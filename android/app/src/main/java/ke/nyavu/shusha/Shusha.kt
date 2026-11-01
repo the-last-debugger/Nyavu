@@ -75,37 +75,6 @@ object Counters {
  * Requires the user to grant notification access in system settings — the app
  * cannot read notifications without that explicit grant.
  */
-class NotificationWatcher : NotificationListenerService() {
-
-    private val urgent = listOf(
-        "you have won", "congratulations", "claim your", "urgent action",
-        "account suspended", "verify your account", "click here", "limited time",
-        "loan approved", "mpesa", "fuliza", "send money to"
-    )
-    private val urlPattern = Regex("""https?://[^\s"'<>]+""", RegexOption.IGNORE_CASE)
-
-    override fun onNotificationPosted(sbn: StatusBarNotification) {
-        val extras = sbn.notification?.extras ?: return
-        val title = extras.getCharSequence(Notification.EXTRA_TITLE)?.toString().orEmpty()
-        val text = extras.getCharSequence(Notification.EXTRA_TEXT)?.toString().orEmpty()
-        val body = "$title $text".trim()
-        if (body.isEmpty()) return
-
-        val link = urlPattern.find(body)?.value
-        val looksUrgent = urgent.any { body.contains(it, ignoreCase = true) }
-        if (link == null && !looksUrgent) return
-
-        Thread {
-            val probability = link?.let { NyavuApi.probabilityOf(applicationContext, it) }
-            val flagged = (probability ?: 0.0) >= 0.65
-            Counters.bump(applicationContext, checked = true, flagged = flagged, blocked = flagged)
-            if (flagged) {
-                runCatching { cancelNotification(sbn.key) }
-            }
-        }.start()
-    }
-}
-
 /**
  * DNS-level filter implemented as a local VPN.
  *
