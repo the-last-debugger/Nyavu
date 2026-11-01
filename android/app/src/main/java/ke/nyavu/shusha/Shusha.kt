@@ -96,19 +96,45 @@ class NyavuVpnService : VpnService() {
     }
 
     private fun start() {
-        startForeground(NOTIF_ID, foregroundNotification())
+        try {
+            startForeground(NOTIF_ID, foregroundNotification())
+        } catch (e: Exception) {
+            // Android 12+ refuses a foreground service it considers undeclared.
+            toast("Could not start the filter: " + (e.message ?: "foreground service refused"))
+            stopSelf()
+            return
+        }
         Blocklist.load(this)
 
-        tunnel = Builder()
-            .setSession("Shusha Nyavu")
-            .addAddress("10.111.222.1", 32)
-            .addDnsServer("10.111.222.1")
-            .addRoute("10.111.222.1", 32)
-            .setBlocking(true)
-            .establish() ?: return
+        val fd = try {
+            Builder()
+                .setSession("Nyavu DNS filter")
+                .addAddress("10.111.222.1", 32)
+                .addDnsServer("10.111.222.1")
+                .addRoute("10.111.222.1", 32)
+                .setBlocking(true)
+                .establish()
+        } catch (e: Exception) {
+            null
+        }
 
+        if (fd == null) {
+            // Almost always another VPN holding the single slot Android allows.
+            toast("Another VPN is active. Turn it off, then start the filter again.")
+            stopSelf()
+            return
+        }
+
+        tunnel = fd
         running = true
         worker = Thread { loop() }.also { it.start() }
+    }
+
+    private fun toast(message: String) {
+        android.os.Handler(mainLooper).post {
+            android.widget.Toast.makeText(applicationContext, message,
+                android.widget.Toast.LENGTH_LONG).show()
+        }
     }
 
     private fun foregroundNotification(): android.app.Notification {
