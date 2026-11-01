@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Shusha Nyavu — Settings</title>
+<style>
+  body { margin:0; background:#0a1020; color:#e8eefb; font:15px/1.6 -apple-system,"Segoe UI",Roboto,sans-serif; }
+  main { max-width:620px; margin:48px auto; padding:0 24px; }
+  h1 { font-size:22px; letter-spacing:-.02em; }
+  p.lede { color:#93a6c4; }
+  fieldset { border:1px solid #22304d; border-radius:12px; padding:18px; margin:18px 0; }
+  legend { padding:0 8px; color:#3fb8f5; font-size:12px; letter-spacing:.1em; text-transform:uppercase; }
+  label { display:block; margin:12px 0 4px; font-size:13px; color:#93a6c4; }
+  input[type=text], select { width:100%; padding:10px 12px; border-radius:8px; background:#0e1628;
+    border:1px solid #2c3d5e; color:#e8eefb; font:14px ui-monospace,Consolas,monospace; }
+  .row { display:flex; gap:10px; align-items:center; margin-top:10px; }
+  button { padding:10px 18px; border-radius:8px; border:1px solid #2c3d5e; background:#16233d;
+    color:#e8eefb; font-weight:600; cursor:pointer; }
+  button.primary { background:linear-gradient(180deg,#4cc2f7,#2a9fdc); color:#04121f; border-color:#63c9f8; }
+  .note { font-size:12px; color:#64789a; }
+  code { color:#7dd3fc; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Shusha Nyavu</h1>
+  <p class="lede">Every page you open is checked against Nyavu before it loads. Only the host name is sent.</p>
+
+  <fieldset>
+    <legend>Connection</legend>
+    <label for="api">Nyavu API address</label>
+    <input type="text" id="api" placeholder="http://127.0.0.1:8000" />
+    <div class="row"><button id="test">Test connection</button><span class="note" id="testOut"></span></div>
+  </fieldset>
+
+  <fieldset>
+    <legend>Behaviour</legend>
+    <label for="mode">When a phishing page is detected</label>
+    <select id="mode">
+      <option value="warn">Show a warning banner and continue</option>
+      <option value="block">Block the page and show an interstitial</option>
+    </select>
+    <div class="row">
+      <label style="margin:0;color:#e8eefb">
+        <input type="checkbox" id="enabled" /> Checking enabled
+      </label>
+    </div>
+  </fieldset>
+
+  <fieldset>
+    <legend>Trusted hosts</legend>
+    <p class="note" id="allowList">None yet.</p>
+    <div class="row"><button id="clearAllow">Clear trusted hosts</button></div>
+  </fieldset>
+
+  <div class="row"><button class="primary" id="save">Save settings</button></div>
+  <p class="note">The extension never reads page content, cookies or history. A verdict is an assessment
+     produced by a statistical model, not a guarantee of safety.</p>
+</main>
+<script src="options.js"></script>
+</body>
+</html>

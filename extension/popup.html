@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<style>
+  :root { --bg:#0a1020; --panel:#121d33; --line:#22304d; --text:#e8eefb;
+          --muted:#93a6c4; --dim:#64789a; --accent:#3fb8f5;
+          --bad:#f2545b; --warn:#fbbf24; --ok:#34d399; }
+  * { box-sizing: border-box; }
+  body { margin:0; width:330px; background:var(--bg); color:var(--text);
+         font:13px/1.5 -apple-system,"Segoe UI",Roboto,sans-serif; }
+  header { display:flex; align-items:center; gap:8px; padding:12px 14px;
+           border-bottom:1px solid var(--line); }
+  header strong { font-size:14px; letter-spacing:-.01em; }
+  .dot { width:8px; height:8px; border-radius:50%; background:var(--ok); margin-left:auto; }
+  main { padding:14px; }
+  .host { font:12px ui-monospace,Consolas,monospace; color:var(--muted);
+          word-break:break-all; margin-bottom:10px; }
+  .band { display:inline-block; padding:3px 10px; border-radius:999px; font-size:11px;
+          font-weight:700; text-transform:uppercase; letter-spacing:.06em; margin-bottom:10px; }
+  .band.high { background:rgba(242,84,91,.15); color:#ff8a90; }
+  .band.medium { background:rgba(251,191,36,.14); color:#ffd166; }
+  .band.low { background:rgba(52,211,153,.14); color:#6ee7b7; }
+  .band.unknown { background:#1b2740; color:var(--dim); }
+  ul { margin:8px 0 0; padding-left:16px; color:var(--muted); font-size:12px; }
+  li { margin-bottom:6px; }
+  .stats { display:flex; gap:10px; margin-top:14px; padding-top:12px;
+           border-top:1px solid var(--line); }
+  .stats div { flex:1; }
+  .stats b { display:block; font:600 16px ui-monospace,Consolas,monospace; color:var(--accent); }
+  .stats span { font-size:10px; color:var(--dim); text-transform:uppercase; letter-spacing:.08em; }
+  button { width:100%; margin-top:12px; padding:9px; border-radius:8px; cursor:pointer;
+           border:1px solid var(--line); background:#16233d; color:var(--text);
+           font-weight:600; font-size:12px; }
+  button:hover { border-color:var(--accent); }
+  button.primary { background:linear-gradient(180deg,#4cc2f7,#2a9fdc); color:#04121f;
+                   border-color:#63c9f8; }
+  .foot { padding:0 14px 12px; font-size:10px; color:var(--dim); }
+</style>
+</head>
+<body>
+<header>
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3fb8f5" stroke-width="2">
+    <path d="M12 2 4 5.5v6c0 4.6 3.2 8.9 8 10.5 4.8-1.6 8-5.9 8-10.5v-6L12 2Z"/>
+  </svg>
+  <strong>Nyavu</strong>
+  <span class="dot" id="dot" title="Connected to Nyavu"></span>
+</header>
+
+<main>
+  <div class="host" id="host">—</div>
+  <div class="band unknown" id="band">checking…</div>
+  <ul id="reasons"></ul>
+
+  <div class="stats">
+    <div><b id="s-checked">0</b><span>checked</span></div>
+    <div><b id="s-flagged">0</b><span>flagged</span></div>
+    <div><b id="s-allowed">0</b><span>trusted</span></div>
+  </div>
+
+  <button class="primary" id="analyse">Shusha Nyavu</button>
+  <button id="trust">Trust this site</button>
+  <button id="options">Settings</button>
+</main>
+<p class="foot">Only the host name is sent, never page content. Verdicts are assessments, not guarantees.</p>
+
+<script src="popup.js"></script>
+</body>
+</html>

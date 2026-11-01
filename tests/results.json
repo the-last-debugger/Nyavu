@@ -1,0 +1,72 @@
+[
+  {
+    "id": "T01",
+    "case": "Known phishing address is flagged",
+    "expected": "verdict == phishing",
+    "actual": "verdict = phishing (0.9998)",
+    "status": "Pass"
+  },
+  {
+    "id": "T02",
+    "case": "Established legitimate domain is not flagged",
+    "expected": "verdict == legitimate",
+    "actual": "verdict = legitimate (0.0003)",
+    "status": "Pass"
+  },
+  {
+    "id": "T03",
+    "case": "Bank domain with correct spelling",
+    "expected": "verdict == legitimate",
+    "actual": "verdict = legitimate (0.0687)",
+    "status": "Pass"
+  },
+  {
+    "id": "T04",
+    "case": "Brand buried in a foreign subdomain",
+    "expected": "verdict == phishing and reason mentions impersonation",
+    "actual": "verdict = phishing, reason states impersonation: yes",
+    "status": "Pass"
+  },
+  {
+    "id": "T05",
+    "case": "IP-literal host",
+    "expected": "verdict == phishing",
+    "actual": "verdict = phishing",
+    "status": "Pass"
+  },
+  {
+    "id": "T06",
+    "case": "Address with no scheme is normalised",
+    "expected": "verdict == phishing",
+    "actual": "verdict = phishing, host = kcb-secure.xyz",
+    "status": "Pass"
+  },
+  {
+    "id": "T07",
+    "case": "Malformed input is rejected",
+    "expected": "HTTP 422",
+    "actual": "HTTP 422",
+    "status": "Pass"
+  },
+  {
+    "id": "T08",
+    "case": "Model metadata endpoint responds",
+    "expected": "accuracy present",
+    "actual": "model = Logistic Regression",
+    "status": "Pass"
+  },
+  {
+    "id": "T09",
+    "case": "Scan history records the checks",
+    "expected": "items > 0",
+    "actual": "5 records returned",
+    "status": "Pass"
+  },
+  {
+    "id": "T10",
+    "case": "Three URLs are classified and stored",
+    "expected": "count == 3",
+    "actual": "3 of 3 returned a verdict",
+    "status": "Pass"
+  }
+]

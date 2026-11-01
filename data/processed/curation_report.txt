@@ -1,0 +1,4 @@
+raw rows: 26202
+phishing removed (domain in Tranco top 200000): 4236
+phishing retained: 8865
+legitimate retained: 8865

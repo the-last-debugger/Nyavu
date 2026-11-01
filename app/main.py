@@ -1,0 +1,223 @@
+"""Nyavu API - FastAPI application entry point."""
+from __future__ import annotations
+
+import csv
+import io
+import os
+
+from fastapi import FastAPI, HTTPException, Request, Response, UploadFile, File
+from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
+from fastapi.staticfiles import StaticFiles
+from pydantic import BaseModel, Field
+
+from . import db
+from .predictor import Predictor
+
+BASE = os.path.dirname(os.path.abspath(__file__))
+STATIC = os.path.join(BASE, "static")
+
+app = FastAPI(
+    title="Nyavu API",
+    version="1.0.0",
+    description="Machine-learning phishing URL detection with explanations.",
+)
+
+state: dict = {}
+
+
+@app.on_event("startup")
+def _startup() -> None:
+    db.init_db()
+    state["predictor"] = Predictor()
+    m = state["predictor"].info()["metrics"]
+    db.record_model(state["predictor"].info()["model"], "1.0.0",
+                    m["accuracy"], m["f1"])
+
+
+# --------------------------------------------------------------------------- #
+# Schemas
+# --------------------------------------------------------------------------- #
+class UrlIn(BaseModel):
+    url: str = Field(..., min_length=3, max_length=2048)
+
+
+class Credentials(BaseModel):
+    email: str = Field(..., min_length=5, max_length=254)
+    password: str = Field(..., min_length=8, max_length=128)
+    full_name: str = Field("", max_length=120)
+
+
+# --------------------------------------------------------------------------- #
+# Helpers
+# --------------------------------------------------------------------------- #
+def current_user(request: Request):
+    return db.user_for_token(request.cookies.get("pg_session", ""))
+
+
+def _scan_and_store(url: str, user_id):
+    try:
+        result = state["predictor"].predict(url)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc))
+    db.add_scan(user_id, url, result["host"], result["verdict"], result["risk"],
+                result["probability"], result["inference_ms"])
+    return result
+
+
+# --------------------------------------------------------------------------- #
+# API
+# --------------------------------------------------------------------------- #
+@app.get("/api/health")
+def health():
+    return {"status": "ok", "model_loaded": "predictor" in state}
+
+
+@app.get("/api/model")
+def model_info():
+    return state["predictor"].info()
+
+
+@app.post("/api/predict")
+def predict(payload: UrlIn, request: Request):
+    user = current_user(request)
+    return _scan_and_store(payload.url.strip(), user["id"] if user else None)
+
+
+@app.post("/api/scan/bulk")
+async def scan_bulk(request: Request, file: UploadFile = File(...)):
+    """Accept a CSV with a 'url' column (or one URL per line)."""
+    user = current_user(request)
+    raw = (await file.read()).decode("utf-8", "ignore")
+    urls = []
+    try:
+        reader = csv.DictReader(io.StringIO(raw))
+        if reader.fieldnames and "url" in [f.lower() for f in reader.fieldnames]:
+            key = next(f for f in reader.fieldnames if f.lower() == "url")
+            urls = [row[key].strip() for row in reader if row.get(key)]
+        else:
+            raise ValueError
+    except Exception:
+        urls = [ln.strip() for ln in raw.splitlines() if ln.strip()]
+
+    urls = urls[:200]
+    if not urls:
+        raise HTTPException(status_code=422, detail="No URLs found in the uploaded file.")
+
+    out = []
+    for u in urls:
+        try:
+            r = state["predictor"].predict(u)
+            db.add_scan(user["id"] if user else None, u, r["host"], r["verdict"],
+                        r["risk"], r["probability"], r["inference_ms"])
+            out.append({k: r[k] for k in ("url", "host", "verdict", "risk",
+                                          "probability", "confidence")})
+        except Exception:
+            out.append({"url": u, "host": "", "verdict": "error", "risk": "unknown",
+                        "probability": None, "confidence": None})
+    flagged = sum(1 for r in out if r["verdict"] == "phishing")
+    return {"count": len(out), "flagged": flagged, "results": out}
+
+
+@app.get("/api/history")
+def history(request: Request, limit: int = 20):
+    user = current_user(request)
+    limit = max(1, min(limit, 100))
+    return {"items": db.recent_scans(limit, user["id"] if user else None)}
+
+
+@app.get("/api/stats")
+def get_stats():
+    return db.stats()
+
+
+# --------------------------------------------------------------------------- #
+# Auth
+# --------------------------------------------------------------------------- #
+@app.get("/api/auth/me")
+def me(request: Request):
+    user = current_user(request)
+    if not user:
+        return {"authenticated": False}
+    return {"authenticated": True, "email": user["email"], "full_name": user["full_name"]}
+
+
+@app.post("/api/auth/register")
+def register(payload: Credentials, response: Response):
+    if "@" not in payload.email or "." not in payload.email.split("@")[-1]:
+        raise HTTPException(status_code=422, detail="Enter a valid email address.")
+    if db.get_user_by_email(payload.email):
+        raise HTTPException(status_code=409, detail="That email is already registered.")
+    uid = db.create_user(payload.email, payload.full_name or payload.email.split("@")[0],
+                         payload.password)
+    token = db.create_session(uid)
+    response.set_cookie("pg_session", token, httponly=True, samesite="lax", max_age=604800)
+    return {"authenticated": True, "email": payload.email.lower().strip(),
+            "full_name": payload.full_name}
+
+
+@app.post("/api/auth/login")
+def login(payload: Credentials, response: Response):
+    user = db.get_user_by_email(payload.email)
+    if not user or not db.verify_password(payload.password, user["password_hash"]):
+        raise HTTPException(status_code=401, detail="Incorrect email or password.")
+    token = db.create_session(user["id"])
+    response.set_cookie("pg_session", token, httponly=True, samesite="lax", max_age=604800)
+    return {"authenticated": True, "email": user["email"], "full_name": user["full_name"]}
+
+
+@app.post("/api/auth/logout")
+def logout(request: Request, response: Response):
+    db.destroy_session(request.cookies.get("pg_session", ""))
+    response.delete_cookie("pg_session")
+    return {"authenticated": False}
+
+
+
+# --------------------------------------------------------------------------- #
+# Simulated phishing page, served locally so the extension can be demonstrated
+# without visiting a real malicious site. Clearly labelled as a test artefact.
+# --------------------------------------------------------------------------- #
+DEMO_PHISH = """<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mobile Money Login</title>
+<style>
+ body{margin:0;min-height:100vh;display:grid;place-items:center;background:#0f1a2b;
+      font:16px/1.5 -apple-system,"Segoe UI",Roboto,sans-serif;color:#e8eefb}
+ .card{width:min(360px,92vw);background:#16233d;border:1px solid #22304d;border-radius:16px;padding:28px}
+ h1{font-size:20px;margin:0 0 6px;letter-spacing:-.02em}
+ p{color:#93a6c4;font-size:14px;margin:0 0 18px}
+ input{width:100%;padding:12px;margin-bottom:12px;border-radius:10px;border:1px solid #2c3d5e;
+       background:#0e1628;color:#e8eefb;font:15px inherit}
+ button{width:100%;padding:12px;border:0;border-radius:10px;font-weight:700;cursor:pointer;
+        background:linear-gradient(180deg,#4cc2f7,#2a9fdc);color:#04121f}
+ .warn{position:fixed;bottom:0;left:0;right:0;background:#3b0d12;color:#ffb4b8;
+       padding:10px 16px;font-size:12px;text-align:center;border-top:1px solid #f2545b}
+</style></head><body>
+<div class="card">
+  <h1>Mobile Money Login</h1>
+  <p>Enter your phone number to continue to your account.</p>
+  <input placeholder="07XX XXX XXX">
+  <input placeholder="PIN" type="password">
+  <button>Continue</button>
+</div>
+<div class="warn">SIMULATED PHISHING PAGE — a test artefact for the Nyavu demonstration.
+This form does nothing and sends nothing.</div>
+</body></html>"""
+
+
+@app.get("/demo/phish", response_class=HTMLResponse)
+def demo_phish():
+    """Local stand-in for a phishing page; used to test Shusha Nyavu safely."""
+    return DEMO_PHISH
+
+
+# --------------------------------------------------------------------------- #
+# Static front end
+# --------------------------------------------------------------------------- #
+@app.get("/")
+def index():
+    return FileResponse(os.path.join(STATIC, "index.html"))
+
+
+app.mount("/", StaticFiles(directory=STATIC, html=True), name="static")

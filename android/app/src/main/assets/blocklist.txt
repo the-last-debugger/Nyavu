@@ -1,0 +1,23 @@
+﻿# Starter blocklist for Shusha Nyavu.
+# Advertising and tracking hosts plus a few phishing-favouring TLD test entries.
+# Regenerate the full list with tools/make_blocklist.py
+doubleclick.net
+googlesyndication.com
+googleadservices.com
+adservice.google.com
+scorecardresearch.com
+quantserve.com
+criteo.com
+taboola.com
+outbrain.com
+adnxs.com
+rubiconproject.com
+pubmatic.com
+openx.net
+zedo.com
+popads.net
+propellerads.com
+onclickads.net
+mgid.com
+revcontent.com
+adsterra.com
