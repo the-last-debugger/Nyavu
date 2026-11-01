@@ -212,6 +212,17 @@ def demo_phish():
     return DEMO_PHISH
 
 
+
+@app.get("/download/nyavu.apk")
+def download_apk():
+    """Serves the built Android agent so a phone can install it over the tailnet."""
+    path = os.path.normpath(os.path.join(BASE, "..", "dist", "Nyavu-Shusha-0.2.0-debug.apk"))
+    if not os.path.exists(path):
+        raise HTTPException(status_code=404, detail="APK has not been built yet.")
+    return FileResponse(path, media_type="application/vnd.android.package-archive",
+                        filename="Nyavu-Shusha.apk")
+
+
 # --------------------------------------------------------------------------- #
 # Static front end
 # --------------------------------------------------------------------------- #

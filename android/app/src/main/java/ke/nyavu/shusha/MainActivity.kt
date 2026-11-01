@@ -43,11 +43,11 @@ class MainActivity : Activity() {
             setPadding(0, 0, 0, 32)
         }
 
-        val notif = Button(this).apply {
-            text = "Grant notification access"
-            setOnClickListener {
-                startActivity(Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS))
-            }
+        val hint = TextView(this).apply {
+            text = "To check a link: open it in any app, tap Share, and choose Nyavu. " +
+                   "No notification access is requested."
+            textSize = 13f
+            setPadding(0, 0, 0, 24)
         }
         val vpn = Button(this).apply {
             text = "Start DNS filtering"
@@ -64,7 +64,7 @@ class MainActivity : Activity() {
         box.addView(title)
         box.addView(blurb)
         box.addView(status)
-        box.addView(notif)
+        box.addView(hint)
         box.addView(vpn)
         box.addView(stop)
         setContentView(box)
@@ -97,16 +97,7 @@ class MainActivity : Activity() {
     }
 
     private fun refresh() {
-        val enabled = Settings.Secure.getString(
-            contentResolver, "enabled_notification_listeners"
-        ) ?: ""
-        val granted = enabled.contains(packageName)
-        status.text = buildString {
-            append("Notification access: ")
-            append(if (granted) "granted" else "not granted")
-            append("\nDNS filter: ")
-            append(if (NyavuVpnService.running) "running" else "stopped")
-        }
+        status.text = "DNS filter: " + (if (NyavuVpnService.running) "running" else "stopped")
     }
 
     companion object {
