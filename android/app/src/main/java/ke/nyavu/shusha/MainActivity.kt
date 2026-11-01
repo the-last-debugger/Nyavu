@@ -4,15 +4,16 @@ import android.app.Activity
 import android.content.Intent
 import android.net.VpnService
 import android.os.Bundle
-import android.provider.Settings
 import android.view.Gravity
 import android.widget.Button
+import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.TextView
 
 /**
- * Single screen: shows the state of the two permissions and starts/stops the DNS filter.
- * Deliberately built in code so the project needs no layout resources.
+ * Single screen: the API address, the two controls for the DNS filter, and a note on
+ * how links are checked. The address is stored in shared preferences so the app can
+ * follow a tunnel URL that changes without needing a new build.
  */
 class MainActivity : Activity() {
 
@@ -24,23 +25,44 @@ class MainActivity : Activity() {
         val box = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             gravity = Gravity.START
-            setPadding(56, 120, 56, 56)
+            setPadding(56, 110, 56, 56)
         }
 
         val title = TextView(this).apply {
-            text = "Shusha Nyavu"
+            text = "Nyavu"
             textSize = 26f
         }
         val blurb = TextView(this).apply {
-            text = "Checks the links your phone receives and filters known phishing " +
-                   "and advertising domains at the DNS level. Nothing leaves the device " +
-                   "except a host name sent to your own Nyavu service."
+            text = "Checks links you share to it, and can block known phishing and " +
+                   "advertising domains at the DNS level."
             textSize = 14f
-            setPadding(0, 24, 0, 32)
+            setPadding(0, 14, 0, 26)
         }
+
+        val apiLabel = TextView(this).apply {
+            text = "Nyavu service address"
+            textSize = 12f
+            setPadding(0, 0, 0, 6)
+        }
+        val apiField = EditText(this).apply {
+            setText(NyavuApi.base(this@MainActivity))
+            hint = "https://example.trycloudflare.com"
+            textSize = 13f
+            setSingleLine()
+        }
+        val saveApi = Button(this).apply {
+            text = "Save address"
+            setOnClickListener {
+                val value = apiField.text.toString().trim().trimEnd('/')
+                getSharedPreferences("nyavu", MODE_PRIVATE).edit()
+                    .putString("apiBase", value).apply()
+                status.text = "Saved. Links will be checked against $value"
+            }
+        }
+
         status = TextView(this).apply {
-            textSize = 15f
-            setPadding(0, 0, 0, 32)
+            textSize = 14f
+            setPadding(0, 26, 0, 22)
         }
 
         val hint = TextView(this).apply {
@@ -49,6 +71,7 @@ class MainActivity : Activity() {
             textSize = 13f
             setPadding(0, 0, 0, 24)
         }
+
         val vpn = Button(this).apply {
             text = "Start DNS filtering"
             setOnClickListener { requestVpn() }
@@ -63,6 +86,9 @@ class MainActivity : Activity() {
 
         box.addView(title)
         box.addView(blurb)
+        box.addView(apiLabel)
+        box.addView(apiField)
+        box.addView(saveApi)
         box.addView(status)
         box.addView(hint)
         box.addView(vpn)
@@ -72,11 +98,7 @@ class MainActivity : Activity() {
 
     private fun requestVpn() {
         val consent = VpnService.prepare(this)
-        if (consent != null) {
-            startActivityForResult(consent, REQ_VPN)
-        } else {
-            startFilter()
-        }
+        if (consent != null) startActivityForResult(consent, REQ_VPN) else startFilter()
     }
 
     @Deprecated("startActivityForResult is retained for API 26 compatibility")
@@ -87,7 +109,11 @@ class MainActivity : Activity() {
     }
 
     private fun startFilter() {
-        startForegroundService(Intent(this, NyavuVpnService::class.java))
+        try {
+            startForegroundService(Intent(this, NyavuVpnService::class.java))
+        } catch (e: Exception) {
+            status.text = "Could not start the filter: ${e.message}"
+        }
         refresh()
     }
 
@@ -97,7 +123,12 @@ class MainActivity : Activity() {
     }
 
     private fun refresh() {
-        status.text = "DNS filter: " + (if (NyavuVpnService.running) "running" else "stopped")
+        status.text = if (NyavuVpnService.running) {
+            "DNS filter: running"
+        } else {
+            "DNS filter: stopped. If another VPN (such as Tailscale) is active, " +
+                "Android allows only one — turn the other off first."
+        }
     }
 
     companion object {

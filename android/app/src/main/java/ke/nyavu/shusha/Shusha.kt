@@ -27,7 +27,7 @@ import java.net.URL
  * README records exactly what is and is not done.
  */
 object NyavuApi {
-    const val DEFAULT_BASE = "http://10.0.2.2:8000"   // emulator alias for the host machine
+    const val DEFAULT_BASE = "https://icons-avenue-individuals-improving.trycloudflare.com"
 
     fun base(ctx: Context): String =
         ctx.getSharedPreferences("nyavu", Context.MODE_PRIVATE)

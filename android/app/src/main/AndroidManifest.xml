@@ -7,6 +7,7 @@
 
     <application
         android:allowBackup="false"
+        android:usesCleartextTraffic="true"
         android:label="Shusha Nyavu"
         android:theme="@android:style/Theme.Material.NoActionBar">
 
