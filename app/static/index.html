@@ -3,12 +3,36 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<title>Nyavu — ML Phishing URL Detection</title>
-<meta name="description" content="Nyavu: machine-learning phishing URL detection with plain-language explanations." />
+<title>Nyavu — Phishing URL Checker | Is This Link Safe?</title>
+<meta name="description" content="Check any suspicious link before you click it. Nyavu uses machine learning to score a URL from its text alone and explains exactly why it looks like phishing. Free, no sign-up." />
 <meta name="theme-color" content="#0b1220" />
 <link rel="manifest" href="/manifest.webmanifest" />
 <link rel="icon" href="/icon-192.png" />
 <link rel="apple-touch-icon" href="/icon-192.png" />
+<link rel="canonical" href="https://nyavu.onrender.com/" />
+<meta name="robots" content="index, follow" />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="Nyavu" />
+<meta property="og:title" content="Nyavu — check a link before you click it" />
+<meta property="og:description" content="Machine-learning phishing URL detection that explains its verdict in plain language. Free, no page fetching, no account required." />
+<meta property="og:url" content="https://nyavu.onrender.com/" />
+<meta property="og:image" content="https://nyavu.onrender.com/icon-512.png" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="Nyavu — check a link before you click it" />
+<meta name="twitter:description" content="Machine-learning phishing URL detection that explains its verdict. Free and open." />
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Nyavu",
+  "url": "https://nyavu.onrender.com/",
+  "applicationCategory": "SecurityApplication",
+  "operatingSystem": "Any",
+  "description": "Machine-learning phishing URL detector that scores a web address from its text alone and explains the reasons behind the verdict.",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+  "isAccessibleForFree": true
+}
+</script>
 <link rel="stylesheet" href="/styles.css" />
 </head>
 <body>
@@ -64,12 +88,51 @@
       <div><strong id="statUsers">—</strong><span>registered users</span></div>
       <div><strong id="statTrain">—</strong><span>training URLs</span></div>
     </div>
+
+    <!-- ------------------------------------------------ public content -->
+    <section class="explain" aria-labelledby="how-heading">
+      <h2 class="block-title" id="how-heading">How Nyavu reads a link</h2>
+      <div class="steps">
+        <article class="step">
+          <span class="step-no">01</span>
+          <h3>It reduces the address</h3>
+          <p>Only the registered domain is judged — the part somebody actually buys and owns.
+             Everything before it is free to invent, so <code>login.bank.co.ke.evil.top</code>
+             is read as <code>evil.top</code>.</p>
+        </article>
+        <article class="step">
+          <span class="step-no">02</span>
+          <h3>It measures seventeen things</h3>
+          <p>Length, digits, hyphens, character entropy, the top-level domain, whether a brand
+             name appears in the wrong place, and how close the spelling sits to a known brand.</p>
+        </article>
+        <article class="step">
+          <span class="step-no">03</span>
+          <h3>It scores and explains</h3>
+          <p>A logistic regression turns those measurements into a risk score, and the same
+             coefficients produce the reasons you read. Nothing is fetched from the destination.</p>
+        </article>
+      </div>
+
+      <h2 class="block-title">What it cannot do</h2>
+      <p class="limits">
+        Nyavu judges names, not pages. A phishing page hosted on a compromised legitimate website
+        will pass, because its address is genuinely correct. Phishing on a domain inside the
+        Tranco top 100,000 is never flagged on name evidence alone. Accuracy on our held-out
+        corpus is <strong>75.4%</strong> — a verdict is an assessment, never a guarantee of safety,
+        and a second opinion from your bank or the sender is always worth the minute it takes.
+      </p>
+      <p class="limits">
+        No page is fetched, no account is required, and nothing you type is shared. Signed-in users
+        keep a private scan history; anonymous scans are counted but never shown to anyone.
+      </p>
+    </section>
   </section>
 
   <!-- ============================== BULK ============================== -->
   <section id="bulk" class="view">
     <div class="hero small">
-      <h1>Bulk URL screening</h1>
+      <h2>Bulk URL screening</h2>
       <p class="lede">Upload a CSV with a <code>url</code> column (or one URL per line).
         Up to 200 URLs per run — useful for triaging a suspicious mail campaign.</p>
     </div>
@@ -83,7 +146,7 @@
   <!-- ============================= HISTORY ============================ -->
   <section id="history" class="view">
     <div class="hero small">
-      <h1>Recent scans</h1>
+      <h2>Recent scans</h2>
       <p class="lede" id="historyNote">Your most recent URL checks.</p>
     </div>
     <div class="panel">
@@ -98,7 +161,7 @@
   <!-- ============================== MODEL ============================= -->
   <section id="model" class="view">
     <div class="hero small">
-      <h1>About the model</h1>
+      <h2>About the model</h2>
       <p class="lede">Three classifiers were trained on the same features and
         compared on a domain-disjoint hold-out set.</p>
     </div>
