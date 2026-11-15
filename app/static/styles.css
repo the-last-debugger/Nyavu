@@ -700,3 +700,25 @@ h2 {
     scroll-behavior: auto !important;
   }
 }
+
+/* --------------------------------------------------------------- articles */
+
+.article { max-width: 72ch; }
+.article h1 { font-size: clamp(1.8rem, 3.6vw, 2.6rem); margin-bottom: 14px; }
+.article h2 {
+  margin: 38px 0 10px;
+  font-size: 1.18rem;
+  letter-spacing: -0.015em;
+  color: var(--text);
+}
+.article p, .article li { color: var(--muted); font-size: 0.96rem; }
+.article ul, .article ol { margin: 0 0 1.2em; padding-left: 1.25em; }
+.article li { margin-bottom: 0.5em; }
+.article strong { color: var(--text); }
+.article code {
+  padding: 2px 6px;
+  border-radius: 6px;
+  background: rgba(69, 224, 194, 0.09);
+  font-size: 0.86em;
+  word-break: break-all;
+}

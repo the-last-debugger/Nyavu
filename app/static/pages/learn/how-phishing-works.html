@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>How phishing links work — and how to spot one | Nyavu</title>
+<meta name="description" content="The five tricks phishing addresses rely on: lookalike spellings, brand names buried in subdomains, homoglyphs, cheap top-level domains and raw IP addresses. With examples and how to check." />
+<link rel="canonical" href="https://nyavu.onrender.com/learn/how-phishing-works" />
+<meta property="og:type" content="article" />
+<meta property="og:title" content="How phishing links work — and how to spot one" />
+<meta property="og:description" content="Five tricks phishing addresses rely on, with real examples and how to check a link safely." />
+<meta property="og:url" content="https://nyavu.onrender.com/learn/how-phishing-works" />
+<meta property="og:image" content="https://nyavu.onrender.com/icon-512.png" />
+<meta name="theme-color" content="#05070d" />
+<link rel="icon" href="/icon-192.png" />
+<link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+
+<header class="topbar">
+  <a class="brand" href="/">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2 4 5.5v6c0 4.6 3.2 8.9 8 10.5 4.8-1.6 8-5.9 8-10.5v-6L12 2Z"/><path class="tick" d="m8.5 12 2.4 2.4 4.6-4.8"/></svg>
+    <span>Nyavu</span>
+  </a>
+  <nav class="nav">
+    <a href="/">Detector</a>
+    <a href="/learn/how-phishing-works" class="active">Learn</a>
+    <a href="/about">About</a>
+  </nav>
+  <div class="account"><a class="btn ghost" href="/">Check a link</a></div>
+</header>
+
+<main>
+  <article class="article">
+    <p class="eyebrow">Guide</p>
+    <h1>How phishing links work — and how to spot one</h1>
+    <p class="lede">A phishing link rarely looks obviously wrong. It usually looks almost right,
+      which is exactly why it works. These are the five tricks the addresses depend on.</p>
+
+    <h2>1. A spelling that survives a glance</h2>
+    <p>Swap one letter and most people read the word they expect. <code>safaricom.co.ke</code>
+      becomes <code>safaricorn.co.ke</code> — an <em>m</em> replaced by <em>rn</em>. The eye resolves
+      the shape, the hand clicks, and the page is an exact copy of the real login screen.</p>
+
+    <h2>2. The brand buried in a subdomain</h2>
+    <p>Read this carefully: <code>safaricom.co.ke.verify-account.top</code>. It contains the bank's
+      name, so it looks legitimate at a glance. But a domain is read from the right, not the left.
+      Everything before <code>verify-account.top</code> is invented — the attacker owns only the end.</p>
+    <p>This is the single most common trick, and it defeats people who have been told to "check the
+      domain" without being told which part of it counts.</p>
+
+    <h2>3. Characters that look identical</h2>
+    <p>Some alphabets contain letters that render almost exactly like Latin ones. A Cyrillic
+      <code>а</code> is not an <code>a</code>. To a reader they are the same glyph; to a browser they
+      are different addresses. This is a homoglyph attack, and no amount of careful reading catches it
+      — only inspecting the underlying address does.</p>
+
+    <h2>4. A cheap ending</h2>
+    <p>Registration in some top-level domains costs almost nothing and requires no identity checks.
+      When a bank's name appears on a <code>.tk</code>, <code>.top</code> or <code>.xyz</code>
+      address, that combination is worth treating as suspicious on its own — the organisation almost
+      certainly owns a country-code or <code>.com</code> domain instead.</p>
+
+    <h2>5. No name at all, just a number</h2>
+    <p><code>http://197.248.11.9/equity/login.php</code> is a real pattern. There is no domain to
+      check because there is no domain — just a server address. Legitimate organisations publish
+      names, not numbers.</p>
+
+    <h2>What does <em>not</em> prove a link is safe</h2>
+    <ul>
+      <li><strong>A padlock.</strong> HTTPS encrypts the connection; it says nothing about who is on
+        the other end. Most phishing sites now have valid certificates.</li>
+      <li><strong>It arrived from someone you know.</strong> Accounts get compromised; a familiar
+        sender is weak evidence.</li>
+      <li><strong>It looks professional.</strong> Page copies are downloaded whole, logos included.</li>
+    </ul>
+
+    <h2>How to check one</h2>
+    <ol>
+      <li>Find the <strong>registered domain</strong> — the last two labels, or the last three for
+        things like <code>.co.ke</code>. That is the part someone had to buy.</li>
+      <li>Compare that domain to the one you expect, character by character, not by shape.</li>
+      <li>If the message is urgent, slow down deliberately. Urgency is a technique, not a fact.</li>
+      <li>Reach the organisation the way you normally would — their app, your bookmark, the number on
+        your card — rather than through the link you were sent.</li>
+    </ol>
+
+    <p class="limits" style="margin-top:2em">
+      <a class="btn primary" href="/">Check a link with Nyavu</a>
+    </p>
+
+    <p class="limits">Nyavu reads addresses, not pages. It will catch the five patterns above, and it
+      will not catch a phishing page on a genuinely correct domain — for example a hacked small
+      business site. Use it as one signal among several.</p>
+  </article>
+</main>
+
+<footer class="foot">
+  <p>Nyavu · Kabarak University · COMP324 Team Project · <a href="/about">About this project</a> ·
+     A verdict is an assessment, not a guarantee of safety.</p>
+</footer>
+
+</body>
+</html>

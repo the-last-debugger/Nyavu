@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>About Nyavu — a machine-learning phishing URL detector</title>
+<meta name="description" content="Nyavu is a COMP324 team project at Kabarak University: a phishing URL detector built on a logistic-regression model, reported honestly at 75.4% accuracy, with every limitation stated." />
+<link rel="canonical" href="https://nyavu.onrender.com/about" />
+<meta property="og:type" content="website" />
+<meta property="og:title" content="About Nyavu" />
+<meta property="og:description" content="A machine-learning phishing URL detector from Kabarak University, built in the open and reported honestly." />
+<meta property="og:url" content="https://nyavu.onrender.com/about" />
+<meta property="og:image" content="https://nyavu.onrender.com/icon-512.png" />
+<meta name="theme-color" content="#05070d" />
+<link rel="icon" href="/icon-192.png" />
+<link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+
+<header class="topbar">
+  <a class="brand" href="/">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2 4 5.5v6c0 4.6 3.2 8.9 8 10.5 4.8-1.6 8-5.9 8-10.5v-6L12 2Z"/><path class="tick" d="m8.5 12 2.4 2.4 4.6-4.8"/></svg>
+    <span>Nyavu</span>
+  </a>
+  <nav class="nav">
+    <a href="/">Detector</a>
+    <a href="/learn/how-phishing-works">Learn</a>
+    <a href="/about" class="active">About</a>
+  </nav>
+  <div class="account"><a class="btn ghost" href="/">Check a link</a></div>
+</header>
+
+<main>
+  <article class="article">
+    <p class="eyebrow">About</p>
+    <h1>A small, honest detector</h1>
+    <p class="lede">Nyavu is Swahili for <em>fishing net</em>. The project asks a narrow question:
+      can a web address that nobody has reported yet be judged from its text alone, and can the
+      judgement be explained well enough that a non-specialist understands it?</p>
+
+    <h2>What it does</h2>
+    <p>You paste a link. It reduces the address to its registered domain, measures seventeen
+      characteristics, and scores it with a logistic-regression model trained on 17,730 addresses.
+      It returns a risk band, a score, and the reasons that moved the score. It never opens the
+      destination, so the site you are checking never learns you looked.</p>
+
+    <h2>The number, and why it is 75%</h2>
+    <p>Published phishing detectors often report accuracy above 97%. Many of those figures come from
+      a quiet data fault: the legitimate addresses were collected as bare domains while the phishing
+      addresses were collected as full hosts. A model trained on that learns "has a subdomain,
+      therefore phishing" instead of learning phishing.</p>
+    <p>An early version of this project reached 95.7% that way. Once the fault was removed, it fell
+      to 63%. The deployed model scores <strong>75.4%</strong> accuracy with an F1 of 0.740 on a
+      domain-disjoint hold-out set, and that is the number reported everywhere in this project.</p>
+    <p>A 19.8% false-positive rate is unusable in front of a person, so the deployed system adds a
+      reputation rule: a domain inside the Tranco top 100,000 is never flagged on name evidence
+      alone. The cost is stated rather than hidden — phishing hosted on a popular domain is missed.</p>
+
+    <h2>What it cannot do</h2>
+    <ul>
+      <li>It judges names, not pages. A phishing page on a compromised legitimate site will pass.</li>
+      <li>It decays. Tactics change; retraining on a schedule is required, not optional.</li>
+      <li>The brand list is a curated reference, not a verified registry of official domains.</li>
+      <li>A verdict is an assessment, never a guarantee of safety.</li>
+    </ul>
+
+    <h2>How it is built</h2>
+    <p>Python throughout: scikit-learn for the pipeline, FastAPI for the service, SQLite for storage,
+      and a hand-written front end with no build step, so nothing can fail to compile in front of an
+      examiner. A browser extension and an Android agent use the same public API. Accounts are
+      optional; scan history belongs to the signed-in user and is never shown to anyone else.</p>
+
+    <h2>Privacy</h2>
+    <p>No page is fetched, no browsing is monitored, and no notification access is requested — that
+      permission was considered and rejected as disproportionate. Passwords are stored as salted
+      PBKDF2-SHA256 hashes. Anonymous scans are counted but never displayed to another visitor.</p>
+
+    <h2>The project</h2>
+    <p>Built by Donald Enron, Justus Kibet, Ian Mazigulu and Allan Kibet for COMP324 at Kabarak
+      University, Department of Computer Science and Information Technology. Source is available on
+      <a href="https://github.com/the-last-debugger/Nyavu">GitHub</a>.</p>
+
+    <p style="margin-top:2em"><a class="btn primary" href="/">Check a link</a></p>
+  </article>
+</main>
+
+<footer class="foot">
+  <p>Nyavu · Kabarak University · COMP324 Team Project ·
+     <a href="/learn/how-phishing-works">How phishing links work</a> ·
+     A verdict is an assessment, not a guarantee of safety.</p>
+</footer>
+
+</body>
+</html>

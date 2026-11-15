@@ -295,6 +295,22 @@ def download_apk():
 # --------------------------------------------------------------------------- #
 # Static front end
 # --------------------------------------------------------------------------- #
+
+@app.get("/about")
+def about():
+    return FileResponse(os.path.join(STATIC, "pages", "about.html"))
+
+
+@app.get("/learn/{slug}")
+def learn(slug: str):
+    if not slug.replace("-", "").isalnum():
+        raise HTTPException(status_code=404)
+    path = os.path.join(STATIC, "pages", "learn", f"{slug}.html")
+    if not os.path.exists(path):
+        raise HTTPException(status_code=404)
+    return FileResponse(path)
+
+
 @app.get("/")
 def index():
     return FileResponse(os.path.join(STATIC, "index.html"))
