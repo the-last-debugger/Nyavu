@@ -1,19 +1,27 @@
-"""SQLite persistence layer (stdlib only, no ORM)."""
+"""Persistence layer — Postgres when DATABASE_URL is set, SQLite otherwise.
+
+One SQL dialect is written: statements use ``?`` placeholders and the adapter
+translates them for Postgres. The schema is generated per backend because the two
+disagree about auto-increment columns.
+
+Why both: SQLite keeps local development and the test suite trivial (no server to
+run), while Postgres gives the hosted deployment storage that survives a redeploy.
+Nothing above this module knows which is in use.
+"""
 from __future__ import annotations
 
 import hashlib
 import os
 import secrets
-import sqlite3
 from contextlib import contextmanager
 from datetime import datetime, timezone
 
-_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-# The path is overridable so a hosted deployment can point at persistent storage
-# (/home on Azure App Service survives restarts and redeploys; the code directory does not).
-DB_PATH = os.environ.get("NYAVU_DB_PATH") or os.path.join(_ROOT, "data", "nyavu.db")
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+DB_PATH = os.environ.get("NYAVU_DB_PATH") or os.path.join(ROOT, "data", "nyavu.db")
+DATABASE_URL = os.environ.get("DATABASE_URL", "").strip()
+USE_PG = DATABASE_URL.startswith(("postgres://", "postgresql://"))
 
-SCHEMA = """
+_SCHEMA_SQLITE = """
 CREATE TABLE IF NOT EXISTS users (
     id            INTEGER PRIMARY KEY AUTOINCREMENT,
     email         TEXT    NOT NULL UNIQUE,
@@ -21,14 +29,12 @@ CREATE TABLE IF NOT EXISTS users (
     password_hash TEXT    NOT NULL,
     created_at    TEXT    NOT NULL
 );
-
 CREATE TABLE IF NOT EXISTS sessions (
     token      TEXT PRIMARY KEY,
     user_id    INTEGER NOT NULL,
     created_at TEXT    NOT NULL,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
-
 CREATE TABLE IF NOT EXISTS scans (
     id           INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id      INTEGER,
@@ -41,7 +47,6 @@ CREATE TABLE IF NOT EXISTS scans (
     created_at   TEXT    NOT NULL,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
 );
-
 CREATE TABLE IF NOT EXISTS models (
     id         INTEGER PRIMARY KEY AUTOINCREMENT,
     name       TEXT    NOT NULL,
@@ -51,32 +56,82 @@ CREATE TABLE IF NOT EXISTS models (
     trained_at TEXT    NOT NULL,
     is_active  INTEGER NOT NULL DEFAULT 0
 );
-
 CREATE INDEX IF NOT EXISTS idx_scans_created ON scans(created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_scans_user    ON scans(user_id);
 """
+
+_SCHEMA_PG = (_SCHEMA_SQLITE
+              .replace("INTEGER PRIMARY KEY AUTOINCREMENT", "SERIAL PRIMARY KEY")
+              .replace(" REAL", " DOUBLE PRECISION"))
 
 
 def now() -> str:
     return datetime.now(timezone.utc).isoformat(timespec="seconds")
 
 
+class _Connection:
+    """The two drivers disagree about placeholders and cursors; this hides that."""
+
+    def __init__(self, raw):
+        self._raw = raw
+
+    def execute(self, sql: str, params=()):
+        if USE_PG:
+            sql = sql.replace("?", "%s")
+        return self._raw.execute(sql, params) if params else self._raw.execute(sql)
+
+    def executescript(self, script: str):
+        statements = [s.strip() for s in script.split(";") if s.strip()]
+        for stmt in statements:
+            self._raw.execute(stmt)
+
+
 @contextmanager
 def connect():
+    if USE_PG:
+        import psycopg
+        from psycopg.rows import dict_row
+
+        conn = psycopg.connect(DATABASE_URL, row_factory=dict_row, connect_timeout=10)
+        try:
+            yield _Connection(conn)
+            conn.commit()
+        except Exception:
+            conn.rollback()
+            raise
+        finally:
+            conn.close()
+        return
+
+    import sqlite3
+
     conn = sqlite3.connect(DB_PATH, timeout=10)
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA foreign_keys = ON")
     try:
-        yield conn
+        yield _Connection(conn)
         conn.commit()
     finally:
         conn.close()
 
 
+def _insert_id(c: _Connection, sql: str, params) -> int:
+    """Return the id of the row just inserted, on either backend."""
+    if USE_PG:
+        row = c.execute(sql + " RETURNING id", params).fetchone()
+        return int(row["id"])
+    return int(c.execute(sql, params).lastrowid)
+
+
 def init_db() -> None:
-    os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
+    if not USE_PG:
+        os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
     with connect() as c:
-        c.executescript(SCHEMA)
+        c.executescript(_SCHEMA_PG if USE_PG else _SCHEMA_SQLITE)
+
+
+def backend() -> str:
+    return "postgres" if USE_PG else "sqlite"
 
 
 # --------------------------------------------------------------------------- #
@@ -105,11 +160,11 @@ def verify_password(password: str, stored: str) -> bool:
 # --------------------------------------------------------------------------- #
 def create_user(email: str, full_name: str, password: str):
     with connect() as c:
-        cur = c.execute(
+        return _insert_id(
+            c,
             "INSERT INTO users (email, full_name, password_hash, created_at) VALUES (?,?,?,?)",
             (email.lower().strip(), full_name.strip(), hash_password(password), now()),
         )
-        return cur.lastrowid
 
 
 def get_user_by_email(email: str):
@@ -146,13 +201,13 @@ def destroy_session(token: str) -> None:
 def add_scan(user_id, url: str, host: str, verdict: str, risk: str,
              probability: float, inference_ms: float) -> int:
     with connect() as c:
-        cur = c.execute(
+        return _insert_id(
+            c,
             """INSERT INTO scans (user_id, url, host, verdict, risk, probability,
                                   inference_ms, created_at)
                VALUES (?,?,?,?,?,?,?,?)""",
             (user_id, url, host, verdict, risk, probability, inference_ms, now()),
         )
-        return cur.lastrowid
 
 
 def recent_scans(limit: int = 20, user_id: int | None = None):
@@ -175,11 +230,11 @@ def recent_scans(limit: int = 20, user_id: int | None = None):
 
 def stats():
     with connect() as c:
-        total = c.execute("SELECT COUNT(*) FROM scans").fetchone()[0]
-        phish = c.execute("SELECT COUNT(*) FROM scans WHERE verdict='phishing'").fetchone()[0]
-        users = c.execute("SELECT COUNT(*) FROM users").fetchone()[0]
-        return {"total_scans": total, "phishing": phish,
-                "legitimate": total - phish, "users": users}
+        total = c.execute("SELECT COUNT(*) AS n FROM scans").fetchone()["n"]
+        phish = c.execute("SELECT COUNT(*) AS n FROM scans WHERE verdict='phishing'").fetchone()["n"]
+        users = c.execute("SELECT COUNT(*) AS n FROM users").fetchone()["n"]
+        return {"total_scans": int(total), "phishing": int(phish),
+                "legitimate": int(total) - int(phish), "users": int(users)}
 
 
 def record_model(name: str, version: str, accuracy: float, f1: float) -> None:

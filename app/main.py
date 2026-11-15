@@ -129,7 +129,7 @@ def _scan_and_store(url: str, user_id):
 # --------------------------------------------------------------------------- #
 @app.get("/api/health")
 def health():
-    return {"status": "ok", "model_loaded": "predictor" in state}
+    return {"status": "ok", "db": db.backend(), "model_loaded": "predictor" in state}
 
 
 @app.get("/api/model")
