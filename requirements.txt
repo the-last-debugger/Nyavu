@@ -6,3 +6,4 @@ pandas>=2.2
 joblib>=1.4
 python-multipart>=0.0.9
 psycopg[binary]>=3.2
+psycopg-pool>=3.2

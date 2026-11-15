@@ -86,21 +86,43 @@ class _Connection:
             self._raw.execute(stmt)
 
 
+_POOL = None
+
+
+def _pool():
+    """One process-wide pool.
+
+    The service opens a connection per request, which SQLite tolerates and Postgres
+    does not: a fresh TLS handshake each time costs ~50 ms and exhausts the server's
+    connection allowance under any concurrency at all. The pool is created lazily so
+    importing this module does not open a socket.
+    """
+    global _POOL
+    if _POOL is None:
+        from psycopg.rows import dict_row
+        from psycopg_pool import ConnectionPool
+
+        _POOL = ConnectionPool(
+            DATABASE_URL,
+            min_size=1,
+            max_size=5,
+            timeout=10,
+            kwargs={"row_factory": dict_row, "connect_timeout": 10},
+            open=True,
+        )
+    return _POOL
+
+
 @contextmanager
 def connect():
     if USE_PG:
-        import psycopg
-        from psycopg.rows import dict_row
-
-        conn = psycopg.connect(DATABASE_URL, row_factory=dict_row, connect_timeout=10)
-        try:
-            yield _Connection(conn)
-            conn.commit()
-        except Exception:
-            conn.rollback()
-            raise
-        finally:
-            conn.close()
+        with _pool().connection() as conn:
+            try:
+                yield _Connection(conn)
+                conn.commit()
+            except Exception:
+                conn.rollback()
+                raise
         return
 
     import sqlite3
