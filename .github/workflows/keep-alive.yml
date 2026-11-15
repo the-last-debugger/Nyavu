@@ -1,0 +1,31 @@
+# Keeps the free Render instance awake.
+#
+# Render spins a free web service down after 15 minutes with no traffic, and the
+# first request afterwards waits ~50s while scikit-learn imports. A request inside
+# that window resets the clock.
+#
+# This is a backstop, not the primary mechanism: GitHub's scheduler can be delayed
+# under load and disables scheduled workflows on inactive repositories after 60
+# days. UptimeRobot (5-minute checks, plus downtime alerts) is the better primary.
+name: keep-alive
+
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Ping the health endpoint
+        run: |
+          for attempt in 1 2 3; do
+            code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 90 \
+              https://nyavu.onrender.com/api/health || echo "000")
+            echo "attempt $attempt -> HTTP $code"
+            [ "$code" = "200" ] && exit 0
+            sleep 20
+          done
+          echo "service did not answer; leaving it for the next run"
