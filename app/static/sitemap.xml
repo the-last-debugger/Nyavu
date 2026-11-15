@@ -3,4 +3,5 @@
   <url><loc>https://nyavu.onrender.com/</loc><changefreq>weekly</changefreq><priority>1.0</priority></url>
   <url><loc>https://nyavu.onrender.com/about</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://nyavu.onrender.com/learn/how-phishing-works</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://nyavu.onrender.com/learn/is-this-link-safe</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
 </urlset>

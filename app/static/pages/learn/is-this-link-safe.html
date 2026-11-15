@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Is this link safe? A five-second check | Nyavu</title>
+<meta name="description" content="A practical five-second method for checking a suspicious link: find the registered domain, compare it character by character, and never trust a padlock alone." />
+<link rel="canonical" href="https://nyavu.onrender.com/learn/is-this-link-safe" />
+<meta property="og:type" content="article" />
+<meta property="og:title" content="Is this link safe? A five-second check" />
+<meta property="og:description" content="Find the registered domain, compare it character by character, and never trust a padlock alone." />
+<meta property="og:url" content="https://nyavu.onrender.com/learn/is-this-link-safe" />
+<meta property="og:image" content="https://nyavu.onrender.com/og.png" />
+<meta name="theme-color" content="#05070d" />
+<link rel="icon" href="/icon-192.png" />
+<link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+
+<header class="topbar">
+  <a class="brand" href="/">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2 4 5.5v6c0 4.6 3.2 8.9 8 10.5 4.8-1.6 8-5.9 8-10.5v-6L12 2Z"/><path class="tick" d="m8.5 12 2.4 2.4 4.6-4.8"/></svg>
+    <span>Nyavu</span>
+  </a>
+  <nav class="nav">
+    <a href="/">Detector</a>
+    <a href="/learn/how-phishing-works" class="active">Learn</a>
+    <a href="/about">About</a>
+  </nav>
+  <div class="account"><a class="btn ghost" href="/">Check a link</a></div>
+</header>
+
+<main>
+  <article class="article">
+    <p class="eyebrow">Checklist</p>
+    <h1>Is this link safe?</h1>
+    <p class="lede">You do not need to be technical to judge a link. You need to look at the right
+      part of it, and to know which signals are worthless.</p>
+
+    <h2>Step 1 — find the part that counts</h2>
+    <p>Read the address from the <strong>right</strong>, not the left. The last label before the
+      ending is the name somebody registered.</p>
+    <p>Take <code>https://safaricom.co.ke.secure-login.top/verify</code>. The eye stops at
+      <em>safaricom.co.ke</em> and relaxes. But the address is read from the right:
+      <code>top</code> is the ending, <code>secure-login</code> is the name, so the real domain is
+      <code>secure-login.top</code>. Everything to its left is a label the owner can invent for
+      free — including a bank's name.</p>
+
+    <h2>Step 2 — compare it to what you expected</h2>
+    <p>Say the address aloud, character by character, against the domain you know. Most phishing
+      addresses differ by one character: <code>rn</code> for <code>m</code>, <code>l</code> for
+      <code>I</code>, a doubled letter, a hyphen inserted where there should be none.</p>
+
+    <h2>Step 3 — ask what the message wants</h2>
+    <p>Phishing needs you to act before you think. A link that arrives with a deadline — an account
+      closing, a payment reversing, a parcel returning — is using urgency as a tool. The urgency is
+      the tell, not the fact.</p>
+
+    <h2>Step 4 — reach the organisation another way</h2>
+    <p>This is the step that makes the first three almost unnecessary. If a message claims to be from
+      your bank, open your banking app, or type the bank's address yourself, or call the number on
+      your card. You do not need to judge the link if you never use it.</p>
+
+    <h2>Signals that mean nothing</h2>
+    <ul>
+      <li><strong>The padlock.</strong> HTTPS proves the connection is encrypted, not that the site
+        is honest. Certificates are free and most phishing sites have one.</li>
+      <li><strong>A familiar sender.</strong> Mailboxes get compromised. A friend's address sending
+        you a link is weak evidence, not strong evidence.</li>
+      <li><strong>Good design.</strong> A page can be copied perfectly in seconds.</li>
+      <li><strong>It worked before.</strong> Attackers reuse domains until they are blocked.</li>
+    </ul>
+
+    <h2>When you have already clicked</h2>
+    <ol>
+      <li>Do not enter anything else on the page.</li>
+      <li>If you typed a password, change it from the organisation's app or website, and anywhere
+        you reused it.</li>
+      <li>If you entered card details, call your bank and ask them to watch or replace the card.</li>
+      <li>Report the message — to your provider, and to the organisation being imitated.</li>
+    </ol>
+
+    <p class="limits" style="margin-top:2em"><a class="btn primary" href="/">Check a link with Nyavu</a></p>
+
+    <p class="limits">Nyavu automates steps 1 and 2 — it finds the registered domain, measures the
+      patterns that distinguish phishing from legitimate addresses, and tells you what it found.
+      It cannot judge the message, and it cannot know whether a page is honest. Steps 3 and 4 are
+      still yours.</p>
+  </article>
+</main>
+
+<footer class="foot">
+  <p>Nyavu · Kabarak University · COMP324 Team Project ·
+     <a href="/learn/how-phishing-works">How phishing links work</a> ·
+     <a href="/about">About</a> ·
+     A verdict is an assessment, not a guarantee of safety.</p>
+</footer>
+
+</body>
+</html>
