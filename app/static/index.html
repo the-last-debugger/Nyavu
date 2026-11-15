@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>Nyavu — Phishing URL Checker | Is This Link Safe?</title>
 <meta name="description" content="Check any suspicious link before you click it. Nyavu uses machine learning to score a URL from its text alone and explains exactly why it looks like phishing. Free, no sign-up." />
-<meta name="theme-color" content="#0b1220" />
+<meta name="theme-color" content="#04060b" />
 <link rel="manifest" href="/manifest.webmanifest" />
 <link rel="icon" href="/icon-192.png" />
 <link rel="apple-touch-icon" href="/icon-192.png" />
@@ -58,9 +58,19 @@
   <!-- ============================ DETECTOR ============================ -->
   <section id="detector" class="view active">
     <div class="hero">
-      <p class="eyebrow">Machine learning · URL text only · no page fetching</p>
-      <h1>Check a link before you click it.</h1>
-      <p class="lede">Paste any URL. Nyavu scores it against a curated corpus and tells you <em>why</em> it looks dangerous.</p>
+      <div class="hero-copy">
+        <p class="eyebrow">Machine learning · URL text only · no page fetching</p>
+        <h1>Check a link before you click it.</h1>
+        <p class="lede">Paste any URL. Nyavu scores it against a curated corpus and tells you <em>why</em> it looks dangerous.</p>
+      </div>
+      <div class="hero-visual" aria-hidden="true">
+        <div class="orbit orbit-1"></div>
+        <div class="orbit orbit-2"></div>
+        <div class="orbit orbit-3"></div>
+        <div class="core">
+          <svg viewBox="0 0 24 24"><path d="M12 2 4 5.5v6c0 4.6 3.2 8.9 8 10.5 4.8-1.6 8-5.9 8-10.5v-6L12 2Z"/><path class="tick" d="m8.5 12 2.4 2.4 4.6-4.8"/></svg>
+        </div>
+      </div>
     </div>
 
     <form class="scanner" id="scanForm" autocomplete="off">
