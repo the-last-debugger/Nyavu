@@ -40,6 +40,7 @@
     if (!url) return;
     const btn = $("#scanBtn");
     btn.disabled = true; btn.textContent = "Analysing…";
+    document.body.classList.add("scanning");
     try {
       const r = await api("/api/predict", {
         method: "POST",
@@ -51,44 +52,60 @@
       loadHistory();
     } catch (err) {
       result.classList.remove("hidden");
-    sweepNeedle(result);
-  
-// The needle sweeps toward the score, overshoots, dithers between levels, then
-// settles. It gives the reader a moment to register the number instead of
-// dropping a verdict on them, and it is the one animation worth the wait.
-function sweepNeedle(root) {
-  const g = root.querySelector(".gauge");
-  if (!g) return;
-  const target = Number(g.dataset.target || 0);
-  const readout = g.querySelector(".readout span");
-  const start = performance.now();
-  const duration = 1500;
-
-  function frame(now) {
-    const t = Math.min(1, (now - start) / duration);
-    const eased = 1 - Math.pow(1 - t, 3);
-    // wobble decays as it approaches the final value: the needle is unsure, then certain
-    const wobble = t < 0.82 ? Math.sin(t * 26) * (1 - t) * 7 : 0;
-    const value = Math.max(0, Math.min(100, target * eased + wobble));
-    g.style.setProperty("--p", value.toFixed(2));
-    if (readout) readout.textContent = Math.round(value);
-    if (t < 1) requestAnimationFrame(frame);
-    else {
-      g.style.setProperty("--p", target);
-      if (readout) readout.textContent = target;
-    }
-  }
-  requestAnimationFrame(frame);
-}
-
-    result.innerHTML = `<div class="verdict-text"><span class="badge high">Error</span>
+      result.innerHTML = `<div class="verdict-text"><span class="badge high">Error</span>
         <p class="verdict-url">${escapeHtml(err.message)}</p></div>`;
     } finally {
       btn.disabled = false; btn.textContent = "Analyse";
+      document.body.classList.remove("scanning");
     }
   });
 
-  const TONE = { high: "var(--bad)", medium: "var(--warn)", low: "var(--ok)" };
+  const TONE = { high: "var(--danger)", medium: "var(--warn)", low: "var(--safe)" };
+
+
+  /* Small things people notice: numbers that count to their value, and a scanning
+     line in the header while a request is in flight. */
+  function countUp(el, value) {
+    if (!el) return;
+    const target = Number(value) || 0;
+    const startAt = performance.now();
+    const duration = 900;
+    function step(now) {
+      const t = Math.min(1, (now - startAt) / duration);
+      const eased = 1 - Math.pow(1 - t, 3);
+      el.textContent = Math.round(target * eased).toLocaleString();
+      if (t < 1) requestAnimationFrame(step);
+      else el.textContent = target.toLocaleString();
+    }
+    requestAnimationFrame(step);
+  }
+
+  /* The needle sweeps toward the score, overshoots, dithers between the bands as it
+     closes, then locks on. The number is registered rather than simply appearing. */
+  function sweepNeedle(root) {
+    const g = root.querySelector(".gauge");
+    if (!g) return;
+    const target = Number(g.dataset.target || 0);
+    const readout = g.querySelector(".readout span");
+    const startAt = performance.now();
+    const duration = 1500;
+
+    function frame(now) {
+      const t = Math.min(1, (now - startAt) / duration);
+      const eased = 1 - Math.pow(1 - t, 3);
+      const wobble = t < 0.82 ? Math.sin(t * 26) * (1 - t) * 7 : 0;
+      const value = Math.max(0, Math.min(100, target * eased + wobble));
+      g.style.setProperty("--p", value.toFixed(2));
+      if (readout) readout.textContent = Math.round(value);
+      if (t < 1) {
+        requestAnimationFrame(frame);
+      } else {
+        g.style.setProperty("--p", target);
+        if (readout) readout.textContent = target;
+      }
+    }
+    requestAnimationFrame(frame);
+  }
   const escapeHtml = s => String(s).replace(/[&<>"']/g, c =>
     ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 
@@ -147,9 +164,9 @@ function sweepNeedle(root) {
   async function loadStats() {
     try {
       const s = await api("/api/stats");
-      $("#statTotal").textContent = s.total_scans.toLocaleString();
-      $("#statPhish").textContent = s.phishing.toLocaleString();
-      $("#statUsers").textContent = s.users.toLocaleString();
+      countUp($("#statTotal"), s.total_scans);
+      countUp($("#statPhish"), s.phishing);
+      countUp($("#statUsers"), s.users);
     } catch { /* non-critical */ }
   }
 
