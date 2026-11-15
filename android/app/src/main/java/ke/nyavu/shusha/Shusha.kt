@@ -27,7 +27,7 @@ import java.net.URL
  * README records exactly what is and is not done.
  */
 object NyavuApi {
-    const val DEFAULT_BASE = "https://wine-flashers-awarded-brief.trycloudflare.com"
+    const val DEFAULT_BASE = "https://nyavu.onrender.com"
 
     fun base(ctx: Context): String =
         ctx.getSharedPreferences("nyavu", Context.MODE_PRIVATE)

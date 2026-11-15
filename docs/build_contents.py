@@ -1,4 +1,4 @@
-﻿"""Two-pass build that replaces the TOC and lists with static, correct page numbers.
+"""Two-pass build that replaces the TOC and lists with static, correct page numbers.
 
 Pass 1 builds the document and converts it to PDF. Page numbers are read from the PDF,
 so they reflect what a reader will actually see. Pass 2 rebuilds the document with the

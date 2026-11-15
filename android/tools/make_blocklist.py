@@ -1,4 +1,4 @@
-﻿"""Builds the Android blocklist from public, freely licensed sources.
+"""Builds the Android blocklist from public, freely licensed sources.
 
     python tools/make_blocklist.py
 

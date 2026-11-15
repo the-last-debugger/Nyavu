@@ -9,6 +9,8 @@ characteristics that produced it.
 A COMP324 team project at Kabarak University, built to be reproducible, honest about its
 accuracy, and cheap enough to run for nothing.
 
+**Live:** <https://nyavu.onrender.com>
+
 ---
 
 ## Why it exists

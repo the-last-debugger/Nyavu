@@ -39,7 +39,7 @@ async function boot() {
   $("s-allowed").textContent = s.allowed;
 
   try {
-    const r = await fetch((settings?.apiBase || "http://127.0.0.1:8000") + "/api/health");
+    const r = await fetch((settings?.apiBase || "https://nyavu.onrender.com") + "/api/health");
     $("dot").style.background = r.ok ? "var(--ok)" : "var(--bad)";
     $("dot").title = r.ok ? "Nyavu API reachable" : "Nyavu API unreachable";
   } catch {
@@ -48,7 +48,7 @@ async function boot() {
   }
 
   $("analyse").onclick = () => {
-    const base = settings?.apiBase || "http://127.0.0.1:8000";
+    const base = settings?.apiBase || "https://nyavu.onrender.com";
     chrome.tabs.create({ url: `${base}/?u=${encodeURIComponent("https://" + host)}` });
   };
 

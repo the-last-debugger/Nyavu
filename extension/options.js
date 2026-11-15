@@ -1,5 +1,5 @@
 /* Shusha Nyavu — settings page. */
-const DEFAULTS = { apiBase: "http://127.0.0.1:8000", mode: "warn", enabled: true, allow: [] };
+const DEFAULTS = { apiBase: "https://nyavu.onrender.com", mode: "warn", enabled: true, allow: [] };
 const $ = (id) => document.getElementById(id);
 
 function paintAllow(allow) {

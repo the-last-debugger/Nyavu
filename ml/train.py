@@ -1,4 +1,4 @@
-﻿"""
+"""
 Nyavu model training and evaluation.
 
 Pipeline

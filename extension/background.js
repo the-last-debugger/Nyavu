@@ -15,7 +15,7 @@
  * the address the user is already navigating to.
  */
 const DEFAULTS = {
-  apiBase: "http://127.0.0.1:8000",
+  apiBase: "https://nyavu.onrender.com",
   mode: "warn",              // "warn" | "block"
   enabled: true,
   allow: []                  // hosts the user has chosen to trust
