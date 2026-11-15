@@ -8,7 +8,10 @@ import sqlite3
 from contextlib import contextmanager
 from datetime import datetime, timezone
 
-DB_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data", "nyavu.db")
+_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+# The path is overridable so a hosted deployment can point at persistent storage
+# (/home on Azure App Service survives restarts and redeploys; the code directory does not).
+DB_PATH = os.environ.get("NYAVU_DB_PATH") or os.path.join(_ROOT, "data", "nyavu.db")
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS users (
