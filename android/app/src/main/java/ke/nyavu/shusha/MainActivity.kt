@@ -115,6 +115,55 @@ class MainActivity : Activity() {
         box.addView(check)
         box.addView(vpn)
         box.addView(stop)
+        // Brand palette, applied in one pass so the whole screen matches the web product.
+        window.statusBarColor = 0xFF04060B.toInt()
+        window.navigationBarColor = 0xFF04060B.toInt()
+        box.setBackgroundColor(0xFF04060B.toInt())
+        for (i in 0 until box.childCount) {
+            when (val v = box.getChildAt(i)) {
+                is Button -> {
+                    v.setBackgroundColor(0xFF43E8C8.toInt())
+                    v.setTextColor(0xFF032620.toInt())
+                }
+                is EditText -> {
+                    v.setBackgroundColor(0xFF10151F.toInt())
+                    v.setTextColor(0xFFEEF2FA.toInt())
+                    v.setHintTextColor(0xFF5B667D.toInt())
+                }
+                is TextView -> {
+                    v.setTextColor(if (v.textSize > 20f) 0xFFEEF2FA.toInt() else 0xFF939FB5.toInt())
+                    if (v.textSize > 20f) {
+                        v.typeface = android.graphics.Typeface.DEFAULT_BOLD
+                    }
+                }
+            }
+        }
+        // Brand palette, applied in one pass so the screen matches the web product.
+        window.statusBarColor = 0xFF04060B.toInt()
+        window.navigationBarColor = 0xFF04060B.toInt()
+        box.setBackgroundColor(0xFF04060B.toInt())
+        for (i in 0 until box.childCount) {
+            when (val v = box.getChildAt(i)) {
+                is Button -> {
+                    v.setBackgroundColor(0xFF43E8C8.toInt())
+                    v.setTextColor(0xFF032620.toInt())
+                }
+                is EditText -> {
+                    v.setBackgroundColor(0xFF10151F.toInt())
+                    v.setTextColor(0xFFEEF2FA.toInt())
+                    v.setHintTextColor(0xFF5B667D.toInt())
+                }
+                is TextView -> {
+                    if (v.textSize > 20f) {
+                        v.setTextColor(0xFFEEF2FA.toInt())
+                        v.typeface = android.graphics.Typeface.DEFAULT_BOLD
+                    } else {
+                        v.setTextColor(0xFF939FB5.toInt())
+                    }
+                }
+            }
+        }
+
         setContentView(box)
     }
 

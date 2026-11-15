@@ -7,7 +7,7 @@ import os
 import time
 
 from fastapi import FastAPI, HTTPException, Request, Response, UploadFile, File
-from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
+from fastapi.responses import RedirectResponse, FileResponse, HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
@@ -284,12 +284,15 @@ def demo_phish():
 
 @app.get("/download/nyavu.apk")
 def download_apk():
-    """Serves the built Android agent so a phone can install it over the tailnet."""
-    path = os.path.normpath(os.path.join(BASE, "..", "dist", "Nyavu-Shusha-0.2.0-debug.apk"))
-    if not os.path.exists(path):
-        raise HTTPException(status_code=404, detail="APK has not been built yet.")
-    return FileResponse(path, media_type="application/vnd.android.package-archive",
-                        filename="Nyavu-Shusha.apk")
+    """Send the phone to the published release rather than a file inside the repo.
+
+    The binary used to sit in dist/ and be served from disk, which meant every build
+    changed the repository and the download could drift from the released version.
+    """
+    return RedirectResponse(
+        "https://github.com/the-last-debugger/Nyavu/releases/latest/download/Nyavu.apk",
+        status_code=307,
+    )
 
 
 # --------------------------------------------------------------------------- #
