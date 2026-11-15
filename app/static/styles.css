@@ -1017,3 +1017,124 @@ h2 {
     scroll-behavior: auto !important;
   }
 }
+
+/* ------------------------------------------------------------------- dial */
+
+.gauge {
+  position: relative;
+  width: 200px;
+  height: 140px;
+  margin: 0 auto;
+  background: none;
+  border: 0;
+  border-radius: 0;
+  filter: none;
+  animation: none;
+  --p: 0;
+  --tone: var(--accent);
+}
+
+.gauge::before, .gauge::after { display: none; }
+
+.gauge .dial {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.gauge .track {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.07);
+  stroke-width: 13;
+  stroke-linecap: round;
+}
+
+.gauge .fill {
+  fill: none;
+  stroke: var(--tone);
+  stroke-width: 13;
+  stroke-linecap: round;
+  filter: drop-shadow(0 0 12px var(--tone));
+  stroke-dasharray: 245;
+  stroke-dashoffset: calc(245 - (245 * var(--p) / 100));
+}
+
+.gauge .needle {
+  position: absolute;
+  left: 50%;
+  bottom: 14px;
+  width: 3px;
+  height: 74px;
+  margin-left: -1.5px;
+  border-radius: 2px;
+  background: linear-gradient(180deg, var(--tone), rgba(255, 255, 255, 0.85));
+  transform-origin: 50% calc(100% - 0px);
+  transform: rotate(calc(-90deg + var(--p) * 1.8deg));
+  box-shadow: 0 0 14px var(--tone);
+  transition: none;
+}
+
+.gauge .needle::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -5px;
+  width: 13px;
+  height: 13px;
+  margin-left: -6.5px;
+  border-radius: 50%;
+  background: #04060b;
+  border: 2px solid var(--tone);
+  box-shadow: 0 0 16px var(--tone);
+}
+
+.gauge .readout {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  text-align: center;
+  pointer-events: none;
+}
+
+.gauge .readout span {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 1.7rem;
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  color: var(--text);
+  line-height: 1;
+}
+
+.gauge .readout small {
+  display: block;
+  margin-top: 3px;
+  color: var(--faint);
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+/* keep the readout legible even when the needle passes behind it */
+.gauge .needle { z-index: 1; }
+.gauge .readout {
+  z-index: 3;
+  bottom: -6px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.gauge .readout span {
+  padding: 4px 14px;
+  border-radius: 999px;
+  background: rgba(4, 6, 11, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: 1.5rem;
+}
+.gauge .readout small {
+  margin-top: 4px;
+}

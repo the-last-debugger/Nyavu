@@ -51,7 +51,37 @@
       loadHistory();
     } catch (err) {
       result.classList.remove("hidden");
-      result.innerHTML = `<div class="verdict-text"><span class="badge high">Error</span>
+    sweepNeedle(result);
+  
+// The needle sweeps toward the score, overshoots, dithers between levels, then
+// settles. It gives the reader a moment to register the number instead of
+// dropping a verdict on them, and it is the one animation worth the wait.
+function sweepNeedle(root) {
+  const g = root.querySelector(".gauge");
+  if (!g) return;
+  const target = Number(g.dataset.target || 0);
+  const readout = g.querySelector(".readout span");
+  const start = performance.now();
+  const duration = 1500;
+
+  function frame(now) {
+    const t = Math.min(1, (now - start) / duration);
+    const eased = 1 - Math.pow(1 - t, 3);
+    // wobble decays as it approaches the final value: the needle is unsure, then certain
+    const wobble = t < 0.82 ? Math.sin(t * 26) * (1 - t) * 7 : 0;
+    const value = Math.max(0, Math.min(100, target * eased + wobble));
+    g.style.setProperty("--p", value.toFixed(2));
+    if (readout) readout.textContent = Math.round(value);
+    if (t < 1) requestAnimationFrame(frame);
+    else {
+      g.style.setProperty("--p", target);
+      if (readout) readout.textContent = target;
+    }
+  }
+  requestAnimationFrame(frame);
+}
+
+    result.innerHTML = `<div class="verdict-text"><span class="badge high">Error</span>
         <p class="verdict-url">${escapeHtml(err.message)}</p></div>`;
     } finally {
       btn.disabled = false; btn.textContent = "Analyse";
@@ -81,8 +111,13 @@
     result.classList.remove("hidden");
     result.innerHTML = `
       <div class="verdict-head">
-        <div class="gauge" style="--p:${pct}; --tone:${TONE[r.risk]}">
-          <div><span>${pct}%</span><small>risk</small></div>
+        <div class="gauge" style="--p:0; --tone:${TONE[r.risk]}" data-target="${pct}">
+          <svg class="dial" viewBox="0 0 200 132" aria-hidden="true">
+            <path class="track" d="M22 112 A78 78 0 0 1 178 112" />
+            <path class="fill" d="M22 112 A78 78 0 0 1 178 112" />
+          </svg>
+          <div class="needle"></div>
+          <div class="readout"><span>0</span><small>risk</small></div>
         </div>
         <div class="verdict-text">
           <span class="badge ${r.risk}">${r.band}</span>${r.reputation === "established"
@@ -105,6 +140,7 @@
       ${evidence}
       <h3 class="block-title">Computed features</h3>
       <dl class="feat-grid">${featRows}</dl>`;
+    sweepNeedle(result);
   }
 
   /* ----------------------------------------------------------------- stats */
