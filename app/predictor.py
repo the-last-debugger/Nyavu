@@ -28,6 +28,10 @@ class Predictor:
         with open(os.path.join(ART, "metrics.json"), encoding="utf-8") as fh:
             self.metrics = json.load(fh)
         self.feature_names = list(self.pipeline.named_steps["prep"].get_feature_names_out())
+        # Only the n-gram columns are ever surfaced as evidence; marking them once
+        # avoids testing 50,000 names on every request.
+        self._ngram_mask = np.array([n.startswith("domain_ngrams__")
+                                     for n in self.feature_names], dtype=bool)
         clf = self.pipeline.named_steps["clf"]
         self.weights = getattr(clf, "coef_", None)
         self.is_linear = self.weights is not None
@@ -43,17 +47,42 @@ class Predictor:
             return set()
 
     # ------------------------------------------------------------------ #
-    def _contributions(self, row: pd.DataFrame):
-        """Per-feature contribution to the logit, in the transformed space."""
+    def _contributions(self, Xt, top: int = 200):
+        """Per-feature contribution to the logit, from an already-transformed matrix.
+
+        The transformed row is sparse and almost entirely zero: a URL activates a few
+        hundred character n-grams out of tens of thousands. Multiplying only the stored
+        entries, and selecting the strongest with a partial sort, avoids densifying and
+        fully sorting a 50,000-wide row on every request.
+        """
         if not self.is_linear:
             return None
-        prep = self.pipeline.named_steps["prep"]
-        Xt = prep.transform(row)
         coef = np.ravel(self.weights)
-        vals = np.asarray(Xt.todense()).ravel() if hasattr(Xt, "todense") else np.ravel(Xt)
-        contrib = vals * coef
-        order = np.argsort(contrib)[::-1]
-        return [(self.feature_names[i], float(contrib[i])) for i in order]
+        if hasattr(Xt, "tocoo"):
+            m = Xt.tocoo()
+            idx, vals = m.col, m.data
+        else:
+            vals = np.ravel(Xt)
+            idx = np.arange(vals.size)
+        if vals.size == 0:
+            return []
+        contrib = vals * coef[idx]
+
+        # Restrict to n-gram columns: those are the only features the explanation
+        # reports, and doing so here keeps the result exactly what a full sort of all
+        # columns would have produced, without sorting tens of thousands of zeros.
+        keep = self._ngram_mask[idx]
+        if not keep.any():
+            return []
+        idx, contrib = idx[keep], contrib[keep]
+
+        # Order by weight, then by token. Ties are common (many character n-grams carry
+        # an identical coefficient) and numpy's sort does not define their order, so
+        # without this the same URL could report different evidence between processes.
+        pairs = sorted(((self.feature_names[idx[i]].split("__", 1)[1], float(contrib[i]))
+                        for i in range(contrib.size)),
+                       key=lambda t: (-t[1], t[0]))
+        return [(f"domain_ngrams__{tok}", w) for tok, w in pairs]
 
     def predict(self, url: str) -> dict:
         t0 = time.perf_counter()
@@ -63,14 +92,21 @@ class Predictor:
 
         host = hostname_of(url)
         domain = registrable_domain(host) if host else ""
-        row = pd.DataFrame([{**feats, "domain": domain}])
-        for c in FEATURE_ORDER:
-            row[c] = row.get(c, 0)
+        # One frame, one transform. Building the frame column-by-column and calling
+        # transform twice (score, then explanation) accounted for most of the request's
+        # server time on a small CPU.
+        data = {c: feats.get(c, 0) for c in FEATURE_ORDER}
+        data["domain"] = domain
+        row = pd.DataFrame([data], columns=list(FEATURE_ORDER) + ["domain"])
 
-        if hasattr(self.pipeline, "predict_proba"):
-            prob = float(self.pipeline.predict_proba(row)[0, 1])
+        prep = self.pipeline.named_steps["prep"]
+        clf = self.pipeline.named_steps["clf"]
+        Xt = prep.transform(row)
+
+        if hasattr(clf, "predict_proba"):
+            prob = float(clf.predict_proba(Xt)[0, 1])
         else:
-            d = float(self.pipeline.decision_function(row)[0])
+            d = float(clf.decision_function(Xt)[0])
             prob = 1 / (1 + np.exp(-d))
 
         label = int(prob >= 0.5)
@@ -112,7 +148,7 @@ class Predictor:
             ]
 
         evidence = []
-        contribs = self._contributions(row)
+        contribs = self._contributions(Xt)
         if contribs:
             seen = set()
             for name, weight in contribs:

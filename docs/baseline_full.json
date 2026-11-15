@@ -1,0 +1,565 @@
+{
+  "http://197.248.11.9/equity/login.php": {
+    "band": "Likely phishing",
+    "evidence": [
+      {
+        "token": "248.",
+        "weight": 0.0001
+      },
+      {
+        "token": ".248.",
+        "weight": 0.0001
+      },
+      {
+        "token": ".248",
+        "weight": 0.0001
+      }
+    ],
+    "probability": 0.9999,
+    "reasons": [
+      "The host is a raw IP address rather than a domain name, which attackers use to avoid registering a domain.",
+      "The domain contains 9 digits, which is unusual for legitimate brand domains.",
+      "The URL does not use HTTPS."
+    ],
+    "reputation": null,
+    "risk": "high",
+    "suggested": null,
+    "verdict": "phishing"
+  },
+  "http://absa.co.ke.verify.top/": {
+    "band": "Likely phishing",
+    "evidence": [
+      {
+        "token": "rify",
+        "weight": 0.2003
+      },
+      {
+        "token": "erify",
+        "weight": 0.1816
+      },
+      {
+        "token": "veri",
+        "weight": 0.172
+      },
+      {
+        "token": "verif",
+        "weight": 0.14
+      },
+      {
+        "token": ".top",
+        "weight": 0.1267
+      }
+    ],
+    "probability": 0.9988,
+    "reasons": [
+      "The brand 'absa' appears in a subdomain, but the address is actually registered to 'verify.top'. A brand inside somebody else's domain is a common impersonation pattern.",
+      "Uses the '.top' top-level domain, which is frequently associated with free or cheap bulk registration and abuse.",
+      "The URL does not use HTTPS."
+    ],
+    "reputation": null,
+    "risk": "high",
+    "suggested": null,
+    "verdict": "phishing"
+  },
+  "http://bit.ly/3xyz": {
+    "band": "Likely legitimate",
+    "evidence": [],
+    "probability": 0.15,
+    "reasons": [
+      "This is an established domain, among the 100,000 most visited on the internet. Name-level evidence is not enough to flag it."
+    ],
+    "reputation": "established",
+    "risk": "low",
+    "suggested": null,
+    "verdict": "legitimate"
+  },
+  "http://equitybankk.co.ke/": {
+    "band": "Likely phishing",
+    "evidence": [
+      {
+        "token": "o.ke",
+        "weight": 0.0946
+      },
+      {
+        "token": "co.k",
+        "weight": 0.0902
+      },
+      {
+        "token": "co.ke",
+        "weight": 0.0902
+      },
+      {
+        "token": ".co.k",
+        "weight": 0.0902
+      },
+      {
+        "token": "bank",
+        "weight": 0.073
+      }
+    ],
+    "probability": 0.9417,
+    "reasons": [
+      "The brand 'equity' appears in this domain, but 'equity' actually uses equitybank.co.ke; the extra or altered wording is a common impersonation trick.",
+      "The URL does not use HTTPS."
+    ],
+    "reputation": null,
+    "risk": "high",
+    "suggested": {
+      "brand": "equity",
+      "domain": "equitybank.co.ke"
+    },
+    "verdict": "phishing"
+  },
+  "http://kcb-secure.xyz/": {
+    "band": "Likely phishing",
+    "evidence": [
+      {
+        "token": "cure",
+        "weight": 0.141
+      },
+      {
+        "token": "ecure",
+        "weight": 0.1249
+      },
+      {
+        "token": "-secu",
+        "weight": 0.1123
+      },
+      {
+        "token": "-sec",
+        "weight": 0.0615
+      },
+      {
+        "token": "secu",
+        "weight": 0.0597
+      }
+    ],
+    "probability": 0.994,
+    "reasons": [
+      "The brand 'kcb' appears in this domain, but 'kcb' actually uses kcbgroup.com; the extra or altered wording is a common impersonation trick.",
+      "Uses the '.xyz' top-level domain, which is frequently associated with free or cheap bulk registration and abuse.",
+      "The URL does not use HTTPS."
+    ],
+    "reputation": null,
+    "risk": "high",
+    "suggested": {
+      "brand": "kcb",
+      "domain": "kcbgroup.com"
+    },
+    "verdict": "phishing"
+  },
+  "http://kra-refund.claims.top/": {
+    "band": "Likely phishing",
+    "evidence": [
+      {
+        "token": "laim",
+        "weight": 0.1259
+      },
+      {
+        "token": "claim",
+        "weight": 0.1259
+      },
+      {
+        "token": "clai",
+        "weight": 0.1259
+      },
+      {
+        "token": ".top",
+        "weight": 0.123
+      }
+    ],
+    "probability": 0.9984,
+    "reasons": [
+      "The brand 'kra' appears in a subdomain, but the address is actually registered to 'claims.top'. A brand inside somebody else's domain is a common impersonation pattern.",
+      "Uses the '.top' top-level domain, which is frequently associated with free or cheap bulk registration and abuse.",
+      "The URL does not use HTTPS."
+    ],
+    "reputation": null,
+    "risk": "high",
+    "suggested": null,
+    "verdict": "phishing"
+  },
+  "http://mpesa.co.ke.verify-account.top/": {
+    "band": "Likely phishing",
+    "evidence": [
+      {
+        "token": "rify",
+        "weight": 0.1406
+      },
+      {
+        "token": "erify",
+        "weight": 0.1275
+      },
+      {
+        "token": "veri",
+        "weight": 0.1208
+      },
+      {
+        "token": "verif",
+        "weight": 0.0983
+      },
+      {
+        "token": "t.top",
+        "weight": 0.0934
+      }
+    ],
+    "probability": 0.9999,
+    "reasons": [
+      "The brand 'mpesa' appears in a subdomain, but the address is actually registered to 'verify-account.top'. A brand inside somebody else's domain is a common impersonation pattern.",
+      "Uses the '.top' top-level domain, which is frequently associated with free or cheap bulk registration and abuse.",
+      "The URL does not use HTTPS."
+    ],
+    "reputation": null,
+    "risk": "high",
+    "suggested": null,
+    "verdict": "phishing"
+  },
+  "http://mtn-uganda.promo.tk/": {
+    "band": "Likely phishing",
+    "evidence": [
+      {
+        "token": "promo",
+        "weight": 0.0972
+      }
+    ],
+    "probability": 0.7149,
+    "reasons": [
+      "Uses the '.tk' top-level domain, which is frequently associated with free or cheap bulk registration and abuse.",
+      "The URL does not use HTTPS."
+    ],
+    "reputation": null,
+    "risk": "high",
+    "suggested": null,
+    "verdict": "phishing"
+  },
+  "http://paypal.com.secure-update.top/": {
+    "band": "Likely phishing",
+    "evidence": [
+      {
+        "token": "secu",
+        "weight": 0.2447
+      },
+      {
+        "token": "cure",
+        "weight": 0.1267
+      },
+      {
+        "token": "updat",
+        "weight": 0.1198
+      },
+      {
+        "token": "upda",
+        "weight": 0.1198
+      },
+      {
+        "token": "pdate",
+        "weight": 0.1198
+      }
+    ],
+    "probability": 1.0,
+    "reasons": [
+      "The brand 'paypal' appears in a subdomain, but the address is actually registered to 'secure-update.top'. A brand inside somebody else's domain is a common impersonation pattern.",
+      "Uses the '.top' top-level domain, which is frequently associated with free or cheap bulk registration and abuse.",
+      "The URL does not use HTTPS."
+    ],
+    "reputation": null,
+    "risk": "high",
+    "suggested": null,
+    "verdict": "phishing"
+  },
+  "http://safaricom-secure-login.tk/verify": {
+    "band": "Likely phishing",
+    "evidence": [
+      {
+        "token": "com-",
+        "weight": 0.1673
+      },
+      {
+        "token": "cure",
+        "weight": 0.1006
+      },
+      {
+        "token": "ecure",
+        "weight": 0.0891
+      },
+      {
+        "token": "safar",
+        "weight": 0.0876
+      },
+      {
+        "token": "afari",
+        "weight": 0.0876
+      }
+    ],
+    "probability": 0.9998,
+    "reasons": [
+      "The brand 'safaricom' appears in this domain, but 'safaricom' actually uses safaricom.co.ke; the extra or altered wording is a common impersonation trick.",
+      "Uses the '.tk' top-level domain, which is frequently associated with free or cheap bulk registration and abuse.",
+      "The domain contains 2 hyphens, a pattern often used to mimic a brand inside a compound domain.",
+      "The domain has high character entropy, consistent with machine-generated names.",
+      "The URL does not use HTTPS."
+    ],
+    "reputation": null,
+    "risk": "high",
+    "suggested": {
+      "brand": "safaricom",
+      "domain": "safaricom.co.ke"
+    },
+    "verdict": "phishing"
+  },
+  "http://secure.bank.co.ke.verify-login.xyz/": {
+    "band": "Likely phishing",
+    "evidence": [
+      {
+        "token": "rify",
+        "weight": 0.1418
+      },
+      {
+        "token": "erify",
+        "weight": 0.1285
+      },
+      {
+        "token": "veri",
+        "weight": 0.1217
+      },
+      {
+        "token": "verif",
+        "weight": 0.0991
+      },
+      {
+        "token": "login",
+        "weight": 0.0881
+      }
+    ],
+    "probability": 0.9865,
+    "reasons": [
+      "Uses the '.xyz' top-level domain, which is frequently associated with free or cheap bulk registration and abuse.",
+      "The URL does not use HTTPS."
+    ],
+    "reputation": null,
+    "risk": "high",
+    "suggested": null,
+    "verdict": "phishing"
+  },
+  "https://github.com/login": {
+    "band": "Likely legitimate",
+    "evidence": [
+      {
+        "token": "ub.co",
+        "weight": 0.0034
+      }
+    ],
+    "probability": 0.0688,
+    "reasons": [
+      "This is an established domain, among the 100,000 most visited on the internet. Name-level evidence is not enough to flag it."
+    ],
+    "reputation": "established",
+    "risk": "low",
+    "suggested": null,
+    "verdict": "legitimate"
+  },
+  "https://mail.google.com/": {
+    "band": "Likely legitimate",
+    "evidence": [],
+    "probability": 0.0003,
+    "reasons": [
+      "This is an established domain, among the 100,000 most visited on the internet. Name-level evidence is not enough to flag it."
+    ],
+    "reputation": "established",
+    "risk": "low",
+    "suggested": null,
+    "verdict": "legitimate"
+  },
+  "https://stackoverflow.com/": {
+    "band": "Likely legitimate",
+    "evidence": [
+      {
+        "token": "acko",
+        "weight": 0.1046
+      },
+      {
+        "token": "rflo",
+        "weight": 0.0801
+      },
+      {
+        "token": "low.c",
+        "weight": 0.0763
+      },
+      {
+        "token": "w.com",
+        "weight": 0.0532
+      },
+      {
+        "token": "w.co",
+        "weight": 0.0532
+      }
+    ],
+    "probability": 0.15,
+    "reasons": [
+      "This is an established domain, among the 100,000 most visited on the internet. Name-level evidence is not enough to flag it."
+    ],
+    "reputation": "established",
+    "risk": "low",
+    "suggested": null,
+    "verdict": "legitimate"
+  },
+  "https://www.equitybank.co.ke/": {
+    "band": "Likely legitimate",
+    "evidence": [
+      {
+        "token": "o.ke",
+        "weight": 0.0998
+      },
+      {
+        "token": "co.k",
+        "weight": 0.0952
+      },
+      {
+        "token": "co.ke",
+        "weight": 0.0952
+      },
+      {
+        "token": ".co.k",
+        "weight": 0.0952
+      },
+      {
+        "token": "bank",
+        "weight": 0.0771
+      }
+    ],
+    "probability": 0.0687,
+    "reasons": [],
+    "reputation": null,
+    "risk": "low",
+    "suggested": null,
+    "verdict": "legitimate"
+  },
+  "https://www.google.com/": {
+    "band": "Likely legitimate",
+    "evidence": [],
+    "probability": 0.0003,
+    "reasons": [
+      "This is an established domain, among the 100,000 most visited on the internet. Name-level evidence is not enough to flag it."
+    ],
+    "reputation": "established",
+    "risk": "low",
+    "suggested": null,
+    "verdict": "legitimate"
+  },
+  "https://www.kra.go.ke/": {
+    "band": "Likely legitimate",
+    "evidence": [
+      {
+        "token": "o.ke",
+        "weight": 0.1435
+      },
+      {
+        "token": "go.ke",
+        "weight": 0.0422
+      },
+      {
+        "token": "go.k",
+        "weight": 0.0422
+      },
+      {
+        "token": ".go.k",
+        "weight": 0.0422
+      },
+      {
+        "token": ".go.",
+        "weight": 0.0422
+      }
+    ],
+    "probability": 0.0259,
+    "reasons": [
+      "This is an established domain, among the 100,000 most visited on the internet. Name-level evidence is not enough to flag it."
+    ],
+    "reputation": "established",
+    "risk": "low",
+    "suggested": null,
+    "verdict": "legitimate"
+  },
+  "https://www.mtn.co.ug/": {
+    "band": "Likely legitimate",
+    "evidence": [
+      {
+        "token": "o.ug",
+        "weight": 0.1444
+      }
+    ],
+    "probability": 0.15,
+    "reasons": [
+      "This is an established domain, among the 100,000 most visited on the internet. Name-level evidence is not enough to flag it."
+    ],
+    "reputation": "established",
+    "risk": "low",
+    "suggested": null,
+    "verdict": "legitimate"
+  },
+  "https://www.safaricom.co.ke/": {
+    "band": "Likely legitimate",
+    "evidence": [
+      {
+        "token": "afar",
+        "weight": 0.109
+      },
+      {
+        "token": "afari",
+        "weight": 0.109
+      },
+      {
+        "token": "safar",
+        "weight": 0.109
+      },
+      {
+        "token": "safa",
+        "weight": 0.109
+      },
+      {
+        "token": "o.ke",
+        "weight": 0.1038
+      }
+    ],
+    "probability": 0.15,
+    "reasons": [
+      "This is an established domain, among the 100,000 most visited on the internet. Name-level evidence is not enough to flag it."
+    ],
+    "reputation": "established",
+    "risk": "low",
+    "suggested": null,
+    "verdict": "legitimate"
+  },
+  "https://www.standardmedia.co.ke/": {
+    "band": "Likely legitimate",
+    "evidence": [
+      {
+        "token": "a.co.",
+        "weight": 0.1275
+      },
+      {
+        "token": "dia.c",
+        "weight": 0.0984
+      },
+      {
+        "token": "o.ke",
+        "weight": 0.095
+      },
+      {
+        "token": ".co.k",
+        "weight": 0.0905
+      },
+      {
+        "token": "co.k",
+        "weight": 0.0905
+      }
+    ],
+    "probability": 0.15,
+    "reasons": [
+      "This is an established domain, among the 100,000 most visited on the internet. Name-level evidence is not enough to flag it."
+    ],
+    "reputation": "established",
+    "risk": "low",
+    "suggested": null,
+    "verdict": "legitimate"
+  }
+}

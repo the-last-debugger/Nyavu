@@ -1,0 +1,122 @@
+{
+  "http://safaricom-secure-login.tk/verify": {
+    "prob": 0.9998,
+    "verdict": "phishing",
+    "risk": "high",
+    "n_reasons": 5
+  },
+  "https://www.google.com/": {
+    "prob": 0.0003,
+    "verdict": "legitimate",
+    "risk": "low",
+    "n_reasons": 1
+  },
+  "http://mpesa.co.ke.verify-account.top/": {
+    "prob": 0.9999,
+    "verdict": "phishing",
+    "risk": "high",
+    "n_reasons": 3
+  },
+  "http://197.248.11.9/equity/login.php": {
+    "prob": 0.9999,
+    "verdict": "phishing",
+    "risk": "high",
+    "n_reasons": 3
+  },
+  "https://www.safaricom.co.ke/": {
+    "prob": 0.15,
+    "verdict": "legitimate",
+    "risk": "low",
+    "n_reasons": 1
+  },
+  "http://equitybankk.co.ke/": {
+    "prob": 0.9417,
+    "verdict": "phishing",
+    "risk": "high",
+    "n_reasons": 2
+  },
+  "https://github.com/login": {
+    "prob": 0.0688,
+    "verdict": "legitimate",
+    "risk": "low",
+    "n_reasons": 1
+  },
+  "http://kcb-secure.xyz/": {
+    "prob": 0.994,
+    "verdict": "phishing",
+    "risk": "high",
+    "n_reasons": 3
+  },
+  "https://www.equitybank.co.ke/": {
+    "prob": 0.0687,
+    "verdict": "legitimate",
+    "risk": "low",
+    "n_reasons": 0
+  },
+  "http://paypal.com.secure-update.top/": {
+    "prob": 1.0,
+    "verdict": "phishing",
+    "risk": "high",
+    "n_reasons": 3
+  },
+  "https://mail.google.com/": {
+    "prob": 0.0003,
+    "verdict": "legitimate",
+    "risk": "low",
+    "n_reasons": 1
+  },
+  "http://absa.co.ke.verify.top/": {
+    "prob": 0.9988,
+    "verdict": "phishing",
+    "risk": "high",
+    "n_reasons": 3
+  },
+  "https://www.standardmedia.co.ke/": {
+    "prob": 0.15,
+    "verdict": "legitimate",
+    "risk": "low",
+    "n_reasons": 1
+  },
+  "http://bit.ly/3xyz": {
+    "prob": 0.15,
+    "verdict": "legitimate",
+    "risk": "low",
+    "n_reasons": 1
+  },
+  "https://www.kra.go.ke/": {
+    "prob": 0.0259,
+    "verdict": "legitimate",
+    "risk": "low",
+    "n_reasons": 1
+  },
+  "http://kra-refund.claims.top/": {
+    "prob": 0.9984,
+    "verdict": "phishing",
+    "risk": "high",
+    "n_reasons": 3
+  },
+  "https://www.mtn.co.ug/": {
+    "prob": 0.15,
+    "verdict": "legitimate",
+    "risk": "low",
+    "n_reasons": 1
+  },
+  "http://mtn-uganda.promo.tk/": {
+    "prob": 0.7149,
+    "verdict": "phishing",
+    "risk": "high",
+    "n_reasons": 2
+  },
+  "https://stackoverflow.com/": {
+    "prob": 0.15,
+    "verdict": "legitimate",
+    "risk": "low",
+    "n_reasons": 1
+  },
+  "http://secure.bank.co.ke.verify-login.xyz/": {
+    "prob": 0.9865,
+    "verdict": "phishing",
+    "risk": "high",
+    "n_reasons": 2
+  }
+}
