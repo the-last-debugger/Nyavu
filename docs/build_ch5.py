@@ -31,7 +31,7 @@ def body(p: Paper, *, page_break=False, include_references=True):
     f1 = res.get("f1", 0)
     fpr = res.get("false_positive_rate", 0)
 
-    p.h1("CHAPTER FIVE: RECOMMENDATIONS AND CONCLUSIONS", page_break=page_break)
+    p.h1("CHAPTER FIVE: SYSTEM RECOMMENDATIONS AND CONCLUSIONS", page_break=page_break)
 
     p.h2("5.1 Introduction")
     p.para(
@@ -109,7 +109,8 @@ def body(p: Paper, *, page_break=False, include_references=True):
         "The project set out to design, develop and evaluate Nyavu, a machine-learning web application "
         "that assesses a URL for phishing and explains its verdict. All four specific objectives "
         "were met. The URL characteristics that separate the two classes were identified and "
-        "implemented as seventeen domain-level features. A labelled dataset of 26,202 addresses "
+        "implemented as seventeen domain-level features of the kind used in comparable work "
+        "(Sahingoz et al., 2019). A labelled dataset of 26,202 addresses "
         "was assembled from open sources and partitioned by registrable domain so that no domain "
         "appears in both training and test data. Three classifiers were trained and compared, and "
         "the logistic regression was selected because it produces calibrated probabilities and "

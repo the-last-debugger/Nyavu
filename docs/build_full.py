@@ -21,7 +21,7 @@ OUT = os.path.dirname(os.path.abspath(__file__))
 ART = os.path.join(OUT, "..", "ml", "artifacts")
 
 TITLE = ("Design and Development of a Machine-Learning-Based "
-         "Phishing URL Detection Web Application")
+         "Phishing URL Detection Web and Mobile Application")
 
 TEAM = [
     ("Donald Enron", "CS/M/0626/01/25"),
@@ -40,7 +40,9 @@ def metrics():
 
 
 def title_page(p: Paper):
-    p.para("", space_after=0)
+    logo = os.path.join(OUT, "assets", "logo.png")
+    if os.path.exists(logo):
+        p.logo(logo, width_cm=3.2, space_after=14)
     p.para("KABARAK UNIVERSITY", bold=True, align="center", size=16, space_after=2)
     p.para("School of Science, Engineering and Technology", align="center", size=11, space_after=2)
     p.para("Department of Computer Science and Information Technology",
@@ -59,8 +61,8 @@ def title_page(p: Paper):
     p.para("NOVEMBER 2026", bold=True, align="center", size=12, space_after=0)
 
 
-def declaration(p: Paper):
-    p.h1("DECLARATION", page_break=True)
+def declaration(p: Paper, page_break: bool = True):
+    p.h1("DECLARATION", page_break=page_break)
     p.para(
         "We, the undersigned, declare that this project report is our original work and has not "
         "been submitted for the award of a degree in any other university or institution. All "
@@ -195,8 +197,8 @@ def key_terms(p: Paper):
     p.table(["Term", "Meaning"], rows, widths=[3.8, 12.0], font_size=9.5, align_center=False)
 
 
-def appendices(p: Paper):
-    p.h1("APPENDICES", page_break=True)
+def appendices(p: Paper, page_break: bool = True):
+    p.h1("APPENDICES", page_break=page_break)
 
     p.h2("Appendix I: Budget")
     p.para(
@@ -279,13 +281,82 @@ def appendices(p: Paper):
             widths=[1.4, 9.0, 5.4], font_size=9.2, align_center=False)
 
 
+
+def merged_tail(p: Paper):
+    """Chapter Five's substance, carried inside Chapter Four for the four-chapter form.
+
+    The marking scheme awards marks for a summary of modules, a test regime, the choice
+    of technology and conclusions with recommendations. All four survive here, so the
+    four-chapter structure does not cost those marks.
+    """
+    p.h2("4.14 Summary of Modules and Recommendations")
+    p.para(
+        "Four modules make up the delivered system, and each can be pointed to in the "
+        "repository. URL intake and validation accepts an address from a field, an uploaded list or "
+        "a camera scan, normalises it and rejects malformed input before any analysis runs. Feature "
+        "extraction reduces the address to its registrable domain and computes the seventeen numeric "
+        "features together with the character n-grams, making no network request. Classification and "
+        "explanation applies the trained model, converts the output into a risk band and assembles "
+        "the reasons that raised the score. Results, history and accounts presents the verdict, "
+        "stores the scan, and serves the bulk screening and history views.")
+    p.para(
+        "The technology behind those modules was chosen for the constraints of the project rather "
+        "than for novelty. Python covers data preparation, training and service in one language; "
+        "scikit-learn provides reproducible pipelines, grouped splitting and the metric functions "
+        "used in this chapter; FastAPI exposes a typed JSON interface in that same language; SQLite "
+        "stores the results without an administrator or a hosting fee; and the client is plain HTML, "
+        "CSS and JavaScript with no build step, so nothing can fail to compile in front of an "
+        "examiner. The training and evaluation described in this chapter are reproducible from a "
+        "clean checkout with a fixed seed.")
+    p.para(
+        "Three recommendations follow from the evaluation. Contextual signals - domain age, "
+        "certificate issuer, hosting network - would raise accuracy on compromised legitimate sites, "
+        "at the cost of network calls and latency. Retraining should be scheduled rather than "
+        "occasional, with the frozen baseline kept for comparison, because every phishing model "
+        "decays as tactics change. And the check belongs at the point of contact: a browser client "
+        "that scores a link as it is clicked would reach the user earlier than a page they must "
+        "remember to visit. None of these requires a change to the classifier; all three extend the "
+        "same service.")
+
+
+
+def _leader(p, text: str, page: str, indent_cm: float = 0.0, size: int = 11):
+    from docx.enum.text import WD_TAB_ALIGNMENT, WD_TAB_LEADER
+    from docx.shared import Cm as _Cm, Pt as _Pt
+    para = p.doc.add_paragraph()
+    pf = para.paragraph_format
+    pf.left_indent = _Cm(indent_cm)
+    pf.space_after = _Pt(2)
+    pf.line_spacing = 1.0
+    pf.tab_stops.add_tab_stop(_Cm(15.6), WD_TAB_ALIGNMENT.RIGHT, WD_TAB_LEADER.DOTS)
+    run = para.add_run(f"{text}\t{page}")
+    run.font.size = _Pt(size)
+    return para
+
+
+def static_toc(p: Paper, entries):
+    for e in entries:
+        indent = {1: 0.0, 2: 0.7, 3: 1.4}.get(e["level"], 1.4)
+        bold = e["level"] == 1
+        para = _leader(p, e["text"], e["page"], indent)
+        for r in para.runs:
+            r.bold = bold
+
+
+def static_list(p: Paper, title: str, items, prefix: str):
+    p.h1(title, page_break=True)
+    for i, item in enumerate(items, 1):
+        _leader(p, item["text"], item["page"], 0.0, size=10)
+
+
 def main():
     p = Paper(TITLE)
-    p.set_page_numbering(p.doc.sections[0], fmt="lowerRoman", start=1)
-    p.footer_page_numbers(p.doc.sections[0])
+    title_page(p)                       # section 1: bare title page
 
-    title_page(p)
-    declaration(p)
+    front = p.new_section(fmt="lowerRoman", start=2)   # title counts as i, unnumbered
+    p.header_text(front, "KABARAK UNIVERSITY")
+
+    declaration(p, page_break=False)
     certification(p)
     copyright_page(p)
     dedication(p)
@@ -293,28 +364,50 @@ def main():
     abstract(p)
 
     p.h1("TABLE OF CONTENTS", page_break=True)
-    p.add_toc("1-3")
-
-    p.list_of("Table")
-    p.list_of("Figure")
+    contents_path = os.environ.get("NYAVU_TOC", "")
+    if contents_path and os.path.exists(contents_path):
+        data = json.load(open(contents_path, encoding="utf-8"))
+        static_toc(p, data.get("entries", []))
+        static_list(p, "LIST OF TABLES", data.get("lot", []), "Table")
+        static_list(p, "LIST OF FIGURES", data.get("lof", []), "Figure")
+    else:
+        p.add_toc("1-3")
+        p.list_of("Table")
+        p.list_of("Figure")
     abbreviations(p)
     key_terms(p)
 
-    # body section: arabic numbering, restarts at 1
-    p.new_section(fmt="decimal", start=1)
-    build_ch1.body(p, page_break=False, include_references=False)
-    build_ch2.body(p, page_break=True, include_references=False)
-    build_ch3.body(p, page_break=True, include_references=False)
-    build_ch4.body(p, page_break=True, include_references=False)
-    build_ch5.body(p, page_break=True, include_references=False)
+    # body starts a new section: arabic numbering from 1, running head per chapter
+    mode = os.environ.get("NYAVU_MODE", "five")
+    chapters = [
+        (build_ch1.body, "CHAPTER ONE: INTRODUCTION"),
+        (build_ch2.body, "CHAPTER TWO: LITERATURE REVIEW"),
+        (build_ch3.body, "CHAPTER THREE: METHODOLOGY AND SYSTEM DESIGN"),
+        (build_ch4.body, "CHAPTER FOUR: SYSTEM IMPLEMENTATION AND DEPLOYMENT"),
+    ]
+    if mode == "five":
+        chapters.append((build_ch5.body,
+                         "CHAPTER FIVE: SYSTEM RECOMMENDATIONS AND CONCLUSIONS"))
+    for index, (body, heading) in enumerate(chapters):
+        sec = p.new_section(fmt="decimal", start=1 if index == 0 else None)
+        p.header_text(sec, heading)
+        body(p, page_break=False, include_references=False)
 
-    p.h1("REFERENCES", page_break=True)
+    if mode == "four_merged":
+        merged_tail(p)
+
+    ref_sec = p.new_section(fmt="decimal", start=None)
+    p.header_text(ref_sec, "REFERENCES")
+    p.h1("REFERENCES", page_break=False)
     p.references(REFERENCES)
 
-    appendices(p)
+    app_sec = p.new_section(fmt="decimal", start=None)
+    p.header_text(app_sec, "APPENDICES")
+    appendices(p, page_break=False)
 
     p.update_fields_on_open()
-    path = os.path.join(OUT, "Nyavu_Project_Report.docx")
+    suffix = os.environ.get("NYAVU_SUFFIX", "")
+    path = os.path.join(OUT, f"Team_Project_Full_Report{suffix}.docx")
     p.save(path)
 
     words = sum(len(par.text.split()) for par in p.doc.paragraphs)

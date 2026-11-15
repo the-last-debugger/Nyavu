@@ -1,4 +1,4 @@
-package ke.nyavu.shusha
+﻿package ke.nyavu.shusha
 
 import android.app.Notification
 import android.app.NotificationChannel
@@ -27,7 +27,7 @@ import java.net.URL
  * README records exactly what is and is not done.
  */
 object NyavuApi {
-    const val DEFAULT_BASE = "https://icons-avenue-individuals-improving.trycloudflare.com"
+    const val DEFAULT_BASE = "https://wine-flashers-awarded-brief.trycloudflare.com"
 
     fun base(ctx: Context): String =
         ctx.getSharedPreferences("nyavu", Context.MODE_PRIVATE)

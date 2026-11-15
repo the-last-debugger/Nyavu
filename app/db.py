@@ -152,18 +152,22 @@ def add_scan(user_id, url: str, host: str, verdict: str, risk: str,
         return cur.lastrowid
 
 
-def recent_scans(limit: int = 20, user_id=None):
+def recent_scans(limit: int = 20, user_id: int | None = None):
+    """Scans belonging to one account.
+
+    A missing user must never widen the query: anonymous scans are recorded with a
+    NULL user_id and are deliberately not readable back, so no visitor can see the
+    addresses another person submitted. Returning an empty list here is the safe
+    default if a caller forgets the argument.
+    """
+    if not user_id:
+        return []
     with connect() as c:
-        if user_id is None:
-            rows = c.execute(
-                "SELECT id, url, host, verdict, risk, probability, created_at "
-                "FROM scans ORDER BY id DESC LIMIT ?", (limit,)).fetchall()
-        else:
-            rows = c.execute(
-                "SELECT id, url, host, verdict, risk, probability, created_at "
-                "FROM scans WHERE user_id = ? ORDER BY id DESC LIMIT ?",
-                (user_id, limit)).fetchall()
-        return [dict(r) for r in rows]
+        rows = c.execute(
+            "SELECT id, url, host, verdict, risk, probability, created_at "
+            "FROM scans WHERE user_id = ? ORDER BY id DESC LIMIT ?",
+            (user_id, limit)).fetchall()
+    return [dict(r) for r in rows]
 
 
 def stats():

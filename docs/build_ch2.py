@@ -46,6 +46,7 @@ def body(p: Paper, *, page_break=True, include_references=True):
         "catch convincing imitations, but they must fetch the destination, which exposes the user "
         "to the page being judged and adds seconds of latency.")
     p.para(
+        "Jain and Gupta (2022) survey the detection literature and reach a similar conclusion. "
         "Academic work has established that the address alone carries enough signal for practical "
         "classification. Sahingoz et al. (2019) extracted lexical features from 73,575 URLs and "
         "compared seven classifiers, reporting accuracies around 97% with a random forest. Le et "
@@ -79,6 +80,12 @@ def body(p: Paper, *, page_break=True, include_references=True):
         widths=[3.3, 4.4, 4.0, 4.6], font_size=8.5, align_center=False,
     )
 
+    p.para(
+        "Taken together, the surveys of phishing detection agree that no single defensive layer "
+        "is sufficient. Alkhalil et al. (2021) and Chiew et al. (2018) show that attacks adapt "
+        "faster than lists are updated, Gupta et al. (2018) classify the countermeasures and note "
+        "that each addresses only part of the lifecycle, and Jain and Gupta (2022) conclude that "
+        "address-level models generalise furthest because they do not depend on prior reporting.")
     p.h2("2.3 URL Characteristics that Distinguish Phishing Addresses")
     p.para(
         "The features used by published detectors fall into three groups. Lexical features "
@@ -140,6 +147,12 @@ def body(p: Paper, *, page_break=True, include_references=True):
         "comparing a linear model against a tree ensemble and a linear support vector machine, "
         "and preferring the linear model where the difference in F1 is small.")
 
+    p.para(
+        "Across these studies the consensus is that feature quality and evaluation discipline, "
+        "rather than the model family, determine reported performance (Sahingoz et al., 2019; "
+        "Le et al., 2018; Jain & Gupta, 2022). A model that is evaluated on a random split, or on "
+        "negatives that are structurally unlike the positives, will report an accuracy that does "
+        "not survive deployment.")
     p.h2("2.6 Communicating a Detection Result")
     p.para(
         "A verdict that cannot be explained is difficult to act on and easy to ignore. Work on "

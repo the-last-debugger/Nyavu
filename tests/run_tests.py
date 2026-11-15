@@ -107,10 +107,35 @@ def main() -> None:
     record("T08", CASES[7][1], CASES[7][3],
            f"model = {m.get('model')}", ok)
 
-    # T09
+    # T09 - anonymous callers must not see anybody's scans
     _, h = call("/api/history?limit=5")
     n = len(h.get("items", []))
-    record("T09", CASES[8][1], CASES[8][3], f"{n} records returned", n > 0)
+    record("T09", "Anonymous history is empty", "items == 0", f"{n} records returned", n == 0)
+
+    # T11 - a signed-in user sees only their own scans
+    import time as _t
+    email = f"test{int(_t.time())}@example.com"
+    status, body = call("/api/auth/register", {"email": email, "password": "testpass123", "full_name": "Test"})
+    if status == 200:
+        _, login = call("/api/auth/login", {"email": email, "password": "testpass123"})
+        # capture the session cookie the server set
+        import http.cookiejar, urllib.request as _u
+        jar = http.cookiejar.CookieJar()
+        opener = _u.build_opener(_u.HTTPCookieProcessor(jar))
+        req = _u.Request(BASE + "/api/auth/login", data=json.dumps(
+            {"email": email, "password": "testpass123"}).encode(),
+            headers={"Content-Type": "application/json"})
+        opener.open(req, timeout=30).read()
+        req2 = _u.Request(BASE + "/api/predict", data=json.dumps(
+            {"url": "https://www.github.com/"}).encode(),
+            headers={"Content-Type": "application/json"})
+        opener.open(req2, timeout=30).read()
+        hist = json.loads(opener.open(_u.Request(BASE + "/api/history?limit=5"), timeout=30).read())
+        mine = len(hist.get("items", []))
+        record("T11", "Signed-in user sees own history", "items >= 1",
+               f"{mine} records returned", mine >= 1)
+    else:
+        record("T11", "Signed-in user sees own history", "items >= 1", f"register returned {status}", False)
 
     # T10 - bulk via multipart is awkward in stdlib, so exercise the predictor
     # through three single calls and confirm each is stored.

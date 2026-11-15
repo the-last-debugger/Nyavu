@@ -13,7 +13,7 @@ from docbuild import Paper  # noqa: E402
 
 OUT = os.path.dirname(os.path.abspath(__file__))
 TITLE = ("Design and Development of a Machine-Learning-Based "
-         "Phishing URL Detection Web Application")
+         "Phishing URL Detection Web and Mobile Application")
 
 TEAM = [
     ("Donald Enron", "CS/M/0626/01/25", "Team Leader"),
@@ -48,7 +48,9 @@ REFERENCES = [
 
 
 def cover(p: Paper):
-    p.para("", space_after=0)
+    logo = os.path.join(OUT, "assets", "logo.png")
+    if os.path.exists(logo):
+        p.logo(logo, width_cm=3.0, space_after=12)
     p.para("KABARAK UNIVERSITY", bold=True, align="center", size=16, space_after=2)
     p.para("School of Science, Engineering and Technology", align="center", size=11, space_after=2)
     p.para("Department of Computer Science and Information Technology",
@@ -95,7 +97,7 @@ def body(p: Paper, *, page_break=True, include_references=True):
     p.para(
         "This chapter introduces the project, states the problem that current detection "
         "approaches leave unresolved, and presents the objectives, research questions, "
-        "significance, scope, modules and key terms that guide the work.", space_after=2)
+        "significance, scope and modules that guide the work.", space_after=2)
 
     p.h2("1.2 Background of the Study")
     p.para(
@@ -117,7 +119,7 @@ def body(p: Paper, *, page_break=True, include_references=True):
         "moves funds immediately. Machine learning offers an alternative to lists of known bad "
         "addresses: learning the structural patterns that separate fraudulent from legitimate "
         "addresses lets a classifier assess one it has never seen. This project builds such a "
-        "classifier and delivers it as Nyavu, Swahili for a fishing net, in a web application "
+        "classifier and delivers it as Nyavu, Swahili for a fishing net, in a web and mobile application "
         "that explains each verdict.",
         space_after=2)
 
@@ -127,30 +129,17 @@ def body(p: Paper, *, page_break=True, include_references=True):
         "parse a host name, and a well-built phishing address differs from the genuine one by a "
         "few characters, so the decision rests on appearance rather than evidence.", space_after=2)
     p.para(
-        "The tools that support that decision are largely reactive. They work against addresses "
-        "already known to be malicious, but cannot answer the question a user faces: is this "
-        "address, which nobody has reported yet, safe to open? The table below summarises the main "
-        "approaches and where each fails.", space_after=2)
-
-    p.caption("Current approaches to phishing URL detection and their weaknesses")
-    p.table(
-        ["Approach", "How it works", "Principal weakness"],
-        [
-            ["Manual inspection",
-             "The user reads the address and judges whether it looks genuine.",
-             "Requires expertise; lookalike characters and embedded brands defeat casual reading."],
-            ["Blocklists and safe-browsing services",
-             "Addresses are reported, verified and published; the browser checks each request against the list.",
-             "Reactive: a new page stays live until it is reported, verified and distributed (Sheng et al., 2009)."],
-            ["Rule-based and heuristic filters",
-             "Hand-written rules score length, keywords and character counts.",
-             "Brittle and easily avoided; thresholds that catch more attacks also flag legitimate sites."],
-            ["Commercial detection APIs",
-             "The address is submitted to a vendor service that returns a verdict.",
-             "Recurring cost, closed logic, and user browsing data leaving the device."],
-        ],
-        widths=[3.4, 5.0, 7.8], font_size=8.5,
-    )
+        "The tools that support that decision are largely reactive. Blocklists and safe-browsing "
+        "services collect addresses that have been reported, verify them and publish them for "
+        "browsers to check; they are accurate on what they contain, but they cannot describe an "
+        "address that nobody has reported yet, so a new page stays live until it has been "
+        "reported, verified and distributed (Sheng et al., 2009). Manual inspection, which remains "
+        "the fallback for most users, requires expertise that a convincing imitation defeats and "
+        "takes longer than the few seconds in which the decision is usually made. Rule-based "
+        "filters score hand-written features such as address length, keywords and character "
+        "counts; they are brittle, easily avoided, and the thresholds that catch more attacks also "
+        "flag legitimate sites. Commercial detection services return a verdict for a subscription, "
+        "but the logic is closed and the user's browsing data leaves the device.", space_after=2)
     p.para(
         "Because the dominant defences depend on prior reporting, a fresh phishing address is both "
         "live and unrecognised until it is reported and verified (Moore & Clayton, 2007). And "
@@ -160,35 +149,39 @@ def body(p: Paper, *, page_break=True, include_references=True):
 
     p.h3("1.3.1 Proposed Solution")
     p.para(
-        "The project proposes a machine-learning web application that assesses a URL from its "
-        "textual structure when it is submitted, without prior reports and without fetching the "
-        "page. Four decisions answer the weaknesses listed there. Generalising from patterns rather "
-        "it assess addresses never reported. Features computed from the address alone give a "
-        "verdict in milliseconds without exposing the user to the destination. Reporting the "
-        "characteristics that raised the score makes the verdict auditable. Inference on commodity "
-        "hardware with open data keeps it affordable.")
+        "The project proposes a machine-learning web and mobile application that assesses a URL "
+        "from its textual structure when it is submitted, without prior reports and without "
+        "fetching the page. Four decisions answer the weaknesses described above. Generalising "
+        "from patterns rather than looking up a list lets it assess addresses that have never been "
+        "reported. Computing the features from the address alone gives a verdict in milliseconds "
+        "without exposing the user to the destination. Reporting the characteristics that raised "
+        "the score makes the verdict auditable. Inference on commodity hardware with open data "
+        "keeps it affordable.")
 
     p.h2("1.4 Objectives")
     p.h3("1.4.1 General Objective")
     p.para(
-        "To design, develop and evaluate a machine-learning-based web application that assesses "
-        "submitted URLs for phishing and communicates the basis of that assessment.", space_after=2)
+        "To develop a machine-learning-based web and mobile application that assesses submitted "
+        "URLs for phishing and communicates the basis of that assessment.", space_after=2)
     p.h3("1.4.2 Specific Objectives")
     p.nlist([
-        "To identify the URL characteristics that distinguish phishing from legitimate addresses.",
-        "To acquire, prepare and partition a labelled URL dataset for training and evaluation.",
-        "To develop and compare machine-learning models and select the best-performing one for "
-        "deployment.",
-        "To develop a web interface that presents each classification with its evidence, and to "
-        "evaluate the system's accuracy and usability.",
+        "To design a lexical and structural feature set, together with a dataset preparation "
+        "procedure, that captures the characteristics distinguishing phishing addresses from "
+        "legitimate ones.",
+        "To implement and compare machine-learning classifiers trained on that dataset and select "
+        "the best-performing model for deployment.",
+        "To evaluate the accuracy of the selected classifier and the clarity of the explanations "
+        "it presents to non-expert users.",
     ], style="roman")
 
     p.h2("1.5 Research Questions")
     p.nlist([
-        "Which URL characteristics distinguish phishing from legitimate addresses?",
-        "How can a labelled URL dataset be prepared for reliable training and evaluation?",
-        "Which model best balances detection performance against false-positive rate?",
-        "How accurately and clearly can a web interface classify URLs and communicate risk?",
+        "Which lexical and structural URL characteristics distinguish phishing addresses from "
+        "legitimate ones?",
+        "Which classification model, trained on the prepared dataset, achieves the best balance "
+        "between detection performance and false-positive rate?",
+        "How accurately does the selected classifier classify URLs, and how clearly does it "
+        "explain its verdicts to non-expert users?",
     ], style="roman-lower")
 
     p.h2("1.6 Significance and Justification")
@@ -206,12 +199,9 @@ def body(p: Paper, *, page_break=True, include_references=True):
         "a mobile device.",
         space_after=2)
     p.para(
-        "The proposal classified bulk screening and a browser extension for one-click checks as "
-        "optional features, and this scope follows that ranking. Bulk screening is included in the "
-        "core system because it reuses the same classifier. Background interception and a browser "
-        "extension are treated as stretch features: described as future work, demonstrated only if "
-        "they are complete, and never relied upon for the evaluation. The study does not inspect "
-        "page content, download files, monitor browsing traffic or guarantee that a site is safe. "
+        "The study does not inspect page content, download files, monitor browsing traffic or "
+        "guarantee that a site is safe, and it does not implement browser or operating-system "
+        "integration. "
         "Performance depends on the representativeness of the dataset, and a model trained on "
         "historical addresses loses accuracy as tactics change. Because the decision is two-class, "
         "some legitimate addresses will be flagged and some fraudulent ones will pass, so a verdict "
@@ -228,27 +218,40 @@ def body(p: Paper, *, page_break=True, include_references=True):
         "is a progressive web application built with Python, scikit-learn, FastAPI and SQLite, so "
         "one codebase serves desktop and mobile.")
 
-    p.h2("1.9 Definition of Key Terms")
-    terms_table(p, [
-        ("Phishing", "a deception in which a message or website impersonates a trusted party to "
-                     "obtain credentials, payment details or personal information."),
-        ("URL", "uniform resource locator; the address that identifies a resource on the internet."),
-        ("Machine learning", "the construction of models that learn patterns from example data in "
-                             "order to predict on new data."),
-        ("False positive", "a legitimate address incorrectly classified as phishing."),
-        ("False negative", "a phishing address incorrectly classified as legitimate."),
-        ("Progressive web application", "a website that can be installed on a device and used like "
-                                        "a native application."),
-    ])
-
     if include_references:
         p.h1("REFERENCES", page_break=True)
         p.references(REFERENCES)
 
 
+def front_pages(p: Paper):
+    p.h1("DECLARATION", page_break=True)
+    p.para(
+        "We, the undersigned, declare that this project report is our original work and has not "
+        "been submitted for the award of a degree in any other university or institution. All "
+        "sources of information used have been acknowledged, and where the work of others has "
+        "been quoted or paraphrased the source has been cited.")
+    p.para("")
+    p.table(["Name", "Registration number", "Signature", "Date"],
+            [[t[0], t[1], "", ""] for t in TEAM],
+            widths=[4.6, 4.6, 4.0, 2.6], font_size=9.5, align_center=False)
+
+    p.h1("CERTIFICATION", page_break=True)
+    p.para("This project report has been submitted for examination with our approval as "
+           "university supervisor.")
+    p.para("")
+    p.table(["Role", "Name", "Signature", "Date"],
+            [["Supervisor", "", "", ""], ["Co-supervisor", "", "", ""]],
+            widths=[3.6, 5.4, 3.8, 3.0], font_size=9.5, align_center=False)
+    p.para("")
+    p.para("Department of Computer Science and Information Technology", align="left")
+    p.para("School of Science, Engineering and Technology", align="left")
+    p.para("Kabarak University", align="left")
+
+
 def main():
     p = Paper(TITLE)
     cover(p)
+    front_pages(p)
     body(p)
     p.page_numbers()
     p.update_fields_on_open()

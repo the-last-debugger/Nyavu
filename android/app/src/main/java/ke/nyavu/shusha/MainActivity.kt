@@ -1,4 +1,4 @@
-package ke.nyavu.shusha
+﻿package ke.nyavu.shusha
 
 import android.app.Activity
 import android.content.Intent
@@ -90,7 +90,29 @@ class MainActivity : Activity() {
         box.addView(apiField)
         box.addView(saveApi)
         box.addView(status)
+        val urlField = EditText(this).apply {
+            setHint("Paste a link to check")
+            setSingleLine()
+            textSize = 13f
+        }
+        val check = Button(this).apply {
+            text = "Check link"
+            setOnClickListener {
+                val link = urlField.text.toString().trim()
+                if (link.isNotEmpty()) {
+                    val i = Intent(this@MainActivity, LinkGateActivity::class.java).apply {
+                        action = Intent.ACTION_SEND
+                        type = "text/plain"
+                        putExtra(Intent.EXTRA_TEXT, link)
+                    }
+                    startActivity(i)
+                }
+            }
+        }
+
         box.addView(hint)
+        box.addView(urlField)
+        box.addView(check)
         box.addView(vpn)
         box.addView(stop)
         setContentView(box)

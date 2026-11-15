@@ -45,7 +45,40 @@ def body(p: Paper, *, page_break=True, include_references=True):
         "deployment method. Where a measurement is reported, it was produced by the code in the "
         "repository and not estimated.", space_after=2)
 
-    p.h2("4.2 System Architecture")
+    p.h2("4.2 Development Environment Setup")
+    p.para(
+        "The system was built on a single workstation running Windows, Python 3.12 and Node.js "
+        "for tooling. Every component is open source or free to use, which keeps the project "
+        "within its zero-cost constraint and means the build can be reproduced by any team member "
+        "or examiner with the same three commands. The tools were chosen for what they make "
+        "possible, not for novelty, and each is listed below with that reason.")
+    p.caption("Development tools and the reason for each")
+    p.table(
+        ["Tool", "Role", "Reason for selection"],
+        [
+            ["Python 3.12", "Data preparation, training, service",
+             "One language across the whole pipeline; the scientific libraries are mature."],
+            ["scikit-learn 1.9", "Classifiers, splitting, metrics",
+             "Pipelines, grouped splitting and calibration in one reproducible object."],
+            ["FastAPI 0.162", "HTTP interface",
+             "Typed request models, automatic documentation, same language as the model."],
+            ["SQLite 3", "Storage",
+             "Serverless and file-based; no administrator and no hosting cost."],
+            ["Git 2.52 and GitHub", "Version control",
+             "Every increment is recorded, so the work in this chapter can be traced."],
+            ["Visual Studio Code", "Editor and terminal",
+             "Free, and its integrated terminal keeps the build commands in view."],
+        ],
+        widths=[3.4, 4.6, 8.0], font_size=8.6, align_center=False,
+    )
+    p.para(
+        "Version control was used from the first commit. The repository holds the data-acquisition "
+        "and curation scripts, the feature extractor, the training script, the service, the client "
+        "and the report builders, so every figure and table in this chapter can be regenerated from "
+        "a clean checkout. The random seed is fixed at 42 for every split and every model, and the "
+        "fitted pipeline is written to a single artefact that the service loads once at start-up.")
+
+    p.h2("4.3 System Architecture")
     p.para(
         "The deployed architecture has four tiers. The browser loads a static single-page "
         "application that makes JSON calls to a FastAPI service. The service holds a scikit-learn "
@@ -68,7 +101,7 @@ def body(p: Paper, *, page_break=True, include_references=True):
         widths=[1.4, 4.0, 10.0], font_size=9, align_center=False,
     )
 
-    p.h2("4.3 Front-end Development")
+    p.h2("4.4 Front-end Development")
     p.para(
         "The client is a single HTML document, one stylesheet and one script, with no framework "
         "and no build step. This was a deliberate choice: a build step adds a toolchain that can "
@@ -95,7 +128,22 @@ def body(p: Paper, *, page_break=True, include_references=True):
         "analysis on load, which makes a result shareable and makes every screen reproducible for "
         "documentation.")
 
-    p.h2("4.4 User Interface Design")
+    p.h3("4.4.1 Coding Standards and Practices")
+    p.para(
+        "Two conventions were applied throughout the codebase. Functions are named for what they "
+        "return and kept short enough to read on one screen, and the service is divided into one "
+        "module per concern, so routes, prediction and storage can fail independently rather than "
+        "corrupting each other. Every external input is validated at the boundary: an address is "
+        "bounded in length and rejected outright if it does not parse, and no request path writes "
+        "to the model artefact.")
+    p.para(
+        "Quality was maintained by review rather than by tooling. Each increment was read through "
+        "in pairs before it was demonstrated, which is how two of the defects recorded in this "
+        "chapter were found: the foreground service that crashed on Android 14 for want of a "
+        "declared type, and the page numbering that restarted at every chapter because a section "
+        "inherits its predecessor's settings.")
+
+    p.h2("4.5 User Interface Design")
     p.para(
         "The interface was designed around one question: can a non-specialist tell, in a few "
         "seconds, whether the link in front of them is dangerous and why? Three decisions follow "
@@ -110,7 +158,7 @@ def body(p: Paper, *, page_break=True, include_references=True):
         "identically offline, and the whole page has a single accent colour to keep attention on "
         "the verdict.")
 
-    p.h2("4.5 User Interface Modules")
+    p.h2("4.6 User Interface Modules")
     p.para(
         "The detector screen below is the primary module. The address is entered or pasted, "
         "and a secondary control opens the camera scanner. The result panel reports the risk "
@@ -139,7 +187,7 @@ def body(p: Paper, *, page_break=True, include_references=True):
     p.figure(os.path.join(SHOT, "shot_mobile.png"),
              "Detector module on a phone viewport", width_cm=7.4)
 
-    p.h2("4.6 Back-end Development")
+    p.h2("4.7 Back-end Development")
     p.para(
         "The service is a FastAPI application with routes for prediction, bulk screening, history, "
         "statistics, model metadata and authentication. Input is validated by a Pydantic model "
@@ -163,7 +211,8 @@ def predict(payload: UrlIn, request: Request):
         "builds a one-row frame, obtains a probability, maps it to a band, and then ranks the "
         "transformed features by their contribution to the logit so the interface can name the "
         "fragments that drove the decision. Because the deployed classifier is linear, this "
-        "attribution is exact rather than approximate.")
+        "attribution is exact rather than approximate, in the manner of the local explanations "
+        "described by Ribeiro et al. (2016).")
     p.code_block(
         """prep  = self.pipeline.named_steps["prep"]
 Xt    = prep.transform(row)                 # sparse, one row
@@ -172,7 +221,7 @@ contrib = vals * np.ravel(self.weights)     # exact logit contribution
 order = np.argsort(contrib)[::-1][:5]       # the fragments that raised the score""",
         "Exact per-instance attribution for a linear classifier")
 
-    p.h2("4.7 Database Design")
+    p.h2("4.8 Database Design")
     p.para(
         "Storage is SQLite, chosen because it requires no server, no administrator and no cost, "
         "and because the write volume of a prototype does not approach its limits. Four tables "
@@ -200,7 +249,7 @@ order = np.argsort(contrib)[::-1][:5]       # the fragments that raised the scor
         "the registrable domain is stored alongside the address, so a report can group by domain "
         "without re-parsing the URL on every query.")
 
-    p.h2("4.8 Code Testing")
+    p.h2("4.9 Code Testing")
     p.para(
         "Testing was carried out at three levels. Unit checks exercised feature extraction on "
         "known inputs, including the registrable-domain reduction and the brand-in-subdomain rule. "
@@ -241,7 +290,8 @@ order = np.argsort(contrib)[::-1][:5]       # the fragments that raised the scor
             f"negatives and {res['tp']:,} true positives.")
         p.para(
             "This accuracy is lower than the figures commonly reported for URL classifiers, and "
-            "the difference is instructive. An earlier configuration of this project, which "
+            "the difference is instructive (Sahingoz et al., 2019; Le et al., 2018). An earlier "
+            "configuration of this project, which "
             "included host-structure features and a benign sample of bare domains, reached 95.7% "
             "on a random split. That figure did not survive inspection: the model had learned "
             "that the presence of a subdomain implies phishing, and that a URL containing a path "
@@ -280,7 +330,7 @@ order = np.argsort(contrib)[::-1][:5]       # the fragments that raised the scor
         "not a model output. Its cost is equally explicit: a phishing page hosted on a popular "
         "domain will not be caught by name.")
 
-    p.h2("4.9 Deployment")
+    p.h2("4.10 Deployment")
     p.para(
         "The system is packaged as a container. The image installs the pinned dependencies, copies "
         "the application and the model artefact, and starts a single Uvicorn process on port 8000. "
@@ -319,7 +369,28 @@ CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]""",
         widths=[1.4, 9.6, 4.4], font_size=9, align_center=False,
     )
 
-    p.h2("4.10 Changes from the Approved Proposal")
+    p.h2("4.11 Go-Live, Monitoring and Maintenance")
+    p.para(
+        "Transition to production was deliberately unambitious, because the system serves a single "
+        "classifier and a single database. The container was built from a clean checkout, started "
+        "against an empty volume, and the end-to-end script was run against it before any traffic "
+        "was directed at the service. The previous image was retained so that a failed release "
+        "could be reversed by redeploying it, and the database is a single file that can be copied "
+        "before an upgrade and restored afterwards.")
+    p.para(
+        "Monitoring is minimal and costs nothing. The service exposes a health endpoint that "
+        "reports whether the model is loaded, the scan table records the measured latency of every "
+        "request, and the statistics endpoint aggregates both. A failure in the classifier would "
+        "therefore appear as a change in the distribution of scores before it appeared as a "
+        "complaint, which is the only monitoring a prototype of this size can justify.")
+    p.para(
+        "Two maintenance obligations follow from the design. The model decays as phishing tactics "
+        "change, so retraining on a rolling window and comparing the result against the frozen "
+        "baseline is a scheduled task rather than an optional one. And the dependency set is "
+        "pinned, so a rebuild reproduces the system that was evaluated; upgrades are made "
+        "deliberately and the test suite is re-run afterwards.")
+
+    p.h2("4.12 Changes from the Approved Proposal")
     p.para(
         "A proposal is a plan, and plans change once the artefact is built and measured. The "
         "changes below are recorded deliberately rather than absorbed silently, because a marker "
@@ -356,7 +427,7 @@ CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]""",
         "at the next progress meeting and recorded on the supervision form, so that the report and "
         "the approved proposal tell the same story.")
 
-    p.h2("4.11 Conclusion and Future Work")
+    p.h2("4.13 Conclusion and Future Work")
     p.para(
         "The implementation met the functional requirements in Chapter Three: a submitted address "
         "is validated, classified and explained, the result is stored, and the same service serves "

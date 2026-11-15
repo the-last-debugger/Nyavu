@@ -24,8 +24,38 @@ class Paper:
         self.figure_no = 0
         self._setup_page()
         self._setup_styles()
+        self._pin_default_fonts()
+        self._pin_language()
 
     # ------------------------------------------------------------------ setup
+    def _pin_default_fonts(self):
+        """Strip theme font references from the document defaults as well."""
+        styles_el = self.doc.styles.element
+        rpr_default = styles_el.find(qn("w:docDefaults"))
+        if rpr_default is None:
+            return
+        for rfonts in rpr_default.iter(qn("w:rFonts")):
+            for attr in ("w:asciiTheme", "w:hAnsiTheme", "w:eastAsiaTheme", "w:cstheme"):
+                if rfonts.get(qn(attr)) is not None:
+                    del rfonts.attrib[qn(attr)]
+            rfonts.set(qn("w:ascii"), FONT)
+            rfonts.set(qn("w:hAnsi"), FONT)
+
+    def _pin_language(self):
+        """Set British English on the base styles so spell-check matches the prose."""
+        for name in ("Normal", "Heading 1", "Heading 2", "Heading 3"):
+            try:
+                st = self.doc.styles[name]
+            except KeyError:
+                continue
+            rpr = st.element.get_or_add_rPr()
+            lang = rpr.find(qn("w:lang"))
+            if lang is None:
+                lang = OxmlElement("w:lang")
+                rpr.append(lang)
+            lang.set(qn("w:val"), "en-GB")
+            lang.set(qn("w:eastAsia"), "en-GB")
+
     def _setup_page(self):
         s = self.doc.sections[0]
         s.page_width, s.page_height = Cm(21.0), Cm(29.7)
@@ -53,7 +83,21 @@ class Paper:
             h.font.bold = bold
             h.font.italic = italic
             h.font.color.rgb = RGBColor(0, 0, 0)
-            h.element.rPr.rFonts.set(qn("w:eastAsia"), FONT)
+            # Word's built-in heading styles point at the theme's major font
+            # (asciiTheme="majorHAnsi"). A theme reference beats an explicit font name,
+            # which is why headings rendered in Calibri despite setting Times New Roman.
+            rpr = h.element.get_or_add_rPr()
+            rfonts = rpr.find(qn("w:rFonts"))
+            if rfonts is None:
+                rfonts = OxmlElement("w:rFonts")
+                rpr.insert(0, rfonts)
+            for attr in ("w:asciiTheme", "w:hAnsiTheme", "w:eastAsiaTheme", "w:cstheme"):
+                if rfonts.get(qn(attr)) is not None:
+                    del rfonts.attrib[qn(attr)]
+            rfonts.set(qn("w:ascii"), FONT)
+            rfonts.set(qn("w:hAnsi"), FONT)
+            rfonts.set(qn("w:eastAsia"), FONT)
+            rfonts.set(qn("w:cs"), FONT)
             h.paragraph_format.space_before = Pt(10 if name != "Heading 1" else 0)
             h.paragraph_format.space_after = Pt(6)
             h.paragraph_format.line_spacing = 1.5
@@ -124,7 +168,7 @@ class Paper:
             out.append(p)
         return out
 
-    def code_block(self, code: str, caption: str = "", *, size=8.4):
+    def code_block(self, code: str, caption: str = "", *, size=9.0):
         """Monospaced, shaded code extract that stays inside the page margins."""
         if caption:
             self.caption(caption, kind="Table")
@@ -143,10 +187,19 @@ class Paper:
             shd.set(qn("w:fill"), "F2F4F7")
             pPr.append(shd)
             r = p.add_run(line if line else " ")
-            r.font.name = "Consolas"
-            r.element.rPr.rFonts.set(qn("w:eastAsia"), "Consolas")
+            r.font.name = FONT
+            r.element.rPr.rFonts.set(qn("w:eastAsia"), FONT)
             r.font.size = Pt(size)
         self.doc.add_paragraph().paragraph_format.space_after = Pt(2)
+
+    def logo(self, path: str, width_cm: float = 3.2, space_after: int = 10):
+        """Centred image, used for the university crest on title pages."""
+        p = self.doc.add_paragraph()
+        p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        p.paragraph_format.space_after = Pt(space_after)
+        p.paragraph_format.space_before = Pt(0)
+        p.add_run().add_picture(path, width=Cm(width_cm))
+        return p
 
     def references(self, items):
         """APA reference list: hanging indent, single-ish spacing, alphabetical order."""
@@ -157,7 +210,7 @@ class Paper:
             pf.first_line_indent = Cm(-1.27)
             pf.line_spacing = 1.15
             pf.space_after = Pt(10)
-            p.alignment = WD_ALIGN_PARAGRAPH.LEFT
+            p.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
             r = p.add_run(item)
             r.font.name = FONT
             r.font.size = Pt(11)
@@ -261,7 +314,7 @@ class Paper:
                        f"{kind.lower()}s.")
 
     def table(self, header, rows, widths=None, *, font_size=9.5,
-              header_fill="D9E2F3", align_center=True):
+              header_fill=None, align_center=True):
         t = self.doc.add_table(rows=1, cols=len(header))
         t.style = "Table Grid"
         t.alignment = WD_TABLE_ALIGNMENT.CENTER
@@ -278,7 +331,8 @@ class Paper:
             r.bold = True
             r.font.size = Pt(font_size)
             r.font.name = FONT
-            self._shade(hdr[i], header_fill)
+            if header_fill:
+                self._shade(hdr[i], header_fill)
 
         for row in rows:
             cells = t.add_row().cells
@@ -331,6 +385,38 @@ class Paper:
             self.footer_page_numbers(section)
             self.set_page_numbering(section, fmt=fmt, start=start)
 
+    def header_text(self, section, text: str, size: int = 9):
+        """Centred running head. Empty text leaves that section's header blank."""
+        section.header.is_linked_to_previous = False
+        p = section.header.paragraphs[0]
+        for run in list(p.runs):
+            run._r.getparent().remove(run._r)
+        p.text = ""
+        p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        p.paragraph_format.space_after = Pt(0)
+        p.paragraph_format.line_spacing = 1.0
+        if text:
+            run = p.add_run(text)
+            run.font.name = FONT
+            run.font.size = Pt(size)
+            run.bold = False
+        return p
+
+    def blank_first_page(self, section):
+        """Title page: no header, no page number.
+
+        The PAGE counter is a paragraph-level field, not a child of a run, so the
+        paragraph's children are stripped wholesale rather than its runs.
+        """
+        section.different_first_page_header_footer = True
+        for part in (section.first_page_footer, section.first_page_header):
+            part.is_linked_to_previous = False
+            for para in part.paragraphs:
+                pPr = para._p.find(qn("w:pPr"))
+                for child in list(para._p):
+                    if child is not pPr:
+                        para._p.remove(child)
+
     def footer_page_numbers(self, section, size: int = 10):
         section.footer.is_linked_to_previous = False
         p = section.footer.paragraphs[0]
@@ -365,7 +451,11 @@ class Paper:
             pg = OxmlElement("w:pgNumType")
             sectPr.append(pg)
         pg.set(qn("w:fmt"), fmt)
-        if start is not None:
+        if start is None:
+            # continue the previous numbering: drop any inherited restart
+            if pg.get(qn("w:start")) is not None:
+                del pg.attrib[qn("w:start")]
+        else:
             pg.set(qn("w:start"), str(start))
 
     def new_section(self, *, fmt: str = "decimal", start: int | None = 1):
@@ -374,6 +464,7 @@ class Paper:
         s.page_width, s.page_height = Cm(21.0), Cm(29.7)
         for attr in ("top_margin", "bottom_margin", "left_margin", "right_margin"):
             setattr(s, attr, Cm(2.54))
+        s.different_first_page_header_footer = False
         self.footer_page_numbers(s)
         self.set_page_numbering(s, fmt=fmt, start=start)
         return s
@@ -403,4 +494,39 @@ class Paper:
 
     def save(self, path: str):
         self.doc.save(path)
+        self._neutralise_theme_fonts(path)
         return path
+
+    @staticmethod
+    def _neutralise_theme_fonts(path: str):
+        """Rewrite the theme and style parts so no Calibri reference survives.
+
+        The default Word template names Calibri in its theme. A theme reference outranks
+        an explicit font on a style, so leaving it in place is how headings revert to
+        Calibri in some viewers even when every style says Times New Roman.
+        """
+        import os
+        import zipfile
+
+        tmp = path + ".tmp"
+        targets = ("word/theme/theme1.xml", "word/styles.xml", "word/stylesWithEffects.xml")
+        with zipfile.ZipFile(path) as zin, zipfile.ZipFile(tmp, "w", zipfile.ZIP_DEFLATED) as zout:
+            for item in zin.infolist():
+                data = zin.read(item.filename)
+                if item.filename in targets:
+                    text = data.decode("utf-8")
+                    for legacy in ("Calibri Light", "Calibri", "Courier New", "Courier",
+                                   "Cambria", "Arial"):
+                        text = text.replace(legacy, "Times New Roman")
+                    data = text.encode("utf-8")
+                zout.writestr(item, data)
+        import time
+        for attempt in range(6):
+            try:
+                os.replace(tmp, path)
+                return
+            except PermissionError:
+                time.sleep(1.5)
+        os.remove(tmp)
+        raise PermissionError(
+            f"{os.path.basename(path)} is open in another program. Close it and rebuild.")

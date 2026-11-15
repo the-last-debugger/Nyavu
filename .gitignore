@@ -10,3 +10,7 @@ android/build/
 android/app/build/
 android/local.properties
 *.log
+
+.adb-tmp/
+*.tmp
+contents_*.json

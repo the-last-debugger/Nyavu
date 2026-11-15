@@ -57,9 +57,16 @@
   },
   {
     "id": "T09",
-    "case": "Scan history records the checks",
-    "expected": "items > 0",
-    "actual": "5 records returned",
+    "case": "Anonymous history is empty",
+    "expected": "items == 0",
+    "actual": "0 records returned",
+    "status": "Pass"
+  },
+  {
+    "id": "T11",
+    "case": "Signed-in user sees own history",
+    "expected": "items >= 1",
+    "actual": "1 records returned",
     "status": "Pass"
   },
   {

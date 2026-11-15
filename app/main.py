@@ -4,6 +4,7 @@ from __future__ import annotations
 import csv
 import io
 import os
+import time
 
 from fastapi import FastAPI, HTTPException, Request, Response, UploadFile, File
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
@@ -34,6 +35,60 @@ def _startup() -> None:
                     m["accuracy"], m["f1"])
 
 
+
+# --------------------------------------------------------------------------- #
+# Abuse protection. Deliberately in-process: one instance, small audience, and no
+# extra dependency. If the service is ever scaled out this must move to Redis.
+# --------------------------------------------------------------------------- #
+_RATE: dict[tuple[str, str], list[float]] = {}
+WINDOW = 60
+
+
+def _client_ip(request: Request) -> str:
+    forwarded = request.headers.get("x-forwarded-for")
+    if forwarded:
+        return forwarded.split(",")[0].strip()
+    return request.client.host if request.client else "unknown"
+
+
+def _limit_for(path: str) -> tuple[str, int] | None:
+    if path == "/api/predict":
+        return "predict", 30
+    if path == "/api/scan/bulk":
+        return "bulk", 5
+    if path.startswith("/api/auth"):
+        return "auth", 10
+    return None
+
+
+@app.middleware("http")
+async def protect(request: Request, call_next):
+    response = await call_next(request)
+    response.headers.setdefault("X-Content-Type-Options", "nosniff")
+    response.headers.setdefault("Referrer-Policy", "strict-origin-when-cross-origin")
+    response.headers.setdefault("X-Frame-Options", "DENY")
+    return response
+
+
+@app.middleware("http")
+async def rate_limit(request: Request, call_next):
+    rule = _limit_for(request.url.path)
+    if rule:
+        name, cap = rule
+        key = (_client_ip(request), name)
+        now = time.time()
+        hits = [t for t in _RATE.get(key, []) if now - t < WINDOW]
+        if len(hits) >= cap:
+            return JSONResponse(
+                {"detail": "Too many requests. Please wait a minute and try again."},
+                status_code=429,
+            )
+        hits.append(now)
+        _RATE[key] = hits
+        if len(_RATE) > 20000:
+            _RATE.clear()
+    return await call_next(request)
+
 # --------------------------------------------------------------------------- #
 # Schemas
 # --------------------------------------------------------------------------- #
@@ -46,6 +101,11 @@ class Credentials(BaseModel):
     password: str = Field(..., min_length=8, max_length=128)
     full_name: str = Field("", max_length=120)
 
+
+
+def cookie_secure() -> bool:
+    """Cookies are marked Secure when the deployment says it is served over HTTPS."""
+    return os.environ.get("NYAVU_COOKIE_SECURE", "0") == "1"
 
 # --------------------------------------------------------------------------- #
 # Helpers
@@ -120,9 +180,16 @@ async def scan_bulk(request: Request, file: UploadFile = File(...)):
 
 @app.get("/api/history")
 def history(request: Request, limit: int = 20):
+    """Only the signed-in user's own scans.
+
+    Scans are kept per account. An anonymous visitor has no account, so there is
+    nothing that could correctly be returned - and nothing is.
+    """
     user = current_user(request)
+    if not user:
+        return {"items": [], "note": "Sign in to keep a private scan history."}
     limit = max(1, min(limit, 100))
-    return {"items": db.recent_scans(limit, user["id"] if user else None)}
+    return {"items": db.recent_scans(limit, user["id"])}
 
 
 @app.get("/api/stats")
@@ -150,7 +217,8 @@ def register(payload: Credentials, response: Response):
     uid = db.create_user(payload.email, payload.full_name or payload.email.split("@")[0],
                          payload.password)
     token = db.create_session(uid)
-    response.set_cookie("pg_session", token, httponly=True, samesite="lax", max_age=604800)
+    response.set_cookie("pg_session", token, httponly=True, samesite="lax",
+                        secure=cookie_secure(), max_age=604800)
     return {"authenticated": True, "email": payload.email.lower().strip(),
             "full_name": payload.full_name}
 
@@ -161,7 +229,8 @@ def login(payload: Credentials, response: Response):
     if not user or not db.verify_password(payload.password, user["password_hash"]):
         raise HTTPException(status_code=401, detail="Incorrect email or password.")
     token = db.create_session(user["id"])
-    response.set_cookie("pg_session", token, httponly=True, samesite="lax", max_age=604800)
+    response.set_cookie("pg_session", token, httponly=True, samesite="lax",
+                        secure=cookie_secure(), max_age=604800)
     return {"authenticated": True, "email": user["email"], "full_name": user["full_name"]}
 
 
