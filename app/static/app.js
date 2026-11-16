@@ -86,16 +86,20 @@
      has deliberately scrolled elsewhere. */
   function revealResult(el) {
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const header = document.querySelector(".topbar");
-    const offset = (header ? header.offsetHeight : 0) + 18;
-    const rect = el.getBoundingClientRect();
-    if (rect.top >= offset && rect.bottom <= window.innerHeight) return;
-    if (window.scrollY > el.offsetTop) return;
-    window.scrollTo({
-      top: Math.max(0, window.scrollY + rect.top - offset),
-      behavior: reduce ? "auto" : "smooth",
+    requestAnimationFrame(() => {
+      const rect = el.getBoundingClientRect();
+      const header = document.querySelector(".topbar");
+      const offset = (header ? header.offsetHeight : 0) + 18;
+      if (rect.top >= offset && rect.top < window.innerHeight * 0.7) return;
+      window.scrollTo({
+        top: Math.max(0, window.scrollY + rect.top - offset),
+        behavior: reduce ? "auto" : "smooth",
+      });
     });
   }
+
+
+
 
   /* The needle sweeps toward the score, overshoots, dithers between the bands as it
      closes, then locks on. The number is registered rather than simply appearing. */
@@ -155,6 +159,7 @@
       .slice(0, 18)
       .map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join("");
 
+    document.body.classList.add("has-result");
     result.classList.remove("hidden");
     result.innerHTML = `
       <div class="verdict-head">
@@ -169,20 +174,21 @@
         <div class="verdict-text">
           <span class="badge ${r.risk}">${r.band}</span>${r.reputation === "established"
             ? '<span class="badge rep">Established domain</span>' : ""}
-          <h2>${r.verdict === "phishing" ? "This link looks like phishing" : "No phishing pattern detected"}</h2>
+          <h2>${r.verdict === "phishing" ? "Something doesn't look right" : "No warning signs found"}</h2>
           <p class="verdict-url">${escapeHtml(r.url)}</p>
-          ${r.suggested ? `<p class="suggest">Did you mean
-             <strong>${escapeHtml(r.suggested.domain)}</strong>? The genuine
-             ${escapeHtml(r.suggested.brand)} site is much closer to this name.</p>` : ""}
+          ${r.suggested ? `<p class="suggest">You may have meant
+             <strong>${escapeHtml(r.suggested.domain)}</strong> — that address is in our
+             reference list for ${escapeHtml(r.suggested.brand)}. We cannot verify official
+             sites, so only open it if you trust the address.</p>` : ""}
           <div class="meta-row">
             <span><b>Host</b> ${escapeHtml(r.host)}</span>
             ${r.verdict === "phishing"
-              ? `<span><b>Confidence</b> ${r.confidence}%</span>` : ""}
+              ? `<span><b>Model score</b> ${(r.probability * 100).toFixed(1)}</span>` : ""}
             <span><b>Latency</b> ${r.inference_ms} ms</span>
           </div>
         </div>
       </div>
-      <h3 class="block-title">Why</h3>
+      <h3 class="block-title">Why Nyavu raised a concern</h3>
       <ul class="reasons">${reasons}</ul>
       ${evidence}
       <details class="advanced">

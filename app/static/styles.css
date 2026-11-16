@@ -1251,3 +1251,22 @@ details.advanced .feat-grid { margin: 6px 0 4px; }
   border-radius: 2px;
   background: linear-gradient(90deg, var(--accent) var(--w, 0%), rgba(255, 255, 255, 0.1) var(--w, 0%));
 }
+
+.result { scroll-margin-top: 84px; }
+@supports (scroll-margin-top: 1px) {
+  .result { scroll-margin-top: 84px; }
+}
+
+/* Once a scan has run, the hero has done its job: it recedes so the verdict is
+   visible immediately, on any viewport, without scrolling. */
+body.has-result .hero {
+  display: none;
+}
+
+body.has-result main {
+  padding-top: 26px;
+}
+
+body.has-result .explain {
+  margin-top: 56px;
+}
