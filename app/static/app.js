@@ -261,17 +261,33 @@
       46-58s   water builds, takes over, and clears
       58s      the verdict
   */
+  /* Every beat below has now been verified to render, to move and to settle, so the
+     waits are trimmed to what the eye needs rather than what exploration needed.
+
+       0.0- 2.0  wind up
+       2.0- 4.0  the throw
+       4.9       it meets the water
+       4.9-11.0  the net lies there
+      11.0-12.5  haul
+      12.5-13.5  the catch comes aboard
+      13.5-17.5  he turns it over
+      17.5-20.0  the camera pushes in
+      18.5-27.5  the dial calibrates and settles
+      29.0-35.0  water builds and takes over
+      35.0       card swaps behind it
+      39.0       verdict
+  */
   const BEAT = {
-    throw: 5000,
-    impact: 8000,
-    haul: 20000,
-    fish: 24000,
-    react: 26000,
-    zoom: 32000,
-    dial: 34000,
-    water: 46000,
-    reveal: 58000,
-    end: 60000,
+    throw: 2000,
+    impact: 4900,
+    haul: 11000,
+    fish: 12500,
+    react: 13500,
+    zoom: 17500,
+    dial: 18500,
+    water: 29000,
+    reveal: 35000,
+    end: 41000,
   };
 
   function resetArtifacts(scene) {
@@ -359,10 +375,10 @@
       if (line && line.parentElement) line.parentElement.remove();
       const skip = document.getElementById("skipBtn");
       if (skip) skip.remove();
-    }, 12000);   // the water takes twelve seconds to build
+    }, 7000);   // swap once the water has actually finished building
 
-    setTimeout(() => water.classList.add("fall"), 13200);
-    setTimeout(() => water.remove(), 19600);
+    setTimeout(() => water.classList.add("fall"), 7800);
+    setTimeout(() => water.remove(), 12200);
   }
 
   function runScene(root) {
@@ -372,6 +388,10 @@
 
     const card = root.querySelector(".result");
     const started = performance.now();
+    // exposed so the verification tools can report the page's own clock rather than
+    // their own, which drifts by a second per screenshot
+    window.__sceneStart = started;
+    window.__beatOf = (ms) => Math.round(ms);
     const done = {};
 
     function frame(now) {
@@ -406,8 +426,8 @@
     const caption = g.querySelector(".readout small");
 
     const token = ++sweepToken;
-    const pause = 34000;   // the dial wakes once the camera is on him   // the catch is in his hands here; the dial starts
-    const duration = 10000;  // ten seconds of calibrating while he examines the catch
+    const pause = 18500;   // the dial wakes once the camera is on him   // the catch is in his hands here; the dial starts
+    const duration = 9000;   // nine seconds of calibrating, settling as the water comes
 
     if (caption) caption.textContent = "examining";
     const scene = document.querySelector(".fishing");

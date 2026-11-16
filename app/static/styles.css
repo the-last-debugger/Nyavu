@@ -3121,3 +3121,7 @@ body.has-result .explain {
   .hero { transition-duration: .62s !important; }
   .result:not(.hidden) { animation: cardIn .72s cubic-bezier(.22,1,.36,1) both !important; }
 }
+
+/* the water keeps pace with the shorter cut */
+.waterline { transition: opacity 6s cubic-bezier(.4, 0, .2, 1); }
+.waterline.fall { transition: opacity 3.6s cubic-bezier(.4, 0, .2, 1); }
