@@ -312,9 +312,9 @@
         const jx = Math.sin(T * 9) * 1.2;
         const jy = Math.cos(T * 11) * 1.2;
         // held up at the 20th size: from here on, the catch is the only subject
-        caught.style.setProperty("--cx", `${(HAND_A[0] + 26 + jx).toFixed(1)}px`);
-        caught.style.setProperty("--cy", `${(HAND_A[1] - 12 + jy).toFixed(1)}px`);
-        caught.style.setProperty("--cs", "2.6");
+        caught.style.setProperty("--cx", `${(HAND_A[0] + 14 + jx).toFixed(1)}px`);
+        caught.style.setProperty("--cy", `${(HAND_A[1] + 2 + jy).toFixed(1)}px`);
+        caught.style.setProperty("--cs", "1.15");
         caught.style.setProperty("--cr", `${(Math.sin(T * 7) * 6).toFixed(1)}deg`);
         caught.setAttribute("visibility", "visible");
         caught.style.opacity = "1";
@@ -326,7 +326,7 @@
         const rot = onWater ? Math.sin(T * 11) * 34 : Math.sin(T * 16) * 12;
         // a real fish inside a real net: big enough to see, and only once it is caught
         const visible = t > 0.30;
-        const size = (2.2 + 0.9 * Math.min(1, s)).toFixed(2);
+        const size = (0.95 + 0.25 * Math.min(1, s)).toFixed(2);
         // variables, not a transform string: CSS composes it, so nothing can clobber it
         caught.style.setProperty("--cx", `${(x + jx).toFixed(1)}px`);
         caught.style.setProperty("--cy", `${(y + 8 * s + jy).toFixed(1)}px`);
@@ -432,14 +432,25 @@
        over to. It fades once the real card is ready, never snapping. */
     const skeleton = document.createElement("div");
     skeleton.className = "verdict-skeleton";
+    // the skeleton copies the verdict's shape, so the hand-over is a fill, not a swap
     skeleton.innerHTML = `
-      <span class="sk sk-badge"></span>
-      <span class="sk sk-title"></span>
-      <span class="sk sk-url"></span>
-      <span class="sk sk-gauge"></span>
-      <span class="sk sk-para"></span>
-      <span class="sk sk-line"></span>
-      <span class="sk sk-line short"></span>`;
+      <div class="sk-head">
+        <span class="sk sk-gauge"></span>
+        <div class="sk-body">
+          <span class="sk sk-badge"></span>
+          <span class="sk sk-title"></span>
+          <span class="sk sk-url"></span>
+          <span class="sk sk-suggest"></span>
+          <span class="sk sk-meta"></span>
+        </div>
+      </div>
+      <span class="sk sk-subtitle"></span>
+      <span class="sk sk-row"></span>
+      <span class="sk sk-row"></span>
+      <span class="sk sk-row"></span>
+      <span class="sk sk-row"></span>
+      <span class="sk sk-row short"></span>
+      <span class="sk sk-subtitle small"></span>`;
     shell.appendChild(skeleton);
 
     document.body.appendChild(backdrop);
@@ -462,7 +473,7 @@
       skeleton.classList.add("gone");
       card.classList.remove("card-pending");
       setTimeout(() => skeleton.remove(), 700);
-    }, 5200);
+    }, 1500);
 
     const shut = () => closeVerdictModal();
     close.addEventListener("click", shut, { once: true });
@@ -504,8 +515,8 @@
     react: 13500,
     zoom: 17500,
     dial: 18500,
-    water: 29000,
-    reveal: 35000,
+    outro: 29000,
+    reveal: 33000,
     end: 41000,
   };
 
@@ -648,28 +659,40 @@
     requestAnimationFrame(frame);
   }
 
-  /* A vertical curtain of water rises over the finished scene, its ripples spreading
-     outward. It holds while the card swaps behind it, then the ripples dissipate and
-     the verdict is simply there. Nothing flashes; nothing crossfades. */
-  function waterCurtain(root) {
+  /* The scene fades; a skeleton holds the card's exact space; the verdict fills it.
+     One container, no shell, no curtain, no movement of the page underneath. */
+  function handOver(root) {
+    const scene = root.querySelector(".fishing");
     const card = root.querySelector(".result");
     if (!card) return;
-    // cover the whole view, so the card and the reasons below it are both hidden
-    const stage = card.closest(".view") || card;
-    const water = document.createElement("div");
-    water.className = "waterline";
-    // real elements, not pseudo-elements: Chromium does not apply SVG filters to those
-    const ca = document.createElement("div");
-    ca.className = "caustic ca";
-    const cb = document.createElement("div");
-    cb.className = "caustic cb";
-    water.appendChild(ca);
-    water.appendChild(cb);
-    const sheen = document.createElement("div");
-    sheen.className = "sheen";
-    water.appendChild(sheen);
-    stage.appendChild(water);
-    requestAnimationFrame(() => water.classList.add("rise"));
+
+    const height = card.getBoundingClientRect().height;
+    card.style.minHeight = `${Math.round(height)}px`;
+
+    if (scene) {
+      scene.style.transition = "opacity .5s cubic-bezier(.4,0,.2,1)";
+      scene.style.opacity = "0";
+    }
+
+    const skeleton = document.createElement("div");
+    skeleton.className = "verdict-skeleton inline";
+    skeleton.innerHTML = `
+      <div class="sk-head">
+        <span class="sk sk-gauge"></span>
+        <div class="sk-body">
+          <span class="sk sk-badge"></span>
+          <span class="sk sk-title"></span>
+          <span class="sk sk-url"></span>
+          <span class="sk sk-suggest"></span>
+          <span class="sk sk-meta"></span>
+        </div>
+      </div>
+      <span class="sk sk-subtitle"></span>
+      <span class="sk sk-row"></span>
+      <span class="sk sk-row"></span>
+      <span class="sk sk-row"></span>`;
+    card.appendChild(skeleton);
+    requestAnimationFrame(() => skeleton.classList.add("on"));
 
     setTimeout(() => {
       card.classList.remove("pending");
@@ -678,28 +701,27 @@
       if (line && line.parentElement) line.parentElement.remove();
       const skip = document.getElementById("skipBtn");
       if (skip) skip.remove();
-      // the answer takes the stage as the water clears
-      openVerdictModal(card);
-    }, 8200);   // swap once the water has actually finished building
 
-    setTimeout(() => water.classList.add("fall"), 9000);
-    setTimeout(() => water.remove(), 13600);
+      setTimeout(() => {
+        skeleton.classList.add("gone");
+        card.classList.remove("reveal-fade");
+        card.style.minHeight = "";
+        setTimeout(() => skeleton.remove(), 700);
+      }, 520);
+    }, 780);
   }
 
-
-  /* The zoom is a camera move, not a CSS scale: the viewBox narrows onto the catch,
-     so nothing can be pushed out of frame and the framing is exact. */
+  /* The zoom is a camera move on the viewBox: exact framing, and the artwork scales
+     with it so nothing drifts out of shot. */
   function cameraPush(root, to, ms) {
     const svg = root.querySelector(".fishing svg");
     if (!svg) return;
     const from = (svg.getAttribute("viewBox") || "0 12 610 236").split(/\s+/).map(Number);
     const t0 = performance.now();
-
     function frame(now) {
       const k = Math.min(1, (now - t0) / ms);
       const e = k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
-      const v = from.map((a, i) => a + (to[i] - a) * e);
-      svg.setAttribute("viewBox", v.map((n) => n.toFixed(1)).join(" "));
+      svg.setAttribute("viewBox", from.map((a, i) => (a + (to[i] - a) * e).toFixed(1)).join(" "));
       if (k < 1) requestAnimationFrame(frame);
     }
     requestAnimationFrame(frame);
@@ -742,10 +764,10 @@
         if (card) card.classList.add("dialcoming");
         done.stopTalk = startMonologue(root);
       }
-      if (!done.water && elapsed >= BEAT.water) {
-        done.water = true;
+      if (!done.outro && elapsed >= BEAT.outro) {
+        done.outro = true;
         if (typeof done.stopTalk === "function") done.stopTalk();
-        waterCurtain(root);
+        handOver(root);
         return;
       }
 
