@@ -1983,3 +1983,19 @@ body.has-result .explain {
 /* the scene must never be clipped by the card */
 .result.pending .verdict-head { overflow: visible; }
 .fishing svg { overflow: visible; }
+
+/* the wake breathes with the boat */
+.fishing .wake {
+  animation: wake 4.2s ease-in-out infinite;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+@keyframes wake {
+  0%, 100% { opacity: .45; transform: scaleX(1) translateX(0); }
+  50%      { opacity: .8;  transform: scaleX(1.03) translateX(1px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fishing .wake { animation: wake 4.2s ease-in-out infinite !important; }
+}

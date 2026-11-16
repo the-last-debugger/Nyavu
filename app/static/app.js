@@ -313,7 +313,15 @@
               <path d="M22 138 h258" stroke="#2A3D4C" stroke-width="4" stroke-linecap="round"/>
               <path d="M40 146 q10 18 44 24 q54 8 112 0 q26 -4 40 -24"
                     fill="none" stroke="#16242F" stroke-width="1.4"/>
+              <!-- stern post and a thwart to sit on -->
+              <path d="M264 138 l6 22" stroke="#2A3D4C" stroke-width="3.5" stroke-linecap="round"/>
+              <rect x="168" y="147" width="92" height="5" rx="2.5"
+                    fill="#101B24" stroke="#263947" stroke-width="1.4"/>
             </g>
+
+            <!-- the hull has its own small wake where it meets the surface -->
+            <path class="wake" d="M26 173 q46 -5 92 0 q40 4 82 0 q18 -2 34 0"
+                  fill="none" stroke="#1D4A57" stroke-width="1.6" stroke-linecap="round"/>
 
             <g class="fisher">
               <!-- trousers: thigh along the thwart, shin dropping to the boards -->
@@ -324,6 +332,9 @@
               <path class="shirt" d="M198 112 q14 -16 26 0 l4 30 h-34 z"
                     fill="#0A1218" stroke="#263947" stroke-width="2.2"/>
               <circle class="head" cx="211" cy="100" r="10.5" fill="#0A1218" stroke="#263947" stroke-width="2.2"/>
+              <circle class="eye" cx="208" cy="99" r="1.25" fill="#3E5566"/>
+              <circle class="eye" cx="214" cy="99" r="1.25" fill="#3E5566"/>
+              <path class="beard" d="M204 104 q7 8 14 0" fill="none" stroke="#3E5566" stroke-width="1.6" stroke-linecap="round"/>
               <path class="hat" d="M194 94 q17 -19 34 0 l9 5 h-52 z" fill="#0A1218" stroke="#263947" stroke-width="2.2"/>
 
               <!-- arms: upper, elbow, forearm; no filled hands -->
