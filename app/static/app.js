@@ -1520,7 +1520,11 @@
 
   /* ------------------------------------------------------------------- PWA */
   if ("serviceWorker" in navigator) {
-    window.addEventListener("load", () => navigator.serviceWorker.register("/sw.js").catch(() => {}));
+    window.addEventListener("load", () => {
+      // updateViaCache none: the worker itself must never be served from the HTTP cache,
+      // or a deploy could take days to reach a returning visitor
+      navigator.serviceWorker.register("/sw.js", { updateViaCache: "none" }).catch(() => {});
+    });
   }
 
   /* ------------------------------------------------------------------ boot */

@@ -4346,8 +4346,8 @@ body.verdict-open { overflow: hidden; }
 
   .fishing .bubble,
   .fishing .bubble.on {
-    left: 6% !important;
-    right: 6% !important;
+    left: 14% !important;
+    right: 4% !important;
     top: 5% !important;
     width: auto !important;
     max-width: none !important;
@@ -4462,4 +4462,56 @@ summary:focus-visible,
   clip: rect(0 0 0 0);
   white-space: nowrap;
   border: 0;
+}
+
+/* ===================== the one thing you must find =====================
+   The address field is the whole product, and in dark-on-dark it read as part of the
+   background. It is a pale panel now, at every size: unmistakable, and still quiet. */
+.input-row {
+  background: #EEF3F7;
+  border: 1px solid rgba(255, 255, 255, .55);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, .45), inset 0 1px 0 rgba(255, 255, 255, .9);
+}
+
+.input-row:focus-within {
+  border-color: #43e8c8;
+  box-shadow: 0 0 0 4px rgba(67, 232, 200, .22), 0 12px 34px rgba(0, 0, 0, .5);
+  transform: translateY(-1px);
+}
+
+#urlInput {
+  color: #0A1219;
+  caret-color: #0A7F6A;
+}
+
+#urlInput::placeholder {
+  color: #6D7C8B;
+  opacity: 1;
+}
+
+.input-icon {
+  color: #0A1219;
+  opacity: .55;
+  filter: grayscale(1) brightness(.35);
+}
+
+/* the two controls inside the pale row keep their weight */
+.input-row .btn.primary { color: #04120E; }
+.input-row .btn.icon {
+  background: rgba(10, 18, 25, .08);
+  border-color: rgba(10, 18, 25, .18);
+  color: #0A1219;
+}
+.input-row .btn.icon:hover { background: rgba(10, 18, 25, .14); }
+
+/* inside the pale row the primary action needs its colour back */
+.input-row .btn.primary {
+  background: linear-gradient(180deg, #4BF0CE 0%, #2FC3A8 100%);
+  color: #04120E;
+  border-color: transparent;
+  box-shadow: 0 6px 18px rgba(47, 195, 168, .35);
+}
+
+.input-row .btn.primary:hover {
+  background: linear-gradient(180deg, #5CF7D8 0%, #35CFB2 100%);
 }
