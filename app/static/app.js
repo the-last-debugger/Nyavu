@@ -262,7 +262,19 @@
           <div><dt>Hold-out URLs</dt><dd>${m.tested_on.toLocaleString()}</dd></div>
           <div><dt>Input features</dt><dd>${m.features} numeric + char n-grams</dd></div>
         </dl>
-        <h3 class="block-title">Model comparison — domain-disjoint hold-out set</h3>
+        <h3 class="block-title">F1 by model · hold-out set</h3>
+        <div class="bars">
+          ${order.map(name => {
+            const v = m.comparison[name].f1 * 100;
+            const cls = name === m.model ? " bar-best" : "";
+            return `<div class="bar-row${cls}">
+              <span class="bar-name">${name}</span>
+              <span class="bar"><i style="--v:${v.toFixed(2)}%"></i></span>
+              <b class="bar-val">${v.toFixed(2)}</b>
+            </div>`;
+          }).join("")}
+        </div>
+        <h3 class="block-title">Full comparison — domain-disjoint hold-out set</h3>
         <table class="table">
           <thead><tr><th>Model</th><th>Accuracy</th><th>Precision</th><th>Recall</th>
             <th>F1</th><th>ROC-AUC</th><th>False positive rate</th><th>ms / URL</th></tr></thead>

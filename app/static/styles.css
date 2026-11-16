@@ -1270,3 +1270,60 @@ body.has-result main {
 body.has-result .explain {
   margin-top: 56px;
 }
+
+/* ------------------------------------------------------------ bar charts */
+
+.bars {
+  display: grid;
+  gap: 10px;
+  margin: 6px 0 30px;
+  padding: 20px 22px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+
+.bar-row {
+  display: grid;
+  grid-template-columns: 190px 1fr 64px;
+  align-items: center;
+  gap: 14px;
+  font-size: 0.84rem;
+}
+
+.bar-name { color: var(--muted); }
+
+.bar {
+  height: 8px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.06);
+  overflow: hidden;
+}
+
+.bar i {
+  display: block;
+  height: 100%;
+  width: var(--v, 0%);
+  border-radius: 4px;
+  background: linear-gradient(90deg, rgba(67, 232, 200, 0.55), var(--accent));
+  animation: grow 1.1s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes grow {
+  from { width: 0; }
+}
+
+.bar-val {
+  text-align: right;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+.bar-best .bar-name { color: var(--text); font-weight: 600; }
+.bar-best .bar i { background: linear-gradient(90deg, var(--accent), #9df6e3); }
+.bar-best .bar-val { color: var(--accent); }
+
+@media (max-width: 700px) {
+  .bar-row { grid-template-columns: 110px 1fr 52px; gap: 8px; }
+}

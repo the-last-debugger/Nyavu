@@ -20,9 +20,9 @@ services:
         value: "1"
       - key: NYAVU_COOKIE_SECURE
         value: "1"
-      # The free plan has no persistent disk, so the database lives in /tmp and is
-      # reset when the instance restarts or redeploys. Accounts and scan history are
-      # therefore per-instance lifetime. Migrating this to managed Postgres is the
-      # next step; the path is the only thing that has to change.
+      # Storage is Postgres (Neon), supplied as DATABASE_URL in the dashboard - not in
+      # this file, because it contains a password. When DATABASE_URL is set, the
+      # service uses Postgres and the SQLite path below is ignored, so accounts and
+      # scan history survive a redeploy. The path is only a local-development fallback.
       - key: NYAVU_DB_PATH
         value: /tmp/nyavu.db
