@@ -454,13 +454,6 @@
             <circle class="ripple r2" cx="352" cy="196" r="10"/>
             <circle class="ripple r3" cx="352" cy="196" r="10"/>
 
-            <g class="splash">
-              <path class="spike" d="M352 196 l-9 -20 M358 194 l-2 -24 M364 196 l9 -19" stroke="#7fe6d3" stroke-width="2" stroke-linecap="round" fill="none"/>
-              <circle class="drop" cx="342" cy="176" r="2.2" fill="#7fe6d3"/>
-              <circle class="drop" cx="356" cy="168" r="2.6" fill="#7fe6d3"/>
-              <circle class="drop" cx="368" cy="178" r="2" fill="#7fe6d3"/>
-            </g>
-
             <path class="tether" fill="url(#mesh)" fill-opacity="0.92" stroke="none" d=""/>
 
             <g class="netcloth" filter="url(#flutter)">
@@ -487,6 +480,12 @@
             <!-- drawn after the net, in world coordinates, so the water can show through it -->
             <g clip-path="url(#waterBand)" style="pointer-events:none">
               <path class="wetnet" fill="#0B3546" fill-opacity="0.85" stroke="none"/>
+            </g>
+            <g class="splash">
+              <path class="spike" d="M352 196 l-9 -20 M358 194 l-2 -24 M364 196 l9 -19" stroke="#B9F7EC" stroke-width="2.6" stroke-linecap="round" fill="none"/>
+              <circle class="drop" cx="342" cy="172" r="2.9" fill="#B9F7EC"/>
+              <circle class="drop" cx="356" cy="163" r="3.4" fill="#B9F7EC"/>
+              <circle class="drop" cx="368" cy="174" r="2.6" fill="#B9F7EC"/>
             </g>
           </svg>
         </div>
