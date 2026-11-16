@@ -41,6 +41,7 @@
     const btn = $("#scanBtn");
     btn.disabled = true; btn.textContent = "Analysing…";
     document.body.classList.add("scanning");
+    document.getElementById("scanForm").classList.add("scanning");
     try {
       const r = await api("/api/predict", {
         method: "POST",
@@ -58,6 +59,8 @@
     } finally {
       btn.disabled = false; btn.textContent = "Analyse";
       document.body.classList.remove("scanning");
+      const f = document.getElementById("scanForm");
+      if (f) f.classList.remove("scanning");
     }
   });
 
@@ -118,7 +121,7 @@
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     const token = ++sweepToken;
-    const pause = reduce ? 0 : 600;
+    const pause = reduce ? 0 : 700;
     const duration = reduce ? 420 : 7800;
 
     if (caption) caption.textContent = "examining";
@@ -126,24 +129,24 @@
     setTimeout(() => {
       const started = performance.now();
 
+      function valueAt(t) {
+        // rises toward the score, but the last stretch is slow
+        const base = target * (1 - Math.pow(1 - Math.min(1, t * 1.12), 2.4));
+        // the wobble holds its strength until 80% of the sweep, then fades:
+        // the needle hunts for a long time before it commits
+        const decay = t < 0.8 ? 1 : Math.max(0, 1 - (t - 0.8) / 0.2);
+        const wobble = Math.sin(t * Math.PI * 2 * 7) * target * 0.07 * decay;
+        return Math.max(0, Math.min(100, base + wobble));
+      }
+
       function frame(now) {
         const t = Math.min(1, (now - started) / duration);
+        const value = t === 1 ? target : valueAt(t);
 
-        // 0 -> 86% quickly, then the last 14% slowly: the needle looks unsure
-        const climb = t < 0.62
-          ? (t / 0.62) * 0.86
-          : 0.86 + (1 - Math.pow(1 - (t - 0.62) / 0.38, 2)) * 0.14;
-
-        // dithering: twenty direction changes over the sweep, decaying to nothing.
-        // Enough to feel like the needle is weighing the evidence, not so much that
-        // it reads as a broken gauge.
-        const wobble = Math.sin(t * 70) * Math.pow(1 - t, 1.6) * 8;
-        const value = Math.max(0, Math.min(100, target * climb + wobble));
-
+        if (token !== sweepToken) return;   // a newer scan took over
         g.style.setProperty("--p", value.toFixed(2));
         if (readout) readout.textContent = Math.round(value);
 
-        if (token !== sweepToken) return;   // a newer scan took over
         if (t < 1) {
           requestAnimationFrame(frame);
         } else {
@@ -155,6 +158,7 @@
       requestAnimationFrame(frame);
     }, pause);
   }
+
 
   const escapeHtml = s => String(s).replace(/[&<>"']/g, c =>
     ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));

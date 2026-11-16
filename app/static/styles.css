@@ -1417,3 +1417,15 @@ body.has-result .explain {
   stroke: rgba(255, 255, 255, 0.07);
   stroke-width: 1;
 }
+
+/* the scanner steps back while a verdict is being produced */
+.scanner { transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.4s; }
+.scanner.scanning { transform: scale(0.994); opacity: 0.9; }
+
+/* and the verdict grows into the space it left */
+.result { animation: arrive 0.7s cubic-bezier(0.16, 1, 0.3, 1) both; }
+
+@keyframes arrive {
+  from { opacity: 0; transform: translateY(18px) scale(0.97); filter: blur(2px); }
+  to   { opacity: 1; transform: none; filter: blur(0); }
+}
