@@ -117,6 +117,11 @@
      a presentation of it, never a delay in computing it. */
   function finishNow() {
     sweepToken++;
+    const veilHost = document.querySelector(".result");
+    if (veilHost && veilHost.classList.contains("pending")) {
+      revealWithCircle(document);
+      return;
+    }
     const card = document.querySelector(".result.pending");
     if (!card) return;
     const g = card.querySelector(".gauge");
@@ -220,46 +225,140 @@
   /* The scene runs on its own ten-second clock from the moment the card appears.
      The dial waits for the landing, then runs its own shorter sweep; the two are
      separate clocks so retiming one never drags the other. */
-  /* One scene clock, three acts: the cast (0-10s), the reaction (10-12s), and the
-     slow zoom into the catch (12-13s) before the verdict card takes over. */
+  /* One master clock for the whole performance. Every beat is a timestamp here, so
+     retiming one act never drags another out of step.
+
+     The choreography follows the standard shape: anticipation (winding up), action
+     (the throw), follow-through (the net drifting), a hold while the dial works, then
+     a transition that carries the eye into the card. Each beat is given time to land
+     rather than being packed tight. */
+
+  /* The splash is animated in JavaScript, not CSS. Two clocks and a cascade of
+     !important rules made the CSS version unreliable; setting opacity and scale
+     directly, on the frame the mesh meets the water, cannot drift. */
+  function fireSplash(root) {
+    const splash = root.querySelector(".splash");
+    const rings = Array.from(root.querySelectorAll(".ripple"));
+    if (splash) {
+      splash.style.animation = "none";
+      splash.style.transformBox = "fill-box";
+      splash.style.transformOrigin = "center";
+    }
+    rings.forEach((r) => {
+      r.style.animation = "none";
+      r.style.transformBox = "fill-box";
+      r.style.transformOrigin = "center";
+      r.style.opacity = "0";
+    });
+
+    const t0 = performance.now();
+    const LIFE = 1700;
+
+    function frame(now) {
+      const k = Math.min(1, (now - t0) / LIFE);
+
+      if (splash) {
+        splash.style.opacity = String(Math.max(0, 1 - Math.pow(k, 2.2)));
+        splash.style.transform =
+          `translateY(${(-16 * k).toFixed(1)}px) scale(${(1 + 0.55 * k).toFixed(2)})`;
+      }
+      rings.forEach((r, i) => {
+        const kk = Math.max(0, Math.min(1, (now - t0 - i * 260) / 1300));
+        r.style.opacity = kk > 0 ? String((1 - kk) * 0.75) : "0";
+        r.style.transform = `scale(${(0.3 + kk * 2.8).toFixed(2)})`;
+      });
+
+      if (k < 1) requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+  }
+
+
+  /* The verdict arrives out of the catch, not on top of it.
+     A circle opens from the fish's position in the verdict's own colour, the card
+     swaps behind it, then the circle clears and the text staggers in. No text is
+     ever crossfaded over other text. */
+  function revealWithCircle(root) {
+    const card = root.querySelector(".result");
+    if (!card) return;
+    const head = card.querySelector(".verdict-head");
+    const caught = root.querySelector(".caught");
+    const gauge = card.querySelector(".gauge");
+    const tone = (gauge && getComputedStyle(gauge).getPropertyValue("--tone")) || "#43e8c8";
+
+    let cx = (head ? head.clientWidth / 2 : 300);
+    let cy = (head ? head.clientHeight / 2 : 200);
+    if (caught) {
+      const r = caught.getBoundingClientRect();
+      const h = head.getBoundingClientRect();
+      cx = r.left - h.left + r.width / 2;
+      cy = r.top - h.top + r.height / 2;
+    }
+
+    const veil = document.createElement("div");
+    veil.className = "veil";
+    veil.style.setProperty("--cx", `${cx.toFixed(0)}px`);
+    veil.style.setProperty("--cy", `${cy.toFixed(0)}px`);
+    veil.style.setProperty("--tone", tone.trim());
+    head.appendChild(veil);
+
+    requestAnimationFrame(() => veil.classList.add("open"));
+
+    setTimeout(() => {
+      card.classList.remove("pending");
+      card.classList.remove("zooming");
+      const line = document.getElementById("thinking");
+      if (line && line.parentElement) line.parentElement.remove();
+      const skip = document.getElementById("skipBtn");
+      if (skip) skip.remove();
+      veil.classList.add("clear");
+      setTimeout(() => veil.remove(), 800);
+    }, 720);
+  }
+
+  const BEAT = {
+    land: 4700,       // mesh meets the water; the splash used to lead this by ~1s
+    fishUp: 9400,     // net aboard, the catch is in his hands, he starts to examine
+    needleStart: 9400,
+    needleEnd: 13400,
+    zoom: 13400,      // camera begins its move on the catch
+    wash: 15600,      // ripples carry the eye into the card
+    reveal: 17400,
+  };
+
   function runScene(root) {
     const started = performance.now();
-    const NET_MS = 10000;
-    let impactDone = false;
-    let reactionDone = false;
-    let zoomDone = false;
+    let impact = false, examine = false, zoomed = false, wash = false, revealed = false;
 
     function frame(now) {
       const elapsed = now - started;
-      const t = Math.min(1, elapsed / NET_MS);
-      updateNet(root, t);
-
       const scene = root.querySelector(".fishing");
+      updateNet(root, Math.min(1, elapsed / 10000));
 
-      // the splash belongs to the frame the mesh meets the surface
-      if (!impactDone && t >= 0.38) {
-        impactDone = true;
-        if (scene) scene.classList.add("impact");
+      if (!impact && elapsed >= BEAT.land) {
+        impact = true;
+        fireSplash(root);
       }
-
-      // he reacts to whatever came up in the net
-      if (!reactionDone && elapsed >= NET_MS) {
-        reactionDone = true;
-        if (scene) scene.classList.add("reaction");
+      if (!examine && elapsed >= BEAT.fishUp) {
+        examine = true;
+        if (scene) scene.classList.add("examine");
       }
-
-      // then the camera moves in on the catch
-      if (!zoomDone && elapsed >= NET_MS + 1600) {
-        zoomDone = true;
+      if (!zoomed && elapsed >= BEAT.zoom) {
+        zoomed = true;
         if (scene) scene.classList.add("zoom");
         const card = root.querySelector(".result.pending");
         if (card) card.classList.add("zooming");
       }
-
-      if (elapsed < NET_MS + 3000) requestAnimationFrame(frame);
+      if (!revealed && elapsed >= BEAT.reveal) {
+        revealed = true;
+        revealWithCircle(root);
+        return;
+      }
+      requestAnimationFrame(frame);
     }
     requestAnimationFrame(frame);
   }
+
 
 
   const TONE_OF = (v) => (v < 35 ? "#35e0a0" : v < 65 ? "#ffb020" : "#ff4d6d");
@@ -272,8 +371,8 @@
     const caption = g.querySelector(".readout small");
 
     const token = ++sweepToken;
-    const pause = 3800;   // the mesh meets the water at 38% of ten seconds
-    const duration = 9200;   // runs through the reaction to the zoom
+    const pause = 9400;   // the catch is in his hands here; the dial starts
+    const duration = 4000;   // four seconds of judging, then the hold
 
     if (caption) caption.textContent = "examining";
     const scene = document.querySelector(".fishing");
@@ -338,10 +437,7 @@
           g.style.setProperty("--tone", TONE_OF(target));
           if (readout) readout.textContent = target;
           if (caption) caption.textContent = "risk";
-          const card = g.closest(".result");
-          if (card) card.classList.remove("pending");
-          const line = document.getElementById("thinking");
-          if (line && line.parentElement) line.parentElement.remove();
+          // the card stays open: the scene has a hold and a transition still to play
         }
       }
       requestAnimationFrame(frame);
@@ -503,6 +599,12 @@
             <!-- drawn after the net, in world coordinates, so the water can show through it -->
             <g clip-path="url(#waterBand)" style="pointer-events:none">
               <path class="wetnet" fill="#0B3546" fill-opacity="0.85" stroke="none"/>
+            </g>
+
+            <g class="wash" fill="none" stroke="#8FF3E2" stroke-width="1.4" opacity="0">
+              <circle cx="352" cy="190" r="40"/>
+              <circle cx="352" cy="190" r="40"/>
+              <circle cx="352" cy="190" r="40"/>
             </g>
             <g class="splash">
               <path class="spike" d="M352 196 l-9 -20 M358 194 l-2 -24 M364 196 l9 -19" stroke="#B9F7EC" stroke-width="2.6" stroke-linecap="round" fill="none"/>

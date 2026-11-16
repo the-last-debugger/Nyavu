@@ -1638,9 +1638,6 @@ body.has-result .explain {
   transform-origin: center;
 }
 
-.fishing .r1 { animation: ripple 7s ease-out 2.1s forwards; }
-.fishing .r2 { animation: ripple 7s ease-out 2.6s forwards; }
-.fishing .r3 { animation: ripple 7s ease-out 3.4s forwards; }
 
 @keyframes ripple {
   0%       { opacity: 0; transform: scale(.3); }
@@ -1712,10 +1709,7 @@ body.has-result .explain {
   .fishing .netg { animation: netswing 7s cubic-bezier(.4,0,.3,1) forwards !important; }
   .fishing .line { animation: lineflex 7s ease-in-out forwards !important; }
   .fishing .boat { animation: bob 3.2s ease-in-out infinite !important; }
-  .fishing .r1   { animation: ripple 7s ease-out 2.1s forwards !important; }
-  .fishing .r2   { animation: ripple 7s ease-out 2.6s forwards !important; }
-  .fishing .r3   { animation: ripple 7s ease-out 3.4s forwards !important; }
-  .fishing[data-catch="dark"]  .catch-dark,
+        .fishing[data-catch="dark"]  .catch-dark,
   .fishing[data-catch="odd"]   .catch-odd,
   .fishing[data-catch="plain"] .catch-plain {
     animation: haul 7s cubic-bezier(.3,1.6,.5,1) forwards !important;
@@ -1809,10 +1803,7 @@ body.has-result .explain {
   .fishing .caught    { animation: catchup 7s linear forwards !important; }
   .fishing .arm       { animation: armwork 7s cubic-bezier(.4,0,.3,1) forwards !important; }
   .fishing .boat      { animation: bob 3.2s ease-in-out infinite !important; }
-  .fishing .r1        { animation: ripple 7s ease-out 2.1s forwards !important; }
-  .fishing .r2        { animation: ripple 7s ease-out 2.6s forwards !important; }
-  .fishing .r3        { animation: ripple 7s ease-out 3.4s forwards !important; }
-}
+      }
 
 /* ====================== the drape: ten seconds of casting ==================
    0-12%  winds back with the net gathered in both hands
@@ -1880,9 +1871,6 @@ body.has-result .explain {
   100%    { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-.fishing .r1 { animation: ripple10 10s ease-out 3.0s forwards; }
-.fishing .r2 { animation: ripple10 10s ease-out 3.7s forwards; }
-.fishing .r3 { animation: ripple10 10s ease-out 4.6s forwards; }
 
 @keyframes ripple10 {
   0%   { opacity: 0; transform: scale(.3); }
@@ -1898,10 +1886,7 @@ body.has-result .explain {
   .fishing .caught   { animation: catchup10 10s linear forwards !important; }
   .fishing .cloth.back  { animation: swish 2.6s ease-in-out infinite alternate !important; }
   .fishing .cloth.front { animation: swish 2.1s ease-in-out infinite alternate-reverse !important; }
-  .fishing .r1 { animation: ripple10 10s ease-out 3.0s forwards !important; }
-  .fishing .r2 { animation: ripple10 10s ease-out 3.7s forwards !important; }
-  .fishing .r3 { animation: ripple10 10s ease-out 4.6s forwards !important; }
-  .fishing .boat { animation: bob 3.2s ease-in-out infinite !important; }
+        .fishing .boat { animation: bob 3.2s ease-in-out infinite !important; }
 }
 
 /* ------------------------------------------------------------ liveliness */
@@ -1965,12 +1950,8 @@ body.has-result .explain {
   animation: armswork 10s cubic-bezier(.4,0,.3,1) forwards !important;
 }
 
-.fishing .r1 { animation: ripple10 10s ease-out 3.2s forwards !important; }
-.fishing .r2 { animation: ripple10 10s ease-out 3.8s forwards !important; }
-.fishing .r3 { animation: ripple10 10s ease-out 4.5s forwards !important; }
 
 /* the moment it lands: a short, bright disturbance, then gone */
-.fishing .splash { opacity: 0; animation: splash 10s linear forwards !important; transform-box: fill-box; transform-origin: center; }
 
 @keyframes splash {
   0%, 32%  { opacity: 0; transform: translateY(6px) scale(.6); }
@@ -2099,11 +2080,6 @@ body.has-result .explain {
   100%    { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-.fishing .r1, .fishing .r2, .fishing .r3, .fishing .splash { animation: none !important; }
-
-.fishing.go .r1 { animation: ripple66 2.6s ease-out 2.24s forwards !important; }
-.fishing.go .r2 { animation: ripple66 2.6s ease-out 2.64s forwards !important; }
-.fishing.go .r3 { animation: ripple66 2.6s ease-out 3.10s forwards !important; }
 
 @keyframes ripple66 {
   0%   { opacity: 0; transform: scale(.3); }
@@ -2111,7 +2087,6 @@ body.has-result .explain {
   100% { opacity: 0; transform: scale(2.8); }
 }
 
-.fishing.go .splash { animation: splash66 1.6s ease-out 2.20s forwards !important; }
 
 @keyframes splash66 {
   0%   { opacity: 0; transform: translateY(6px) scale(.6); }
@@ -2123,11 +2098,7 @@ body.has-result .explain {
 @media (prefers-reduced-motion: reduce) {
   .fishing.go .arms { animation: armswork 6.6s cubic-bezier(.4,0,.3,1) forwards !important; }
   .fishing.go .caught { animation: catchup66 6.6s linear forwards !important; }
-  .fishing.go .r1 { animation: ripple66 2.6s ease-out 2.24s forwards !important; }
-  .fishing.go .r2 { animation: ripple66 2.6s ease-out 2.64s forwards !important; }
-  .fishing.go .r3 { animation: ripple66 2.6s ease-out 3.10s forwards !important; }
-  .fishing.go .splash { animation: splash66 1.6s ease-out 2.20s forwards !important; }
-}
+        }
 
 /* ================== one scene clock (ten seconds), one dial clock ==================
    The scene starts at render. Its ten-second timeline puts the net in the water at
@@ -2144,21 +2115,11 @@ body.has-result .explain {
   100%    { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-.fishing .r1, .fishing .r2, .fishing .r3, .fishing .splash { animation: none !important; }
-
-.fishing.impact .splash { animation: splash66 1.6s ease-out forwards !important; }
-.fishing.impact .r1 { animation: ripple66 2.6s ease-out forwards !important; }
-.fishing.impact .r2 { animation: ripple66 2.6s ease-out .35s forwards !important; }
-.fishing.impact .r3 { animation: ripple66 2.6s ease-out .80s forwards !important; }
 
 @media (prefers-reduced-motion: reduce) {
   .fishing.go .arms { animation: armswork 10s cubic-bezier(.4,0,.3,1) forwards !important; }
   .fishing.go .caught { animation: catchup10b 10s linear forwards !important; }
-  .fishing.impact .splash { animation: splash66 1.6s ease-out forwards !important; }
-  .fishing.impact .r1 { animation: ripple66 2.6s ease-out forwards !important; }
-  .fishing.impact .r2 { animation: ripple66 2.6s ease-out .35s forwards !important; }
-  .fishing.impact .r3 { animation: ripple66 2.6s ease-out .80s forwards !important; }
-}
+        }
 
 /* ============================== act two: the reaction ==============================
    Ten seconds of cast and haul, then he reacts to what is in the net, then the
@@ -2201,7 +2162,6 @@ body.has-result .explain {
 /* ============================== act three: the zoom ============================== */
 .fishing svg { transform-origin: 62% 78%; transition: transform 1.6s cubic-bezier(.6,0,.25,1); }
 .fishing.zoom svg { transform: scale(1.9); }
-.fishing.zoom .fisher { opacity: .35; transition: opacity 1s ease .6s; }
 .fishing.zoom .caught { filter: drop-shadow(0 0 12px rgba(255,255,255,.18)); }
 
 /* the zoom is a close-up: the dial steps back so it does not float over the shot */
@@ -2215,3 +2175,54 @@ body.has-result .explain {
   40%      { transform: rotate(-1.4deg) translateY(-1px); }
   70%      { transform: rotate(1deg) translateY(0); }
 }
+
+/* ===================== the transition: a slower, carried move =====================
+   Zoom is a push-in of 1.8s, held, and then a wash of ripples crosses the frame and
+   the card rises through it. Nothing snaps. */
+
+.fishing svg { transform-origin: 60% 76%; transition: transform 1.8s cubic-bezier(.35,0,.2,1); }
+.fishing.zoom svg { transform: scale(1.5); }
+
+
+/* the catch lifts into his hands as he starts to examine it */
+.fishing.examine .caught { animation: examine 2.4s ease-in-out infinite; }
+@keyframes examine {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50%      { transform: translateY(-2px) rotate(-4deg); }
+}
+
+.fishing.examine .fisher { animation: inspect 3s ease-in-out infinite; }
+@keyframes inspect {
+  0%, 100% { transform: rotate(0deg) translateY(0); }
+  50%      { transform: rotate(2.5deg) translateY(-1px); }
+}
+
+/* the wash: three rings cross the frame, and the scene dissolves behind them */
+
+  to   { transform: scale(9); opacity: 0; }
+}
+
+  60%  { opacity: .5; filter: blur(2px); }
+  100% { opacity: 0; filter: blur(6px); }
+}
+
+.wash circle { transform-box: fill-box; transform-origin: center; }
+
+/* ============ the verdict arrives out of the catch ============ */
+
+.veil {
+  position: absolute;
+  inset: 0;
+  z-index: 9;
+  pointer-events: none;
+  background: var(--tone, #43e8c8);
+  opacity: 0.92;
+  clip-path: circle(0px at var(--cx, 50%) var(--cy, 50%));
+  transition: clip-path .72s cubic-bezier(.4, 0, .2, 1), opacity .7s ease .05s;
+}
+
+.veil.open { clip-path: circle(140% at var(--cx, 50%) var(--cy, 50%)); }
+.veil.clear { opacity: 0; }
+
+/* the dial keeps its colour through the zoom: it is evidence, not scenery */
+.result.zooming .gauge { opacity: 1; }
