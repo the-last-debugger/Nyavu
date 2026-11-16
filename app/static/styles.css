@@ -4164,3 +4164,51 @@ body.verdict-open { overflow: hidden; }
 
 /* the moon is a plain crescent now: no halo, just light and dust */
 .fishing .moon { filter: drop-shadow(0 0 6px rgba(190, 240, 255, .25)); }
+
+/* ===================== the water, done properly =====================
+   Each layer is a tile containing a whole number of wave periods, with a second copy
+   offset by exactly one tile. Translating by the tile width loops seamlessly, so the
+   surface rolls instead of sliding. */
+.fishing .wavelayer {
+  animation: roll 1s linear infinite;
+  animation-duration: var(--dur, 12s);
+  will-change: transform;
+}
+
+.fishing .wl1 { --dur: 11s; }
+.fishing .wl2 { --dur: 15s; animation-direction: reverse; }
+.fishing .wl3 { --dur: 21s; }
+
+@keyframes roll {
+  from { transform: translateX(0); }
+  to   { transform: translateX(calc(-1 * var(--tile))); }
+}
+
+/* he goes over the stern, not through the hull: out, down, and under the water plane */
+.fishing.drowning .fisher {
+  animation: drown 2.4s cubic-bezier(.5, 0, .75, 1) forwards !important;
+}
+
+@keyframes drown {
+  0%   { transform: translate(0, 0) rotate(0deg); opacity: 1; }
+  25%  { transform: translate(24px, 4px) rotate(16deg); opacity: 1; }
+  55%  { transform: translate(52px, 26px) rotate(38deg); opacity: .95; }
+  80%  { transform: translate(70px, 46px) rotate(54deg); opacity: .7; }
+  100% { transform: translate(84px, 62px) rotate(66deg); opacity: 0; }
+}
+
+.fishing.drowning .boat {
+  animation: lurch 2.4s ease-in-out forwards !important;
+}
+
+@keyframes lurch {
+  0%   { transform: rotate(0deg) translateY(0); }
+  40%  { transform: rotate(3deg) translateY(2px); }
+  100% { transform: rotate(6deg) translateY(6px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fishing .wavelayer { animation: roll 1s linear infinite !important; animation-duration: var(--dur, 12s) !important; }
+  .fishing.drowning .fisher { animation: drown 2.4s cubic-bezier(.5,0,.75,1) forwards !important; }
+  .fishing.drowning .boat { animation: lurch 2.4s ease-in-out forwards !important; }
+}
