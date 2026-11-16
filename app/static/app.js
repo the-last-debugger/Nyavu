@@ -350,7 +350,8 @@
                 <stop offset="100%" stop-color="#0A1A22"/>
               </radialGradient>
               <pattern id="mesh" width="9" height="9" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
-                <path d="M0 0 V9 M0 0 H9" stroke="#3fd9c0" stroke-width="1.15" fill="none" opacity="0.75"/>
+                <rect width="9" height="9" fill="#0A1218"/>
+                <path d="M0 0 V9 M0 0 H9" stroke="#233541" stroke-width="1" fill="none" opacity="0.95"/>
               </pattern>
               <filter id="flutter" x="-30%" y="-30%" width="160%" height="160%">
                 <feTurbulence type="fractalNoise" baseFrequency="0.014 0.022" numOctaves="2" seed="7" result="noise">
@@ -392,16 +393,15 @@
               <path class="shirt" d="M198 112 q14 -16 26 0 l4 30 h-34 z"
                     fill="#0A1218" stroke="#263947" stroke-width="2.2"/>
               <circle class="head" cx="211" cy="100" r="10.5" fill="#0A1218" stroke="#263947" stroke-width="2.2"/>
-              <circle class="eye" cx="208" cy="99" r="1.25" fill="#3E5566"/>
-              <circle class="eye" cx="214" cy="99" r="1.25" fill="#3E5566"/>
-              <path class="beard" d="M204 104 q7 8 14 0" fill="none" stroke="#3E5566" stroke-width="1.6" stroke-linecap="round"/>
+              <circle class="eye" cx="213" cy="98" r="1.3" fill="#42596B"/>
+              <path class="nose" d="M219 100 l5 2 l-5 1.4 z" fill="#42596B"/>
+              <path class="mouth" d="M218 105 q4 1 6 -1" fill="none" stroke="#42596B" stroke-width="1.4" stroke-linecap="round"/>
               <path class="hat" d="M194 94 q17 -19 34 0 l9 5 h-52 z" fill="#0A1218" stroke="#263947" stroke-width="2.2"/>
 
               <!-- arms: upper, elbow, forearm; no filled hands -->
               <g class="arms">
-                <path d="M214 118 L226 116" stroke="#263947" stroke-width="6" fill="none" stroke-linecap="round"/>
-                <circle cx="226" cy="116" r="3.4" fill="#263947"/>
-                <path d="M226 116 L240 110" stroke="#263947" stroke-width="5" fill="none" stroke-linecap="round"/>
+                <!-- far arm: only the forearm clears the body, so the bicep is hidden -->
+                <path d="M223 117 L240 110" stroke="#263947" stroke-width="5" fill="none" stroke-linecap="round"/>
                 <path d="M212 126 L224 125" stroke="#263947" stroke-width="6" fill="none" stroke-linecap="round"/>
                 <circle cx="224" cy="125" r="3.4" fill="#263947"/>
                 <path d="M224 125 L238 120" stroke="#263947" stroke-width="5" fill="none" stroke-linecap="round"/>
@@ -423,13 +423,12 @@
               <circle class="drop" cx="368" cy="178" r="2" fill="#7fe6d3"/>
             </g>
 
-            <path class="tether" fill="url(#mesh)" fill-opacity="0.55"
-                  stroke="#3fd9c0" stroke-width="0.8" d=""/>
+            <path class="tether" fill="url(#mesh)" fill-opacity="0.92" stroke="none" d=""/>
 
             <g class="netcloth" filter="url(#flutter)">
-              <path class="cloth back" fill="url(#mesh)" fill-opacity="0.5"
+              <path class="cloth back" fill="url(#mesh)" stroke="none" fill-opacity="0.85"
                     d="M-58 -4 q8 -22 32 -25 q20 -2 27 -15 q9 13 28 15 q23 3 29 25 q-5 21 -30 23 q-22 2 -30 13 q-9 -11 -30 -13 q-27 -3 -26 -23 z"/>
-              <path class="cloth front" fill="url(#mesh)"
+              <path class="cloth front" fill="url(#mesh)" stroke="none"
                     d="M-52 2 q6 -19 28 -22 q18 -2 24 -13 q8 11 25 13 q20 3 26 22 q-4 19 -26 21 q-19 2 -26 11 q-8 -9 -26 -11 q-24 -2 -25 -21 z"/>
               <g class="caught">
                 <g class="catch-dark">
