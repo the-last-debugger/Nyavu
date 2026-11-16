@@ -3801,14 +3801,10 @@ body.verdict-open { overflow: hidden; }
 
 /* the catch: position composed from the variables JavaScript writes */
 .fishing .caught {
-  transform: translate(var(--cx, 300px), var(--cy, 180px))
-             rotate(var(--cr, 0deg))
-             scale(var(--cs, 1)) !important;
-  transform-box: view-box !important;
-  transform-origin: 0 0 !important;
   opacity: 1 !important;
   animation: none !important;
-  transition: none;
+  transform-box: view-box;
+  transform-origin: 0 0;
 }
 
 /* ---- the skeleton now mirrors the verdict's own layout ---- */

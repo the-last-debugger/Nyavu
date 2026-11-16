@@ -312,10 +312,9 @@
         const jx = Math.sin(T * 9) * 1.2;
         const jy = Math.cos(T * 11) * 1.2;
         // held up at the 20th size: from here on, the catch is the only subject
-        caught.style.setProperty("--cx", `${(HAND_A[0] + 14 + jx).toFixed(1)}px`);
-        caught.style.setProperty("--cy", `${(HAND_A[1] + 2 + jy).toFixed(1)}px`);
-        caught.style.setProperty("--cs", "1.15");
-        caught.style.setProperty("--cr", `${(Math.sin(T * 7) * 6).toFixed(1)}deg`);
+        caught.setAttribute("transform",
+          `translate(${(HAND_A[0] + 14 + jx).toFixed(1)} ${(HAND_A[1] + 2 + jy).toFixed(1)}) ` +
+          `rotate(${(Math.sin(T * 7) * 6).toFixed(1)}) scale(1.15)`);
         caught.setAttribute("visibility", "visible");
         caught.style.opacity = "1";
       } else {
@@ -328,10 +327,9 @@
         const visible = t > 0.30;
         const size = (0.95 + 0.25 * Math.min(1, s)).toFixed(2);
         // variables, not a transform string: CSS composes it, so nothing can clobber it
-        caught.style.setProperty("--cx", `${(x + jx).toFixed(1)}px`);
-        caught.style.setProperty("--cy", `${(y + 8 * s + jy).toFixed(1)}px`);
-        caught.style.setProperty("--cs", size);
-        caught.style.setProperty("--cr", `${rot.toFixed(1)}deg`);
+        caught.setAttribute("transform",
+          `translate(${(x + jx).toFixed(1)} ${(y + 8 * s + jy).toFixed(1)}) ` +
+          `rotate(${rot.toFixed(1)}) scale(${size})`);
         caught.setAttribute("visibility", visible ? "visible" : "hidden");
         caught.style.opacity = "1";
       }
@@ -870,7 +868,7 @@
                 <path d="M0 0 V9 M0 0 H9" stroke="#4E7B8C" stroke-width="1.15" fill="none" opacity="1"/>
               </pattern>
               <clipPath id="waterBand" clipPathUnits="userSpaceOnUse">
-                <rect x="0" y="172" width="610" height="88"/>
+                <rect x="-110" y="172" width="840" height="130"/>
               </clipPath>
               <filter id="flutter" x="-30%" y="-30%" width="160%" height="160%">
                 <feTurbulence type="fractalNoise" baseFrequency="0.014 0.022" numOctaves="2" seed="7" result="noise">
@@ -882,8 +880,8 @@
               </filter>
             </defs>
 
-            <rect x="0" y="0" width="610" height="172" fill="#070E15"/>
-            <rect x="0" y="0" width="610" height="236" fill="url(#moonlight)"/>
+            <rect x="-110" y="-40" width="840" height="212" fill="#070E15"/>
+            <rect x="-110" y="-40" width="840" height="330" fill="url(#moonlight)"/>
 
             <mask id="crescent">
               <circle cx="318" cy="38" r="18" fill="#ffffff"/>
@@ -955,22 +953,11 @@
                 <circle cx="224" cy="125" r="3.4" fill="#263947"/>
                 <path d="M224 125 L238 120" stroke="#3A5666" stroke-width="5" fill="none" stroke-linecap="round"/>
               </g>
-            
-                <g class="catch-odd">
-                  <circle cx="0" cy="2" r="8.5" fill="#1C1608" stroke="#ffb020" stroke-width="2"/>
-                  <path d="M-4 -3 q6 -6 6 5" stroke="#ffb020" stroke-width="2" fill="none" stroke-linecap="round"/>
-                </g>
-                <g class="catch-plain">
-                  <path d="M-15 2 q10 -8 21 0 q-11 8 -21 0 z" fill="#0C2C24" stroke="#35e0a0" stroke-width="2"/>
-                  <path d="M6 2 l8 -5 v10 z" fill="#0C2C24" stroke="#35e0a0" stroke-width="1.8"/>
-                </g>
-              
-            </g>
 
             <!-- the sea is drawn after the boat, so only the keel sits under it -->
-            <rect x="0" y="172" width="610" height="88" fill="url(#seaG)"/>
-            <rect x="0" y="172" width="610" height="26" fill="url(#moonwater)"/>
-            <path d="M0 172 h610" stroke="#12303A" stroke-width="1.2"/>
+            <rect x="-110" y="172" width="840" height="130" fill="url(#seaG)"/>
+            <rect x="-110" y="172" width="840" height="26" fill="url(#moonwater)"/>
+            <path d="M-110 172 h840" stroke="#12303A" stroke-width="1.2"/>
 
             <circle class="ripple r1" cx="352" cy="196" r="10"/>
             <circle class="ripple r2" cx="352" cy="196" r="10"/>
