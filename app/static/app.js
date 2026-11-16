@@ -112,6 +112,17 @@
      a short version rather than none - the number still has to arrive. */
   let sweepToken = 0;
 
+  /* The dial sweeps wide before it decides: right to the ceiling, back to the
+     floor, then narrowing swings that end on the true score. Colour follows the
+     band the needle is currently in, so the dial reads as undecided while it
+     hunts. Roughly seven seconds, which is long for a UI and deliberate here. */
+  const SWING = [
+    [0.00, 0], [0.55, 100], [1.15, 22], [1.85, 88], [2.55, 44],
+    [3.25, 96], [3.95, 58], [4.65, 92], [5.35, 70], [6.00, 90],
+    [6.50, 84], [7.00, 0],
+  ];
+  const TONE_OF = (v) => (v < 35 ? "#35e0a0" : v < 65 ? "#ffb020" : "#ff4d6d");
+
   function sweepNeedle(root) {
     const g = root.querySelector(".gauge");
     if (!g) return;
@@ -121,23 +132,30 @@
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     const token = ++sweepToken;
-    const pause = reduce ? 0 : 700;
-    const duration = reduce ? 420 : 7800;
+    const pause = reduce ? 0 : 250;
+    const duration = reduce ? 420 : 7000;
 
     if (caption) caption.textContent = "examining";
 
+    const key = SWING.slice();
+    key[key.length - 1] = [7.0, target];
+
+    function valueAt(ratio) {
+      const seconds = ratio * 7.0;
+      for (let i = 0; i < key.length - 1; i++) {
+        const [t0, v0] = key[i];
+        const [t1, v1] = key[i + 1];
+        if (seconds >= t0 && seconds <= t1) {
+          const k = (seconds - t0) / (t1 - t0);
+          const eased = k * k * (3 - 2 * k);
+          return v0 + (v1 - v0) * eased;
+        }
+      }
+      return target;
+    }
+
     setTimeout(() => {
       const started = performance.now();
-
-      function valueAt(t) {
-        // rises toward the score, but the last stretch is slow
-        const base = target * (1 - Math.pow(1 - Math.min(1, t * 1.12), 2.4));
-        // the wobble holds its strength until 80% of the sweep, then fades:
-        // the needle hunts for a long time before it commits
-        const decay = t < 0.8 ? 1 : Math.max(0, 1 - (t - 0.8) / 0.2);
-        const wobble = Math.sin(t * Math.PI * 2 * 7) * target * 0.07 * decay;
-        return Math.max(0, Math.min(100, base + wobble));
-      }
 
       function frame(now) {
         const t = Math.min(1, (now - started) / duration);
@@ -145,12 +163,14 @@
 
         if (token !== sweepToken) return;   // a newer scan took over
         g.style.setProperty("--p", value.toFixed(2));
+        g.style.setProperty("--tone", TONE_OF(value));
         if (readout) readout.textContent = Math.round(value);
 
         if (t < 1) {
           requestAnimationFrame(frame);
         } else {
           g.style.setProperty("--p", target);
+          g.style.setProperty("--tone", TONE_OF(target));
           if (readout) readout.textContent = target;
           if (caption) caption.textContent = "risk";
         }
@@ -158,6 +178,7 @@
       requestAnimationFrame(frame);
     }, pause);
   }
+
 
 
   const escapeHtml = s => String(s).replace(/[&<>"']/g, c =>
