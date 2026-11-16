@@ -4870,3 +4870,93 @@ h1, h2, .hero h1, .hero h2 {
 @media (max-width: 900px) {
   .data-band { width: 100%; }
 }
+
+/* =====================================================================
+   Where the light was coming from
+
+   A gradient headline, a glowing nav pill, glowing verdict badges, a shine sweeping
+   across the primary button, a luminous underline on the top bar and a halo on the
+   moon. None of it was doing a job. Light is the surface and the type now.
+   ===================================================================== */
+h1, .hero h1 {
+  background: none !important;
+  -webkit-background-clip: border-box !important;
+  background-clip: border-box !important;
+  -webkit-text-fill-color: currentColor !important;
+  color: #EDF1F6 !important;
+}
+
+.stats-strip strong {
+  background: none !important;
+  -webkit-text-fill-color: currentColor !important;
+  color: var(--text) !important;
+}
+
+.nav a.active { box-shadow: none !important; }
+.badge.high, .badge.low, .badge.safe, .badge.medium { box-shadow: none !important; }
+
+.btn.primary::after { display: none !important; }
+.topbar::after { display: none !important; }
+.eyebrow-dot { box-shadow: none !important; }
+.fishing .moon { filter: none !important; }
+
+/* the verdict surface is a panel, not a light source */
+.verdict-head {
+  background: rgba(255, 255, 255, .022) !important;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, .05), 0 18px 40px rgba(0, 0, 0, .35) !important;
+}
+
+/* focus is a ring, not a glow */
+.input-row:focus-within {
+  box-shadow: 0 0 0 3px rgba(67, 232, 200, .30), 0 10px 26px rgba(0, 0, 0, .45) !important;
+}
+
+/* =====================================================================
+   The samples: a line of links, underlined, the way someone would offer them
+   ===================================================================== */
+.samples {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px 18px;
+  margin-top: 14px;
+}
+
+.samples-label {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 0.86rem;
+  color: var(--faint);
+}
+
+.chip {
+  padding: 1px 0 !important;
+  background: none !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  font-family: var(--font-body) !important;
+  font-size: 0.86rem !important;
+  letter-spacing: 0 !important;
+  color: var(--muted) !important;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+  text-decoration-color: rgba(255, 255, 255, .22);
+  transition: color .2s ease, text-decoration-color .2s ease;
+}
+
+.chip:hover {
+  color: var(--text) !important;
+  text-decoration-color: var(--mint);
+  background: none !important;
+}
+
+.chip.danger { color: #C9A6AE !important; }
+.chip.danger:hover { color: #F0C8D0 !important; text-decoration-color: #E8879A; }
+
+/* the address takes the body face now, at reading size */
+#urlInput {
+  font-family: var(--font-body) !important;
+  font-size: 1rem !important;
+  letter-spacing: 0 !important;
+}
