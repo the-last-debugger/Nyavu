@@ -216,6 +216,17 @@
     revealResult(result);
   }
 
+
+  /* A light that follows the pointer across cards. Cheap, and it makes a static
+     panel feel like a surface rather than a picture. */
+  document.addEventListener("pointermove", (event) => {
+    const card = event.target.closest(".verdict-head, .step, .panel, .stats-strip");
+    if (!card) return;
+    const rect = card.getBoundingClientRect();
+    card.style.setProperty("--mx", `${event.clientX - rect.left}px`);
+    card.style.setProperty("--my", `${event.clientY - rect.top}px`);
+  }, { passive: true });
+
   /* ----------------------------------------------------------------- stats */
   async function loadStats() {
     try {
