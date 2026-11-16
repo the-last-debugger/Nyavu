@@ -4125,3 +4125,42 @@ body.verdict-open { overflow: hidden; }
 @media (prefers-reduced-motion: reduce) {
   .fishing .wave { animation: swell 26s linear infinite !important; }
 }
+
+/* ============================== the drowning ==============================
+   He slips under after the examination, and the boat tips with the weight of it.
+   Pure CSS on groups the JavaScript never touches, so nothing fights. */
+
+.fishing.drowning .fisher {
+  animation: drown 2.8s cubic-bezier(.45, 0, .7, 1) forwards !important;
+}
+
+@keyframes drown {
+  0%   { transform: translateY(0) rotate(0deg); opacity: 1; }
+  35%  { transform: translateY(14px) rotate(-4deg); opacity: .95; }
+  70%  { transform: translateY(46px) rotate(-9deg); opacity: .55; }
+  100% { transform: translateY(78px) rotate(-14deg); opacity: 0; }
+}
+
+.fishing.drowning .boat {
+  animation: tip 3s ease-in forwards !important;
+}
+
+@keyframes tip {
+  0%   { transform: rotate(0deg) translateY(0); }
+  60%  { transform: rotate(-3deg) translateY(4px); }
+  100% { transform: rotate(-6deg) translateY(9px); }
+}
+
+/* the water closes over him */
+.fishing.drowning .wave { animation-duration: 9s !important; opacity: .9; }
+
+/* the bubble leaves with him */
+.fishing.drowning .bubble { opacity: 0 !important; transition: opacity .8s ease !important; }
+
+@media (prefers-reduced-motion: reduce) {
+  .fishing.drowning .fisher { animation: drown 2.8s cubic-bezier(.45,0,.7,1) forwards !important; }
+  .fishing.drowning .boat { animation: tip 3s ease-in forwards !important; }
+}
+
+/* the moon is a plain crescent now: no halo, just light and dust */
+.fishing .moon { filter: drop-shadow(0 0 6px rgba(190, 240, 255, .25)); }

@@ -442,6 +442,7 @@
     react: 13500,
     zoom: 17500,
     dial: 18500,
+    drown: 21500,
     outro: 29000,
     reveal: 33000,
     end: 41000,
@@ -456,6 +457,11 @@
     "Right. Let's see what the sea brought us.",
     "Another one. Hold my hat.",
     "Same water, new trouble.",
+    "Night shift. Nobody's watching.",
+    "Let's see who's wearing a costume tonight.",
+    "Off we go. Mind the wet.",
+    "The sea keeps its secrets. Not for long.",
+    "One more cast, then I'm done. I always say that.",
   ];
 
   /* His lines. The deck is reshuffled every scan, one lesson is slipped in, and the
@@ -634,6 +640,28 @@
     });
   }
 
+  /* He goes under, and the catch leaves the way it came - out of the water, up, and
+     gone. The jump is computed, so it arcs rather than slides. */
+  function fishEscapes(root) {
+    const caught = root.querySelector(".caught");
+    if (!caught) return;
+    const from = [HAND_A[0] + 14, HAND_A[1] + 2];
+    const t0 = performance.now();
+
+    function frame(now) {
+      const k = Math.min(1, (now - t0) / 2400);
+      const x = from[0] + 120 * k;
+      const y = from[1] - 70 * Math.sin(Math.PI * Math.min(1, k * 1.1)) + 150 * k * k;
+      const spin = 220 * k;
+      caught.style.setProperty("transform",
+        `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px) rotate(${spin.toFixed(1)}deg) scale(1.15)`,
+        "important");
+      caught.style.setProperty("opacity", String(Math.max(0, 1 - Math.max(0, k - 0.75) * 4)), "important");
+      if (k < 1) requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+  }
+
   function handOver(root) {
     const scene = root.querySelector(".fishing");
     const card = root.querySelector(".result");
@@ -729,6 +757,12 @@
         cameraPush(root, [-8, -12, 542, 210], 2400);
         if (card) card.classList.add("dialcoming");
         done.stopTalk = startMonologue(root);
+      }
+      if (!done.drown && elapsed >= BEAT.drown) {
+        done.drown = true;
+        if (typeof done.stopTalk === "function") done.stopTalk();
+        scene.classList.add("drowning");
+        setTimeout(() => fishEscapes(root), 900);
       }
       if (!done.outro && elapsed >= BEAT.outro) {
         done.outro = true;
@@ -921,12 +955,16 @@
             <rect x="-110" y="-40" width="840" height="330" fill="url(#moonlight)"/>
 
             <mask id="crescent">
-              <circle cx="318" cy="38" r="18" fill="#ffffff"/>
-              <circle cx="310" cy="32" r="15.4" fill="#000000"/>
+              <circle cx="602" cy="30" r="17" fill="#ffffff"/>
+              <circle cx="595" cy="25" r="14.6" fill="#000000"/>
             </mask>
-            <circle cx="318" cy="38" r="54" fill="#8FD3E8" opacity="0.05"/>
-            <circle cx="318" cy="38" r="30" fill="#BFE9F7" opacity="0.06"/>
-            <circle cx="318" cy="38" r="18" fill="url(#moonG)" mask="url(#crescent)"/>
+            <!-- dust: a few specks caught in the light -->
+            <g fill="#EAF8FF" opacity="0.55">
+              <circle cx="626" cy="18" r="1.1"/><circle cx="634" cy="30" r="0.8"/>
+              <circle cx="618" cy="44" r="1"/><circle cx="640" cy="14" r="0.7"/>
+              <circle cx="612" cy="8" r="0.9"/><circle cx="646" cy="38" r="0.6"/>
+            </g>
+            <circle cx="602" cy="30" r="17" fill="#F2FBFF" mask="url(#crescent)"/>
 
             <!-- far shore: a church and a lighthouse, held back by tone, not by blur -->
             <g class="far-shore" fill="#070E14" stroke="#1B2C38" stroke-width="1.6" stroke-linejoin="round">
