@@ -1694,19 +1694,30 @@ body.has-result .explain {
 
 .skip:hover { color: var(--accent); border-color: var(--accent); }
 
-/* Reduced motion keeps the scene but stops it moving: the catch is simply already
-   in the boat. Removing the feature was the wrong reading of the preference. */
-@media (prefers-reduced-motion: reduce) {
-  .fishing .arm, .fishing .netg, .fishing .line, .fishing .ripple,
-  .fishing .boat, .fishing .catch-dark, .fishing .catch-odd, .fishing .catch-plain {
-    animation: none !important;
-  }
-  .fishing[data-catch="dark"]  .catch-dark,
-  .fishing[data-catch="odd"]   .catch-odd,
-  .fishing[data-catch="plain"] .catch-plain { opacity: 1; }
-  .fishing .ripple { opacity: 0; }
-}
+/* The scan performance always runs, like the dial does.
+   A still fisherman with the catch already landed tells the wrong story, and this
+   machine class of preference is common enough that the feature would be invisible
+   on many screens. Decorative motion elsewhere still honours the setting. */
 
 .fishing { max-width: 100% !important; }
 .fishing svg { width: 100%; height: auto; }
 .fishing .ripple { fill: none; stroke: rgba(67,232,200,.55); stroke-width: 1.4; }
+
+/* The global reduced-motion rule above collapses every animation to 0.001ms.
+   The scan performance is the product's feedback, not decoration, so it is
+   restored here for all users - same reasoning as the dial, which is JS-driven
+   and therefore already unaffected. */
+@media (prefers-reduced-motion: reduce) {
+  .fishing .arm  { animation: cast 7s cubic-bezier(.4,0,.3,1) forwards !important; }
+  .fishing .netg { animation: netswing 7s cubic-bezier(.4,0,.3,1) forwards !important; }
+  .fishing .line { animation: lineflex 7s ease-in-out forwards !important; }
+  .fishing .boat { animation: bob 3.2s ease-in-out infinite !important; }
+  .fishing .r1   { animation: ripple 7s ease-out 2.1s forwards !important; }
+  .fishing .r2   { animation: ripple 7s ease-out 2.6s forwards !important; }
+  .fishing .r3   { animation: ripple 7s ease-out 3.4s forwards !important; }
+  .fishing[data-catch="dark"]  .catch-dark,
+  .fishing[data-catch="odd"]   .catch-odd,
+  .fishing[data-catch="plain"] .catch-plain {
+    animation: haul 7s cubic-bezier(.3,1.6,.5,1) forwards !important;
+  }
+}
