@@ -194,6 +194,9 @@
     [1.00, 250, 116, 0.34, 0],
   ];
   // one fixed radius per spoke: the rim is never a circle, it is a torn hide
+  /* set while the catch is making its escape, so the scene loop stops holding it */
+  let catchEscaping = false;
+
   const IRREG = [1.12, 0.94, 1.03, 0.86, 1.08, 0.97, 1.15, 0.9, 1.0, 0.88,
                  1.06, 0.93, 1.11, 0.96, 1.02, 0.87, 1.09, 0.95, 1.13, 0.99];
 
@@ -311,7 +314,7 @@
     [fill, mesh].forEach((el) => { if (el) el.style.opacity = clothFade; });
 
     const caught = root.querySelector(".caught");
-    if (caught) {
+    if (caught && !catchEscaping) {
       if (delivered || t2 > 0.55) {
         // held up in front of him, still twitching but no longer thrashing
         const jx = Math.sin(T * 9) * 1.2;
@@ -645,6 +648,7 @@
   function fishEscapes(root) {
     const caught = root.querySelector(".caught");
     if (!caught) return;
+    catchEscaping = true;
     const from = [HAND_A[0] + 14, HAND_A[1] + 2];
     const t0 = performance.now();
 
@@ -754,7 +758,7 @@
       if (!done.react && elapsed >= BEAT.react) { done.react = true; scene.classList.add("reaction"); }
       if (!done.zoom && elapsed >= BEAT.zoom) {
         done.zoom = true;
-        cameraPush(root, [62, 46, 542, 210], 2400);
+        cameraPush(root, [78, 20, 542, 210], 2400);
         if (card) card.classList.add("dialcoming");
         done.stopTalk = startMonologue(root);
       }
@@ -902,6 +906,7 @@
        has to be cleared here. Without this the dial arrives already visible on the
        next link, and a stale water curtain can linger under the new scene. */
     result.classList.remove("dialcoming", "zooming", "modal", "revealed");
+    catchEscaping = false;
     result.querySelectorAll(".waterline").forEach((n) => n.remove());
     document.body.classList.remove("verdict-open");
     document.documentElement.classList.remove("modal-lock");
