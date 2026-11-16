@@ -3125,3 +3125,23 @@ body.has-result .explain {
 /* the water keeps pace with the shorter cut */
 .waterline { transition: opacity 6s cubic-bezier(.4, 0, .2, 1); }
 .waterline.fall { transition: opacity 3.6s cubic-bezier(.4, 0, .2, 1); }
+
+/* ================== moving between views ==================
+   Switching tabs used to swap display and land the whole page at once. The incoming
+   view now rises into place on the same curve the card uses, so the product has one
+   grammar rather than one polished moment and several abrupt ones. */
+
+.view.active { animation: viewIn .46s cubic-bezier(.22, 1, .36, 1) both; }
+
+@keyframes viewIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* the nav mark slides rather than jumping between items */
+#nav a { transition: color .25s ease, background-color .25s ease, transform .25s ease; }
+#nav a.active { transform: translateY(-1px); }
+
+@media (prefers-reduced-motion: reduce) {
+  .view.active { animation: viewIn .46s cubic-bezier(.22,1,.36,1) both !important; }
+}
