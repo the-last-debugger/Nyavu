@@ -705,6 +705,7 @@
 
       setTimeout(() => {
         card.innerHTML = verdict;
+        card.classList.add("verdict-shown");
         card.classList.remove("pending");
         card.classList.remove("zooming");
         const g = card.querySelector(".gauge");
@@ -905,7 +906,7 @@
     /* The card element survives between scans, so anything the previous run set on it
        has to be cleared here. Without this the dial arrives already visible on the
        next link, and a stale water curtain can linger under the new scene. */
-    result.classList.remove("dialcoming", "zooming", "modal", "revealed");
+    result.classList.remove("dialcoming", "zooming", "modal", "revealed", "verdict-shown");
     catchEscaping = false;
     result.querySelectorAll(".waterline").forEach((n) => n.remove());
     document.body.classList.remove("verdict-open");

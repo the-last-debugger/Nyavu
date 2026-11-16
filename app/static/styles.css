@@ -4212,3 +4212,36 @@ body.verdict-open { overflow: hidden; }
   .fishing.drowning .fisher { animation: drown 2.4s cubic-bezier(.5,0,.75,1) forwards !important; }
   .fishing.drowning .boat { animation: lurch 2.4s ease-in-out forwards !important; }
 }
+
+/* ===================== no dead space while a scan runs =====================
+   The reasons and evidence were faded to zero opacity but still taking height, which is
+   what left the empty band under the scene. They are removed from layout until the
+   verdict is ready. */
+.result.pending .block-title,
+.result.pending .reasons,
+.result.pending .evidence,
+.result.pending details.advanced {
+  display: none !important;
+}
+
+/* the evidence only exists alongside the verdict */
+.result:not(.verdict-shown) .block-title,
+.result:not(.verdict-shown) .reasons,
+.result:not(.verdict-shown) .evidence,
+.result:not(.verdict-shown) details.advanced,
+.result:not(.verdict-shown) .stamp {
+  display: none !important;
+}
+
+.result.verdict-shown .block-title,
+.result.verdict-shown .reasons,
+.result.verdict-shown .evidence {
+  display: revert !important;
+}
+
+.result.verdict-shown .reasons { display: grid !important; }
+.result.verdict-shown .evidence { display: flex !important; }
+
+/* the way out is available from the first second; only the dial waits its turn */
+.result.pending:not(.dialcoming) .thinking-row { opacity: 1 !important; }
+.result.pending:not(.dialcoming) .gauge { opacity: 0; }
