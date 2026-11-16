@@ -4589,3 +4589,66 @@ summary:focus-visible,
   color: var(--muted);
   margin-top: 10px;
 }
+
+/* ===================== humanisation =====================
+   Three things made the page read as generated: a faint technical grid behind
+   everything, coloured glows bleeding in from the corners, and one radius and one
+   spacing value applied everywhere. All three are gone or uneven now. */
+
+/* 1. no grid. The pattern was a tell, and it was doing nothing for the content. */
+body::after { display: none !important; }
+
+/* 2. glows reduced to a suggestion of light, not a colour wash */
+body::before {
+  background:
+    radial-gradient(1100px 760px at 16% -12%, rgba(67, 232, 200, 0.045), transparent 66%),
+    radial-gradient(920px 640px at 86% 0%, rgba(96, 120, 190, 0.035), transparent 64%) !important;
+  animation: none !important;
+}
+
+/* 3. radii vary by what a surface is */
+.panel,
+.step { border-radius: 14px; }
+
+.result .verdict-head { border-radius: 20px; }
+.preview-card { border-radius: 15px; }
+.stats-strip { border-radius: 16px; }
+.spark-card { border-radius: 16px; }
+
+.result .reasons li { border-radius: 10px; }
+.result .suggest { border-radius: 12px; }
+
+.btn { border-radius: 11px; }
+.btn.icon { border-radius: 9px; }
+
+/* 4. the rhythm is not a metronome */
+.explain { margin-top: 58px; }
+.steps { gap: 16px; margin-bottom: 42px; }
+.data-band { margin-top: 46px; }
+.block-title { margin: 38px 0 12px; }
+
+/* 5. one asymmetric move: the example verdict sits a little lower than the copy,
+      the way a card dropped on a desk would */
+.hero-visual { transform: translateY(14px); }
+
+@media (max-width: 900px) {
+  .hero-visual { transform: none; }
+}
+
+/* ===================== the last of the neon =====================
+   The dial, the sparkline dot and the brand mark all carried coloured bloom. Light now
+   comes from the surface and the typography, not from filters. */
+.gauge .fill { filter: none !important; }
+.gauge .needle { box-shadow: none !important; }
+.gauge .pivot { box-shadow: none !important; }
+
+.spark-dot { filter: none !important; }
+.spark-line { filter: none !important; }
+
+.brand svg { filter: none !important; }
+
+/* the readout number had a glow of its own */
+.readout span { text-shadow: none !important; }
+
+/* the verdict stamp was blended and glowing; it is ink on paper */
+.stamp { mix-blend-mode: normal !important; filter: none !important; }
