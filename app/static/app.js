@@ -220,24 +220,47 @@
   /* The scene runs on its own ten-second clock from the moment the card appears.
      The dial waits for the landing, then runs its own shorter sweep; the two are
      separate clocks so retiming one never drags the other. */
-  function runScene(root, durationMs) {
+  /* One scene clock, three acts: the cast (0-10s), the reaction (10-12s), and the
+     slow zoom into the catch (12-13s) before the verdict card takes over. */
+  function runScene(root) {
     const started = performance.now();
+    const NET_MS = 10000;
     let impactDone = false;
+    let reactionDone = false;
+    let zoomDone = false;
 
     function frame(now) {
-      const t = Math.min(1, (now - started) / durationMs);
+      const elapsed = now - started;
+      const t = Math.min(1, elapsed / NET_MS);
       updateNet(root, t);
 
-      // the splash belongs to the frame the net meets the water, not to a CSS delay
-      if (!impactDone && t >= 0.34) {
+      const scene = root.querySelector(".fishing");
+
+      // the splash belongs to the frame the mesh meets the surface
+      if (!impactDone && t >= 0.38) {
         impactDone = true;
-        const scene = root.querySelector(".fishing");
         if (scene) scene.classList.add("impact");
       }
-      if (t < 1) requestAnimationFrame(frame);
+
+      // he reacts to whatever came up in the net
+      if (!reactionDone && elapsed >= NET_MS) {
+        reactionDone = true;
+        if (scene) scene.classList.add("reaction");
+      }
+
+      // then the camera moves in on the catch
+      if (!zoomDone && elapsed >= NET_MS + 1600) {
+        zoomDone = true;
+        if (scene) scene.classList.add("zoom");
+        const card = root.querySelector(".result.pending");
+        if (card) card.classList.add("zooming");
+      }
+
+      if (elapsed < NET_MS + 3000) requestAnimationFrame(frame);
     }
     requestAnimationFrame(frame);
   }
+
 
   const TONE_OF = (v) => (v < 35 ? "#35e0a0" : v < 65 ? "#ffb020" : "#ff4d6d");
 
@@ -249,14 +272,14 @@
     const caption = g.querySelector(".readout small");
 
     const token = ++sweepToken;
-    const pause = 3400;   // the net meets the water at 34% of ten seconds
-    const duration = 6600;
+    const pause = 3800;   // the mesh meets the water at 38% of ten seconds
+    const duration = 9200;   // runs through the reaction to the zoom
 
     if (caption) caption.textContent = "examining";
     const scene = document.querySelector(".fishing");
     if (scene) scene.classList.add("go");
     updateNet(document, 0);
-    runScene(document, 10000);
+    runScene(document);
 
     const ease = (x) => {
       const k = Math.min(1, Math.max(0, x));
