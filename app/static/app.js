@@ -942,7 +942,7 @@
           <div class="stamp ${r.risk}" aria-hidden="true">${r.risk === "high" ? "phishing" : r.risk === "medium" ? "unsure" : "clear"}</div>
 
         <div class="fishing" data-catch="${r.risk === "high" ? "dark" : r.risk === "medium" ? "odd" : "plain"}" aria-hidden="true">
-          <svg viewBox="-102 -28 813 315" preserveAspectRatio="xMidYMid meet">
+          <svg viewBox="-102 -28 813 315" preserveAspectRatio="xMidYMid slice">
             <defs>
               <linearGradient id="seaG" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%" stop-color="#0B3546"/>

@@ -4334,3 +4334,97 @@ body.verdict-open { overflow: hidden; }
 @media (prefers-reduced-motion: reduce) {
   .ropeline { transition-duration: .4s !important; }
 }
+
+/* ===================== phones =====================
+   At 390px the scene was a letterboxed strip with a speech bubble larger than the
+   picture. The scene now keeps a usable height by cropping the sides, the bubble sizes
+   itself to the frame, and the status row stacks instead of fighting for space. */
+@media (max-width: 700px) {
+  .fishing svg {
+    min-height: 200px;
+  }
+
+  .fishing .bubble,
+  .fishing .bubble.on {
+    left: 6% !important;
+    right: 6% !important;
+    top: 5% !important;
+    width: auto !important;
+    max-width: none !important;
+    padding: 8px 11px;
+    font-size: 0.74rem;
+    line-height: 1.35;
+    border-radius: 12px 12px 12px 4px;
+  }
+
+  .fishing .bubble::after { left: 18px; }
+
+  .result.pending .thinking-row {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 10px !important;
+  }
+
+  .result.pending .thinking { font-size: 0.8rem !important; }
+  .result.pending .skip { align-self: stretch !important; text-align: center; }
+
+  /* the numbers were wrapping to three lines each */
+  .stats-strip strong { font-size: 1.45rem; }
+  .stats-strip span { font-size: 0.6rem; letter-spacing: .09em; }
+  .stats-strip > div { padding: 18px 10px; }
+
+  /* the preview card was eating the first screen */
+  .preview-card { padding: 16px 16px; }
+  .preview-url { font-size: 0.74rem; }
+  .preview-line { font-size: 0.82rem; }
+  .hero .eyebrow { font-size: 0.6rem; padding: 5px 10px; }
+}
+
+/* ===================== the verdict on a phone =====================
+   It was still using the two-column head, so the dial and the heading fought for a
+   390px strip, and the URL broke mid-word. One column, left aligned, wrapping properly. */
+@media (max-width: 700px) {
+  .result .verdict-head {
+    grid-template-columns: 1fr !important;
+    justify-items: start !important;
+    text-align: left !important;
+    gap: 14px !important;
+    padding: 18px !important;
+  }
+
+  .result .gauge {
+    width: 128px !important;
+    height: 106px !important;
+    margin: 0 auto !important;
+    order: -1;
+  }
+
+  .result .verdict-text h2 {
+    font-size: 1.45rem !important;
+    line-height: 1.15 !important;
+    letter-spacing: -0.02em !important;
+  }
+
+  .result .verdict-url {
+    font-size: 0.78rem !important;
+    line-height: 1.45 !important;
+    overflow-wrap: anywhere !important;
+    word-break: break-word !important;
+  }
+
+  .result .verdict-text .badge { font-size: 0.66rem; }
+
+  .result .stamp {
+    position: static !important;
+    display: inline-block !important;
+    margin: 10px 0 0 !important;
+    transform: rotate(-4deg) !important;
+    font-size: 0.66rem !important;
+    padding: 5px 11px !important;
+  }
+
+  .result .reasons li { padding: 14px 14px 14px 44px !important; font-size: 0.86rem; }
+  .result .block-title { font-size: 0.62rem; letter-spacing: .16em; }
+  .result .meta-row { gap: 10px !important; font-size: 0.7rem !important; flex-wrap: wrap !important; }
+  .result .suggest { font-size: 0.82rem !important; }
+}
