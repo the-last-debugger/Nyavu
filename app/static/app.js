@@ -597,7 +597,10 @@
             const share = Math.max(6, Math.round(((e.weight || 0) / max) * 100));
             return `<span class="pill"><i style="--w:${share}%"></i>${escapeHtml(e.token)}</span>`;
           }).join("");
-          return `<h3 class="block-title">Parts of the address that raised the score</h3>
+          const fragTitle = r.risk === "low"
+            ? "Parts of the address that counted in its favour"
+            : "Parts of the address that raised the score";
+          return `<h3 class="block-title">${fragTitle}</h3>
                   <div class="evidence">${bars}</div>`;
         })()
       : "";
@@ -623,7 +626,9 @@
         <div class="verdict-text">
           <span class="badge ${r.risk}">${r.band}</span>${r.reputation === "established"
             ? '<span class="badge rep">Established domain</span>' : ""}
-          <h2>${r.verdict === "phishing" ? "Something doesn't look right" : "No warning signs found"}</h2>
+          <h2>${r.risk === "high" ? "Something doesn't look right"
+            : r.risk === "medium" ? "This one is hard to call"
+            : "No warning signs found"}</h2>
           <p class="verdict-url">${escapeHtml(r.url)}</p>
           <div class="stamp ${r.risk}" aria-hidden="true">${r.risk === "high" ? "phishing" : r.risk === "medium" ? "unsure" : "clear"}</div>
 
@@ -802,7 +807,9 @@
         <p class="thinking" id="thinking"><span class="dot"></span><span class="phase">Reading the address</span></p>
         <button type="button" class="skip" id="skipBtn">Skip the theatre</button>
       </div>
-      <h3 class="block-title">Why Nyavu raised a concern</h3>
+      <h3 class="block-title">${r.risk === "low"
+        ? "Why this looks fine"
+        : r.risk === "medium" ? "What gave Nyavu pause" : "Why Nyavu raised a concern"}</h3>
       <ul class="reasons">${reasons}</ul>
       ${evidence}
       <details class="advanced">
