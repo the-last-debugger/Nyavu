@@ -154,6 +154,28 @@
     setTimeout(() => {
       const started = performance.now();
 
+      const PHASES = [
+        [0.00, "Reading the address"],
+        [0.18, "Finding the registered domain"],
+        [0.34, "Comparing against known brands"],
+        [0.52, "Measuring the character patterns"],
+        [0.70, "Weighing the evidence"],
+        [0.86, "Reaching a verdict"],
+      ];
+      let phaseIndex = -1;
+      const phaseTimer = setInterval(() => {
+        if (token !== sweepToken) { clearInterval(phaseTimer); return; }
+        const elapsed = (performance.now() - started) / duration;
+        let next = 0;
+        PHASES.forEach((p, i) => { if (elapsed >= p[0]) next = i; });
+        if (next !== phaseIndex) {
+          phaseIndex = next;
+          const node = document.querySelector("#thinking .phase");
+          if (node) node.textContent = PHASES[next][1];
+        }
+        if (elapsed >= 1) clearInterval(phaseTimer);
+      }, 120);
+
       function frame(now) {
         const t = Math.min(1, (now - started) / duration);
         const value = t === 1 ? target : valueAt(t);
@@ -170,6 +192,10 @@
           g.style.setProperty("--tone", TONE_OF(target));
           if (readout) readout.textContent = target;
           if (caption) caption.textContent = "risk";
+          const card = g.closest(".result");
+          if (card) card.classList.remove("pending");
+          const line = document.getElementById("thinking");
+          if (line) line.remove();
         }
       }
       requestAnimationFrame(frame);
@@ -207,6 +233,7 @@
 
     document.body.classList.add("has-result");
     result.classList.remove("hidden");
+    result.classList.add("pending");
     result.innerHTML = `
       <div class="verdict-head">
         <div class="gauge" style="--p:0; --tone:${TONE[r.risk]}" data-target="${pct}">
@@ -222,6 +249,7 @@
             ? '<span class="badge rep">Established domain</span>' : ""}
           <h2>${r.verdict === "phishing" ? "Something doesn't look right" : "No warning signs found"}</h2>
           <p class="verdict-url">${escapeHtml(r.url)}</p>
+          <div class="skeleton" aria-hidden="true"><i></i><i></i><i></i></div>
           ${r.suggested ? `<p class="suggest">You may have meant
              <strong>${escapeHtml(r.suggested.domain)}</strong> — that address is in our
              reference list for ${escapeHtml(r.suggested.brand)}. We cannot verify official
@@ -234,6 +262,7 @@
           </div>
         </div>
       </div>
+      <p class="thinking" id="thinking"><span class="dot"></span><span class="phase">Reading the address</span></p>
       <h3 class="block-title">Why Nyavu raised a concern</h3>
       <ul class="reasons">${reasons}</ul>
       ${evidence}

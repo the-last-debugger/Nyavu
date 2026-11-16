@@ -1429,3 +1429,134 @@ body.has-result .explain {
   from { opacity: 0; transform: translateY(18px) scale(0.97); filter: blur(2px); }
   to   { opacity: 1; transform: none; filter: blur(0); }
 }
+
+/* ------------------------------------------------ the verdict is withheld */
+
+/* While the dial is deciding, the card must not give the answer away. Everything
+   that states a verdict is hidden; only the dial and the running narration show. */
+.result.pending .verdict-text .badge,
+.result.pending .verdict-text h2,
+.result.pending .verdict-text .suggest,
+.result.pending .meta-row,
+.result.pending .block-title,
+.result.pending .reasons,
+.result.pending .evidence,
+.result.pending details.advanced {
+  opacity: 0;
+  transform: translateY(6px);
+  filter: blur(3px);
+  transition: opacity .5s ease, transform .5s ease, filter .5s ease;
+}
+
+.result:not(.pending) .verdict-text .badge { transition-delay: .05s; }
+.result:not(.pending) .verdict-text h2 { transition-delay: .15s; }
+.result:not(.pending) .verdict-text .suggest { transition-delay: .3s; }
+.result:not(.pending) .meta-row { transition-delay: .4s; }
+.result:not(.pending) .block-title { transition-delay: .55s; }
+.result:not(.pending) .reasons { transition-delay: .6s; }
+.result:not(.pending) .evidence { transition-delay: .7s; }
+.result:not(.pending) details.advanced { transition-delay: .8s; }
+
+.verdict-text .badge,
+.verdict-text h2,
+.verdict-text .suggest,
+.meta-row,
+.result .block-title,
+.result .reasons,
+.result .evidence,
+.result details.advanced {
+  transition: opacity .5s ease, transform .5s ease, filter .5s ease;
+}
+
+/* the narration line that stands in for the answer */
+.thinking {
+  display: none;
+  align-items: center;
+  gap: 10px;
+  margin: 26px 0 0;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+}
+
+.result.pending .thinking { display: flex; }
+
+.thinking .dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 10px var(--accent);
+  animation: think 1.1s ease-in-out infinite;
+}
+
+@keyframes think {
+  0%, 100% { opacity: .25; transform: scale(.8); }
+  50%      { opacity: 1; transform: scale(1.15); }
+}
+
+.thinking .phase::after {
+  content: "";
+  display: inline-block;
+  width: 1ch;
+  animation: dots 1.4s steps(4, end) infinite;
+}
+
+@keyframes dots {
+  0%   { content: ""; }
+  25%  { content: "."; }
+  50%  { content: ".."; }
+  75%  { content: "..."; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .result.pending .verdict-text .badge,
+  .result.pending .verdict-text h2,
+  .result.pending .verdict-text .suggest,
+  .result.pending .meta-row,
+  .result.pending .block-title,
+  .result.pending .reasons,
+  .result.pending .evidence { filter: none; }
+}
+
+/* the space where the answer will appear, while it is still being decided */
+.skeleton { display: none; }
+
+.result.pending .skeleton {
+  display: grid;
+  gap: 10px;
+  margin: 14px 0 4px;
+}
+
+.skeleton i {
+  display: block;
+  height: 12px;
+  border-radius: 6px;
+  background: linear-gradient(90deg,
+      rgba(255,255,255,.045) 25%, rgba(255,255,255,.10) 37%, rgba(255,255,255,.045) 63%);
+  background-size: 400% 100%;
+  animation: shimmer 1.8s ease-in-out infinite;
+}
+
+.skeleton i:nth-child(1) { width: 58%; height: 18px; }
+.skeleton i:nth-child(2) { width: 86%; }
+.skeleton i:nth-child(3) { width: 44%; }
+
+@keyframes shimmer {
+  from { background-position: 100% 0; }
+  to   { background-position: 0 0; }
+}
+
+/* while pending, the answer text is out of the way entirely so the card reads
+   as working rather than empty */
+.result.pending .verdict-text h2,
+.result.pending .verdict-text .badge,
+.result.pending .verdict-text .suggest,
+.result.pending .meta-row,
+.result.pending .block-title,
+.result.pending .reasons,
+.result.pending .evidence,
+.result.pending details.advanced {
+  display: none;
+}
