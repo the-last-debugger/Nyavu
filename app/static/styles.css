@@ -4800,3 +4800,73 @@ body::before {
 .folio, .block-title, .step-no {
   font-weight: 600;
 }
+
+/* =====================================================================
+   The typography stops advertising itself
+
+   Space Grotesk at -0.04em tracking over Inter is the house style of every generated
+   landing page. A book serif for the things that are written, the sans for the things
+   that are operated, and the mono reserved for numbers and marginalia.
+   ===================================================================== */
+:root {
+  --font-serif: Georgia, "Iowan Old Style", "Palatino Linotype", "Book Antiqua", serif;
+  --text: #E4E8EE;
+  --muted: #9BA5B2;
+}
+
+body { font-size: 1rem; line-height: 1.62; color: var(--text); }
+
+h1, h2, .hero h1, .hero h2 {
+  font-family: var(--font-serif) !important;
+  font-weight: 400 !important;
+  letter-spacing: -0.012em !important;
+}
+
+.hero h1 {
+  font-size: clamp(2.35rem, 3.5vw, 3.4rem) !important;
+  line-height: 1.1 !important;
+  letter-spacing: -0.014em !important;
+}
+
+.hero .lede {
+  font-family: var(--font-body);
+  font-size: 1.02rem;
+  line-height: 1.62;
+  color: var(--muted);
+  max-width: 44ch;
+}
+
+/* numbers in the serif's old-style figures, which is where it earns its keep */
+.stats-strip strong {
+  font-family: var(--font-serif) !important;
+  font-weight: 400 !important;
+  letter-spacing: -0.01em !important;
+  font-size: 1.75rem !important;
+}
+
+/* section labels: sans, quieter tracking, no shouting */
+.block-title {
+  font-family: var(--font-body) !important;
+  font-size: 0.7rem !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.115em !important;
+  color: var(--muted) !important;
+}
+
+/* folios and captions keep the mono, but with less mechanical spacing */
+.folio { letter-spacing: 0.16em !important; color: var(--faint) !important; }
+.step-no { font-family: var(--font-serif) !important; font-size: 0.8rem !important; letter-spacing: 0 !important; color: var(--faint) !important; font-style: italic; }
+
+/* one rule instead of many, and not all the way across */
+.explain { border-top: 0 !important; padding-top: 0 !important; }
+
+.data-band {
+  border-top: 1px solid rgba(255, 255, 255, .10) !important;
+  width: 72%;
+}
+
+.steps { border-top: 1px solid rgba(255, 255, 255, .10); }
+
+@media (max-width: 900px) {
+  .data-band { width: 100%; }
+}
