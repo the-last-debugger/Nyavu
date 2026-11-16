@@ -1813,3 +1813,93 @@ body.has-result .explain {
   .fishing .r2        { animation: ripple 7s ease-out 2.6s forwards !important; }
   .fishing .r3        { animation: ripple 7s ease-out 3.4s forwards !important; }
 }
+
+/* ====================== the drape: ten seconds of casting ==================
+   0-12%  winds back with the net gathered in both hands
+   12-26% throws; the cloth flutters out over the water
+   26-40% lands and spreads
+   40-66% drifts, drawn across the water
+   66-88% hauled back in, catch coming up inside it
+   88-100% aboard, verdict.                                                   */
+
+.fishing .netcloth {
+  transform-box: view-box;
+  transform-origin: 0 0;
+  animation: netcast 10s cubic-bezier(.34,.9,.4,1) forwards;
+}
+
+@keyframes netcast {
+  0%, 12% { transform: translate(298px, 96px) scale(.30) rotate(-14deg); }
+  26%     { transform: translate(302px, 152px) scale(.66) rotate(8deg); }
+  34%     { transform: translate(322px, 180px) scale(1) rotate(0deg); }
+  66%     { transform: translate(324px, 183px) scale(1.03) rotate(-3deg); }
+  78%     { transform: translate(310px, 164px) scale(.82) rotate(5deg); }
+  88%     { transform: translate(294px, 142px) scale(.64) rotate(-4deg); }
+  94%     { transform: translate(288px, 135px) scale(.56) rotate(0deg); }
+  100%    { transform: translate(288px, 135px) scale(.56) rotate(0deg); }
+}
+
+.fishing .arms {
+  transform-box: view-box;
+  transform-origin: 252px 116px;
+  animation: armswork 10s cubic-bezier(.4,0,.3,1) forwards;
+}
+
+@keyframes armswork {
+  0%   { transform: rotate(-6deg); }
+  12%  { transform: rotate(-30deg); }
+  26%  { transform: rotate(34deg); }
+  40%  { transform: rotate(26deg); }
+  52%  { transform: rotate(18deg); }
+  60%  { transform: rotate(28deg); }
+  70%  { transform: rotate(14deg); }
+  80%  { transform: rotate(-18deg); }
+  90%  { transform: rotate(-4deg); }
+  100% { transform: rotate(0deg); }
+}
+
+.fishing .cloth { transform-box: fill-box; transform-origin: center; }
+.fishing .cloth.back { animation: swish 2.6s ease-in-out infinite alternate; }
+.fishing .cloth.front { animation: swish 2.1s ease-in-out infinite alternate-reverse; }
+
+@keyframes swish {
+  from { transform: rotate(-2.4deg) scale(1); }
+  to   { transform: rotate(2.4deg) scale(1.03); }
+}
+
+.fishing .caught { opacity: 0; animation: catchup10 10s linear forwards; transform-box: fill-box; transform-origin: center; }
+.fishing .caught > g { display: none; animation: none !important; opacity: 1 !important; }
+
+.fishing[data-catch="dark"]  .caught > .catch-dark  { display: block; }
+.fishing[data-catch="odd"]   .caught > .catch-odd   { display: block; }
+.fishing[data-catch="plain"] .caught > .catch-plain { display: block; }
+
+@keyframes catchup10 {
+  0%, 86% { opacity: 0; }
+  90%     { opacity: 1; transform: translateY(4px) scale(.9); }
+  100%    { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.fishing .r1 { animation: ripple10 10s ease-out 3.0s forwards; }
+.fishing .r2 { animation: ripple10 10s ease-out 3.7s forwards; }
+.fishing .r3 { animation: ripple10 10s ease-out 4.6s forwards; }
+
+@keyframes ripple10 {
+  0%   { opacity: 0; transform: scale(.3); }
+  6%   { opacity: .85; }
+  34%  { opacity: 0; transform: scale(3.2); }
+  100% { opacity: 0; transform: scale(3.2); }
+}
+
+/* exempt the scene from the global animation collapse */
+@media (prefers-reduced-motion: reduce) {
+  .fishing .netcloth { animation: netcast 10s cubic-bezier(.34,.9,.4,1) forwards !important; }
+  .fishing .arms     { animation: armswork 10s cubic-bezier(.4,0,.3,1) forwards !important; }
+  .fishing .caught   { animation: catchup10 10s linear forwards !important; }
+  .fishing .cloth.back  { animation: swish 2.6s ease-in-out infinite alternate !important; }
+  .fishing .cloth.front { animation: swish 2.1s ease-in-out infinite alternate-reverse !important; }
+  .fishing .r1 { animation: ripple10 10s ease-out 3.0s forwards !important; }
+  .fishing .r2 { animation: ripple10 10s ease-out 3.7s forwards !important; }
+  .fishing .r3 { animation: ripple10 10s ease-out 4.6s forwards !important; }
+  .fishing .boat { animation: bob 3.2s ease-in-out infinite !important; }
+}

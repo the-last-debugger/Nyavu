@@ -159,7 +159,7 @@
 
     const token = ++sweepToken;
     const pause = 250;
-    const duration = 7000;
+    const duration = 10000;
 
     if (caption) caption.textContent = "examining";
 
@@ -289,57 +289,80 @@
                 <stop offset="0%" stop-color="#1B3A44"/>
                 <stop offset="100%" stop-color="#0A1A22"/>
               </radialGradient>
+
+              <!-- real netting: a diamond lattice, not a solid circle -->
+              <pattern id="mesh" width="9" height="9" patternUnits="userSpaceOnUse"
+                       patternTransform="rotate(45)">
+                <path d="M0 0 V9 M0 0 H9" stroke="#3fd9c0" stroke-width="1.15"
+                      fill="none" opacity="0.75"/>
+              </pattern>
+
+              <!-- the cloth breathes: slow turbulence displaces the net as it moves -->
+              <filter id="flutter" x="-30%" y="-30%" width="160%" height="160%">
+                <feTurbulence type="fractalNoise" baseFrequency="0.014 0.022" numOctaves="2" seed="7" result="noise">
+                  <animate attributeName="baseFrequency" dur="10s" repeatCount="indefinite"
+                           values="0.012 0.022;0.022 0.012;0.012 0.022"/>
+                </feTurbulence>
+                <feDisplacementMap in="SourceGraphic" in2="noise" scale="7"
+                                   xChannelSelector="R" yChannelSelector="G"/>
+              </filter>
             </defs>
 
             <rect x="0" y="0" width="460" height="152" fill="#050B11"/>
-            <circle cx="382" cy="46" r="19" fill="url(#moonG)"/>
+            <circle cx="386" cy="44" r="19" fill="url(#moonG)"/>
             <rect x="0" y="150" width="460" height="100" fill="url(#seaG)"/>
             <path d="M0 150 h460" stroke="#12303A" stroke-width="1.2"/>
 
-            <circle class="ripple r1" cx="330" cy="182" r="10"/>
-            <circle class="ripple r2" cx="330" cy="182" r="10"/>
-            <circle class="ripple r3" cx="330" cy="182" r="10"/>
+            <circle class="ripple r1" cx="322" cy="180" r="10"/>
+            <circle class="ripple r2" cx="322" cy="180" r="10"/>
+            <circle class="ripple r3" cx="322" cy="180" r="10"/>
 
             <g class="boat">
-              <path d="M150 152 q40 30 104 30 q64 0 96 -30 z" fill="#060C12" stroke="#1E2E3A" stroke-width="2.4"/>
-              <path d="M158 149 h188" stroke="#263947" stroke-width="3.4" stroke-linecap="round"/>
+              <path d="M156 152 q38 28 100 28 q62 0 94 -28 z" fill="#060C12" stroke="#1E2E3A" stroke-width="2.4"/>
+              <path d="M164 149 h180" stroke="#263947" stroke-width="3.4" stroke-linecap="round"/>
             </g>
 
             <g class="fisher">
-              <path class="torso" d="M232 112 q12 -26 30 -5 l-5 32 h-22 z" fill="#060C12" stroke="#263947" stroke-width="2.2"/>
-              <circle class="head" cx="248" cy="96" r="10" fill="#060C12" stroke="#263947" stroke-width="2.2"/>
-              <path class="hat" d="M232 90 q16 -18 32 0 l8 5 h-48 z" fill="#060C12" stroke="#263947" stroke-width="2.2"/>
-              <g class="arm">
-                <path d="M256 110 l30 -8" stroke="#263947" stroke-width="6" stroke-linecap="round"/>
-                <path class="hand" d="M286 102 m-4 0 a4 4 0 1 0 8 0 a4 4 0 1 0 -8 0" fill="#263947"/>
+              <path class="torso" d="M236 114 q13 -28 32 -6 l-6 34 h-23 z" fill="#060C12" stroke="#263947" stroke-width="2.2"/>
+              <circle class="head" cx="252" cy="97" r="10.5" fill="#060C12" stroke="#263947" stroke-width="2.2"/>
+              <path class="hat" d="M235 91 q17 -19 34 0 l9 5 h-52 z" fill="#060C12" stroke="#263947" stroke-width="2.2"/>
+              <g class="arms">
+                <!-- upper arm, elbow, forearm, hand - per side, so the bend shows -->
+                <path class="limb" d="M249 115 L264 114" stroke="#263947" stroke-width="6.2"
+                      fill="none" stroke-linecap="round"/>
+                <circle class="elbow" cx="264" cy="114" r="3.6" fill="#263947"/>
+                <path class="limb" d="M264 114 L281 104" stroke="#263947" stroke-width="5.2"
+                      fill="none" stroke-linecap="round"/>
+                <path class="hand" d="M281 104 q4 -3 6 1 q2 4 -3 5 z" fill="#263947"/>
+
+                <path class="limb" d="M254 122 L269 122" stroke="#263947" stroke-width="6.2"
+                      fill="none" stroke-linecap="round"/>
+                <circle class="elbow" cx="269" cy="122" r="3.6" fill="#263947"/>
+                <path class="limb" d="M269 122 L285 114" stroke="#263947" stroke-width="5.2"
+                      fill="none" stroke-linecap="round"/>
+                <path class="hand" d="M285 114 q4 -3 6 1 q2 4 -3 5 z" fill="#263947"/>
               </g>
             </g>
 
-            <!-- the cast net: bundled in hand, thrown, spreads on the water, hauled back -->
-            <g class="net">
-              <g class="net-bundle">
-                <path d="M270 92 q10 -6 18 2" stroke="#43e8c8" stroke-width="3" fill="none" stroke-linecap="round"/>
-              </g>
-              <g class="net-open">
-                <circle cx="0" cy="0" r="34" fill="rgba(67,232,200,.07)" stroke="#43e8c8" stroke-width="2"/>
-                <circle cx="0" cy="0" r="21" fill="none" stroke="rgba(67,232,200,.45)" stroke-width="1.2"/>
-                <g stroke="rgba(67,232,200,.5)" stroke-width="1">
-                  <path d="M-34 0 H34"/><path d="M-24 -24 L24 24"/><path d="M0 -34 V34"/>
-                  <path d="M-24 24 L24 -24"/><path d="M-32 -12 Q0 6 32 -12"/><path d="M-32 12 Q0 -6 32 12"/>
+            <!-- the drape: two layered cloths of netting, thrown together -->
+            <g class="netcloth" filter="url(#flutter)">
+              <path class="cloth back" fill="url(#mesh)"
+                    d="M-58 -4 q8 -22 32 -25 q20 -2 27 -15 q9 13 28 15 q23 3 29 25 q-5 21 -30 23 q-22 2 -30 13 q-9 -11 -30 -13 q-27 -3 -26 -23 z"
+                    fill-opacity="0.5"/>
+              <path class="cloth front" fill="url(#mesh)"
+                    d="M-52 2 q6 -19 28 -22 q18 -2 24 -13 q8 11 25 13 q20 3 26 22 q-4 19 -26 21 q-19 2 -26 11 q-8 -9 -26 -11 q-24 -2 -25 -21 z"/>
+              <g class="caught">
+                <g class="catch-dark">
+                  <path d="M-13 2 q9 -11 19 -1 q-4 8 -12 8 z" fill="#200910" stroke="#ff4d6d" stroke-width="2"/>
+                  <path d="M-6 -5 l1 -7 M0 -6 l2 -7 M6 -4 l3 -6" stroke="#ff4d6d" stroke-width="2" stroke-linecap="round"/>
                 </g>
-                <g class="caught">
-                  <g class="catch-dark">
-                    <path d="M-14 2 q9 -12 20 -1 q-4 9 -13 9 z" fill="#200910" stroke="#ff4d6d" stroke-width="2"/>
-                    <path d="M-6 -6 l1 -8 M0 -7 l2 -8 M6 -5 l3 -7" stroke="#ff4d6d" stroke-width="2" stroke-linecap="round"/>
-                  </g>
-                  <g class="catch-odd">
-                    <circle cx="0" cy="2" r="9" fill="#1C1608" stroke="#ffb020" stroke-width="2"/>
-                    <path d="M-4 -4 q6 -6 6 5" stroke="#ffb020" stroke-width="2" fill="none" stroke-linecap="round"/>
-                  </g>
-                  <g class="catch-plain">
-                    <path d="M-16 2 q10 -9 22 0 q-11 9 -22 0 z" fill="#0C2C24" stroke="#35e0a0" stroke-width="2"/>
-                    <path d="M6 2 l8 -6 v12 z" fill="#0C2C24" stroke="#35e0a0" stroke-width="1.8"/>
-                  </g>
+                <g class="catch-odd">
+                  <circle cx="0" cy="2" r="8.5" fill="#1C1608" stroke="#ffb020" stroke-width="2"/>
+                  <path d="M-4 -3 q6 -6 6 5" stroke="#ffb020" stroke-width="2" fill="none" stroke-linecap="round"/>
+                </g>
+                <g class="catch-plain">
+                  <path d="M-15 2 q10 -8 21 0 q-11 8 -21 0 z" fill="#0C2C24" stroke="#35e0a0" stroke-width="2"/>
+                  <path d="M6 2 l8 -5 v10 z" fill="#0C2C24" stroke="#35e0a0" stroke-width="1.8"/>
                 </g>
               </g>
             </g>
