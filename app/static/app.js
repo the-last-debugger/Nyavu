@@ -242,6 +242,21 @@
      far rim, so it reads as a cone of cloth rather than a flat wheel, plus rings and
      spokes and a sway driven by two slow sines. A cast net covers ground - it opens
      wide as it flies and settles over the water. */
+  /* Camera move on the viewBox: exact framing, and the artwork scales with it. */
+  function cameraPush(root, to, ms) {
+    const svg = root.querySelector(".fishing svg");
+    if (!svg) return;
+    const from = (svg.getAttribute("viewBox") || "-102 -28 813 315").split(/\s+/).map(Number);
+    const t0 = performance.now();
+    function frame(now) {
+      const k = Math.min(1, (now - t0) / ms);
+      const e = k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
+      svg.setAttribute("viewBox", from.map((a, i) => (a + (to[i] - a) * e).toFixed(1)).join(" "));
+      if (k < 1) requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+  }
+
   function updateNet(root, t) {
     const body = root.querySelector(".netlive");
     if (!body) return;
@@ -522,55 +537,25 @@
       "Nobody legitimate asks for your net before you've seen the fish.",
     ],
   };
-  function startMonologue(root) {
-    const bubble = root.querySelector(".bubble");
-    const scene = root.querySelector(".fishing");
-    if (!bubble || !scene) return;
-    const kind = scene.dataset.catch || "odd";
-
-    /* Shuffle a deck per scan, then drop one lesson into the middle of it. The order is
-       different every time, so a second scan never sounds like a re-run. */
-    const deck = [...(LINES[kind] || LINES.odd)];
+  /* He speaks twice while he works and twice while he examines - each line placed on a
+     beat so the words and the action agree. The outcome-specific lines do not begin
+     until the catch is in his hands, so the verdict is never given away early. */
+  function shuffled(list, n) {
+    const deck = [...list];
     for (let i = deck.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [deck[i], deck[j]] = [deck[j], deck[i]];
     }
-    const lesson = LINES.lesson[Math.floor(Math.random() * LINES.lesson.length)];
-    deck.splice(Math.min(2, deck.length), 0, lesson);
-
-    const span = bubble.querySelector("span");
-    let i = 0;
-
-    const show = () => {
-      if (span) span.textContent = deck[i % deck.length];
-      bubble.classList.add("on");
-      i += 1;
-    };
-
-    show();
-    // the words change; the bubble never leaves, so there is no flicker between lines
-    const cycle = setInterval(() => {
-      bubble.classList.add("swap");
-      setTimeout(() => { show(); bubble.classList.remove("swap"); }, 220);
-    }, 5200);
-
-    return () => { clearInterval(cycle); bubble.classList.remove("on", "swap"); };
+    return deck.slice(0, n);
   }
 
-  /* The zoom is a camera move on the viewBox: exact framing, and the artwork scales
-     with it, so nothing drifts out of shot. */
-  function cameraPush(root, to, ms) {
-    const svg = root.querySelector(".fishing svg");
-    if (!svg) return;
-    const from = (svg.getAttribute("viewBox") || "-102 -28 813 315").split(/\s+/).map(Number);
-    const t0 = performance.now();
-    function frame(now) {
-      const k = Math.min(1, (now - t0) / ms);
-      const e = k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
-      svg.setAttribute("viewBox", from.map((a, i) => (a + (to[i] - a) * e).toFixed(1)).join(" "));
-      if (k < 1) requestAnimationFrame(frame);
-    }
-    requestAnimationFrame(frame);
+  function say(root, text) {
+    const bubble = root.querySelector(".bubble");
+    if (!bubble || !text) return;
+    const span = bubble.querySelector("span");
+    if (span) span.textContent = text;
+    bubble.classList.add("on", "swap");
+    setTimeout(() => bubble.classList.remove("swap"), 180);
   }
 
   function resetArtifacts(scene) {
@@ -743,11 +728,15 @@
     window.__beatOf = (ms) => Math.round(ms);
     const done = {};
 
-    // he speaks before he works
+    /* two lines for the work, two for the examination, each on a beat */
+    const kind = scene.dataset.catch || "odd";
+    const intro = shuffled(OPENERS, 2);
+    const exam = shuffled(LINES[kind] || LINES.odd, 2);
+
     const bubble = scene.querySelector(".bubble");
     if (bubble) {
       const span = bubble.querySelector("span");
-      if (span) span.textContent = OPENERS[Math.floor(Math.random() * OPENERS.length)];
+      if (span) span.textContent = intro[0];
       bubble.classList.add("on");
     }
 
@@ -761,22 +750,30 @@
       if (!done.impact && elapsed >= BEAT.impact) {
         done.impact = true;
         burst(root);
-        // he starts talking as soon as the net is out, and keeps talking through it
-        done.stopTalk = startMonologue(root);
+        say(root, intro[1]);            // the second line, as the net settles
       }
-      if (!done.fish && elapsed >= BEAT.fish) { done.fish = true; scene.classList.add("examine"); drip(root); }
-      if (!done.react && elapsed >= BEAT.react) { done.react = true; scene.classList.add("reaction"); }
+      if (!done.fish && elapsed >= BEAT.fish) {
+        done.fish = true;
+        scene.classList.add("examine");
+        drip(root);
+        say(root, exam[0]);              // the catch is in his hands; now he speaks to it
+      }
+      if (!done.react && elapsed >= BEAT.react) {
+        done.react = true;
+        scene.classList.add("reaction");
+      }
       if (!done.zoom && elapsed >= BEAT.zoom) {
         done.zoom = true;
         cameraPush(root, [78, 20, 542, 210], 2400);
         if (card) card.classList.add("dialcoming");
-        done.stopTalk = startMonologue(root);
+        say(root, exam[1]);               // his second thought, as the camera moves in
       }
       if (!done.drown && elapsed >= BEAT.drown) {
         done.drown = true;
         if (scene.dataset.catch === "dark") {
           // only the phish frightens him; on a clean or unsure catch he keeps talking
-          if (typeof done.stopTalk === "function") done.stopTalk();
+          const b = root.querySelector(".bubble");
+          if (b) b.classList.remove("on");
           scene.classList.add("drowning");
           setTimeout(() => fishEscapes(root), 700);
         }
