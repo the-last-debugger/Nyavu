@@ -415,26 +415,49 @@
     close.textContent = "Close";
     shell.appendChild(close);
 
+    /* A skeleton of the card, in the same space, so the water has something to hand
+       over to. It fades once the real card is ready, never snapping. */
+    const skeleton = document.createElement("div");
+    skeleton.className = "verdict-skeleton";
+    skeleton.innerHTML = `
+      <span class="sk sk-badge"></span>
+      <span class="sk sk-title"></span>
+      <span class="sk sk-url"></span>
+      <span class="sk sk-gauge"></span>
+      <span class="sk sk-para"></span>
+      <span class="sk sk-line"></span>
+      <span class="sk sk-line short"></span>`;
+    shell.appendChild(skeleton);
+
     document.body.appendChild(backdrop);
     document.body.appendChild(shell);
 
     const home = card.parentElement;
     shell.appendChild(card);
+    card.classList.add("in-modal", "card-pending");
 
     requestAnimationFrame(() => {
       backdrop.classList.add("on");
       shell.classList.add("on");
-      card.scrollIntoView({ block: "nearest" });
     });
 
     document.body.classList.add("verdict-open");
-    card.classList.add("in-modal");
-    activeModal = { shell, backdrop, home };
+    activeModal = { shell, backdrop, home, skeleton };
+
+    // the skeleton gives way once the water is gone
+    setTimeout(() => {
+      skeleton.classList.add("gone");
+      card.classList.remove("card-pending");
+      setTimeout(() => skeleton.remove(), 700);
+    }, 5200);
 
     const shut = () => closeVerdictModal();
     close.addEventListener("click", shut, { once: true });
     backdrop.addEventListener("click", shut, { once: true });
-    shell.addEventListener("keydown", (e) => { if (e.key === "Escape") shut(); });
+    // the shell is full-bleed now, so a click on it but off the card also closes
+    shell.addEventListener("click", (e) => {
+      if (!card.contains(e.target) && !close.contains(e.target)) shut();
+    });
     document.addEventListener("keydown", function esc(e) {
       if (e.key !== "Escape") return;
       document.removeEventListener("keydown", esc);

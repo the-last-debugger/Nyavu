@@ -3711,3 +3711,110 @@ body.verdict-open { overflow: hidden; }
 
 /* sitting in his hands rather than floating beside them */
 .fishing .held { left: 40%; top: 43%; }
+
+/* ============ the verdict takes over the water's space ============
+   The shell is full-bleed and shares the curtain's tone, so when the water clears there
+   is no geometry change at all: the same rectangle simply becomes the card. A skeleton
+   holds that space, then hands over to the real verdict. */
+
+.modal-shell {
+  position: fixed;
+  inset: 0;
+  left: 0;
+  top: 0;
+  transform: none;
+  width: auto;
+  max-width: none;
+  max-height: none;
+  height: 100%;
+  border: none;
+  border-radius: 0;
+  padding: 34px 26px 40px;
+  background:
+    radial-gradient(120% 70% at 50% -10%, rgba(150, 240, 235, .10), transparent 60%),
+    linear-gradient(180deg, #0A2632 0%, #071820 45%, #050E14 100%);
+  box-shadow: none;
+  overflow-y: auto;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  opacity: 0;
+  transition: opacity 1.1s cubic-bezier(.4, 0, .2, 1);
+}
+
+.modal-shell.on { opacity: 1; transform: none; }
+
+.modal-shell .result {
+  width: min(940px, 100%);
+  margin: 0 auto;
+}
+
+/* the card arrives after the skeleton, never instead of it */
+.modal-shell .result.card-pending { opacity: 0; }
+.modal-shell .result { transition: opacity .8s cubic-bezier(.4, 0, .2, 1); }
+
+/* ---- skeleton ---- */
+.verdict-skeleton {
+  position: absolute;
+  top: 34px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(940px, calc(100% - 52px));
+  display: grid;
+  gap: 14px;
+  padding: 26px 28px;
+  border-radius: 22px;
+  background: linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,.012));
+  border: 1px solid var(--line-hi);
+  transition: opacity .65s ease, filter .65s ease;
+  pointer-events: none;
+}
+
+.verdict-skeleton.gone { opacity: 0; filter: blur(6px); }
+
+.sk {
+  display: block;
+  border-radius: 8px;
+  background: linear-gradient(90deg,
+    rgba(255,255,255,.05) 0%, rgba(255,255,255,.12) 40%, rgba(255,255,255,.05) 80%);
+  background-size: 260% 100%;
+  animation: skShimmer 1.8s linear infinite;
+}
+
+@keyframes skShimmer {
+  from { background-position: 140% 0; }
+  to   { background-position: -40% 0; }
+}
+
+.sk-badge { width: 132px; height: 22px; border-radius: 999px; }
+.sk-title { width: 62%; height: 30px; margin-top: 4px; }
+.sk-url   { width: 44%; height: 14px; }
+.sk-gauge { width: 150px; height: 110px; border-radius: 14px; margin: 6px 0; }
+.sk-para  { width: 100%; height: 54px; border-radius: 14px; }
+.sk-line  { width: 100%; height: 34px; border-radius: 12px; }
+.sk-line.short { width: 74%; }
+
+@media (max-width: 720px) {
+  .modal-shell { padding: 18px 10px 26px; }
+  .verdict-skeleton { top: 18px; width: calc(100% - 20px); padding: 18px 16px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .modal-shell { transition-duration: 1.1s !important; }
+  .verdict-skeleton { transition-duration: .65s !important; }
+  .sk { animation-duration: 1.8s !important; }
+}
+
+/* the card stays invisible until the skeleton hands over */
+.modal-shell .result.card-pending { opacity: 0 !important; animation: none !important; }
+
+/* and the way out belongs top-right, over the full-bleed stage */
+.modal-shell .modal-close {
+  position: fixed;
+  top: 18px;
+  right: 20px;
+  left: auto;
+  float: none;
+  margin: 0;
+  z-index: 5;
+}
