@@ -625,6 +625,7 @@
             ? '<span class="badge rep">Established domain</span>' : ""}
           <h2>${r.verdict === "phishing" ? "Something doesn't look right" : "No warning signs found"}</h2>
           <p class="verdict-url">${escapeHtml(r.url)}</p>
+          <div class="stamp ${r.risk}" aria-hidden="true">${r.risk === "high" ? "phishing" : r.risk === "medium" ? "unsure" : "clear"}</div>
 
         <div class="fishing" data-catch="${r.risk === "high" ? "dark" : r.risk === "medium" ? "odd" : "plain"}" aria-hidden="true">
           <svg viewBox="0 12 610 236" preserveAspectRatio="xMidYMid meet">

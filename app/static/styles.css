@@ -3237,3 +3237,94 @@ body.has-result .explain {
 /* a gentler push-in, so the shore and the sky stay in the shot */
 .fishing.zoom svg { transform: scale(1.32); }
 .fishing svg { transform-origin: 47% 56%; }
+
+/* ======================== the landing: how the verdict presents ========================
+   After the water clears, the card is not just revealed - it is stamped. Each outcome
+   presses its own mark, in its own colour, and the evidence below settles in behind
+   it. Nothing fades in as a block. */
+
+.verdict-text { position: relative; }
+
+.stamp {
+  position: absolute;
+  top: -10px;
+  right: 6px;
+  padding: 6px 14px;
+  border: 2px solid currentColor;
+  border-radius: 8px;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  transform: rotate(-7deg);
+  opacity: 0;
+  pointer-events: none;
+  mix-blend-mode: screen;
+}
+
+.stamp.high   { color: #ff5b74; }
+.stamp.medium { color: #ffb020; }
+.stamp.low    { color: #35e0a0; }
+
+.result.pending .stamp { display: none; }
+
+.result:not(.pending) .stamp {
+  animation: stampIn .62s cubic-bezier(.2, 1.5, .4, 1) .15s both;
+}
+
+@keyframes stampIn {
+  0%   { opacity: 0; transform: rotate(-14deg) scale(1.9); filter: blur(3px); }
+  60%  { opacity: 1; transform: rotate(-6deg) scale(1.02); filter: blur(0); }
+  100% { opacity: .92; transform: rotate(-7deg) scale(1); }
+}
+
+/* the evidence settles in behind the stamp, one line at a time */
+.result:not(.pending) .reasons li {
+  animation: rowIn .5s cubic-bezier(.22, 1, .36, 1) both;
+}
+.result:not(.pending) .reasons li:nth-child(1) { animation-delay: .34s; }
+.result:not(.pending) .reasons li:nth-child(2) { animation-delay: .42s; }
+.result:not(.pending) .reasons li:nth-child(3) { animation-delay: .50s; }
+.result:not(.pending) .reasons li:nth-child(4) { animation-delay: .58s; }
+.result:not(.pending) .reasons li:nth-child(5) { animation-delay: .66s; }
+
+@keyframes rowIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* the card carries the tone of its verdict, faintly */
+.result:not(.pending) .verdict-head::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  animation: toneWash .9s ease .1s forwards;
+  background: radial-gradient(120% 90% at 12% 0%, var(--tone-soft, transparent), transparent 60%);
+}
+
+@keyframes toneWash { to { opacity: 1; } }
+
+/* the bubble sits beside his mouth, not behind him */
+.fishing .bubble { left: 31%; top: 17%; }
+
+@media (prefers-reduced-motion: reduce) {
+  .result:not(.pending) .stamp { animation: stampIn .62s cubic-bezier(.2,1.5,.4,1) .15s both !important; }
+  .result:not(.pending) .reasons li { animation: rowIn .5s cubic-bezier(.22,1,.36,1) both !important; }
+  .result:not(.pending) .verdict-head::after { animation: toneWash .9s ease .1s forwards !important; }
+}
+
+/* on narrow screens the stamp moves off the URL and shrinks */
+@media (max-width: 760px) {
+  .stamp {
+    position: static;
+    display: inline-block;
+    margin: 4px 0 10px;
+    font-size: 0.62rem;
+    letter-spacing: 0.2em;
+    padding: 5px 10px;
+  }
+}
