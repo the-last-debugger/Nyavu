@@ -112,15 +112,14 @@
      a short version rather than none - the number still has to arrive. */
   let sweepToken = 0;
 
-  /* The dial sweeps wide before it decides: right to the ceiling, back to the
-     floor, then narrowing swings that end on the true score. Colour follows the
-     band the needle is currently in, so the dial reads as undecided while it
-     hunts. Roughly seven seconds, which is long for a UI and deliberate here. */
-  const SWING = [
-    [0.00, 0], [0.55, 100], [1.15, 22], [1.85, 88], [2.55, 44],
-    [3.25, 96], [3.95, 58], [4.65, 92], [5.35, 70], [6.00, 90],
-    [6.50, 84], [7.00, 0],
-  ];
+  /* The dial starts almost still, accelerates, becomes frantic, then commits.
+     Seven seconds of it. Colour follows the band the needle is passing through,
+     so the dial reads as undecided while it hunts.
+
+     Note: this runs at full length even when the system asks for reduced motion.
+     The dial is the product's only feedback that a scan happened; shortening it
+     was hiding the feature on machines with Windows animation effects disabled.
+     The decorative animations elsewhere still honour the preference. */
   const TONE_OF = (v) => (v < 35 ? "#35e0a0" : v < 65 ? "#ffb020" : "#ff4d6d");
 
   function sweepNeedle(root) {
@@ -129,29 +128,27 @@
     const target = Number(g.dataset.target || 0);
     const readout = g.querySelector(".readout span");
     const caption = g.querySelector(".readout small");
-    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     const token = ++sweepToken;
-    const pause = reduce ? 0 : 250;
-    const duration = reduce ? 420 : 7000;
+    const pause = 250;
+    const duration = 7000;
 
     if (caption) caption.textContent = "examining";
 
-    const key = SWING.slice();
-    key[key.length - 1] = [7.0, target];
+    const ease = (x) => {
+      const k = Math.min(1, Math.max(0, x));
+      return k * k * (3 - 2 * k);
+    };
 
-    function valueAt(ratio) {
-      const seconds = ratio * 7.0;
-      for (let i = 0; i < key.length - 1; i++) {
-        const [t0, v0] = key[i];
-        const [t1, v1] = key[i + 1];
-        if (seconds >= t0 && seconds <= t1) {
-          const k = (seconds - t0) / (t1 - t0);
-          const eased = k * k * (3 - 2 * k);
-          return v0 + (v1 - v0) * eased;
-        }
-      }
-      return target;
+    function valueAt(t) {
+      // the score is only approached in the final tenth
+      const rise = target * ease(t / 0.7) * 0.55;
+      const centre = rise + (target - rise) * ease((t - 0.9) / 0.1);
+      // amplitude grows slowly, then collapses into the answer
+      const amp = 52 * ease(t / 0.9) * (1 - ease((t - 0.92) / 0.08));
+      // frequency climbs, so the swings crowd together before they stop
+      const phase = 2 * Math.PI * (0.3 * t + 13 * t * t * t);
+      return Math.max(0, Math.min(100, centre + amp * Math.sin(phase)));
     }
 
     setTimeout(() => {
@@ -178,6 +175,7 @@
       requestAnimationFrame(frame);
     }, pause);
   }
+
 
 
 
