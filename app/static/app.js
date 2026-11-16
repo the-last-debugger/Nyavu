@@ -279,64 +279,68 @@
           <p class="verdict-url">${escapeHtml(r.url)}</p>
 
         <div class="fishing" data-catch="${r.risk === "high" ? "dark" : r.risk === "medium" ? "odd" : "plain"}" aria-hidden="true">
-          <svg viewBox="0 0 600 210" preserveAspectRatio="xMidYMid meet">
+          <svg viewBox="0 0 460 250" preserveAspectRatio="xMidYMid meet">
             <defs>
               <linearGradient id="seaG" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stop-color="#0B2530"/>
+                <stop offset="0%" stop-color="#0C2833"/>
                 <stop offset="100%" stop-color="#050D13"/>
               </linearGradient>
-              <linearGradient id="skyG" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stop-color="#071019"/>
-                <stop offset="100%" stop-color="#04070B"/>
-              </linearGradient>
+              <radialGradient id="moonG" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stop-color="#1B3A44"/>
+                <stop offset="100%" stop-color="#0A1A22"/>
+              </radialGradient>
             </defs>
 
-            <rect x="0" y="0" width="600" height="132" fill="url(#skyG)"/>
-            <circle cx="470" cy="44" r="16" fill="#0F2A33"/>
-            <rect x="0" y="130" width="600" height="80" fill="url(#seaG)"/>
+            <rect x="0" y="0" width="460" height="152" fill="#050B11"/>
+            <circle cx="382" cy="46" r="19" fill="url(#moonG)"/>
+            <rect x="0" y="150" width="460" height="100" fill="url(#seaG)"/>
+            <path d="M0 150 h460" stroke="#12303A" stroke-width="1.2"/>
 
-            <circle class="ripple r1" cx="300" cy="166" r="9"/>
-            <circle class="ripple r2" cx="300" cy="166" r="9"/>
-            <circle class="ripple r3" cx="300" cy="166" r="9"/>
+            <circle class="ripple r1" cx="330" cy="182" r="10"/>
+            <circle class="ripple r2" cx="330" cy="182" r="10"/>
+            <circle class="ripple r3" cx="330" cy="182" r="10"/>
 
             <g class="boat">
-              <path d="M196 132 q46 26 108 26 q62 0 96 -26 z" fill="#060C12" stroke="#1B2A36" stroke-width="2"/>
-              <path d="M206 130 h188" stroke="#243543" stroke-width="3" stroke-linecap="round"/>
-              <path d="M284 132 v-26" stroke="#1B2A36" stroke-width="3"/>
+              <path d="M150 152 q40 30 104 30 q64 0 96 -30 z" fill="#060C12" stroke="#1E2E3A" stroke-width="2.4"/>
+              <path d="M158 149 h188" stroke="#263947" stroke-width="3.4" stroke-linecap="round"/>
             </g>
 
             <g class="fisher">
-              <path class="torso" d="M272 108 q10 -22 26 -4 l-4 24 h-18 z" fill="#060C12" stroke="#22323F" stroke-width="2"/>
-              <path class="hat" d="M270 84 q16 -16 32 0 l6 4 h-44 z" fill="#060C12" stroke="#22323F" stroke-width="2"/>
-              <circle class="head" cx="288" cy="88" r="7" fill="#060C12" stroke="#22323F" stroke-width="2"/>
+              <path class="torso" d="M232 112 q12 -26 30 -5 l-5 32 h-22 z" fill="#060C12" stroke="#263947" stroke-width="2.2"/>
+              <circle class="head" cx="248" cy="96" r="10" fill="#060C12" stroke="#263947" stroke-width="2.2"/>
+              <path class="hat" d="M232 90 q16 -18 32 0 l8 5 h-48 z" fill="#060C12" stroke="#263947" stroke-width="2.2"/>
               <g class="arm">
-                <path d="M296 100 l34 -16" stroke="#22323F" stroke-width="5" stroke-linecap="round"/>
-                <path d="M330 84 L392 44" stroke="#2C4150" stroke-width="2.4" stroke-linecap="round"/>
-                <g class="netg">
-                  <path class="net" d="M392 44 q14 10 6 26 q-16 -2 -20 -14 z"
-                        fill="rgba(67,232,200,.08)" stroke="#43e8c8" stroke-width="1.6"/>
-                  <path class="netmesh" d="M394 50 l8 10 M392 58 l8 10 M398 48 l-4 20"
-                        stroke="rgba(67,232,200,.4)" stroke-width="1"/>
-                </g>
+                <path d="M256 110 l30 -8" stroke="#263947" stroke-width="6" stroke-linecap="round"/>
+                <path class="hand" d="M286 102 m-4 0 a4 4 0 1 0 8 0 a4 4 0 1 0 -8 0" fill="#263947"/>
               </g>
-              <path class="line" d="M396 70 Q340 120 300 158" stroke="rgba(190,215,230,.28)"
-                    stroke-width="1.1" fill="none"/>
             </g>
 
-            <g class="catch">
-              <g class="catch-dark">
-                <path d="M282 158 q16 -20 34 -2 q-6 14 -20 14 z" fill="#200910" stroke="#ff4d6d" stroke-width="1.8"/>
-                <path d="M292 148 l2 -10 M300 147 l3 -10 M308 150 l5 -9" stroke="#ff4d6d" stroke-width="1.8" stroke-linecap="round"/>
+            <!-- the cast net: bundled in hand, thrown, spreads on the water, hauled back -->
+            <g class="net">
+              <g class="net-bundle">
+                <path d="M270 92 q10 -6 18 2" stroke="#43e8c8" stroke-width="3" fill="none" stroke-linecap="round"/>
               </g>
-              <g class="catch-odd">
-                <circle cx="300" cy="156" r="12" fill="#1C1608" stroke="#ffb020" stroke-width="1.8"/>
-                <path d="M295 149 q8 -8 8 6" stroke="#ffb020" stroke-width="1.8" fill="none" stroke-linecap="round"/>
-                <circle cx="300" cy="162" r="2" fill="#ffb020"/>
-              </g>
-              <g class="catch-plain">
-                <path d="M280 158 q18 -14 34 0 q-16 14 -34 0 z" fill="#0C2C24" stroke="#35e0a0" stroke-width="1.8"/>
-                <path d="M314 158 l10 -7 v14 z" fill="#0C2C24" stroke="#35e0a0" stroke-width="1.6"/>
-                <circle cx="290" cy="155" r="1.6" fill="#35e0a0"/>
+              <g class="net-open">
+                <circle cx="0" cy="0" r="34" fill="rgba(67,232,200,.07)" stroke="#43e8c8" stroke-width="2"/>
+                <circle cx="0" cy="0" r="21" fill="none" stroke="rgba(67,232,200,.45)" stroke-width="1.2"/>
+                <g stroke="rgba(67,232,200,.5)" stroke-width="1">
+                  <path d="M-34 0 H34"/><path d="M-24 -24 L24 24"/><path d="M0 -34 V34"/>
+                  <path d="M-24 24 L24 -24"/><path d="M-32 -12 Q0 6 32 -12"/><path d="M-32 12 Q0 -6 32 12"/>
+                </g>
+                <g class="caught">
+                  <g class="catch-dark">
+                    <path d="M-14 2 q9 -12 20 -1 q-4 9 -13 9 z" fill="#200910" stroke="#ff4d6d" stroke-width="2"/>
+                    <path d="M-6 -6 l1 -8 M0 -7 l2 -8 M6 -5 l3 -7" stroke="#ff4d6d" stroke-width="2" stroke-linecap="round"/>
+                  </g>
+                  <g class="catch-odd">
+                    <circle cx="0" cy="2" r="9" fill="#1C1608" stroke="#ffb020" stroke-width="2"/>
+                    <path d="M-4 -4 q6 -6 6 5" stroke="#ffb020" stroke-width="2" fill="none" stroke-linecap="round"/>
+                  </g>
+                  <g class="catch-plain">
+                    <path d="M-16 2 q10 -9 22 0 q-11 9 -22 0 z" fill="#0C2C24" stroke="#35e0a0" stroke-width="2"/>
+                    <path d="M6 2 l8 -6 v12 z" fill="#0C2C24" stroke="#35e0a0" stroke-width="1.8"/>
+                  </g>
+                </g>
               </g>
             </g>
           </svg>

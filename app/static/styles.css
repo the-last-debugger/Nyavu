@@ -1721,3 +1721,95 @@ body.has-result .explain {
     animation: haul 7s cubic-bezier(.3,1.6,.5,1) forwards !important;
   }
 }
+
+/* ============================== the cast net ==============================
+   He throws it, it spreads on the water, then he hauls it back and the catch
+   comes up with it. The net is the only thing that travels; the man stays put
+   and works the rope, which is what actually happens on a small boat. */
+
+.fishing .net {
+  transform-box: view-box;
+  transform-origin: 0 0;
+  animation: netthrow 7s cubic-bezier(.34,.9,.4,1) forwards;
+}
+
+@keyframes netthrow {
+  0%, 9%   { transform: translate(272px, 96px) scale(.24); }
+  19%      { transform: translate(316px, 146px) scale(.44); }   /* in the air */
+  27%      { transform: translate(330px, 182px) scale(1); }     /* hits the water */
+  58%      { transform: translate(332px, 184px) scale(1.04); }  /* spread, drifting */
+  70%      { transform: translate(320px, 172px) scale(.78); }   /* breaking the surface */
+  84%      { transform: translate(302px, 150px) scale(.6); }    /* coming aboard */
+  94%      { transform: translate(292px, 136px) scale(.52); }   /* in the boat */
+  100%     { transform: translate(290px, 134px) scale(.5); }
+}
+
+.fishing .net-bundle { animation: bundle 7s linear forwards; }
+
+@keyframes bundle {
+  0%, 12% { opacity: 1; }
+  22%     { opacity: 0; }
+  100%    { opacity: 0; }
+}
+
+.fishing .net-open { opacity: 0; animation: netopen 7s linear forwards; }
+
+@keyframes netopen {
+  0%, 22% { opacity: 0; }
+  27%     { opacity: 1; }
+  100%    { opacity: 1; }
+}
+
+/* the catch rides inside the net, so it rises with it */
+.fishing .caught { opacity: 0; animation: catchup 7s linear forwards; }
+.fishing .caught > g { display: none; animation: none !important; opacity: 1 !important; }
+
+.fishing[data-catch="dark"]  .caught > .catch-dark  { display: block; }
+.fishing[data-catch="odd"]   .caught > .catch-odd   { display: block; }
+.fishing[data-catch="plain"] .caught > .catch-plain { display: block; }
+
+@keyframes catchup {
+  0%, 84% { opacity: 0; }
+  88%     { opacity: 1; transform: translateY(4px) scale(.9); }
+  100%    { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.fishing .caught { transform-box: fill-box; transform-origin: center; }
+
+/* the arm actually works: wind up, throw, hold, two tugs, then the haul */
+.fishing .arm {
+  transform-box: view-box;
+  transform-origin: 256px 110px;
+  animation: armwork 7s cubic-bezier(.4,0,.3,1) forwards;
+}
+
+@keyframes armwork {
+  0%   { transform: rotate(-6deg); }
+  9%   { transform: rotate(-44deg); }   /* winding up */
+  20%  { transform: rotate(30deg); }    /* the throw */
+  27%  { transform: rotate(22deg); }
+  40%  { transform: rotate(26deg); }
+  50%  { transform: rotate(18deg); }    /* first tug */
+  58%  { transform: rotate(28deg); }
+  66%  { transform: rotate(12deg); }
+  74%  { transform: rotate(24deg); }    /* second tug */
+  84%  { transform: rotate(-16deg); }   /* the haul */
+  94%  { transform: rotate(-4deg); }
+  100% { transform: rotate(0deg); }
+}
+
+/* net suppresses its old rod-era rules */
+.fishing .netmesh, .fishing .netg { animation: none !important; }
+
+/* the cast-net scene is also exempt from the global collapse, same reason */
+@media (prefers-reduced-motion: reduce) {
+  .fishing .net       { animation: netthrow 7s cubic-bezier(.34,.9,.4,1) forwards !important; }
+  .fishing .net-bundle{ animation: bundle 7s linear forwards !important; }
+  .fishing .net-open  { animation: netopen 7s linear forwards !important; }
+  .fishing .caught    { animation: catchup 7s linear forwards !important; }
+  .fishing .arm       { animation: armwork 7s cubic-bezier(.4,0,.3,1) forwards !important; }
+  .fishing .boat      { animation: bob 3.2s ease-in-out infinite !important; }
+  .fishing .r1        { animation: ripple 7s ease-out 2.1s forwards !important; }
+  .fishing .r2        { animation: ripple 7s ease-out 2.6s forwards !important; }
+  .fishing .r3        { animation: ripple 7s ease-out 3.4s forwards !important; }
+}
