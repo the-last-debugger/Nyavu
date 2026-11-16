@@ -4035,3 +4035,26 @@ body.verdict-open { overflow: hidden; }
 
 .result.pending .thinking { white-space: normal !important; }
 .result.pending .skip { width: auto !important; white-space: nowrap !important; flex: 0 0 auto !important; }
+
+/* ================= the scene frame, corrected =================
+   The SVG was being letterboxed by an old max-width, which drew the artwork at 75%
+   inside a wider box and left dark bands on either side. The frame fills the card; the
+   three-quarter size lives in the viewBox, where it belongs. */
+.result.pending .fishing,
+.fishing {
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+}
+
+.fishing svg {
+  display: block;
+  width: 100% !important;
+  height: auto !important;
+  max-height: none !important;
+  overflow: visible;
+}
+
+/* the catch must never appear at its fallback position before it is placed */
+.fishing .caught { opacity: 0; }
+.fishing.castable .caught { opacity: 1; }
