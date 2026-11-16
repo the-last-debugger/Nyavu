@@ -302,6 +302,76 @@
       35.0       card swaps behind it
       39.0       verdict
   */
+
+  /* The verdict is the product's answer, so it gets the stage rather than sitting in
+     the page flow. A blurred backdrop, the card lifted above it, and a way out that
+     returns everything to normal. */
+  let activeModal = null;   // { shell, backdrop, home }
+
+  /* The card keeps its own layout; the modal is a shell around it. Wrapping rather
+     than restyling means the verdict looks exactly as designed, at any size. */
+  function openVerdictModal(card) {
+    closeVerdictModal(true);
+
+    const backdrop = document.createElement("div");
+    backdrop.className = "backdrop";
+
+    const shell = document.createElement("div");
+    shell.className = "modal-shell";
+    shell.setAttribute("role", "dialog");
+    shell.setAttribute("aria-modal", "true");
+    shell.setAttribute("aria-label", "Verdict");
+
+    const close = document.createElement("button");
+    close.type = "button";
+    close.className = "modal-close";
+    close.textContent = "Close";
+    shell.appendChild(close);
+
+    document.body.appendChild(backdrop);
+    document.body.appendChild(shell);
+
+    const home = card.parentElement;
+    shell.appendChild(card);
+
+    requestAnimationFrame(() => {
+      backdrop.classList.add("on");
+      shell.classList.add("on");
+      card.scrollIntoView({ block: "nearest" });
+    });
+
+    document.body.classList.add("verdict-open");
+    card.classList.add("in-modal");
+    activeModal = { shell, backdrop, home };
+
+    const shut = () => closeVerdictModal();
+    close.addEventListener("click", shut, { once: true });
+    backdrop.addEventListener("click", shut, { once: true });
+    shell.addEventListener("keydown", (e) => { if (e.key === "Escape") shut(); });
+    document.addEventListener("keydown", function esc(e) {
+      if (e.key !== "Escape") return;
+      document.removeEventListener("keydown", esc);
+      shut();
+    });
+  }
+
+  function closeVerdictModal(silent) {
+    if (!activeModal) return;
+    const { shell, backdrop, home } = activeModal;
+    activeModal = null;
+
+    const card = shell.querySelector(".result");
+    if (card) {
+      card.classList.remove("in-modal");
+      if (home) home.appendChild(card);
+    }
+    shell.classList.remove("on");
+    backdrop.classList.remove("on");
+    document.body.classList.remove("verdict-open");
+    setTimeout(() => { shell.remove(); backdrop.remove(); }, 420);
+    if (!silent) window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
   const BEAT = {
     throw: 2000,
     impact: 4900,
@@ -318,21 +388,41 @@
 
   /* He talks while he works. The lines are chosen by what is in the net, and they
      are written in his voice: dry, plain, never a marketing sentence. */
+  /* His lines. The deck is reshuffled every scan, one lesson is slipped in, and the
+     phish/fish pun belongs to the dark catch where it actually applies. */
   const LINES = {
     plain: [
       "Clean. Not a thing hiding in it.",
       "Good weight. Good shape. Off you go.",
       "Now that's a fish worth the rowing.",
+      "Nothing in the belly but water. Nice.",
+      "Straight as a new rope, this one.",
+      "No teeth. No tricks. Just a fish.",
     ],
     odd: [
       "Hm. Half a fish.",
       "Something's off. Hold still, will you.",
       "You look like a fish. You don't feel like one.",
+      "I've pulled boots out with more sense than you.",
+      "Could be fine. Could be a boot. We wait.",
+      "This one's wearing a disguise, I swear.",
     ],
     dark: [
       "Oi. That's not a fish.",
       "Bait. This one's bait.",
       "Teeth. Of course it has teeth.",
+      "That's a phish, not a fish. One letter, whole different ocean.",
+      "Careful now. It's dressed up like the real thing.",
+      "See how it smiles? Fish don't smile.",
+      "Beautiful scales. Shame about the teeth.",
+    ],
+    lesson: [
+      "Nobody gives away a free catch. Remember that.",
+      "It's the hyphen that gives them away. Always the hyphen.",
+      "If the net looks too good, check the net.",
+      "A real bank never asks you to swim out to it.",
+      "Funny thing about bait: it always looks like dinner.",
+      "Check the harbour, not the flag on the boat.",
     ],
   };
 
@@ -341,19 +431,27 @@
     const scene = root.querySelector(".fishing");
     if (!bubble || !scene) return;
     const kind = scene.dataset.catch || "odd";
-    const lines = LINES[kind] || LINES.odd;
+
+    /* Shuffle a deck per scan, then drop one lesson into the middle of it. The order is
+       different every time, so a second scan never sounds like a re-run. */
+    const deck = [...(LINES[kind] || LINES.odd)];
+    for (let i = deck.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [deck[i], deck[j]] = [deck[j], deck[i]];
+    }
+    const lesson = LINES.lesson[Math.floor(Math.random() * LINES.lesson.length)];
+    deck.splice(Math.min(2, deck.length), 0, lesson);
+
     const span = bubble.querySelector("span");
     let i = 0;
 
     const show = () => {
-      if (span) span.textContent = lines[i % lines.length];
+      if (span) span.textContent = deck[i % deck.length];
       bubble.classList.add("on");
       i += 1;
     };
-    const hide = () => bubble.classList.remove("on");
 
     show();
-    bubble.classList.add("on");
     // the words change; the bubble never leaves, so there is no flicker between lines
     const cycle = setInterval(() => {
       bubble.classList.add("swap");
@@ -448,6 +546,8 @@
       if (line && line.parentElement) line.parentElement.remove();
       const skip = document.getElementById("skipBtn");
       if (skip) skip.remove();
+      // the answer takes the stage as the water clears
+      openVerdictModal(card);
     }, 8200);   // swap once the water has actually finished building
 
     setTimeout(() => water.classList.add("fall"), 9000);
@@ -612,6 +712,15 @@
 
     document.body.classList.add("has-result");
     result.classList.remove("hidden");
+
+    /* The card element survives between scans, so anything the previous run set on it
+       has to be cleared here. Without this the dial arrives already visible on the
+       next link, and a stale water curtain can linger under the new scene. */
+    result.classList.remove("dialcoming", "zooming", "modal", "revealed");
+    result.querySelectorAll(".waterline").forEach((n) => n.remove());
+    document.body.classList.remove("verdict-open");
+    document.documentElement.classList.remove("modal-lock");
+
     result.classList.add("pending");
     result.innerHTML = `
       <div class="verdict-head">
@@ -661,12 +770,13 @@
             </defs>
 
             <rect x="0" y="0" width="610" height="172" fill="#050B11"/>
-            <!-- a crescent: the disc with an offset disc subtracted from it -->
+            <!-- a crescent: the disc with an offset disc subtracted from it.
+                 Placed left of centre, because the dial owns the right of the frame. -->
             <mask id="crescent">
-              <circle cx="470" cy="40" r="18" fill="#ffffff"/>
-              <circle cx="462" cy="34" r="15.4" fill="#000000"/>
+              <circle cx="318" cy="38" r="18" fill="#ffffff"/>
+              <circle cx="310" cy="32" r="15.4" fill="#000000"/>
             </mask>
-            <circle cx="470" cy="40" r="18" fill="url(#moonG)" mask="url(#crescent)"/>
+            <circle cx="318" cy="38" r="18" fill="url(#moonG)" mask="url(#crescent)"/>
 
             <!-- far shore: a church and a lighthouse, held back by tone, not by blur -->
             <g class="far-shore" fill="#070E14" stroke="#1B2C38" stroke-width="1.6" stroke-linejoin="round">
@@ -680,7 +790,11 @@
               <rect x="132" y="158" width="4" height="6" fill="#C9A45A" stroke="none" opacity="0.55"/>
             </g>
 
-            <g class="far-shore" fill="#070E14" stroke="#1B2C38" stroke-width="1.6" stroke-linejoin="round">
+            <!-- The lighthouse sits far left, clear of the dial on the right. Attention
+                 in the scene runs boat (left) -> net (centre) -> dial (right), so the
+                 landmarks fill the emptier left half and never compete with the needle. -->
+            <g class="far-shore" fill="#070E14" stroke="#1B2C38" stroke-width="1.6"
+               stroke-linejoin="round" transform="translate(-430 0)">
               <!-- lighthouse: tapered tower, gallery, lantern, and its beam -->
               <path d="M458 172 l3 -46 h12 l3 46 z"/>
               <path d="M459 126 h19"/>
