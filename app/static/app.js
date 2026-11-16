@@ -215,36 +215,111 @@
     return { x: last[1], y: last[2], s: last[3], r: last[4] };
   }
 
+  /* A smooth closed curve through a ring of points: quadratics through the midpoints
+     of each pair. Cheap, and it gives the rim the soft, lobed edge a net actually has
+     instead of a polygon. */
+  function smoothClosed(pts) {
+    const n = pts.length;
+    const mid = (a, b) => [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2];
+    const m0 = mid(pts[n - 1], pts[0]);
+    let d = `M${m0[0].toFixed(1)} ${m0[1].toFixed(1)}`;
+    for (let i = 0; i < n; i++) {
+      const p = pts[i];
+      const m = mid(p, pts[(i + 1) % n]);
+      d += ` Q${p[0].toFixed(1)} ${p[1].toFixed(1)} ${m[0].toFixed(1)} ${m[1].toFixed(1)}`;
+    }
+    return d + "Z";
+  }
+
+  /* The net is real geometry, rebuilt every frame: a canopy with a near rim and a
+     far rim, so it reads as a cone of cloth rather than a flat wheel, plus rings and
+     spokes and a sway driven by two slow sines. A cast net covers ground - it opens
+     wide as it flies and settles over the water. */
   function updateNet(root, t) {
-    const cloth = root.querySelector(".netcloth");
-    const tether = root.querySelector(".tether");
-    if (!cloth) return;
-    const { x, y, s, r } = netState(t);
-    cloth.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px) scale(${s.toFixed(3)}) rotate(${r.toFixed(1)}deg)`;
+    const body = root.querySelector(".netlive");
+    if (!body) return;
 
-    if (tether) {
-      // the mouth of the net: the edge nearest his hands
-      const half = 58 * s;
-      const lift = 26 * s;
-      const nl = [x - half, y - lift];
-      const nr = [x + half, y - lift];
-      tether.setAttribute("d",
-        `M${HAND_A[0]} ${HAND_A[1]} L${nl[0].toFixed(1)} ${nl[1].toFixed(1)} ` +
-        `L${nr[0].toFixed(1)} ${nr[1].toFixed(1)} L${HAND_B[0]} ${HAND_B[1]} Z`);
-      // slack under water: the strip darkens as it sinks
-      tether.setAttribute("fill-opacity", t > 0.3 && t < 0.7 ? "0.35" : "0.55");
+    const { x, y, s } = netState(t);
+    const T = performance.now() / 1000;
 
-      // the submerged share of the net takes the water's colour
-      const wet = root.querySelector(".wetnet");
-      const front = root.querySelector(".cloth.front");
-      if (wet && front) {
-        wet.setAttribute("d", front.getAttribute("d"));
-        wet.setAttribute("transform",
-          `translate(${x.toFixed(1)}, ${y.toFixed(1)}) scale(${s.toFixed(3)}) rotate(${r.toFixed(1)})`);
-        wet.setAttribute("fill-opacity", t > 0.30 ? "0.82" : "0");
-      }
+    const R = 6 + 132 * s;               // it opens wide as it travels
+    const FLAT = 0.42;                    // foreshortened: we see the canopy at an angle
+    const N = 20;
+    const DIP = 20 * s;                   // the far rim sits higher, the near rim lower
+
+    const rim = [];
+    const far = [];
+    for (let i = 0; i < N; i++) {
+      const a = (i / N) * Math.PI * 2;
+      const wob = 1
+        + 0.05 * Math.sin(a * 3 + T * 2.1)
+        + 0.03 * Math.sin(a * 5 - T * 1.6);
+      const rr = R * wob;
+      const ex = Math.cos(a);
+      const ey = Math.sin(a);
+      // the rim nearest the viewer dips toward the water; the far side lifts
+      const lift = -DIP * ey;
+      rim.push([x + rr * ex, y + rr * FLAT * ey + lift + Math.sin(a + T * 1.25) * 3 * s]);
+      far.push([x + rr * 0.62 * ex, y - rr * FLAT * 0.55 * ey - DIP * 0.8 + Math.sin(a - T * 1.1) * 2 * s]);
+    }
+
+    const fill = body.querySelector(".net-fill");
+    if (fill) fill.setAttribute("d", smoothClosed(rim) + smoothClosed(far));
+
+    // spokes from the crown down to the near rim, and the join to the far rim
+    const hub = [x, y - DIP * 1.5 - R * 0.10];
+    let d = "";
+    for (let i = 0; i < N; i++) {
+      const p = rim[i];
+      const f = far[i];
+      d += `M${hub[0].toFixed(1)} ${hub[1].toFixed(1)}` +
+           ` Q${((hub[0] + p[0]) / 2 + Math.sin(T * 1.6) * 2).toFixed(1)}` +
+           ` ${((hub[1] + p[1]) / 2 + 2).toFixed(1)}` +
+           ` ${p[0].toFixed(1)} ${p[1].toFixed(1)}`;
+      d += `M${f[0].toFixed(1)} ${f[1].toFixed(1)} L${p[0].toFixed(1)} ${p[1].toFixed(1)}`;
+    }
+    [0.42, 0.74].forEach((k, idx) => {
+      const ring = rim.map(([px, py]) => [
+        hub[0] + (px - hub[0]) * k,
+        hub[1] + (py - hub[1]) * k + Math.sin(T * 1.1 + idx * 1.7) * 2,
+      ]);
+      d += smoothClosed(ring);
+    });
+    const mesh = body.querySelector(".net-mesh");
+    if (mesh) mesh.setAttribute("d", d);
+
+    // the catch rides in the net and fights hard
+    const caught = body.querySelector(".caught");
+    if (caught) {
+      const onWater = t > 0.40 && t < 0.72;
+      const amp = onWater ? 7 : 2.5;
+      const jx = Math.sin(T * 12) * amp + Math.sin(T * 19.3) * amp * 0.55;
+      const jy = Math.cos(T * 14.7) * amp + Math.sin(T * 8.1) * amp * 0.45;
+      const rot = onWater ? Math.sin(T * 11) * 34 : Math.sin(T * 16) * 12;
+      caught.setAttribute("transform",
+        `translate(${(x + jx).toFixed(1)}, ${(y + 8 * s + jy).toFixed(1)}) rotate(${rot.toFixed(1)})`);
+    }
+
+    // the rope from his hands to the crown
+    const rope = body.parentElement.querySelector(".rope");
+    const ropeHi = body.parentElement.querySelector(".rope-hi");
+    if (rope) {
+      const cxp = (HAND_A[0] + hub[0]) / 2;
+      const cyp = (HAND_A[1] + hub[1]) / 2 + 10 * s + 2;
+      const dd = `M${HAND_A[0]} ${HAND_A[1]} Q${cxp.toFixed(1)} ${cyp.toFixed(1)} ${hub[0].toFixed(1)} ${hub[1].toFixed(1)}`;
+      rope.setAttribute("d", dd);
+      if (ropeHi) ropeHi.setAttribute("d", dd);
+      rope.setAttribute("stroke-width", (4.6 * Math.max(0.5, s)).toFixed(1));
+    }
+
+    const wet = root.querySelector(".wetnet");
+    if (wet) {
+      wet.setAttribute("d", smoothClosed(rim));
+      wet.setAttribute("fill-opacity", t > 0.34 ? "0.8" : "0");
     }
   }
+
+
 
 
   /* The scene runs on its own ten-second clock from the moment the card appears.
@@ -456,7 +531,7 @@
     const cycle = setInterval(() => {
       bubble.classList.add("swap");
       setTimeout(() => { show(); bubble.classList.remove("swap"); }, 220);
-    }, 3400);
+    }, 6400);
 
     return () => { clearInterval(cycle); bubble.classList.remove("on", "swap"); };
   }
@@ -873,13 +948,17 @@
             <circle class="ripple r2" cx="352" cy="196" r="10"/>
             <circle class="ripple r3" cx="352" cy="196" r="10"/>
 
-            <path class="tether" fill="url(#mesh)" fill-opacity="0.92" stroke="none" d=""/>
+            <!-- the net is drawn live: a rim, rings and spokes recomputed every frame,
+                 so it opens when thrown, sags under its own weight, and sways. -->
+            <path class="rope" fill="none" stroke="#1B3341" stroke-width="4.2"
+                  stroke-linecap="round" d=""/>
+            <path class="rope-hi" fill="none" stroke="#4E7B8C" stroke-width="1.2"
+                  stroke-linecap="round" opacity="0.7" d=""/>
 
-            <g class="netcloth" filter="url(#flutter)">
-              <path class="cloth back" fill="url(#mesh)" stroke="none" fill-opacity="0.85"
-                    d="M-58 -4 q8 -22 32 -25 q20 -2 27 -15 q9 13 28 15 q23 3 29 25 q-5 21 -30 23 q-22 2 -30 13 q-9 -11 -30 -13 q-27 -3 -26 -23 z"/>
-              <path class="cloth front" fill="url(#mesh)" stroke="none"
-                    d="M-52 2 q6 -19 28 -22 q18 -2 24 -13 q8 11 25 13 q20 3 26 22 q-4 19 -26 21 q-19 2 -26 11 q-8 -9 -26 -11 q-24 -2 -25 -21 z"/>
+            <g class="netlive">
+              <path class="net-fill" fill="url(#mesh)" fill-opacity="0.96" stroke="none" d=""/>
+              <path class="net-mesh" fill="none" stroke="#4E7B8C" stroke-width="0.9"
+                    stroke-opacity="0.85" d=""/>
               <g class="drip-group" fill="#8FF3E2" stroke="none">
               <circle class="drip" cx="300" cy="150" r="1.6"/>
               <circle class="drip" cx="314" cy="156" r="1.3"/>
