@@ -753,8 +753,8 @@
                 <stop offset="100%" stop-color="#0A1A22"/>
               </radialGradient>
               <pattern id="mesh" width="9" height="9" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
-                <rect width="9" height="9" fill="#0E1C25"/>
-                <path d="M0 0 V9 M0 0 H9" stroke="#33525F" stroke-width="1.05" fill="none" opacity="1"/>
+                <rect width="9" height="9" fill="#162B36"/>
+                <path d="M0 0 V9 M0 0 H9" stroke="#4E7B8C" stroke-width="1.15" fill="none" opacity="1"/>
               </pattern>
               <clipPath id="waterBand" clipPathUnits="userSpaceOnUse">
                 <rect x="0" y="172" width="610" height="88"/>
@@ -769,13 +769,30 @@
               </filter>
             </defs>
 
-            <rect x="0" y="0" width="610" height="172" fill="#050B11"/>
+            <defs>
+              <!-- moonlight: a cool wash from the crescent across the sky and water -->
+              <radialGradient id="moonlight" cx="54%" cy="14%" r="62%">
+                <stop offset="0%" stop-color="#BFE9F7" stop-opacity="0.30"/>
+                <stop offset="30%" stop-color="#6FB4CE" stop-opacity="0.13"/>
+                <stop offset="70%" stop-color="#1C3B4C" stop-opacity="0.04"/>
+                <stop offset="100%" stop-color="#050B11" stop-opacity="0"/>
+              </radialGradient>
+              <!-- the water takes the moon too, from above -->
+              <linearGradient id="moonwater" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#2E6D82" stop-opacity="0.55"/>
+                <stop offset="100%" stop-color="#0A2430" stop-opacity="0"/>
+              </linearGradient>
+            </defs>
+            <rect x="0" y="0" width="610" height="172" fill="#070E15"/>
+            <rect x="0" y="0" width="610" height="236" fill="url(#moonlight)"/>
             <!-- a crescent: the disc with an offset disc subtracted from it.
                  Placed left of centre, because the dial owns the right of the frame. -->
             <mask id="crescent">
               <circle cx="318" cy="38" r="18" fill="#ffffff"/>
               <circle cx="310" cy="32" r="15.4" fill="#000000"/>
             </mask>
+            <circle cx="318" cy="38" r="54" fill="#8FD3E8" opacity="0.05"/>
+            <circle cx="318" cy="38" r="30" fill="#BFE9F7" opacity="0.06"/>
             <circle cx="318" cy="38" r="18" fill="url(#moonG)" mask="url(#crescent)"/>
 
             <!-- far shore: a church and a lighthouse, held back by tone, not by blur -->
@@ -809,14 +826,14 @@
             <g class="boat">
               <!-- freeboard: gunwale at 140, keel at 182, waterline at 172 -->
               <path d="M28 140 q10 30 52 38 q60 10 128 0 q34 -6 46 -38 z"
-                    fill="#080F16" stroke="#1E2E3A" stroke-width="2.4"/>
-              <path d="M22 138 h258" stroke="#2A3D4C" stroke-width="4" stroke-linecap="round"/>
+                    fill="#080F16" stroke="#33505F" stroke-width="2.4"/>
+              <path d="M22 138 h258" stroke="#41616F" stroke-width="4" stroke-linecap="round"/>
               <path d="M40 146 q10 18 44 24 q54 8 112 0 q26 -4 40 -24"
-                    fill="none" stroke="#16242F" stroke-width="1.4"/>
+                    fill="none" stroke="#27414E" stroke-width="1.4"/>
               <!-- stern post and a thwart to sit on -->
-              <path d="M264 138 l6 22" stroke="#2A3D4C" stroke-width="3.5" stroke-linecap="round"/>
+              <path d="M264 138 l6 22" stroke="#41616F" stroke-width="3.5" stroke-linecap="round"/>
               <rect x="168" y="147" width="92" height="5" rx="2.5"
-                    fill="#101B24" stroke="#263947" stroke-width="1.4"/>
+                    fill="#182833" stroke="#3A5666" stroke-width="1.4"/>
             </g>
 
             <!-- the hull has its own small wake where it meets the surface -->
@@ -826,29 +843,30 @@
             <g class="fisher">
               <!-- trousers: thigh along the thwart, shin dropping to the boards -->
               <path class="trouser" d="M196 140 q22 -4 40 2 l2 12 q-22 6 -42 0 z"
-                    fill="#0B141A" stroke="#263947" stroke-width="2"/>
+                    fill="#0B141A" stroke="#3A5666" stroke-width="2"/>
               <path class="trouser" d="M232 152 q8 2 8 12 l-2 12 h-12 l2 -22 z"
-                    fill="#0B141A" stroke="#263947" stroke-width="2"/>
+                    fill="#0B141A" stroke="#3A5666" stroke-width="2"/>
               <path class="shirt" d="M198 112 q14 -16 26 0 l4 30 h-34 z"
-                    fill="#0A1218" stroke="#263947" stroke-width="2.2"/>
-              <circle class="head" cx="211" cy="100" r="10.5" fill="#0A1218" stroke="#263947" stroke-width="2.2"/>
+                    fill="#0A1218" stroke="#3A5666" stroke-width="2.2"/>
+              <circle class="head" cx="211" cy="100" r="10.5" fill="#0A1218" stroke="#3A5666" stroke-width="2.2"/>
               <circle class="eye" cx="213" cy="98" r="1.3" fill="#42596B"/>
               <path class="nose" d="M219 100 l5 2 l-5 1.4 z" fill="#42596B"/>
               <path class="mouth" d="M218 105 q4 1 6 -1" fill="none" stroke="#42596B" stroke-width="1.4" stroke-linecap="round"/>
-              <path class="hat" d="M194 94 q17 -19 34 0 l9 5 h-52 z" fill="#0A1218" stroke="#263947" stroke-width="2.2"/>
+              <path class="hat" d="M194 94 q17 -19 34 0 l9 5 h-52 z" fill="#0A1218" stroke="#3A5666" stroke-width="2.2"/>
 
               <!-- arms: upper, elbow, forearm; no filled hands -->
               <g class="arms">
                 <!-- far arm: only the forearm clears the body, so the bicep is hidden -->
-                <path d="M223 117 L240 110" stroke="#263947" stroke-width="5" fill="none" stroke-linecap="round"/>
-                <path d="M212 126 L224 125" stroke="#263947" stroke-width="6" fill="none" stroke-linecap="round"/>
+                <path d="M223 117 L240 110" stroke="#3A5666" stroke-width="5" fill="none" stroke-linecap="round"/>
+                <path d="M212 126 L224 125" stroke="#3A5666" stroke-width="6" fill="none" stroke-linecap="round"/>
                 <circle cx="224" cy="125" r="3.4" fill="#263947"/>
-                <path d="M224 125 L238 120" stroke="#263947" stroke-width="5" fill="none" stroke-linecap="round"/>
+                <path d="M224 125 L238 120" stroke="#3A5666" stroke-width="5" fill="none" stroke-linecap="round"/>
               </g>
             </g>
 
             <!-- sea drawn after the boat so only the keel sits under it -->
             <rect x="0" y="172" width="610" height="88" fill="url(#seaG)"/>
+            <rect x="0" y="172" width="610" height="26" fill="url(#moonwater)"/>
             <path d="M0 172 h610" stroke="#12303A" stroke-width="1.2"/>
 
             <circle class="ripple r1" cx="352" cy="196" r="10"/>
@@ -885,7 +903,7 @@
 
             <!-- drawn after the net, in world coordinates, so the water can show through it -->
             <g clip-path="url(#waterBand)" style="pointer-events:none">
-              <path class="wetnet" fill="#0B3546" fill-opacity="0.85" stroke="none"/>
+              <path class="wetnet" fill="#12495C" fill-opacity="0.85" stroke="none"/>
             </g>
           </svg>
           <div class="bubble" aria-live="polite"><span></span></div>

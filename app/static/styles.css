@@ -3515,3 +3515,16 @@ body.verdict-open { overflow: hidden; }
 @media (prefers-reduced-motion: reduce) {
   .modal-shell { transition-duration: .5s !important; }
 }
+
+/* ============ the water owns the viewport, not the page ============
+   It used to be sized by the view, so the moment the card left the flow for the
+   modal the curtain shrank and the seam jumped. Fixed positioning decouples it from
+   layout entirely, and it sits above the modal so the verdict is revealed by the
+   water clearing rather than popping in over it. */
+
+.waterline {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  border-radius: 0;
+}
