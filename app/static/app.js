@@ -80,6 +80,23 @@
     requestAnimationFrame(step);
   }
 
+
+  /* The result used to render below the fold, so the needle swept where nobody could
+     see it. Only scroll when it is actually out of sight, and never when the reader
+     has deliberately scrolled elsewhere. */
+  function revealResult(el) {
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const header = document.querySelector(".topbar");
+    const offset = (header ? header.offsetHeight : 0) + 18;
+    const rect = el.getBoundingClientRect();
+    if (rect.top >= offset && rect.bottom <= window.innerHeight) return;
+    if (window.scrollY > el.offsetTop) return;
+    window.scrollTo({
+      top: Math.max(0, window.scrollY + rect.top - offset),
+      behavior: reduce ? "auto" : "smooth",
+    });
+  }
+
   /* The needle sweeps toward the score, overshoots, dithers between the bands as it
      closes, then locks on. The number is registered rather than simply appearing. */
   function sweepNeedle(root) {
@@ -87,6 +104,12 @@
     if (!g) return;
     const target = Number(g.dataset.target || 0);
     const readout = g.querySelector(".readout span");
+
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      g.style.setProperty("--p", target);
+      if (readout) readout.textContent = target;
+      return;
+    }
     const startAt = performance.now();
     const duration = 1500;
 
@@ -116,8 +139,15 @@
       : `<li class="safe">No strong phishing indicators were found in the URL text.</li>`;
 
     const evidence = r.evidence && r.evidence.length
-      ? `<h3 class="block-title">Host fragments that raised the score</h3>
-         <div class="evidence">${r.evidence.map(e => `<span>${escapeHtml(e.token)}</span>`).join("")}</div>`
+      ? (() => {
+          const max = Math.max(...r.evidence.map(e => e.weight || 0), 0.0001);
+          const bars = r.evidence.map(e => {
+            const share = Math.max(6, Math.round(((e.weight || 0) / max) * 100));
+            return `<span class="pill"><i style="--w:${share}%"></i>${escapeHtml(e.token)}</span>`;
+          }).join("");
+          return `<h3 class="block-title">Parts of the address that raised the score</h3>
+                  <div class="evidence">${bars}</div>`;
+        })()
       : "";
 
     const featRows = Object.entries(r.features)
@@ -155,9 +185,12 @@
       <h3 class="block-title">Why</h3>
       <ul class="reasons">${reasons}</ul>
       ${evidence}
-      <h3 class="block-title">Computed features</h3>
-      <dl class="feat-grid">${featRows}</dl>`;
+      <details class="advanced">
+        <summary>What the model measured</summary>
+        <dl class="feat-grid">${featRows}</dl>
+      </details>`;
     sweepNeedle(result);
+    revealResult(result);
   }
 
   /* ----------------------------------------------------------------- stats */
