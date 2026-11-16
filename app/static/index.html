@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8" />
@@ -64,12 +64,19 @@
         <p class="lede">Paste any URL. Nyavu scores it against a curated corpus and tells you <em>why</em> it looks dangerous.</p>
       </div>
       <div class="hero-visual" aria-hidden="true">
-        <div class="orbit orbit-1"></div>
-        <div class="orbit orbit-2"></div>
-        <div class="orbit orbit-3"></div>
-        <div class="core">
-          <svg viewBox="0 0 24 24"><path d="M12 2 4 5.5v6c0 4.6 3.2 8.9 8 10.5 4.8-1.6 8-5.9 8-10.5v-6L12 2Z"/><path class="tick" d="m8.5 12 2.4 2.4 4.6-4.8"/></svg>
+        <!-- what you actually get: a compact preview of a verdict, not an abstract orb -->
+        <div class="preview-card">
+          <div class="preview-head">
+            <span class="preview-dot"></span>
+            <span class="preview-url">safaricom-secure-login.tk</span>
+          </div>
+          <div class="preview-bar"><i style="--w: 96%"></i></div>
+          <p class="preview-line"><strong>Likely phishing</strong> · brand name in the wrong place</p>
+          <div class="preview-reasons">
+            <span>brand mismatch</span><span>hyphenated</span><span>no HTTPS</span>
+          </div>
         </div>
+        <p class="preview-caption">An example verdict. Names only — Nyavu never visits the link.</p>
       </div>
     </div>
 
@@ -92,13 +99,15 @@
 
     <div id="result" class="result hidden" aria-live="polite"></div>
 
-    <div class="stats-strip" id="statsStrip">
-      <div><strong id="statTotal">—</strong><span>URLs analysed</span></div>
-      <div><strong id="statPhish">—</strong><span>flagged as phishing</span></div>
-      <div><strong id="statUsers">—</strong><span>registered users</span></div>
-      <div><strong id="statTrain">—</strong><span>training URLs</span></div>
+    <div class="data-band">
+      <div class="stats-strip" id="statsStrip">
+        <div><strong id="statTotal">—</strong><span>URLs analysed</span></div>
+        <div><strong id="statPhish">—</strong><span>flagged as phishing</span></div>
+        <div><strong id="statUsers">—</strong><span>registered users</span></div>
+        <div><strong id="statTrain">—</strong><span>training URLs</span></div>
       </div>
       <div class="spark-card" id="spark" aria-hidden="true"></div>
+    </div>
 
     <!-- ------------------------------------------------ public content -->
     <section class="explain" aria-labelledby="how-heading">
