@@ -2180,8 +2180,8 @@ body.has-result .explain {
    Zoom is a push-in of 1.8s, held, and then a wash of ripples crosses the frame and
    the card rises through it. Nothing snaps. */
 
-.fishing svg { transform-origin: 60% 76%; transition: transform 1.8s cubic-bezier(.35,0,.2,1); }
-.fishing.zoom svg { transform: scale(1.5); }
+.fishing svg { transform-origin: 46% 58%; transition: transform 2.4s cubic-bezier(.33,0,.2,1); }
+.fishing.zoom svg { transform: scale(1.75); }
 
 
 /* the catch lifts into his hands as he starts to examine it */
@@ -2230,49 +2230,67 @@ body.has-result .explain {
 /* ------------------------------- drips off the hauled net ------------------------------- */
 .fishing .drip { opacity: 0; }
 
+
 /* ---------------------- the water curtain ----------------------
-   A vertical plane of water faces the viewer, its ripples spreading outward, then
-   the ripples dissipate and the verdict is behind them. */
+   Self-contained caustics: each layer is an SVG data-URI whose filter lives in the
+   same document as the pattern it distorts, so there is no cross-document filter
+   reference to fail. The pattern is bright bands; the filter warps them into water.
+   Two layers at different angles, scales and speeds give it depth. */
 
 .waterline {
   position: absolute;
   inset: 0;
-  z-index: 8;
+  z-index: 20;
   pointer-events: none;
-  border-radius: inherit;
   overflow: hidden;
   opacity: 0;
-  background: linear-gradient(180deg, #0C3A4C 0%, #072430 45%, #04141C 100%);
+  background: linear-gradient(180deg, #0C3A4C 0%, #072430 52%, #04141C 100%);
   transition: opacity 1.2s cubic-bezier(.4, 0, .2, 1);
 }
 
-.waterline::before,
-.waterline::after {
-  content: "";
+.waterline .caustic {
   position: absolute;
-  inset: -60%;
-  border-radius: 50%;
-  background: repeating-radial-gradient(circle at 50% 52%,
-      rgba(150, 240, 235, 0.16) 0 2px,
-      rgba(150, 240, 235, 0.05) 2px 5px,
-      transparent 5px 30px);
-  animation: rippleout 5.5s linear infinite;
-  will-change: transform;
+  inset: -30%;
+  background-repeat: repeat;
+  background-size: 600px 400px;
+  mix-blend-mode: screen;
+  will-change: transform, background-position;
 }
 
-.waterline::after {
-  animation-duration: 7.5s;
-  animation-direction: reverse;
-  opacity: .7;
+.waterline .ca {
+  background-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22600%22%20height%3D%22400%22%3E%0A%3Cdefs%3E%0A%3Cpattern%20id%3D%22p%22%20width%3D%2226%22%20height%3D%2226%22%20patternUnits%3D%22userSpaceOnUse%22%20patternTransform%3D%22rotate%2838%29%22%3E%0A%3Crect%20width%3D%2226%22%20height%3D%2226%22%20fill%3D%22none%22%2F%3E%0A%3Crect%20width%3D%2226%22%20height%3D%222.2%22%20fill%3D%22rgb%28150%2C240%2C235%29%22%20opacity%3D%220.55%22%2F%3E%0A%3Crect%20y%3D%229%22%20width%3D%2226%22%20height%3D%221.1%22%20fill%3D%22rgb%28150%2C240%2C235%29%22%20opacity%3D%220.24750000000000003%22%2F%3E%0A%3C%2Fpattern%3E%0A%3Cfilter%20id%3D%22f%22%20x%3D%22-20%25%22%20y%3D%22-20%25%22%20width%3D%22140%25%22%20height%3D%22140%25%22%3E%0A%3CfeTurbulence%20type%3D%22turbulence%22%20baseFrequency%3D%220.012%200.012%22%20numOctaves%3D%223%22%20seed%3D%227%22%20result%3D%22n%22%2F%3E%0A%3CfeDisplacementMap%20in%3D%22SourceGraphic%22%20in2%3D%22n%22%20scale%3D%2226%22%20xChannelSelector%3D%22R%22%20yChannelSelector%3D%22G%22%2F%3E%0A%3CfeGaussianBlur%20stdDeviation%3D%220.6%22%2F%3E%0A%3C%2Ffilter%3E%0A%3C%2Fdefs%3E%0A%3Crect%20width%3D%22600%22%20height%3D%22400%22%20fill%3D%22url%28%23p%29%22%20filter%3D%22url%28%23f%29%22%2F%3E%0A%3C%2Fsvg%3E");
+  opacity: .85;
+  animation: causticA 26s linear infinite;
 }
 
-@keyframes rippleout {
-  from { transform: scale(.55); opacity: .9; }
-  to   { transform: scale(1.6); opacity: 0; }
+.waterline .cb {
+  background-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22600%22%20height%3D%22400%22%3E%0A%3Cdefs%3E%0A%3Cpattern%20id%3D%22p%22%20width%3D%2226%22%20height%3D%2226%22%20patternUnits%3D%22userSpaceOnUse%22%20patternTransform%3D%22rotate%28-52%29%22%3E%0A%3Crect%20width%3D%2226%22%20height%3D%2226%22%20fill%3D%22none%22%2F%3E%0A%3Crect%20width%3D%2226%22%20height%3D%222.2%22%20fill%3D%22rgb%28150%2C240%2C235%29%22%20opacity%3D%220.38%22%2F%3E%0A%3Crect%20y%3D%229%22%20width%3D%2226%22%20height%3D%221.1%22%20fill%3D%22rgb%28150%2C240%2C235%29%22%20opacity%3D%220.171%22%2F%3E%0A%3C%2Fpattern%3E%0A%3Cfilter%20id%3D%22f%22%20x%3D%22-20%25%22%20y%3D%22-20%25%22%20width%3D%22140%25%22%20height%3D%22140%25%22%3E%0A%3CfeTurbulence%20type%3D%22turbulence%22%20baseFrequency%3D%220.02%200.02%22%20numOctaves%3D%223%22%20seed%3D%2219%22%20result%3D%22n%22%2F%3E%0A%3CfeDisplacementMap%20in%3D%22SourceGraphic%22%20in2%3D%22n%22%20scale%3D%2218%22%20xChannelSelector%3D%22R%22%20yChannelSelector%3D%22G%22%2F%3E%0A%3CfeGaussianBlur%20stdDeviation%3D%221.2%22%2F%3E%0A%3C%2Ffilter%3E%0A%3C%2Fdefs%3E%0A%3Crect%20width%3D%22600%22%20height%3D%22400%22%20fill%3D%22url%28%23p%29%22%20filter%3D%22url%28%23f%29%22%2F%3E%0A%3C%2Fsvg%3E");
+  opacity: .6;
+  background-size: 520px 360px;
+  animation: causticB 38s linear infinite reverse;
+}
+
+@keyframes causticA {
+  from { transform: translate3d(0, 0, 0) scale(1); background-position: 0 0; }
+  to   { transform: translate3d(-30px, 10px, 0) scale(1.06); background-position: 220px 140px; }
+}
+
+@keyframes causticB {
+  from { transform: translate3d(0, 0, 0) scale(1.05); background-position: 0 0; }
+  to   { transform: translate3d(26px, -14px, 0) scale(1); background-position: -180px -120px; }
+}
+
+.waterline .sheen {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(120% 90% at 50% 0%, rgba(190,255,250,.16), transparent 55%),
+    radial-gradient(90% 70% at 50% 100%, rgba(0,0,0,.45), transparent 70%);
+  pointer-events: none;
 }
 
 .waterline.rise { opacity: 1; }
-.waterline.fall { opacity: 0; transition: opacity 1.6s cubic-bezier(.4, 0, .2, 1); }
+.waterline.fall { opacity: 0; transition: opacity 1.6s cubic-bezier(.4,0,.2,1); }
 
   to   { background-position: 0 0; }
 }
@@ -2909,8 +2927,8 @@ body.has-result .explain {
    Zoom is a push-in of 1.8s, held, and then a wash of ripples crosses the frame and
    the card rises through it. Nothing snaps. */
 
-.fishing svg { transform-origin: 60% 76%; transition: transform 1.8s cubic-bezier(.35,0,.2,1); }
-.fishing.zoom svg { transform: scale(1.5); }
+.fishing svg { transform-origin: 46% 58%; transition: transform 2.4s cubic-bezier(.33,0,.2,1); }
+.fishing.zoom svg { transform: scale(1.75); }
 
 
 /* the catch lifts into his hands as he starts to examine it */
@@ -2974,7 +2992,7 @@ body.has-result .explain {
   transition: opacity 1s cubic-bezier(.4,0,.2,1);
 }
 
-.waterline::after {
+.waterline .cb {
   content: "";
   position: absolute;
   inset: -30%;

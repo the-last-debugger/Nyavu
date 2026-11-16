@@ -319,6 +319,16 @@
     const stage = card.closest(".view") || card;
     const water = document.createElement("div");
     water.className = "waterline";
+    // real elements, not pseudo-elements: Chromium does not apply SVG filters to those
+    const ca = document.createElement("div");
+    ca.className = "caustic ca";
+    const cb = document.createElement("div");
+    cb.className = "caustic cb";
+    water.appendChild(ca);
+    water.appendChild(cb);
+    const sheen = document.createElement("div");
+    sheen.className = "sheen";
+    water.appendChild(sheen);
     stage.appendChild(water);
     requestAnimationFrame(() => water.classList.add("rise"));
 
