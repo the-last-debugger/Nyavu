@@ -4,6 +4,7 @@ from __future__ import annotations
 import csv
 import io
 import os
+import re
 import time
 
 from fastapi import FastAPI, HTTPException, Request, Response, UploadFile, File
@@ -67,6 +68,16 @@ async def protect(request: Request, call_next):
     response.headers.setdefault("X-Content-Type-Options", "nosniff")
     response.headers.setdefault("Referrer-Policy", "strict-origin-when-cross-origin")
     response.headers.setdefault("X-Frame-Options", "DENY")
+    # A link checker is a natural target for injected scripts, so the policy is strict:
+    # no third-party origins at all, and only our own bundle may execute.
+    response.headers.setdefault("Content-Security-Policy",
+        "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; "
+        "img-src 'self' data:; font-src 'self'; connect-src 'self'; "
+        "frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'")
+    response.headers.setdefault("Strict-Transport-Security", "max-age=31536000; includeSubDomains")
+    response.headers.setdefault("Permissions-Policy", "camera=(self), microphone=(), geolocation=()")
+    response.headers.setdefault("Cross-Origin-Opener-Policy", "same-origin")
+    response.headers.setdefault("X-Permitted-Cross-Domain-Policies", "none")
     return response
 
 
@@ -137,8 +148,32 @@ def model_info():
     return state["predictor"].info()
 
 
+
+# Only web addresses are meaningful here. Anything with another scheme is rejected
+# rather than scored: "javascript:alert(1)" has no host name, and prepending http://
+# to it would invent one ("javascript") and return a confident verdict about it.
+_NON_WEB_SCHEMES = {"javascript", "data", "file", "vbscript", "about", "blob",
+                    "mailto", "tel", "ftp", "ftps", "ws", "wss", "chrome",
+                    "view-source", "jar", "ms-msdt"}
+_SCHEME_RE = re.compile(r"^\s*([a-zA-Z][a-zA-Z0-9+.\-]*):(//)?")
+
+
+def _reject_non_web(url: str) -> None:
+    m = _SCHEME_RE.match(url or "")
+    if not m:
+        return
+    scheme = m.group(1).lower()
+    if scheme in ("http", "https"):
+        return
+    if m.group(2) or scheme in _NON_WEB_SCHEMES:
+        raise HTTPException(
+            status_code=422,
+            detail="Only http and https addresses can be checked.",
+        )
+
 @app.post("/api/predict")
 def predict(payload: UrlIn, request: Request):
+    _reject_non_web(payload.url)
     user = current_user(request)
     return _scan_and_store(payload.url.strip(), user["id"] if user else None)
 
