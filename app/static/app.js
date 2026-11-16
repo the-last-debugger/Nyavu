@@ -604,6 +604,22 @@
     return () => { clearInterval(cycle); bubble.classList.remove("on", "swap"); };
   }
 
+  /* The zoom is a camera move on the viewBox: exact framing, and the artwork scales
+     with it, so nothing drifts out of shot. */
+  function cameraPush(root, to, ms) {
+    const svg = root.querySelector(".fishing svg");
+    if (!svg) return;
+    const from = (svg.getAttribute("viewBox") || "-102 -28 813 315").split(/\s+/).map(Number);
+    const t0 = performance.now();
+    function frame(now) {
+      const k = Math.min(1, (now - t0) / ms);
+      const e = k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
+      svg.setAttribute("viewBox", from.map((a, i) => (a + (to[i] - a) * e).toFixed(1)).join(" "));
+      if (k < 1) requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+  }
+
   function resetArtifacts(scene) {
     [scene.querySelector(".splash"), ...scene.querySelectorAll(".ripple")]
       .forEach((el) => {
@@ -666,65 +682,57 @@
     const card = root.querySelector(".result");
     if (!card) return;
 
-    const height = card.getBoundingClientRect().height;
-    card.style.minHeight = `${Math.round(height)}px`;
+    const verdict = card._verdictHTML || "";
+    const target = card._target || 0;
 
     if (scene) {
       scene.style.transition = "opacity .5s cubic-bezier(.4,0,.2,1)";
       scene.style.opacity = "0";
     }
 
-    const skeleton = document.createElement("div");
-    skeleton.className = "verdict-skeleton inline";
-    skeleton.innerHTML = `
-      <div class="sk-head">
-        <span class="sk sk-gauge"></span>
-        <div class="sk-body">
-          <span class="sk sk-badge"></span>
-          <span class="sk sk-title"></span>
-          <span class="sk sk-url"></span>
-          <span class="sk sk-suggest"></span>
-          <span class="sk sk-meta"></span>
-        </div>
-      </div>
-      <span class="sk sk-subtitle"></span>
-      <span class="sk sk-row"></span>
-      <span class="sk sk-row"></span>
-      <span class="sk sk-row"></span>`;
-    card.appendChild(skeleton);
-    requestAnimationFrame(() => skeleton.classList.add("on"));
+    // hold the card's height through the swap, or the page jumps beneath the reader
+    const held = Math.round(card.getBoundingClientRect().height);
+    card.style.minHeight = `${held}px`;
 
     setTimeout(() => {
-      card.classList.remove("pending");
-      card.classList.remove("zooming");
-      const line = document.getElementById("thinking");
-      if (line && line.parentElement) line.parentElement.remove();
-      const skip = document.getElementById("skipBtn");
-      if (skip) skip.remove();
+      // the card's own contents become the skeleton: identical box, identical flow
+      card.innerHTML = `
+        <div class="verdict-skeleton inplace" aria-hidden="true">
+          <div class="sk-head">
+            <span class="sk sk-gauge"></span>
+            <div class="sk-body">
+              <span class="sk sk-badge"></span>
+              <span class="sk sk-title"></span>
+              <span class="sk sk-url"></span>
+              <span class="sk sk-suggest"></span>
+              <span class="sk sk-meta"></span>
+            </div>
+          </div>
+          <span class="sk sk-subtitle"></span>
+          <span class="sk sk-row"></span>
+          <span class="sk sk-row"></span>
+          <span class="sk sk-row"></span>
+        </div>`;
 
       setTimeout(() => {
-        skeleton.classList.add("gone");
-        card.classList.remove("reveal-fade");
-        card.style.minHeight = "";
-        setTimeout(() => skeleton.remove(), 700);
-      }, 520);
-    }, 780);
-  }
-
-  /* The zoom is a camera move on the viewBox: exact framing, and the artwork scales
-     with it so nothing drifts out of shot. */
-  function cameraPush(root, to, ms) {
-    const svg = root.querySelector(".fishing svg");
-    if (!svg) return;
-    const from = (svg.getAttribute("viewBox") || "0 12 610 236").split(/\s+/).map(Number);
-    const t0 = performance.now();
-    function frame(now) {
-      const k = Math.min(1, (now - t0) / ms);
-      const e = k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
-      svg.setAttribute("viewBox", from.map((a, i) => (a + (to[i] - a) * e).toFixed(1)).join(" "));
-      if (k < 1) requestAnimationFrame(frame);
-    }
-    requestAnimationFrame(frame);
+        card.innerHTML = verdict;
+        card.classList.remove("pending");
+        card.classList.remove("zooming");
+        const g = card.querySelector(".gauge");
+        if (g) {
+          g.style.setProperty("--p", target);
+          const ro = card.querySelector(".readout span");
+          if (ro) ro.textContent = target;
+          const cap = card.querySelector(".readout small");
+          if (cap) cap.textContent = "risk";
+          g.style.setProperty("--tone", TONE_OF(target));
+        }
+        const line = document.getElementById("thinking");
+        if (line && line.parentElement) line.parentElement.remove();
+        // the verdict is taller than the skeleton; release the pin once it is in
+        requestAnimationFrame(() => { card.style.minHeight = ""; });
+      }, 900);
+    }, 380);
   }
 
   function runScene(root) {
@@ -760,7 +768,7 @@
       if (!done.react && elapsed >= BEAT.react) { done.react = true; scene.classList.add("reaction"); }
       if (!done.zoom && elapsed >= BEAT.zoom) {
         done.zoom = true;
-        cameraPush(root, [150, 34, 300, 160], 2400);
+        cameraPush(root, [-8, -12, 542, 210], 2400);
         if (card) card.classList.add("dialcoming");
         done.stopTalk = startMonologue(root);
       }
@@ -924,7 +932,7 @@
           <div class="stamp ${r.risk}" aria-hidden="true">${r.risk === "high" ? "phishing" : r.risk === "medium" ? "unsure" : "clear"}</div>
 
         <div class="fishing" data-catch="${r.risk === "high" ? "dark" : r.risk === "medium" ? "odd" : "plain"}" aria-hidden="true">
-          <svg viewBox="0 12 610 236" preserveAspectRatio="xMidYMid meet">
+          <svg viewBox="-102 -28 813 315" preserveAspectRatio="xMidYMid meet">
             <defs>
               <linearGradient id="seaG" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%" stop-color="#0B3546"/>
@@ -1101,6 +1109,8 @@
         <summary>What the model measured</summary>
         <dl class="feat-grid">${featRows}</dl>
       </details>`;
+    result._verdictHTML = result.innerHTML;
+    result._target = pct;
     sweepNeedle(result);
     revealResult(result);
   }
