@@ -448,10 +448,10 @@
       if (line && line.parentElement) line.parentElement.remove();
       const skip = document.getElementById("skipBtn");
       if (skip) skip.remove();
-    }, 7000);   // swap once the water has actually finished building
+    }, 8200);   // swap once the water has actually finished building
 
-    setTimeout(() => water.classList.add("fall"), 7800);
-    setTimeout(() => water.remove(), 12200);
+    setTimeout(() => water.classList.add("fall"), 9000);
+    setTimeout(() => water.remove(), 13600);
   }
 
   function runScene(root) {
