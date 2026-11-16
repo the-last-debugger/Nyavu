@@ -256,8 +256,13 @@
     const far = [];
     for (let i = 0; i < N; i++) {
       const a = (i / N) * Math.PI * 2;
+      // in the water the net lies still and breathes; in the air it flutters
+      const inWater = t > 0.34 && t < 0.78;
+      const swell = inWater ? 0.018 : 0.05;
+      const chop = inWater ? 0.008 : 0.03;
       const wob = IRREG[i]
-        * (1 + 0.045 * Math.sin(a * 3 + T * 2.1) + 0.03 * Math.sin(a * 5 - T * 1.6));
+        * (1 + swell * Math.sin(a * 3 + T * (inWater ? 0.8 : 2.1))
+             + chop * Math.sin(a * 5 - T * (inWater ? 0.6 : 1.6)));
       const rr = R * wob * (1 - 0.55 * t2);
       const ex = Math.cos(a);
       const ey = Math.sin(a);
@@ -312,9 +317,9 @@
         const jx = Math.sin(T * 9) * 1.2;
         const jy = Math.cos(T * 11) * 1.2;
         // held up at the 20th size: from here on, the catch is the only subject
-        caught.setAttribute("transform",
-          `translate(${(HAND_A[0] + 14 + jx).toFixed(1)} ${(HAND_A[1] + 2 + jy).toFixed(1)}) ` +
-          `rotate(${(Math.sin(T * 7) * 6).toFixed(1)}) scale(1.15)`);
+        caught.style.setProperty("transform",
+          `translate(${(HAND_A[0] + 14 + jx).toFixed(1)}px, ${(HAND_A[1] + 2 + jy).toFixed(1)}px) ` +
+          `rotate(${(Math.sin(T * 7) * 6).toFixed(1)}deg) scale(1.15)`, "important");
         caught.setAttribute("visibility", "visible");
         caught.style.opacity = "1";
       } else {
@@ -327,9 +332,10 @@
         const visible = t > 0.30;
         const size = (0.95 + 0.25 * Math.min(1, s)).toFixed(2);
         // variables, not a transform string: CSS composes it, so nothing can clobber it
-        caught.setAttribute("transform",
-          `translate(${(x + jx).toFixed(1)} ${(y + 8 * s + jy).toFixed(1)}) ` +
-          `rotate(${rot.toFixed(1)}) scale(${size})`);
+        // inline !important: a running CSS animation would otherwise win over this
+        caught.style.setProperty("transform",
+          `translate(${(x + jx).toFixed(1)}px, ${(y + 8 * s + jy).toFixed(1)}px) ` +
+          `rotate(${rot.toFixed(1)}deg) scale(${size})`, "important");
         caught.setAttribute("visibility", visible ? "visible" : "hidden");
         caught.style.opacity = "1";
       }
@@ -462,6 +468,8 @@
       "Nothing in the belly but water. Nice.",
       "Straight as a new rope, this one.",
       "No teeth. No tricks. Just a fish.",
+      "Honest scales. You don't see many.",
+      "Swims true. I'd put my name on it.",
     ],
     odd: [
       "Hm. Half a fish.",
@@ -470,6 +478,9 @@
       "I've pulled boots out with more sense than you.",
       "Could be fine. Could be a boot. We wait.",
       "This one's wearing a disguise, I swear.",
+      "Fins say yes. Face says no.",
+      "I'll be honest with you: I don't know.",
+      "Fifty-fifty. Like a coin in the harbour.",
     ],
     dark: [
       "Oi. That's not a fish.",
@@ -479,6 +490,9 @@
       "Careful now. It's dressed up like the real thing.",
       "See how it smiles? Fish don't smile.",
       "Beautiful scales. Shame about the teeth.",
+      "It's got the bank's colours on. It's not the bank.",
+      "Nice hat. Wrong fisherman.",
+      "It swam up wearing somebody else's name.",
     ],
     lesson: [
       "Nobody gives away a free catch. Remember that.",
@@ -487,9 +501,14 @@
       "A real bank never asks you to swim out to it.",
       "Funny thing about bait: it always looks like dinner.",
       "Check the harbour, not the flag on the boat.",
+      "One letter moved is a whole new harbour.",
+      "The address is the boat. Look at the boat, not the paint.",
+      "Free things in the water are usually attached to something.",
+      "If they hurry you, they're selling, not helping.",
+      "A .tk doesn't cost enough to be a bank.",
+      "Nobody legitimate asks for your net before you've seen the fish.",
     ],
   };
-
   function startMonologue(root) {
     const bubble = root.querySelector(".bubble");
     const scene = root.querySelector(".fishing");
@@ -976,6 +995,9 @@
             <rect x="-110" y="172" width="840" height="130" fill="url(#seaG)"/>
             <rect x="-110" y="172" width="840" height="26" fill="url(#moonwater)"/>
             <path d="M-110 172 h840" stroke="#12303A" stroke-width="1.2"/>
+            <path class="wave w1" d="M-160 173.3 L-150 174.0 L-140 174.7 L-130 175.2 L-120 175.5 L-110 175.6 L-100 175.4 L-90 174.9 L-80 174.3 L-70 173.7 L-60 173.1 L-50 172.6 L-40 172.4 L-30 172.5 L-20 172.8 L-10 173.3 L0 174.0 L10 174.7 L20 175.2 L30 175.5 L40 175.6 L50 175.4 L60 174.9 L70 174.3 L80 173.7 L90 173.1 L100 172.6 L110 172.4 L120 172.5 L130 172.8 L140 173.3 L150 174.0 L160 174.7 L170 175.2 L180 175.5 L190 175.6 L200 175.4 L210 174.9 L220 174.3 L230 173.7 L240 173.1 L250 172.6 L260 172.4 L270 172.5 L280 172.8 L290 173.3 L300 174.0 L310 174.7 L320 175.2 L330 175.5 L340 175.6 L350 175.4 L360 174.9 L370 174.3 L380 173.7 L390 173.1 L400 172.6 L410 172.4 L420 172.5 L430 172.8 L440 173.3 L450 174.0 L460 174.7 L470 175.2 L480 175.5 L490 175.6 L500 175.4 L510 174.9 L520 174.3 L530 173.7 L540 173.1 L550 172.6 L560 172.4 L570 172.5 L580 172.8 L590 173.3 L600 174.0 L610 174.7 L620 175.2 L630 175.5 L640 175.6 L650 175.4 L660 174.9 L670 174.3 L680 173.7 L690 173.1 L700 172.6 L710 172.4 L720 172.5 L730 172.8 L740 173.3 L750 174.0 L760 174.7 L770 175.2 L780 175.5 L790 175.6 L800 175.4 L810 174.9 L820 174.3 L830 173.7 L840 173.1" fill="none" stroke="#2C6B80" stroke-width="1.40" opacity="0.50"/>
+            <path class="wave w2" d="M-160 179.9 L-150 179.2 L-140 178.6 L-130 177.9 L-120 177.4 L-110 177.0 L-100 176.9 L-90 177.0 L-80 177.3 L-70 177.8 L-60 178.4 L-50 179.1 L-40 179.8 L-30 180.4 L-20 180.8 L-10 181.1 L0 181.1 L10 180.9 L20 180.5 L30 179.9 L40 179.2 L50 178.6 L60 177.9 L70 177.4 L80 177.0 L90 176.9 L100 177.0 L110 177.3 L120 177.8 L130 178.4 L140 179.1 L150 179.8 L160 180.4 L170 180.8 L180 181.1 L190 181.1 L200 180.9 L210 180.5 L220 179.9 L230 179.2 L240 178.6 L250 177.9 L260 177.4 L270 177.0 L280 176.9 L290 177.0 L300 177.3 L310 177.8 L320 178.4 L330 179.1 L340 179.8 L350 180.4 L360 180.8 L370 181.1 L380 181.1 L390 180.9 L400 180.5 L410 179.9 L420 179.2 L430 178.6 L440 177.9 L450 177.4 L460 177.0 L470 176.9 L480 177.0 L490 177.3 L500 177.8 L510 178.4 L520 179.1 L530 179.8 L540 180.4 L550 180.8 L560 181.1 L570 181.1 L580 180.9 L590 180.5 L600 179.9 L610 179.2 L620 178.6 L630 177.9 L640 177.4 L650 177.0 L660 176.9 L670 177.0 L680 177.3 L690 177.8 L700 178.4 L710 179.1 L720 179.8 L730 180.4 L740 180.8 L750 181.1 L760 181.1 L770 180.9 L780 180.5 L790 179.9 L800 179.2 L810 178.6 L820 177.9 L830 177.4 L840 177.0" fill="none" stroke="#2C6B80" stroke-width="1.15" opacity="0.38"/>
+            <path class="wave w3" d="M-160 181.9 L-150 182.3 L-140 182.9 L-130 183.6 L-120 184.3 L-110 185.0 L-100 185.6 L-90 186.1 L-80 186.4 L-70 186.6 L-60 186.6 L-50 186.3 L-40 185.9 L-30 185.4 L-20 184.7 L-10 184.0 L0 183.3 L10 182.7 L20 182.1 L30 181.7 L40 181.5 L50 181.4 L60 181.5 L70 181.9 L80 182.3 L90 182.9 L100 183.6 L110 184.3 L120 185.0 L130 185.6 L140 186.1 L150 186.4 L160 186.6 L170 186.6 L180 186.3 L190 185.9 L200 185.4 L210 184.7 L220 184.0 L230 183.3 L240 182.7 L250 182.1 L260 181.7 L270 181.5 L280 181.4 L290 181.5 L300 181.9 L310 182.3 L320 182.9 L330 183.6 L340 184.3 L350 185.0 L360 185.6 L370 186.1 L380 186.4 L390 186.6 L400 186.6 L410 186.3 L420 185.9 L430 185.4 L440 184.7 L450 184.0 L460 183.3 L470 182.7 L480 182.1 L490 181.7 L500 181.5 L510 181.4 L520 181.5 L530 181.9 L540 182.3 L550 182.9 L560 183.6 L570 184.3 L580 185.0 L590 185.6 L600 186.1 L610 186.4 L620 186.6 L630 186.6 L640 186.3 L650 185.9 L660 185.4 L670 184.7 L680 184.0 L690 183.3 L700 182.7 L710 182.1 L720 181.7 L730 181.5 L740 181.4 L750 181.5 L760 181.9 L770 182.3 L780 182.9 L790 183.6 L800 184.3 L810 185.0 L820 185.6 L830 186.1 L840 186.4" fill="none" stroke="#2C6B80" stroke-width="0.90" opacity="0.26"/>
 
             <circle class="ripple r1" cx="352" cy="196" r="10"/>
             <circle class="ripple r2" cx="352" cy="196" r="10"/>

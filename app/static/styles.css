@@ -3804,7 +3804,6 @@ body.verdict-open { overflow: hidden; }
   opacity: 1 !important;
   animation: none !important;
   transform-box: view-box;
-  transform-origin: 0 0;
 }
 
 /* ---- the skeleton now mirrors the verdict's own layout ---- */
@@ -4097,3 +4096,32 @@ body.verdict-open { overflow: hidden; }
 }
 
 .result .verdict-head > .block-title { margin-top: 26px !important; }
+
+/* ===================== the bubble sits above him, never behind =====================
+   The scene is isolated so the bubble's stacking is decided inside it, and the bubble is
+   anchored above his hat with its tail pointing down at him. */
+.fishing { isolation: isolate; }
+
+.fishing .bubble,
+.fishing .bubble.on {
+  left: 33%;
+  top: 19%;
+  max-width: 260px;
+  z-index: 30;
+}
+
+.fishing svg { z-index: 1; }
+
+/* three gentle swells on the surface, drifting rather than shivering */
+.fishing .wave { animation: swell 26s linear infinite; }
+.fishing .w2 { animation-duration: 34s; animation-direction: reverse; }
+.fishing .w3 { animation-duration: 44s; }
+
+@keyframes swell {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-150px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fishing .wave { animation: swell 26s linear infinite !important; }
+}
