@@ -598,6 +598,23 @@
 
   /* The scene fades; a skeleton holds the card's exact space; the verdict fills it.
      One container, no shell, no curtain, no movement of the page underneath. */
+
+  /* Some layout quirks have resisted every selector I have tried; setting the two
+     properties directly on the nodes is guaranteed to win. */
+  function normaliseCard(card) {
+    if (!card) return;
+    card.querySelectorAll(".block-title").forEach((el) => {
+      el.style.width = "100%";
+      el.style.maxWidth = "none";
+      el.style.marginLeft = "0";
+      el.style.float = "none";
+    });
+    card.querySelectorAll(".reasons, .evidence").forEach((el) => {
+      el.style.width = "100%";
+      el.style.marginLeft = "0";
+    });
+  }
+
   function handOver(root) {
     const scene = root.querySelector(".fishing");
     const card = root.querySelector(".result");
@@ -648,6 +665,7 @@
           if (cap) cap.textContent = "risk";
           g.style.setProperty("--tone", TONE_OF(target));
         }
+        normaliseCard(card);
         const line = document.getElementById("thinking");
         if (line && line.parentElement) line.parentElement.remove();
         // the verdict is taller than the skeleton; release the pin once it is in

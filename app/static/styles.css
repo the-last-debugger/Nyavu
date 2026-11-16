@@ -4054,3 +4054,46 @@ body.verdict-open { overflow: hidden; }
 /* the catch must never appear at its fallback position before it is placed */
 .fishing .caught { opacity: 0; }
 .fishing.castable .caught { opacity: 1; }
+
+/* ===================== the verdict is one column of prose =====================
+   The card was flowing its content through CSS multi-columns, which put each heading
+   in a narrow first column and its list in the second. Same class of bug as the grid
+   split, different mechanism. */
+.result,
+.result .verdict-text,
+.result .verdict-head {
+  columns: auto !important;
+  column-count: auto !important;
+  column-width: auto !important;
+}
+
+.result .block-title,
+.result .reasons,
+.result .evidence {
+  break-inside: avoid;
+}
+
+/* the dial belongs on the right of the stage: the boat and the fisherman hold the
+   left, the net lands in the middle, and the needle reads last */
+.result.pending .gauge {
+  left: auto !important;
+  right: 22px !important;
+  top: 50% !important;
+}
+
+/* ===================== the real cause of the label rail =====================
+   The headings and lists are children of .verdict-head, which is a two-column grid
+   (dial column + text column). They were being placed into those columns, which is why
+   every selector aimed at .result did nothing. They span the full width now. */
+.result .verdict-head > .block-title,
+.result .verdict-head > .reasons,
+.result .verdict-head > .evidence,
+.result .verdict-head > details.advanced,
+.result .verdict-head > .thinking-row {
+  grid-column: 1 / -1 !important;
+  width: 100% !important;
+  max-width: none !important;
+  margin-left: 0 !important;
+}
+
+.result .verdict-head > .block-title { margin-top: 26px !important; }
