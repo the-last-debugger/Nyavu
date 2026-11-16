@@ -101,38 +101,55 @@
 
 
 
-  /* The needle sweeps toward the score, overshoots, dithers between the bands as it
-     closes, then locks on. The number is registered rather than simply appearing. */
+  /* The needle is the product's moment of measurement, so it is staged:
+     a beat of stillness while the card settles, a fast climb, then a slower
+     approach that dithers between bands before locking on. Reduced-motion users
+     get a short version rather than none - the number still has to arrive. */
   function sweepNeedle(root) {
     const g = root.querySelector(".gauge");
     if (!g) return;
     const target = Number(g.dataset.target || 0);
     const readout = g.querySelector(".readout span");
+    const caption = g.querySelector(".readout small");
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      g.style.setProperty("--p", target);
-      if (readout) readout.textContent = target;
-      return;
-    }
-    const startAt = performance.now();
-    const duration = 1500;
+    const pause = reduce ? 0 : 380;
+    const duration = reduce ? 420 : 2600;
 
-    function frame(now) {
-      const t = Math.min(1, (now - startAt) / duration);
-      const eased = 1 - Math.pow(1 - t, 3);
-      const wobble = t < 0.82 ? Math.sin(t * 26) * (1 - t) * 7 : 0;
-      const value = Math.max(0, Math.min(100, target * eased + wobble));
-      g.style.setProperty("--p", value.toFixed(2));
-      if (readout) readout.textContent = Math.round(value);
-      if (t < 1) {
-        requestAnimationFrame(frame);
-      } else {
-        g.style.setProperty("--p", target);
-        if (readout) readout.textContent = target;
+    if (caption) caption.textContent = "examining";
+
+    setTimeout(() => {
+      const started = performance.now();
+
+      function frame(now) {
+        const t = Math.min(1, (now - started) / duration);
+
+        // 0 -> 86% quickly, then the last 14% slowly: the needle looks unsure
+        const climb = t < 0.62
+          ? (t / 0.62) * 0.86
+          : 0.86 + (1 - Math.pow(1 - (t - 0.62) / 0.38, 2)) * 0.14;
+
+        // dithering: eight direction changes over the sweep, decaying to nothing.
+        // Enough to feel like the needle is weighing the evidence, not so much that
+        // it reads as a broken gauge.
+        const wobble = Math.sin(t * 44) * Math.pow(1 - t, 1.6) * 8;
+        const value = Math.max(0, Math.min(100, target * climb + wobble));
+
+        g.style.setProperty("--p", value.toFixed(2));
+        if (readout) readout.textContent = Math.round(value);
+
+        if (t < 1) {
+          requestAnimationFrame(frame);
+        } else {
+          g.style.setProperty("--p", target);
+          if (readout) readout.textContent = target;
+          if (caption) caption.textContent = "risk";
+        }
       }
-    }
-    requestAnimationFrame(frame);
+      requestAnimationFrame(frame);
+    }, pause);
   }
+
   const escapeHtml = s => String(s).replace(/[&<>"']/g, c =>
     ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 
