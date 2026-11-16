@@ -177,7 +177,17 @@
         <thead><tr><th>When</th><th>Host</th><th>Verdict</th><th>Score</th></tr></thead>
         <tbody></tbody>
       </table>
-      <p class="empty" id="historyEmpty">No scans yet.</p>
+      <div class="empty-state" id="historyEmpty">
+        <svg class="empty-fish" viewBox="-24 -18 48 36" aria-hidden="true">
+          <path d="M-16 2 q11 -9 23 0 q-12 9 -23 0 z" fill="#0C2C24" stroke="#35e0a0" stroke-width="1.8"/>
+          <path d="M7 2 l9 -6 v12 z" fill="#0C2C24" stroke="#35e0a0" stroke-width="1.6"/>
+          <circle cx="-9" cy="0" r="1.4" fill="#35e0a0"/>
+        </svg>
+        <p class="empty-title">Nothing caught yet</p>
+        <p class="empty-copy">Your last twenty-five checks will appear here, each with the verdict
+           and the score it was given. Anonymous scans are counted but never stored against you.</p>
+        <a class="btn primary" href="#detector">Check a link</a>
+      </div>
     </div>
   </section>
 

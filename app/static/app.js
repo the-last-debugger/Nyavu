@@ -1282,7 +1282,11 @@
           <td><span class="pill ${it.risk}">${escapeHtml(it.verdict)}</span></td>
           <td>${(it.probability * 100).toFixed(1)}%</td>
         </tr>`).join("");
-    } catch (e) { empty.textContent = "Could not load history."; }
+    } catch (e) {
+        empty.classList.remove("hidden");
+        const t = empty.querySelector(".empty-title");
+        if (t) t.textContent = "Could not load history";
+      }
   }
 
   /* ----------------------------------------------------------------- model */
