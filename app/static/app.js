@@ -102,9 +102,10 @@
 
 
   /* The needle is the product's moment of measurement, so it is staged:
-     a beat of stillness while the card settles, a fast climb, then a slower
-     approach that dithers between bands before locking on. Reduced-motion users
-     get a short version rather than none - the number still has to arrive. */
+     a beat of stillness while the card settles, a climb, then a long approach
+     that dithers between bands before locking on. 7.8 seconds in total: long
+     enough to watch, short enough not to be an insult. Reduced-motion users get
+     a short version rather than none - the number still has to arrive. */
   function sweepNeedle(root) {
     const g = root.querySelector(".gauge");
     if (!g) return;
@@ -113,8 +114,8 @@
     const caption = g.querySelector(".readout small");
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-    const pause = reduce ? 0 : 380;
-    const duration = reduce ? 420 : 2600;
+    const pause = reduce ? 0 : 600;
+    const duration = reduce ? 420 : 7800;
 
     if (caption) caption.textContent = "examining";
 
@@ -129,10 +130,10 @@
           ? (t / 0.62) * 0.86
           : 0.86 + (1 - Math.pow(1 - (t - 0.62) / 0.38, 2)) * 0.14;
 
-        // dithering: eight direction changes over the sweep, decaying to nothing.
+        // dithering: twenty direction changes over the sweep, decaying to nothing.
         // Enough to feel like the needle is weighing the evidence, not so much that
         // it reads as a broken gauge.
-        const wobble = Math.sin(t * 44) * Math.pow(1 - t, 1.6) * 8;
+        const wobble = Math.sin(t * 70) * Math.pow(1 - t, 1.6) * 8;
         const value = Math.max(0, Math.min(100, target * climb + wobble));
 
         g.style.setProperty("--p", value.toFixed(2));
