@@ -159,6 +159,9 @@
     if (scene) scene.style.display = "none";
     card.classList.remove("pending");
     card.classList.remove("zooming");
+    // the skip path must show the same verdict as the theatrical one
+    card.classList.add("verdict-shown");
+    normaliseCard(card);
     const line = document.getElementById("thinking");
     if (line && line.parentElement) line.parentElement.remove();
     const skip = document.getElementById("skipBtn");
