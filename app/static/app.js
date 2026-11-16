@@ -350,8 +350,8 @@
                 <stop offset="100%" stop-color="#0A1A22"/>
               </radialGradient>
               <pattern id="mesh" width="9" height="9" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
-                <rect width="9" height="9" fill="#0A1218"/>
-                <path d="M0 0 V9 M0 0 H9" stroke="#233541" stroke-width="1" fill="none" opacity="0.95"/>
+                <rect width="9" height="9" fill="#0E1C25"/>
+                <path d="M0 0 V9 M0 0 H9" stroke="#33525F" stroke-width="1.05" fill="none" opacity="1"/>
               </pattern>
               <filter id="flutter" x="-30%" y="-30%" width="160%" height="160%">
                 <feTurbulence type="fractalNoise" baseFrequency="0.014 0.022" numOctaves="2" seed="7" result="noise">
