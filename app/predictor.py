@@ -21,6 +21,12 @@ from features import (BRANDS, BRAND_DOMAINS, FEATURE_ORDER, extract,  # noqa: E4
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ART = os.path.join(ROOT, "ml", "artifacts")
 
+# Registry-restricted Kenyan second-level domains. A name under one of these cannot
+# be bought by the public - the registry allocates them to accredited institutions -
+# so a name-based model should not be flagging them on string evidence. This is the
+# same reasoning as the reputation prior, applied to a namespace instead of a rank.
+TRUSTED_SUFFIXES = (".ac.ke", ".go.ke", ".or.ke", ".sc.ke", ".ne.ke", ".ac.ug", ".go.ug")
+
 
 class Predictor:
     def __init__(self) -> None:
@@ -137,7 +143,10 @@ class Predictor:
         # Reputation prior: a domain-only model has a false-positive rate that is too
         # high to deploy unchecked, so an established domain (Tranco top 100,000) is not
         # marked on name evidence alone. Surfaced as its own state, not a footnote.
-        if domain and domain in self.allowlist and not feats.get("brand_in_wrong_place"):
+        trusted = bool(domain) and (
+            domain in self.allowlist or domain.endswith(TRUSTED_SUFFIXES)
+        )
+        if trusted and not feats.get("brand_in_wrong_place"):
             reputation = "established"
             if prob > 0.15:
                 prob = 0.15

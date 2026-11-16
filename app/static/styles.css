@@ -2081,3 +2081,50 @@ body.has-result .explain {
 /* the net is positioned by JavaScript now, so the CSS animation must stand down */
 .fishing .netcloth { animation: none !important; }
 .fishing .tether { stroke-linejoin: round; }
+
+/* ============ every part of the scene runs on the same clock ============
+   The net lands 34% into the sweep, so the splash, ripples, arms and the catch
+   are all gated on `.go`, which is added when the sweep begins - not when the
+   card is rendered. */
+
+.fishing .arms { animation: none !important; }
+.fishing.go .arms { animation: armswork 6.6s cubic-bezier(.4,0,.3,1) forwards !important; }
+
+.fishing .caught { opacity: 0; animation: none !important; }
+.fishing.go .caught { animation: catchup66 6.6s linear forwards !important; }
+
+@keyframes catchup66 {
+  0%, 56% { opacity: 0; }
+  60%     { opacity: 1; transform: translateY(4px) scale(.9); }
+  100%    { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.fishing .r1, .fishing .r2, .fishing .r3, .fishing .splash { animation: none !important; }
+
+.fishing.go .r1 { animation: ripple66 2.6s ease-out 2.24s forwards !important; }
+.fishing.go .r2 { animation: ripple66 2.6s ease-out 2.64s forwards !important; }
+.fishing.go .r3 { animation: ripple66 2.6s ease-out 3.10s forwards !important; }
+
+@keyframes ripple66 {
+  0%   { opacity: 0; transform: scale(.3); }
+  10%  { opacity: .8; }
+  100% { opacity: 0; transform: scale(2.8); }
+}
+
+.fishing.go .splash { animation: splash66 1.6s ease-out 2.20s forwards !important; }
+
+@keyframes splash66 {
+  0%   { opacity: 0; transform: translateY(6px) scale(.6); }
+  12%  { opacity: 1; transform: translateY(0) scale(1); }
+  45%  { opacity: .8; transform: translateY(-8px) scale(1.2); }
+  100% { opacity: 0; transform: translateY(-16px) scale(1.35); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fishing.go .arms { animation: armswork 6.6s cubic-bezier(.4,0,.3,1) forwards !important; }
+  .fishing.go .caught { animation: catchup66 6.6s linear forwards !important; }
+  .fishing.go .r1 { animation: ripple66 2.6s ease-out 2.24s forwards !important; }
+  .fishing.go .r2 { animation: ripple66 2.6s ease-out 2.64s forwards !important; }
+  .fishing.go .r3 { animation: ripple66 2.6s ease-out 3.10s forwards !important; }
+  .fishing.go .splash { animation: splash66 1.6s ease-out 2.20s forwards !important; }
+}

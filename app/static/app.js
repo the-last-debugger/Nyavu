@@ -203,6 +203,16 @@
         `L${nr[0].toFixed(1)} ${nr[1].toFixed(1)} L${HAND_B[0]} ${HAND_B[1]} Z`);
       // slack under water: the strip darkens as it sinks
       tether.setAttribute("fill-opacity", t > 0.3 && t < 0.7 ? "0.35" : "0.55");
+
+      // the submerged share of the net takes the water's colour
+      const wet = root.querySelector(".wetnet");
+      const front = root.querySelector(".cloth.front");
+      if (wet && front) {
+        wet.setAttribute("d", front.getAttribute("d"));
+        wet.setAttribute("transform",
+          `translate(${x.toFixed(1)}, ${y.toFixed(1)}) scale(${s.toFixed(3)}) rotate(${r.toFixed(1)})`);
+        wet.setAttribute("fill-opacity", t > 0.30 ? "0.82" : "0");
+      }
     }
   }
 
@@ -216,10 +226,12 @@
     const caption = g.querySelector(".readout small");
 
     const token = ++sweepToken;
-    const pause = 250;
-    const duration = 10000;
+    const pause = 2244;   // the net meets the water here; the dial then observes
+    const duration = 4360;
 
     if (caption) caption.textContent = "examining";
+    const scene = document.querySelector(".fishing");
+    if (scene) scene.classList.add("go");
     updateNet(document, 0);
 
     const ease = (x) => {
@@ -342,8 +354,8 @@
           <svg viewBox="0 12 610 236" preserveAspectRatio="xMidYMid meet">
             <defs>
               <linearGradient id="seaG" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stop-color="#0C2833"/>
-                <stop offset="100%" stop-color="#050D13"/>
+                <stop offset="0%" stop-color="#0B3546"/>
+                <stop offset="100%" stop-color="#04121A"/>
               </linearGradient>
               <radialGradient id="moonG" cx="50%" cy="50%" r="50%">
                 <stop offset="0%" stop-color="#1B3A44"/>
@@ -353,6 +365,9 @@
                 <rect width="9" height="9" fill="#0E1C25"/>
                 <path d="M0 0 V9 M0 0 H9" stroke="#33525F" stroke-width="1.05" fill="none" opacity="1"/>
               </pattern>
+              <clipPath id="waterBand" clipPathUnits="userSpaceOnUse">
+                <rect x="0" y="172" width="610" height="88"/>
+              </clipPath>
               <filter id="flutter" x="-30%" y="-30%" width="160%" height="160%">
                 <feTurbulence type="fractalNoise" baseFrequency="0.014 0.022" numOctaves="2" seed="7" result="noise">
                   <animate attributeName="baseFrequency" dur="10s" repeatCount="indefinite"
@@ -430,6 +445,9 @@
                     d="M-58 -4 q8 -22 32 -25 q20 -2 27 -15 q9 13 28 15 q23 3 29 25 q-5 21 -30 23 q-22 2 -30 13 q-9 -11 -30 -13 q-27 -3 -26 -23 z"/>
               <path class="cloth front" fill="url(#mesh)" stroke="none"
                     d="M-52 2 q6 -19 28 -22 q18 -2 24 -13 q8 11 25 13 q20 3 26 22 q-4 19 -26 21 q-19 2 -26 11 q-8 -9 -26 -11 q-24 -2 -25 -21 z"/>
+              <g clip-path="url(#waterBand)" style="pointer-events:none">
+                <path class="wetnet" fill="#0B3546" fill-opacity="0.82" stroke="none" transform=""/>
+              </g>
               <g class="caught">
                 <g class="catch-dark">
                   <path d="M-13 2 q9 -11 19 -1 q-4 8 -12 8 z" fill="#200910" stroke="#ff4d6d" stroke-width="2"/>
