@@ -4515,3 +4515,77 @@ summary:focus-visible,
 .input-row .btn.primary:hover {
   background: linear-gradient(180deg, #5CF7D8 0%, #35CFB2 100%);
 }
+
+/* the two controls inside the address row: drawn, not borrowed from a font */
+.input-icon svg { width: 19px; height: 19px; display: block; }
+.input-icon { opacity: .5; }
+
+.input-row .btn.icon svg { width: 18px; height: 18px; display: block; }
+.input-row .btn.icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 12px;
+  height: 38px;
+}
+
+/* ===================== less neon, more ink =====================
+   The tell of a machine-written interface is uniformity: every surface glows, every
+   label shouts in capitals, every corner is the same curve. These rules take the shine
+   off the chrome and let the content carry the page. */
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  margin: 0 0 18px;
+  padding: 0;
+  border: 0;
+  background: none;
+  border-radius: 0;
+  font-family: var(--font-body, inherit);
+  font-size: 0.86rem;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--muted);
+}
+
+.eyebrow-dot {
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: var(--mint);
+  box-shadow: 0 0 8px rgba(67, 232, 200, .5);
+}
+
+/* captions are words, not telemetry */
+.stats-strip span {
+  text-transform: none;
+  letter-spacing: .01em;
+  font-family: var(--font-body, inherit);
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.spark-label {
+  text-transform: none;
+  letter-spacing: .02em;
+  font-family: var(--font-body, inherit);
+  font-size: 0.74rem;
+  color: var(--muted);
+}
+
+/* the glow on every button and card was doing no work */
+.btn.primary { box-shadow: 0 2px 10px rgba(0, 0, 0, .25); }
+.btn.primary:hover { box-shadow: 0 4px 16px rgba(0, 0, 0, .3); }
+
+.stats-strip .div, .stats-strip > div { background: transparent; }
+
+/* the sparkline caption: a sentence, not a telemetry readout */
+.spark-cap {
+  font-family: var(--font-body, inherit);
+  font-size: 0.78rem;
+  letter-spacing: 0.01em;
+  text-transform: none;
+  color: var(--muted);
+  margin-top: 10px;
+}

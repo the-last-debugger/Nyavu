@@ -59,7 +59,7 @@
   <section id="detector" class="view active">
     <div class="hero">
       <div class="hero-copy">
-        <p class="eyebrow">Machine learning · URL text only · no page fetching</p>
+        <p class="eyebrow"><span class="eyebrow-dot"></span>Scores a link from its name alone — nothing is fetched</p>
         <h1>Check a link before you click it.</h1>
         <p class="lede">Paste any URL. Nyavu scores it against a curated corpus and tells you <em>why</em> it looks dangerous.</p>
       </div>
@@ -82,11 +82,21 @@
 
     <form class="scanner" id="scanForm" autocomplete="off">
       <div class="input-row">
-        <span class="input-icon" aria-hidden="true">🔗</span>
+        <span class="input-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round">
+            <path d="M10 13a5 5 0 0 0 7 0l2-2a5 5 0 0 0-7-7l-1 1"/>
+            <path d="M14 11a5 5 0 0 0-7 0l-2 2a5 5 0 0 0 7 7l1-1"/>
+          </svg>
+        </span>
         <input id="urlInput" name="url" type="text" inputmode="url"
                placeholder="https://example.com/login" spellcheck="false" required />
         <button class="btn primary" type="submit" id="scanBtn">Analyse</button>
-        <button class="btn icon" type="button" id="qrBtn" title="Scan a QR code with your camera">▣</button>
+        <button class="btn icon" type="button" id="qrBtn" title="Scan a QR code with your camera" aria-label="Scan a QR code with your camera">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round">
+            <path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3"/>
+            <path d="M4 12h16"/>
+          </svg>
+        </button>
       </div>
       <div class="samples">
         <span>Try:</span>
@@ -101,10 +111,10 @@
 
     <div class="data-band">
       <div class="stats-strip" id="statsStrip">
-        <div><strong id="statTotal">—</strong><span>URLs analysed</span></div>
-        <div><strong id="statPhish">—</strong><span>flagged as phishing</span></div>
-        <div><strong id="statUsers">—</strong><span>registered users</span></div>
-        <div><strong id="statTrain">—</strong><span>training URLs</span></div>
+        <div><strong id="statTotal">—</strong><span>Links checked</span></div>
+        <div><strong id="statPhish">—</strong><span>Flagged as phishing</span></div>
+        <div><strong id="statUsers">—</strong><span>People signed up</span></div>
+        <div><strong id="statTrain">—</strong><span>Links in training</span></div>
       </div>
       <div class="spark-card" id="spark" aria-hidden="true"></div>
     </div>

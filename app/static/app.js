@@ -115,7 +115,8 @@
      has deliberately scrolled elsewhere. */
   function revealResult(el) {
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    requestAnimationFrame(() => {
+
+    const bring = () => {
       const rect = el.getBoundingClientRect();
       const header = document.querySelector(".topbar");
       const offset = (header ? header.offsetHeight : 0) + 18;
@@ -124,7 +125,13 @@
         top: Math.max(0, window.scrollY + rect.top - offset),
         behavior: reduce ? "auto" : "smooth",
       });
-    });
+    };
+
+    // The hero collapses over 620ms when a scan starts, which moves the card up the
+    // page. Measuring before that settles sends the scroll past its target, which is
+    // what happened on a phone. Measure now, then again once the layout is still.
+    requestAnimationFrame(bring);
+    setTimeout(bring, 700);
   }
 
 
@@ -767,7 +774,12 @@
       }
       if (!done.zoom && elapsed >= BEAT.zoom) {
         done.zoom = true;
-        cameraPush(root, [78, 20, 542, 210], 2400);
+        // a phone sees a narrower slice of the same viewBox, so the push is gentler
+        // there and wide enough to hold both the fisherman and the crescent
+        const target = window.innerWidth < 700
+          ? [52, 6, 630, 250]
+          : [78, 20, 542, 210];
+        cameraPush(root, target, 2400);
         if (card) card.classList.add("dialcoming");
         say(root, exam[1]);               // his second thought, as the camera moves in
       }
