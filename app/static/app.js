@@ -245,13 +245,33 @@
       15.2s  camera pushes in on the catch
       18.8s  the scene sinks into water and the verdict rises out of it
      --------------------------------------------------------------------------- */
+  /* Deliberately long. Every beat gets room to read before the next begins; these
+     numbers come down only once each one is confirmed to render and to land.
+
+       0-2s    the card settles, the scene fades up
+       2-5s    he winds the net back
+       5-8s    the throw
+       8-9s    it meets the water
+       9-20s   the net lies there and drifts
+      20-24s   the haul
+      24-26s   the catch comes aboard
+      26-32s   he turns it over - the reaction, six seconds of it
+      32-36s   the camera pushes in
+      34-44s   the dial wakes and calibrates while he examines
+      46-58s   water builds, takes over, and clears
+      58s      the verdict
+  */
   const BEAT = {
-    impact: 4700,
-    fish: 9400,
-    react: 13400,
-    zoom: 15200,
-    sink: 18800,
-    end: 21200,
+    throw: 5000,
+    impact: 8000,
+    haul: 20000,
+    fish: 24000,
+    react: 26000,
+    zoom: 32000,
+    dial: 34000,
+    water: 46000,
+    reveal: 58000,
+    end: 60000,
   };
 
   function resetArtifacts(scene) {
@@ -339,10 +359,10 @@
       if (line && line.parentElement) line.parentElement.remove();
       const skip = document.getElementById("skipBtn");
       if (skip) skip.remove();
-    }, 1400);
+    }, 12000);   // the water takes twelve seconds to build
 
-    setTimeout(() => water.classList.add("fall"), 2200);
-    setTimeout(() => water.remove(), 4200);
+    setTimeout(() => water.classList.add("fall"), 13200);
+    setTimeout(() => water.remove(), 19600);
   }
 
   function runScene(root) {
@@ -350,22 +370,31 @@
     if (!scene) return;
     resetArtifacts(scene);
 
+    const card = root.querySelector(".result");
     const started = performance.now();
-    let impact = false, fish = false, reacted = false, zoomed = false, sank = false;
+    const done = {};
 
     function frame(now) {
       const elapsed = now - started;
-      updateNet(root, Math.min(1, elapsed / 10000));
+      // the net works on its own ten seconds inside the longer scene
+      const netT = Math.min(1, Math.max(0, (elapsed - BEAT.throw + 1200) / 10000));
+      updateNet(root, netT);
 
-      if (!impact && elapsed >= BEAT.impact) { impact = true; burst(root); }
-      if (!fish && elapsed >= BEAT.fish) { fish = true; scene.classList.add("examine"); drip(root); }
-      if (!reacted && elapsed >= BEAT.react) { reacted = true; scene.classList.add("reaction"); }
-      if (!zoomed && elapsed >= BEAT.zoom) { zoomed = true; scene.classList.add("zoom"); }
-      if (!sank && elapsed >= BEAT.sink) { sank = true; waterCurtain(root); return; }
+      if (!done.impact && elapsed >= BEAT.impact) { done.impact = true; burst(root); }
+      if (!done.fish && elapsed >= BEAT.fish) { done.fish = true; scene.classList.add("examine"); drip(root); }
+      if (!done.react && elapsed >= BEAT.react) { done.react = true; scene.classList.add("reaction"); }
+      if (!done.zoom && elapsed >= BEAT.zoom) {
+        done.zoom = true;
+        scene.classList.add("zoom");
+        if (card) card.classList.add("dialcoming");
+      }
+      if (!done.water && elapsed >= BEAT.water) { done.water = true; waterCurtain(root); return; }
+
       requestAnimationFrame(frame);
     }
     requestAnimationFrame(frame);
   }
+
 
   const TONE_OF = (v) => (v < 35 ? "#35e0a0" : v < 65 ? "#ffb020" : "#ff4d6d");
 
@@ -377,8 +406,8 @@
     const caption = g.querySelector(".readout small");
 
     const token = ++sweepToken;
-    const pause = 9400;   // the catch is in his hands here; the dial starts
-    const duration = 4000;   // four seconds of judging, then the hold
+    const pause = 34000;   // the dial wakes once the camera is on him   // the catch is in his hands here; the dial starts
+    const duration = 10000;  // ten seconds of calibrating while he examines the catch
 
     if (caption) caption.textContent = "examining";
     const scene = document.querySelector(".fishing");

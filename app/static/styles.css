@@ -3022,3 +3022,34 @@ body.has-result .explain {
   border-radius: 0;
   z-index: 20;
 }
+
+/* the water takes its time arriving and leaving */
+.waterline { transition: opacity 12s cubic-bezier(.4, 0, .2, 1); }
+.waterline.fall { transition: opacity 6.4s cubic-bezier(.4, 0, .2, 1); }
+
+/* the dial is not there until the camera brings it into view */
+.result.pending:not(.dialcoming) .gauge,
+.result.pending:not(.dialcoming) .thinking-row { opacity: 0; }
+
+.result.pending .gauge {
+  transition: opacity 2.4s cubic-bezier(.22,1,.36,1), transform 2.4s cubic-bezier(.22,1,.36,1);
+}
+
+.result.pending:not(.dialcoming) .gauge { transform: translateY(10px) scale(.72); }
+.result.pending.dialcoming .gauge { opacity: 1; transform: none; }
+
+/* ---------------- the scene's own animations must not be collapsed ----------------
+   The global reduced-motion rule kills every CSS animation, which is why the
+   fisherman's reaction never rendered. These are the performance: they always run. */
+@media (prefers-reduced-motion: reduce) {
+  .fishing.examine .fisher,
+  .fishing.examine .caught,
+  .fishing.reaction .fisher,
+  .fishing.reaction .boat,
+  .fishing.reaction .catch-dark,
+  .fishing.reaction .catch-odd,
+  .fishing.reaction .catch-plain {
+    animation-duration: 2.4s !important;
+    animation-iteration-count: infinite !important;
+  }
+}
