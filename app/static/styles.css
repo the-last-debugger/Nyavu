@@ -25,7 +25,7 @@
   --line-hi:   rgba(255, 255, 255, 0.14);
   --text:      #eef2fa;
   --muted:     #939fb5;
-  --faint:     #5b667d;
+  --faint: #8d97ab;
 
   --accent:    #43e8c8;
   --accent-2:  #7c6bff;
@@ -4427,4 +4427,39 @@ body.verdict-open { overflow: hidden; }
   .result .block-title { font-size: 0.62rem; letter-spacing: .16em; }
   .result .meta-row { gap: 10px !important; font-size: 0.7rem !important; flex-wrap: wrap !important; }
   .result .suggest { font-size: 0.82rem !important; }
+}
+
+
+/* ===================== keyboard =====================
+   Focus was invisible everywhere: the input set outline:none and nothing replaced it, so
+   a keyboard user could not tell where they were. */
+:focus-visible {
+  outline: 2px solid #43e8c8;
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* the search field keeps its own look, but the row around it lights up */
+.input-row:focus-within {
+  border-color: rgba(67, 232, 200, .55);
+  box-shadow: 0 0 0 3px rgba(67, 232, 200, .12);
+}
+
+button:focus-visible,
+a:focus-visible,
+summary:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid #43e8c8;
+  outline-offset: 3px;
+}
+
+/* skip links are a courtesy, not a design element */
+.visually-hidden {
+  position: absolute !important;
+  width: 1px; height: 1px;
+  margin: -1px; padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
 }
