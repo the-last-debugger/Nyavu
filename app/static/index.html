@@ -63,21 +63,11 @@
         <h1>Check a link before you click it.</h1>
         <p class="lede">Paste any URL. Nyavu scores it against a curated corpus and tells you <em>why</em> it looks dangerous.</p>
       </div>
-      <div class="hero-visual" aria-hidden="true">
-        <!-- what you actually get: a compact preview of a verdict, not an abstract orb -->
-        <div class="preview-card">
-          <div class="preview-head">
-            <span class="preview-dot"></span>
-            <span class="preview-url">safaricom-secure-login.tk</span>
-          </div>
-          <div class="preview-bar"><i style="--w: 96%"></i></div>
-          <p class="preview-line"><strong>Likely phishing</strong> · brand name in the wrong place</p>
-          <div class="preview-reasons">
-            <span>brand mismatch</span><span>hyphenated</span><span>no HTTPS</span>
-          </div>
-        </div>
-        <p class="preview-caption">An example verdict. Names only — Nyavu never visits the link.</p>
-      </div>
+      <aside class="hero-note">
+        <span class="folio">01</span>
+        <p>Nyavu reads the address, not the page. Nothing is fetched and nothing is
+           stored about you, so there is nothing for a bad link to exploit.</p>
+      </aside>
     </div>
 
     <form class="scanner" id="scanForm" autocomplete="off">

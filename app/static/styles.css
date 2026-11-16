@@ -4652,3 +4652,151 @@ body::before {
 
 /* the verdict stamp was blended and glowing; it is ink on paper */
 .stamp { mix-blend-mode: normal !important; filter: none !important; }
+
+/* =====================================================================
+   A page set by a person, not a template
+
+   Seven columns of statement, four of marginalia, a hairline between them. The numbers
+   are a line of type rather than a dashboard grid, and the three principles are divided
+   by rules instead of being boxed. This is where the borrowed editorial language lives.
+   ===================================================================== */
+
+.hero {
+  grid-template-columns: minmax(0, 7fr) minmax(0, 4fr);
+  gap: 72px;
+  align-items: start;
+}
+
+.hero-copy { max-width: 30ch; }
+
+.hero-note {
+  margin-top: 58px;
+  padding-left: 20px;
+  border-left: 1px solid var(--line-hi);
+  max-width: 34ch;
+}
+
+.hero-note .folio {
+  display: block;
+  margin-bottom: 10px;
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.2em;
+  color: var(--faint);
+}
+
+.hero-note p {
+  margin: 0;
+  font-size: 0.84rem;
+  line-height: 1.6;
+  color: var(--muted);
+}
+
+/* the numbers are a sentence of type, not four boxes */
+.data-band {
+  display: block;
+  margin-top: 44px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line-hi);
+}
+
+.stats-strip {
+  display: flex !important;
+  flex-wrap: wrap;
+  gap: 34px;
+  margin: 0;
+  background: none !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  overflow: visible !important;
+}
+
+.stats-strip > div {
+  display: flex !important;
+  align-items: baseline;
+  gap: 9px;
+  padding: 0 !important;
+  background: none !important;
+  border: 0 !important;
+}
+
+.stats-strip strong {
+  font-size: 1.6rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--text);
+}
+
+.stats-strip span { font-size: 0.8rem; color: var(--muted); }
+
+.spark-card {
+  margin-top: 18px !important;
+  padding: 0 !important;
+  background: none !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+}
+
+.spark-card svg { height: 44px !important; opacity: .8; }
+
+/* the three principles, divided by rules rather than boxed */
+.steps {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0;
+  border-top: 1px solid var(--line-hi);
+}
+
+.step {
+  padding: 24px 28px 26px 0 !important;
+  background: none !important;
+  border: 0 !important;
+  border-right: 1px solid var(--line);
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+.step:last-child { border-right: 0; padding-right: 0 !important; }
+.step + .step { padding-left: 28px !important; }
+
+.step-no {
+  display: block;
+  margin-bottom: 12px;
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.2em;
+  color: var(--faint);
+}
+
+@media (max-width: 900px) {
+  .hero { grid-template-columns: 1fr; gap: 30px; }
+  .hero-note { margin-top: 6px; }
+  .steps { grid-template-columns: 1fr; }
+  .step {
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
+    padding: 20px 0 !important;
+  }
+  .step:last-child { border-bottom: 0; }
+  .stats-strip { gap: 18px 26px; }
+}
+
+/* tighten what the editorial layout exposed */
+.hero-copy { max-width: 34ch; }
+
+.hero h1 {
+  font-size: clamp(2.3rem, 3.4vw, 3.35rem);
+  line-height: 1.04;
+  letter-spacing: -0.038em;
+}
+
+.explain { margin-top: 40px; padding-top: 26px; }
+
+.data-band { margin-bottom: 0; }
+.spark-card { margin-bottom: 0 !important; }
+.spark-card .spark-cap { margin-top: 6px; }
+
+/* the folios and small labels sit a touch heavier than the body, like marginalia */
+.folio, .block-title, .step-no {
+  font-weight: 600;
+}
