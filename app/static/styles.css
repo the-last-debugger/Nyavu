@@ -3145,3 +3145,95 @@ body.has-result .explain {
 @media (prefers-reduced-motion: reduce) {
   .view.active { animation: viewIn .46s cubic-bezier(.22,1,.36,1) both !important; }
 }
+
+/* ======================= native view transitions =======================
+   When the browser can own the switch, the CSS entrance must stand down or the two
+   would run together. Where it cannot - older browsers, or reduced motion - the
+   CSS curve is the fallback and nothing is lost. */
+
+.vt .view.active { animation: none; }
+
+::view-transition-old(root) {
+  animation: vtOut .26s cubic-bezier(.4, 0, .2, 1) both;
+}
+
+::view-transition-new(root) {
+  animation: vtIn .38s cubic-bezier(.22, 1, .36, 1) both;
+}
+
+@keyframes vtOut {
+  from { opacity: 1; transform: scale(1); }
+  to   { opacity: 0; transform: scale(.995); }
+}
+
+@keyframes vtIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* ---------------------------------- the fisherman talks ---------------------------------- */
+.fishing .bubble {
+  position: absolute;
+  left: 9%;
+  top: 14%;
+  max-width: 232px;
+  padding: 10px 13px;
+  border-radius: 14px 14px 14px 4px;
+  background: rgba(8, 16, 22, 0.92);
+  border: 1px solid var(--line-hi);
+  color: var(--ink);
+  font-size: 0.82rem;
+  line-height: 1.4;
+  letter-spacing: 0.01em;
+  opacity: 0;
+  transform: translateY(6px) scale(.97);
+  transition: opacity .3s ease, transform .34s cubic-bezier(.22,1,.36,1);
+  pointer-events: none;
+  z-index: 6;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, .45);
+}
+
+.fishing .bubble.on { opacity: 1; transform: none; }
+
+.fishing .bubble::after {
+  content: "";
+  position: absolute;
+  left: 22px;
+  bottom: -7px;
+  width: 12px;
+  height: 12px;
+  background: rgba(8, 16, 22, 0.92);
+  border-right: 1px solid var(--line-hi);
+  border-bottom: 1px solid var(--line-hi);
+  transform: rotate(45deg);
+  border-radius: 0 0 3px 0;
+}
+
+.fishing { position: relative; }
+
+/* the lighthouse lamp breathes */
+.fishing .lamp { animation: lamp 4.2s ease-in-out infinite; }
+.fishing .beam { animation: beam 8.4s ease-in-out infinite; }
+
+@keyframes lamp {
+  0%, 100% { opacity: .45; }
+  45%      { opacity: 1; }
+}
+
+@keyframes beam {
+  0%, 100% { opacity: .05; }
+  50%      { opacity: .16; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fishing .lamp { animation: lamp 4.2s ease-in-out infinite !important; }
+  .fishing .beam { animation: beam 8.4s ease-in-out infinite !important; }
+  .fishing .bubble { transition-duration: .3s !important; }
+}
+
+/* the line changes while the bubble stays put */
+.fishing .bubble.swap { opacity: 0; transform: translateY(-4px); transition: opacity .2s ease, transform .2s ease; }
+
+/* a gentler push-in, so the shore and the sky stay in the shot */
+.fishing.zoom svg { transform: scale(1.32); }
+.fishing svg { transform-origin: 47% 56%; }

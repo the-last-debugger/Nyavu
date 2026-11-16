@@ -13,15 +13,40 @@
 
   /* ---------------------------------------------------------------- routing */
   const views = $$(".view");
-  function route() {
-    const id = (location.hash || "#detector").slice(1);
-    const target = $("#" + id) ? id : "detector";
+
+  /* The browser can own the switch: View Transitions crossfades the old view out and
+     the new one in as a single composited operation, so there is never a frame where
+     both are half-true. Where it is unavailable, the CSS entrance animation runs
+     instead - the same curve, one element at a time. */
+  const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const canViewTransition = typeof document.startViewTransition === "function" && !prefersReduced;
+  if (canViewTransition) document.documentElement.classList.add("vt");
+
+  function applyRoute(target) {
     views.forEach(v => v.classList.toggle("active", v.id === target));
     $$("#nav a").forEach(a => a.classList.toggle("active", a.getAttribute("href") === "#" + target));
+  }
+
+  function afterRoute(target) {
     if (target === "history") loadHistory();
     if (target === "model") loadModel();
     if (target === "detector") { loadStats(); loadSparkline(); }
     window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function route() {
+    const id = (location.hash || "#detector").slice(1);
+    const target = $("#" + id) ? id : "detector";
+    const current = views.find(v => v.classList.contains("active"));
+    if (current && current.id === target) { afterRoute(target); return; }
+
+    if (canViewTransition) {
+      const t = document.startViewTransition(() => applyRoute(target));
+      t.finished.then(() => afterRoute(target)).catch(() => afterRoute(target));
+    } else {
+      applyRoute(target);
+      afterRoute(target);
+    }
   }
   window.addEventListener("hashchange", route);
 
@@ -290,6 +315,54 @@
     end: 41000,
   };
 
+
+  /* He talks while he works. The lines are chosen by what is in the net, and they
+     are written in his voice: dry, plain, never a marketing sentence. */
+  const LINES = {
+    plain: [
+      "Clean. Not a thing hiding in it.",
+      "Good weight. Good shape. Off you go.",
+      "Now that's a fish worth the rowing.",
+    ],
+    odd: [
+      "Hm. Half a fish.",
+      "Something's off. Hold still, will you.",
+      "You look like a fish. You don't feel like one.",
+    ],
+    dark: [
+      "Oi. That's not a fish.",
+      "Bait. This one's bait.",
+      "Teeth. Of course it has teeth.",
+    ],
+  };
+
+  function startMonologue(root) {
+    const bubble = root.querySelector(".bubble");
+    const scene = root.querySelector(".fishing");
+    if (!bubble || !scene) return;
+    const kind = scene.dataset.catch || "odd";
+    const lines = LINES[kind] || LINES.odd;
+    const span = bubble.querySelector("span");
+    let i = 0;
+
+    const show = () => {
+      if (span) span.textContent = lines[i % lines.length];
+      bubble.classList.add("on");
+      i += 1;
+    };
+    const hide = () => bubble.classList.remove("on");
+
+    show();
+    bubble.classList.add("on");
+    // the words change; the bubble never leaves, so there is no flicker between lines
+    const cycle = setInterval(() => {
+      bubble.classList.add("swap");
+      setTimeout(() => { show(); bubble.classList.remove("swap"); }, 220);
+    }, 3400);
+
+    return () => { clearInterval(cycle); bubble.classList.remove("on", "swap"); };
+  }
+
   function resetArtifacts(scene) {
     [scene.querySelector(".splash"), ...scene.querySelectorAll(".ripple")]
       .forEach((el) => {
@@ -407,8 +480,14 @@
         done.zoom = true;
         scene.classList.add("zoom");
         if (card) card.classList.add("dialcoming");
+        done.stopTalk = startMonologue(root);
       }
-      if (!done.water && elapsed >= BEAT.water) { done.water = true; waterCurtain(root); return; }
+      if (!done.water && elapsed >= BEAT.water) {
+        done.water = true;
+        if (typeof done.stopTalk === "function") done.stopTalk();
+        waterCurtain(root);
+        return;
+      }
 
       requestAnimationFrame(frame);
     }
@@ -576,7 +655,35 @@
             </defs>
 
             <rect x="0" y="0" width="610" height="172" fill="#050B11"/>
-            <circle cx="470" cy="40" r="18" fill="url(#moonG)"/>
+            <!-- a crescent: the disc with an offset disc subtracted from it -->
+            <mask id="crescent">
+              <circle cx="470" cy="40" r="18" fill="#ffffff"/>
+              <circle cx="462" cy="34" r="15.4" fill="#000000"/>
+            </mask>
+            <circle cx="470" cy="40" r="18" fill="url(#moonG)" mask="url(#crescent)"/>
+
+            <!-- far shore: a church and a lighthouse, held back by tone, not by blur -->
+            <g class="far-shore" fill="#070E14" stroke="#1B2C38" stroke-width="1.6" stroke-linejoin="round">
+              <!-- church: nave, pitched roof, tower, spire -->
+              <path d="M74 172 v-24 l26 -13 l26 13 v24 z"/>
+              <path d="M128 172 v-34 h13 v34 z"/>
+              <path d="M134.5 138 v-14 l6 -8 l6 8 v14 z"/>
+              <path d="M140.5 108 v-8"/>
+              <path d="M137 112 h7"/>
+              <!-- a lit window, the only warmth on the shore -->
+              <rect x="132" y="158" width="4" height="6" fill="#C9A45A" stroke="none" opacity="0.55"/>
+            </g>
+
+            <g class="far-shore" fill="#070E14" stroke="#1B2C38" stroke-width="1.6" stroke-linejoin="round">
+              <!-- lighthouse: tapered tower, gallery, lantern, and its beam -->
+              <path d="M458 172 l3 -46 h12 l3 46 z"/>
+              <path d="M459 126 h19"/>
+              <path d="M463 126 v-8 h11 v8 z"/>
+              <path d="M464 118 h9"/>
+              <path class="lamp" d="M468.5 122 m-1.6 0 a1.6 1.6 0 1 1 3.2 0 a1.6 1.6 0 1 1 -3.2 0"
+                    fill="#B8F2E6" stroke="none"/>
+              <path class="beam" d="M476 122 l30 -12 v24 z" fill="#8FF3E2" stroke="none" opacity="0.10"/>
+            </g>
 
             <!-- the boat: gunwale at 150, keel at 180, waterline at 172 => a quarter under -->
             <g class="boat">
@@ -660,6 +767,9 @@
             <g clip-path="url(#waterBand)" style="pointer-events:none">
               <path class="wetnet" fill="#0B3546" fill-opacity="0.85" stroke="none"/>
             </g>
+          </svg>
+          <div class="bubble" aria-live="polite"><span></span></div>
+          <svg class="svg-close" aria-hidden="true" style="display:none"></svg>
 
             <g class="wash" fill="none" stroke="#8FF3E2" stroke-width="1.4" opacity="0">
               <circle cx="352" cy="190" r="40"/>
