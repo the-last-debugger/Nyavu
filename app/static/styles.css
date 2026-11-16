@@ -1258,9 +1258,35 @@ details.advanced .feat-grid { margin: 6px 0 4px; }
 }
 
 /* Once a scan has run, the hero has done its job: it recedes so the verdict is
-   visible immediately, on any viewport, without scrolling. */
+   visible immediately. It collapses rather than vanishing, so the page does not
+   jump under the reader's eyes. */
+.hero {
+  max-height: 1400px;
+  overflow: hidden;
+  transition:
+    max-height .62s cubic-bezier(.4, 0, .2, 1),
+    opacity .45s ease,
+    transform .62s cubic-bezier(.22, 1, .36, 1),
+    margin .62s cubic-bezier(.4, 0, .2, 1);
+}
+
 body.has-result .hero {
-  display: none;
+  max-height: 0;
+  opacity: 0;
+  transform: translateY(-18px);
+  margin-top: 0;
+  margin-bottom: 0;
+  pointer-events: none;
+}
+
+main { transition: padding-top .62s cubic-bezier(.4, 0, .2, 1); }
+
+/* the card arrives rather than appearing */
+.result:not(.hidden) { animation: cardIn .72s cubic-bezier(.22, 1, .36, 1) both; }
+
+@keyframes cardIn {
+  from { opacity: 0; transform: translateY(16px) scale(.995); }
+  to   { opacity: 1; transform: none; }
 }
 
 body.has-result main {
@@ -3088,4 +3114,10 @@ body.has-result .explain {
   .waterline.fall { transition-duration: 6.4s !important; }
   .waterline .ca { animation: causticA 26s linear infinite !important; }
   .waterline .cb { animation: causticB 38s linear infinite reverse !important; }
+}
+
+/* the entrance is part of the performance, so it is exempt too */
+@media (prefers-reduced-motion: reduce) {
+  .hero { transition-duration: .62s !important; }
+  .result:not(.hidden) { animation: cardIn .72s cubic-bezier(.22,1,.36,1) both !important; }
 }
