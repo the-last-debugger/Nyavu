@@ -2185,13 +2185,13 @@ body.has-result .explain {
 
 
 /* the catch lifts into his hands as he starts to examine it */
-.fishing.examine .caught { animation: examine 2.4s ease-in-out infinite; }
+.fishing.examine:not(.reaction) .caught { animation: examine 2.4s ease-in-out infinite; }
 @keyframes examine {
   0%, 100% { transform: translateY(0) rotate(0deg); }
   50%      { transform: translateY(-2px) rotate(-4deg); }
 }
 
-.fishing.examine .fisher { animation: inspect 3s ease-in-out infinite; }
+.fishing.examine:not(.reaction) .fisher { animation: inspect 3s ease-in-out infinite; }
 @keyframes inspect {
   0%, 100% { transform: rotate(0deg) translateY(0); }
   50%      { transform: rotate(2.5deg) translateY(-1px); }
@@ -2932,13 +2932,13 @@ body.has-result .explain {
 
 
 /* the catch lifts into his hands as he starts to examine it */
-.fishing.examine .caught { animation: examine 2.4s ease-in-out infinite; }
+.fishing.examine:not(.reaction) .caught { animation: examine 2.4s ease-in-out infinite; }
 @keyframes examine {
   0%, 100% { transform: translateY(0) rotate(0deg); }
   50%      { transform: translateY(-2px) rotate(-4deg); }
 }
 
-.fishing.examine .fisher { animation: inspect 3s ease-in-out infinite; }
+.fishing.examine:not(.reaction) .fisher { animation: inspect 3s ease-in-out infinite; }
 @keyframes inspect {
   0%, 100% { transform: rotate(0deg) translateY(0); }
   50%      { transform: rotate(2.5deg) translateY(-1px); }
@@ -3052,4 +3052,40 @@ body.has-result .explain {
     animation-duration: 2.4s !important;
     animation-iteration-count: infinite !important;
   }
+}
+
+/* ============================================================================
+   FINAL EXEMPTION AUDIT
+   The global rule above collapses every CSS animation to 0.001ms when the system
+   asks for reduced motion. On this machine that is always true, which is why
+   several features appeared "missing" rather than broken. Everything the operator
+   needs to see is restored here; only purely ambient decoration still obeys.
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  /* the scan narration */
+  .thinking .dot { animation: think 1.1s ease-in-out infinite !important; }
+  .thinking .phase::after { animation: dots 1.4s steps(4, end) infinite !important; }
+
+  /* the dial while it decides */
+  .result.pending .gauge { transition-duration: 2.4s !important; }
+
+  /* the scene: arms, boat, wake, cloth, catch, reaction, examine */
+  .fishing .boat { animation: bob 3.2s ease-in-out infinite !important; }
+  .fishing .wake { animation: wake 4.2s ease-in-out infinite !important; }
+  .fishing .cloth.back { animation: swish 2.6s ease-in-out infinite alternate !important; }
+  .fishing .cloth.front { animation: swish 2.1s ease-in-out infinite alternate-reverse !important; }
+  .fishing.go .arms { animation: armswork 10s cubic-bezier(.4,0,.3,1) forwards !important; }
+  .fishing.go .caught { animation: catchup10b 10s linear forwards !important; }
+  .fishing.examine:not(.reaction) .fisher { animation: inspect 3s ease-in-out infinite !important; }
+  .fishing.examine:not(.reaction) .caught { animation: examine 2.4s ease-in-out infinite !important; }
+  .fishing.reaction .fisher { animation-duration: 2.4s !important; animation-iteration-count: infinite !important; }
+  .fishing.reaction .boat { animation: rock 1.6s ease-in-out infinite !important; }
+  .fishing.zoom svg { transition: transform 2.4s cubic-bezier(.33,0,.2,1) !important; }
+
+  /* the water */
+  .waterline { transition-duration: 12s !important; }
+  .waterline.fall { transition-duration: 6.4s !important; }
+  .waterline .ca { animation: causticA 26s linear infinite !important; }
+  .waterline .cb { animation: causticB 38s linear infinite reverse !important; }
 }
