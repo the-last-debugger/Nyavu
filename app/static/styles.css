@@ -1560,3 +1560,153 @@ body.has-result .explain {
 .result.pending details.advanced {
   display: none;
 }
+
+/* ================================================== the fisherman's catch ===
+   A seven-second performance that runs with the dial. He prepares, casts, feels
+   something, hauls, and the catch is whatever the verdict says it is. Purely
+   presentational: the result is already computed and is revealed the moment the
+   net clears the water. */
+
+.fishing { display: none; width: 100%; max-width: 360px; }
+
+.result.pending .fishing { display: block; margin: 4px 0 0; }
+.result.pending .skeleton { display: none; }
+
+.fishing svg { width: 100%; height: auto; overflow: visible; }
+
+.fishing .sea { opacity: .9; }
+
+.fishing .boat { animation: bob 3.2s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+
+@keyframes bob {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50%      { transform: translateY(-2px) rotate(-1deg); }
+}
+
+.fishing .arm {
+  transform-box: fill-box;
+  transform-origin: 0% 100%;
+  animation: cast 7s cubic-bezier(.4,0,.3,1) forwards;
+}
+
+@keyframes cast {
+  0%   { transform: rotate(0deg); }
+  12%  { transform: rotate(-38deg); }   /* winding up */
+  26%  { transform: rotate(46deg); }    /* the cast */
+  45%  { transform: rotate(30deg); }    /* holding, something tugging */
+  62%  { transform: rotate(34deg); }
+  78%  { transform: rotate(6deg); }     /* hauling */
+  90%  { transform: rotate(-8deg); }
+  100% { transform: rotate(0deg); }
+}
+
+.fishing .netg {
+  transform-box: fill-box;
+  transform-origin: 0% 50%;
+  animation: netswing 7s cubic-bezier(.4,0,.3,1) forwards;
+}
+
+@keyframes netswing {
+  0%, 10%   { transform: translate(0,0) scale(1); opacity: 1; }
+  26%       { transform: translate(6px, 26px) scale(.9); opacity: 1; }
+  45%       { transform: translate(4px, 20px) scale(.92); opacity: .95; }
+  78%       { transform: translate(-2px, 4px) scale(1.02); opacity: 1; }
+  100%      { transform: translate(0,0) scale(1); }
+}
+
+.fishing .line {
+  animation: lineflex 7s ease-in-out forwards;
+  transform-box: fill-box;
+  transform-origin: top center;
+}
+
+@keyframes lineflex {
+  0%, 20%  { opacity: .15; }
+  26%      { opacity: .8; }
+  45%      { opacity: .6; }
+  70%      { opacity: .8; }
+  85%      { opacity: .3; }
+  100%     { opacity: .1; }
+}
+
+.fishing .ripple {
+  fill: none;
+  stroke: rgba(67, 232, 200, .5);
+  stroke-width: 1.2;
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.fishing .r1 { animation: ripple 7s ease-out 2.1s forwards; }
+.fishing .r2 { animation: ripple 7s ease-out 2.6s forwards; }
+.fishing .r3 { animation: ripple 7s ease-out 3.4s forwards; }
+
+@keyframes ripple {
+  0%       { opacity: 0; transform: scale(.3); }
+  8%       { opacity: .7; }
+  30%      { opacity: 0; transform: scale(2.6); }
+  100%     { opacity: 0; transform: scale(2.6); }
+}
+
+.fishing .catch { opacity: 0; }
+
+.fishing[data-catch="dark"]  .catch-dark,
+.fishing[data-catch="odd"]   .catch-odd,
+.fishing[data-catch="plain"] .catch-plain { animation: haul 7s cubic-bezier(.3,1.6,.5,1) forwards; }
+
+@keyframes haul {
+  0%, 84%  { opacity: 0; transform: translateY(16px) scale(.7); }
+  90%      { opacity: 1; transform: translateY(-4px) scale(1.06); }
+  100%     { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.fishing .catch-dark, .fishing .catch-odd, .fishing .catch-plain {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+/* narration + skip share a row */
+.thinking-row {
+  display: none;
+  align-items: center;
+  gap: 16px;
+  margin: 22px 0 0;
+}
+
+.result.pending .thinking-row { display: flex; }
+.thinking-row .thinking { margin: 0; display: flex; }
+
+.skip {
+  margin-left: auto;
+  padding: 7px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--line-hi);
+  background: transparent;
+  color: var(--faint);
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: color .2s, border-color .2s;
+}
+
+.skip:hover { color: var(--accent); border-color: var(--accent); }
+
+/* Reduced motion keeps the scene but stops it moving: the catch is simply already
+   in the boat. Removing the feature was the wrong reading of the preference. */
+@media (prefers-reduced-motion: reduce) {
+  .fishing .arm, .fishing .netg, .fishing .line, .fishing .ripple,
+  .fishing .boat, .fishing .catch-dark, .fishing .catch-odd, .fishing .catch-plain {
+    animation: none !important;
+  }
+  .fishing[data-catch="dark"]  .catch-dark,
+  .fishing[data-catch="odd"]   .catch-odd,
+  .fishing[data-catch="plain"] .catch-plain { opacity: 1; }
+  .fishing .ripple { opacity: 0; }
+}
+
+.fishing { max-width: 100% !important; }
+.fishing svg { width: 100%; height: auto; }
+.fishing .ripple { fill: none; stroke: rgba(67,232,200,.55); stroke-width: 1.4; }

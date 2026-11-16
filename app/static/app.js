@@ -112,6 +112,34 @@
      a short version rather than none - the number still has to arrive. */
   let sweepToken = 0;
 
+
+  /* Skip: jump the theatre to its end. The result is already known; the animation is
+     a presentation of it, never a delay in computing it. */
+  function finishNow() {
+    sweepToken++;
+    const card = document.querySelector(".result.pending");
+    if (!card) return;
+    const g = card.querySelector(".gauge");
+    const target = Number(g && g.dataset.target ? g.dataset.target : 0);
+    if (g) {
+      g.style.setProperty("--p", target);
+      g.style.setProperty("--tone", TONE_OF(target));
+    }
+    const ro = card.querySelector(".readout span");
+    if (ro) ro.textContent = target;
+    const cap = card.querySelector(".readout small");
+    if (cap) cap.textContent = "risk";
+    card.classList.remove("pending");
+    const line = document.getElementById("thinking");
+    if (line && line.parentElement) line.parentElement.remove();
+    const skip = document.getElementById("skipBtn");
+    if (skip) skip.remove();
+  }
+
+  document.addEventListener("click", (event) => {
+    if (event.target && event.target.id === "skipBtn") finishNow();
+  });
+
   /* The dial starts almost still, accelerates, becomes frantic, then commits.
      Seven seconds of it. Colour follows the band the needle is passing through,
      so the dial reads as undecided while it hunts.
@@ -195,7 +223,7 @@
           const card = g.closest(".result");
           if (card) card.classList.remove("pending");
           const line = document.getElementById("thinking");
-          if (line) line.remove();
+          if (line && line.parentElement) line.parentElement.remove();
         }
       }
       requestAnimationFrame(frame);
@@ -249,6 +277,70 @@
             ? '<span class="badge rep">Established domain</span>' : ""}
           <h2>${r.verdict === "phishing" ? "Something doesn't look right" : "No warning signs found"}</h2>
           <p class="verdict-url">${escapeHtml(r.url)}</p>
+
+        <div class="fishing" data-catch="${r.risk === "high" ? "dark" : r.risk === "medium" ? "odd" : "plain"}" aria-hidden="true">
+          <svg viewBox="0 0 600 210" preserveAspectRatio="xMidYMid meet">
+            <defs>
+              <linearGradient id="seaG" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#0B2530"/>
+                <stop offset="100%" stop-color="#050D13"/>
+              </linearGradient>
+              <linearGradient id="skyG" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#071019"/>
+                <stop offset="100%" stop-color="#04070B"/>
+              </linearGradient>
+            </defs>
+
+            <rect x="0" y="0" width="600" height="132" fill="url(#skyG)"/>
+            <circle cx="470" cy="44" r="16" fill="#0F2A33"/>
+            <rect x="0" y="130" width="600" height="80" fill="url(#seaG)"/>
+
+            <circle class="ripple r1" cx="300" cy="166" r="9"/>
+            <circle class="ripple r2" cx="300" cy="166" r="9"/>
+            <circle class="ripple r3" cx="300" cy="166" r="9"/>
+
+            <g class="boat">
+              <path d="M196 132 q46 26 108 26 q62 0 96 -26 z" fill="#060C12" stroke="#1B2A36" stroke-width="2"/>
+              <path d="M206 130 h188" stroke="#243543" stroke-width="3" stroke-linecap="round"/>
+              <path d="M284 132 v-26" stroke="#1B2A36" stroke-width="3"/>
+            </g>
+
+            <g class="fisher">
+              <path class="torso" d="M272 108 q10 -22 26 -4 l-4 24 h-18 z" fill="#060C12" stroke="#22323F" stroke-width="2"/>
+              <path class="hat" d="M270 84 q16 -16 32 0 l6 4 h-44 z" fill="#060C12" stroke="#22323F" stroke-width="2"/>
+              <circle class="head" cx="288" cy="88" r="7" fill="#060C12" stroke="#22323F" stroke-width="2"/>
+              <g class="arm">
+                <path d="M296 100 l34 -16" stroke="#22323F" stroke-width="5" stroke-linecap="round"/>
+                <path d="M330 84 L392 44" stroke="#2C4150" stroke-width="2.4" stroke-linecap="round"/>
+                <g class="netg">
+                  <path class="net" d="M392 44 q14 10 6 26 q-16 -2 -20 -14 z"
+                        fill="rgba(67,232,200,.08)" stroke="#43e8c8" stroke-width="1.6"/>
+                  <path class="netmesh" d="M394 50 l8 10 M392 58 l8 10 M398 48 l-4 20"
+                        stroke="rgba(67,232,200,.4)" stroke-width="1"/>
+                </g>
+              </g>
+              <path class="line" d="M396 70 Q340 120 300 158" stroke="rgba(190,215,230,.28)"
+                    stroke-width="1.1" fill="none"/>
+            </g>
+
+            <g class="catch">
+              <g class="catch-dark">
+                <path d="M282 158 q16 -20 34 -2 q-6 14 -20 14 z" fill="#200910" stroke="#ff4d6d" stroke-width="1.8"/>
+                <path d="M292 148 l2 -10 M300 147 l3 -10 M308 150 l5 -9" stroke="#ff4d6d" stroke-width="1.8" stroke-linecap="round"/>
+              </g>
+              <g class="catch-odd">
+                <circle cx="300" cy="156" r="12" fill="#1C1608" stroke="#ffb020" stroke-width="1.8"/>
+                <path d="M295 149 q8 -8 8 6" stroke="#ffb020" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+                <circle cx="300" cy="162" r="2" fill="#ffb020"/>
+              </g>
+              <g class="catch-plain">
+                <path d="M280 158 q18 -14 34 0 q-16 14 -34 0 z" fill="#0C2C24" stroke="#35e0a0" stroke-width="1.8"/>
+                <path d="M314 158 l10 -7 v14 z" fill="#0C2C24" stroke="#35e0a0" stroke-width="1.6"/>
+                <circle cx="290" cy="155" r="1.6" fill="#35e0a0"/>
+              </g>
+            </g>
+          </svg>
+        </div>
           <div class="skeleton" aria-hidden="true"><i></i><i></i><i></i></div>
           ${r.suggested ? `<p class="suggest">You may have meant
              <strong>${escapeHtml(r.suggested.domain)}</strong> — that address is in our
@@ -262,7 +354,10 @@
           </div>
         </div>
       </div>
-      <p class="thinking" id="thinking"><span class="dot"></span><span class="phase">Reading the address</span></p>
+      <div class="thinking-row">
+        <p class="thinking" id="thinking"><span class="dot"></span><span class="phase">Reading the address</span></p>
+        <button type="button" class="skip" id="skipBtn">Skip the theatre</button>
+      </div>
       <h3 class="block-title">Why Nyavu raised a concern</h3>
       <ul class="reasons">${reasons}</ul>
       ${evidence}
