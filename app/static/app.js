@@ -1009,6 +1009,15 @@
               <path d="M22 138 h258" stroke="#41616F" stroke-width="4" stroke-linecap="round"/>
               <path d="M40 146 q10 18 44 24 q54 8 112 0 q26 -4 40 -24"
                     fill="none" stroke="#27414E" stroke-width="1.4"/>
+              <!-- her registration, painted along the strake -->
+              <defs>
+                <path id="hullMarkLine" d="M96 150 q54 9 142 -1" fill="none"/>
+              </defs>
+              <text class="hull-mark" font-family="ui-monospace, SFMono-Regular, Menlo, monospace"
+                    font-size="9" letter-spacing="2.2" fill="#6E9FB2" opacity="0.85">
+                <textPath href="#hullMarkLine" startOffset="0">NYAVU APD</textPath>
+              </text>
+
               <!-- stern post and a thwart to sit on -->
               <path d="M264 138 l6 22" stroke="#41616F" stroke-width="3.5" stroke-linecap="round"/>
               <rect x="168" y="147" width="92" height="5" rx="2.5"
