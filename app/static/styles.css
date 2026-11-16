@@ -4327,3 +4327,10 @@ body.verdict-open { overflow: hidden; }
 }
 .dropzone.has-file .drop-file { color: var(--mint); }
 .dropzone.has-file { border-style: solid; }
+
+/* the rope fades rather than snapping when it leaves his hands */
+.ropeline { transition: opacity .4s cubic-bezier(.4, 0, .2, 1); }
+
+@media (prefers-reduced-motion: reduce) {
+  .ropeline { transition-duration: .4s !important; }
+}

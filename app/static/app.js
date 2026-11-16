@@ -465,6 +465,7 @@
     "Off we go. Mind the wet.",
     "The sea keeps its secrets. Not for long.",
     "One more cast, then I'm done. I always say that.",
+    "Wind's wrong for it. Doesn't matter.",
   ];
 
   /* His lines. The deck is reshuffled every scan, one lesson is slipped in, and the
@@ -479,6 +480,8 @@
       "No teeth. No tricks. Just a fish.",
       "Honest scales. You don't see many.",
       "Swims true. I'd put my name on it.",
+      "Nothing here a taxman would argue with.",
+      "Clean as the day it was made.",
     ],
     odd: [
       "Hm. Half a fish.",
@@ -490,6 +493,7 @@
       "Fins say yes. Face says no.",
       "I'll be honest with you: I don't know.",
       "Fifty-fifty. Like a coin in the harbour.",
+      "I've seen this face before. Can't place it.",
     ],
     dark: [
       "Oi. That's not a fish.",
@@ -548,7 +552,7 @@
     const cycle = setInterval(() => {
       bubble.classList.add("swap");
       setTimeout(() => { show(); bubble.classList.remove("swap"); }, 220);
-    }, 6400);
+    }, 5200);
 
     return () => { clearInterval(cycle); bubble.classList.remove("on", "swap"); };
   }
@@ -754,7 +758,12 @@
       if (scene) scene.classList.toggle("castable", elapsed >= BEAT.ready);
       updateNet(root, elapsed >= BEAT.ready ? netT : 0);
 
-      if (!done.impact && elapsed >= BEAT.impact) { done.impact = true; burst(root); }
+      if (!done.impact && elapsed >= BEAT.impact) {
+        done.impact = true;
+        burst(root);
+        // he starts talking as soon as the net is out, and keeps talking through it
+        done.stopTalk = startMonologue(root);
+      }
       if (!done.fish && elapsed >= BEAT.fish) { done.fish = true; scene.classList.add("examine"); drip(root); }
       if (!done.react && elapsed >= BEAT.react) { done.react = true; scene.classList.add("reaction"); }
       if (!done.zoom && elapsed >= BEAT.zoom) {
@@ -765,9 +774,9 @@
       }
       if (!done.drown && elapsed >= BEAT.drown) {
         done.drown = true;
-        if (typeof done.stopTalk === "function") done.stopTalk();
         if (scene.dataset.catch === "dark") {
-          // only the phish frightens him
+          // only the phish frightens him; on a clean or unsure catch he keeps talking
+          if (typeof done.stopTalk === "function") done.stopTalk();
           scene.classList.add("drowning");
           setTimeout(() => fishEscapes(root), 700);
         }
