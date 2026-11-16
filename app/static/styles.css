@@ -2226,3 +2226,781 @@ body.has-result .explain {
 
 /* the dial keeps its colour through the zoom: it is evidence, not scenery */
 .result.zooming .gauge { opacity: 1; }
+
+/* ------------------------------- drips off the hauled net ------------------------------- */
+.fishing .drip { opacity: 0; }
+
+/* ---------------------- the water curtain ----------------------
+   A vertical plane of water faces the viewer, its ripples spreading outward, then
+   the ripples dissipate and the verdict is behind them. */
+
+.waterline {
+  position: absolute;
+  inset: 0;
+  z-index: 8;
+  pointer-events: none;
+  border-radius: inherit;
+  overflow: hidden;
+  opacity: 0;
+  background: linear-gradient(180deg, #0C3A4C 0%, #072430 45%, #04141C 100%);
+  transition: opacity 1.2s cubic-bezier(.4, 0, .2, 1);
+}
+
+.waterline::before,
+.waterline::after {
+  content: "";
+  position: absolute;
+  inset: -60%;
+  border-radius: 50%;
+  background: repeating-radial-gradient(circle at 50% 52%,
+      rgba(150, 240, 235, 0.16) 0 2px,
+      rgba(150, 240, 235, 0.05) 2px 5px,
+      transparent 5px 30px);
+  animation: rippleout 5.5s linear infinite;
+  will-change: transform;
+}
+
+.waterline::after {
+  animation-duration: 7.5s;
+  animation-direction: reverse;
+  opacity: .7;
+}
+
+@keyframes rippleout {
+  from { transform: scale(.55); opacity: .9; }
+  to   { transform: scale(1.6); opacity: 0; }
+}
+
+.waterline.rise { opacity: 1; }
+.waterline.fall { opacity: 0; transition: opacity 1.6s cubic-bezier(.4, 0, .2, 1); }
+
+  to   { background-position: 0 0; }
+}
+
+/* while pending, the answer text is out of the way entirely so the card reads
+   as working rather than empty */
+.result.pending .verdict-text h2,
+.result.pending .verdict-text .badge,
+.result.pending .verdict-text .suggest,
+.result.pending .meta-row,
+.result.pending .block-title,
+.result.pending .reasons,
+.result.pending .evidence,
+.result.pending details.advanced {
+  display: none;
+}
+
+/* ================================================== the fisherman's catch ===
+   A seven-second performance that runs with the dial. He prepares, casts, feels
+   something, hauls, and the catch is whatever the verdict says it is. Purely
+   presentational: the result is already computed and is revealed the moment the
+   net clears the water. */
+
+.fishing { display: none; width: 100%; max-width: 360px; }
+
+.result.pending .fishing { display: block; margin: 4px 0 0; }
+.result.pending .skeleton { display: none; }
+
+.fishing svg { width: 100%; height: auto; overflow: visible; }
+
+.fishing .sea { opacity: .9; }
+
+.fishing .boat { animation: bob 3.2s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+
+@keyframes bob {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50%      { transform: translateY(-2px) rotate(-1deg); }
+}
+
+.fishing .arm {
+  transform-box: fill-box;
+  transform-origin: 0% 100%;
+  animation: cast 7s cubic-bezier(.4,0,.3,1) forwards;
+}
+
+@keyframes cast {
+  0%   { transform: rotate(0deg); }
+  12%  { transform: rotate(-38deg); }   /* winding up */
+  26%  { transform: rotate(46deg); }    /* the cast */
+  45%  { transform: rotate(30deg); }    /* holding, something tugging */
+  62%  { transform: rotate(34deg); }
+  78%  { transform: rotate(6deg); }     /* hauling */
+  90%  { transform: rotate(-8deg); }
+  100% { transform: rotate(0deg); }
+}
+
+.fishing .netg {
+  transform-box: fill-box;
+  transform-origin: 0% 50%;
+  animation: netswing 7s cubic-bezier(.4,0,.3,1) forwards;
+}
+
+@keyframes netswing {
+  0%, 10%   { transform: translate(0,0) scale(1); opacity: 1; }
+  26%       { transform: translate(6px, 26px) scale(.9); opacity: 1; }
+  45%       { transform: translate(4px, 20px) scale(.92); opacity: .95; }
+  78%       { transform: translate(-2px, 4px) scale(1.02); opacity: 1; }
+  100%      { transform: translate(0,0) scale(1); }
+}
+
+.fishing .line {
+  animation: lineflex 7s ease-in-out forwards;
+  transform-box: fill-box;
+  transform-origin: top center;
+}
+
+@keyframes lineflex {
+  0%, 20%  { opacity: .15; }
+  26%      { opacity: .8; }
+  45%      { opacity: .6; }
+  70%      { opacity: .8; }
+  85%      { opacity: .3; }
+  100%     { opacity: .1; }
+}
+
+.fishing .ripple {
+  fill: none;
+  stroke: rgba(67, 232, 200, .5);
+  stroke-width: 1.2;
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+
+@keyframes ripple {
+  0%       { opacity: 0; transform: scale(.3); }
+  8%       { opacity: .7; }
+  30%      { opacity: 0; transform: scale(2.6); }
+  100%     { opacity: 0; transform: scale(2.6); }
+}
+
+.fishing .catch { opacity: 0; }
+
+.fishing[data-catch="dark"]  .catch-dark,
+.fishing[data-catch="odd"]   .catch-odd,
+.fishing[data-catch="plain"] .catch-plain { animation: haul 7s cubic-bezier(.3,1.6,.5,1) forwards; }
+
+@keyframes haul {
+  0%, 84%  { opacity: 0; transform: translateY(16px) scale(.7); }
+  90%      { opacity: 1; transform: translateY(-4px) scale(1.06); }
+  100%     { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.fishing .catch-dark, .fishing .catch-odd, .fishing .catch-plain {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+/* narration + skip share a row */
+.thinking-row {
+  display: none;
+  align-items: center;
+  gap: 16px;
+  margin: 22px 0 0;
+}
+
+.result.pending .thinking-row { display: flex; }
+.thinking-row .thinking { margin: 0; display: flex; }
+
+.skip {
+  margin-left: auto;
+  padding: 7px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--line-hi);
+  background: transparent;
+  color: var(--faint);
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: color .2s, border-color .2s;
+}
+
+.skip:hover { color: var(--accent); border-color: var(--accent); }
+
+/* The scan performance always runs, like the dial does.
+   A still fisherman with the catch already landed tells the wrong story, and this
+   machine class of preference is common enough that the feature would be invisible
+   on many screens. Decorative motion elsewhere still honours the setting. */
+
+.fishing { max-width: 100% !important; }
+.fishing svg { width: 100%; height: auto; }
+.fishing .ripple { fill: none; stroke: rgba(67,232,200,.55); stroke-width: 1.4; }
+
+/* The global reduced-motion rule above collapses every animation to 0.001ms.
+   The scan performance is the product's feedback, not decoration, so it is
+   restored here for all users - same reasoning as the dial, which is JS-driven
+   and therefore already unaffected. */
+@media (prefers-reduced-motion: reduce) {
+  .fishing .arm  { animation: cast 7s cubic-bezier(.4,0,.3,1) forwards !important; }
+  .fishing .netg { animation: netswing 7s cubic-bezier(.4,0,.3,1) forwards !important; }
+  .fishing .line { animation: lineflex 7s ease-in-out forwards !important; }
+  .fishing .boat { animation: bob 3.2s ease-in-out infinite !important; }
+        .fishing[data-catch="dark"]  .catch-dark,
+  .fishing[data-catch="odd"]   .catch-odd,
+  .fishing[data-catch="plain"] .catch-plain {
+    animation: haul 7s cubic-bezier(.3,1.6,.5,1) forwards !important;
+  }
+}
+
+/* ============================== the cast net ==============================
+   He throws it, it spreads on the water, then he hauls it back and the catch
+   comes up with it. The net is the only thing that travels; the man stays put
+   and works the rope, which is what actually happens on a small boat. */
+
+.fishing .net {
+  transform-box: view-box;
+  transform-origin: 0 0;
+  animation: netthrow 7s cubic-bezier(.34,.9,.4,1) forwards;
+}
+
+@keyframes netthrow {
+  0%, 9%   { transform: translate(272px, 96px) scale(.24); }
+  19%      { transform: translate(316px, 146px) scale(.44); }   /* in the air */
+  27%      { transform: translate(330px, 182px) scale(1); }     /* hits the water */
+  58%      { transform: translate(332px, 184px) scale(1.04); }  /* spread, drifting */
+  70%      { transform: translate(320px, 172px) scale(.78); }   /* breaking the surface */
+  84%      { transform: translate(302px, 150px) scale(.6); }    /* coming aboard */
+  94%      { transform: translate(292px, 136px) scale(.52); }   /* in the boat */
+  100%     { transform: translate(290px, 134px) scale(.5); }
+}
+
+.fishing .net-bundle { animation: bundle 7s linear forwards; }
+
+@keyframes bundle {
+  0%, 12% { opacity: 1; }
+  22%     { opacity: 0; }
+  100%    { opacity: 0; }
+}
+
+.fishing .net-open { opacity: 0; animation: netopen 7s linear forwards; }
+
+@keyframes netopen {
+  0%, 22% { opacity: 0; }
+  27%     { opacity: 1; }
+  100%    { opacity: 1; }
+}
+
+/* the catch rides inside the net, so it rises with it */
+.fishing .caught { opacity: 0; animation: catchup 7s linear forwards; }
+.fishing .caught > g { display: none; animation: none !important; opacity: 1 !important; }
+
+.fishing[data-catch="dark"]  .caught > .catch-dark  { display: block; }
+.fishing[data-catch="odd"]   .caught > .catch-odd   { display: block; }
+.fishing[data-catch="plain"] .caught > .catch-plain { display: block; }
+
+@keyframes catchup {
+  0%, 84% { opacity: 0; }
+  88%     { opacity: 1; transform: translateY(4px) scale(.9); }
+  100%    { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.fishing .caught { transform-box: fill-box; transform-origin: center; }
+
+/* the arm actually works: wind up, throw, hold, two tugs, then the haul */
+.fishing .arm {
+  transform-box: view-box;
+  transform-origin: 256px 110px;
+  animation: armwork 7s cubic-bezier(.4,0,.3,1) forwards;
+}
+
+@keyframes armwork {
+  0%   { transform: rotate(-6deg); }
+  9%   { transform: rotate(-44deg); }   /* winding up */
+  20%  { transform: rotate(30deg); }    /* the throw */
+  27%  { transform: rotate(22deg); }
+  40%  { transform: rotate(26deg); }
+  50%  { transform: rotate(18deg); }    /* first tug */
+  58%  { transform: rotate(28deg); }
+  66%  { transform: rotate(12deg); }
+  74%  { transform: rotate(24deg); }    /* second tug */
+  84%  { transform: rotate(-16deg); }   /* the haul */
+  94%  { transform: rotate(-4deg); }
+  100% { transform: rotate(0deg); }
+}
+
+/* net suppresses its old rod-era rules */
+.fishing .netmesh, .fishing .netg { animation: none !important; }
+
+/* the cast-net scene is also exempt from the global collapse, same reason */
+@media (prefers-reduced-motion: reduce) {
+  .fishing .net       { animation: netthrow 7s cubic-bezier(.34,.9,.4,1) forwards !important; }
+  .fishing .net-bundle{ animation: bundle 7s linear forwards !important; }
+  .fishing .net-open  { animation: netopen 7s linear forwards !important; }
+  .fishing .caught    { animation: catchup 7s linear forwards !important; }
+  .fishing .arm       { animation: armwork 7s cubic-bezier(.4,0,.3,1) forwards !important; }
+  .fishing .boat      { animation: bob 3.2s ease-in-out infinite !important; }
+      }
+
+/* ====================== the drape: ten seconds of casting ==================
+   0-12%  winds back with the net gathered in both hands
+   12-26% throws; the cloth flutters out over the water
+   26-40% lands and spreads
+   40-66% drifts, drawn across the water
+   66-88% hauled back in, catch coming up inside it
+   88-100% aboard, verdict.                                                   */
+
+.fishing .netcloth {
+  transform-box: view-box;
+  transform-origin: 0 0;
+  animation: netcast 10s cubic-bezier(.34,.9,.4,1) forwards;
+}
+
+@keyframes netcast {
+  0%, 12% { transform: translate(298px, 96px) scale(.30) rotate(-14deg); }
+  26%     { transform: translate(302px, 152px) scale(.66) rotate(8deg); }
+  34%     { transform: translate(322px, 180px) scale(1) rotate(0deg); }
+  66%     { transform: translate(324px, 183px) scale(1.03) rotate(-3deg); }
+  78%     { transform: translate(310px, 164px) scale(.82) rotate(5deg); }
+  88%     { transform: translate(294px, 142px) scale(.64) rotate(-4deg); }
+  94%     { transform: translate(288px, 135px) scale(.56) rotate(0deg); }
+  100%    { transform: translate(288px, 135px) scale(.56) rotate(0deg); }
+}
+
+.fishing .arms {
+  transform-box: view-box;
+  transform-origin: 252px 116px;
+  animation: armswork 10s cubic-bezier(.4,0,.3,1) forwards;
+}
+
+@keyframes armswork {
+  0%   { transform: rotate(-6deg); }
+  12%  { transform: rotate(-30deg); }
+  26%  { transform: rotate(34deg); }
+  40%  { transform: rotate(26deg); }
+  52%  { transform: rotate(18deg); }
+  60%  { transform: rotate(28deg); }
+  70%  { transform: rotate(14deg); }
+  80%  { transform: rotate(-18deg); }
+  90%  { transform: rotate(-4deg); }
+  100% { transform: rotate(0deg); }
+}
+
+.fishing .cloth { transform-box: fill-box; transform-origin: center; }
+.fishing .cloth.back { animation: swish 2.6s ease-in-out infinite alternate; }
+.fishing .cloth.front { animation: swish 2.1s ease-in-out infinite alternate-reverse; }
+
+@keyframes swish {
+  from { transform: rotate(-2.4deg) scale(1); }
+  to   { transform: rotate(2.4deg) scale(1.03); }
+}
+
+.fishing .caught { opacity: 0; animation: catchup10 10s linear forwards; transform-box: fill-box; transform-origin: center; }
+.fishing .caught > g { display: none; animation: none !important; opacity: 1 !important; }
+
+.fishing[data-catch="dark"]  .caught > .catch-dark  { display: block; }
+.fishing[data-catch="odd"]   .caught > .catch-odd   { display: block; }
+.fishing[data-catch="plain"] .caught > .catch-plain { display: block; }
+
+@keyframes catchup10 {
+  0%, 86% { opacity: 0; }
+  90%     { opacity: 1; transform: translateY(4px) scale(.9); }
+  100%    { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+
+@keyframes ripple10 {
+  0%   { opacity: 0; transform: scale(.3); }
+  6%   { opacity: .85; }
+  34%  { opacity: 0; transform: scale(3.2); }
+  100% { opacity: 0; transform: scale(3.2); }
+}
+
+/* exempt the scene from the global animation collapse */
+@media (prefers-reduced-motion: reduce) {
+  .fishing .netcloth { animation: netcast 10s cubic-bezier(.34,.9,.4,1) forwards !important; }
+  .fishing .arms     { animation: armswork 10s cubic-bezier(.4,0,.3,1) forwards !important; }
+  .fishing .caught   { animation: catchup10 10s linear forwards !important; }
+  .fishing .cloth.back  { animation: swish 2.6s ease-in-out infinite alternate !important; }
+  .fishing .cloth.front { animation: swish 2.1s ease-in-out infinite alternate-reverse !important; }
+        .fishing .boat { animation: bob 3.2s ease-in-out infinite !important; }
+}
+
+/* ------------------------------------------------------------ liveliness */
+
+.hero-visual {
+  transform: perspective(800px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
+}
+
+.btn.primary {
+  transform: translate(var(--bx, 0px), var(--by, 0px));
+}
+
+.btn.primary:hover {
+  transform: translate(var(--bx, 0px), calc(var(--by, 0px) - 1px));
+}
+
+/* a bigger net on the water: it should read as a cast, not a coin */
+@keyframes netcast-big {
+  0%, 12% { transform: translate(298px, 96px) scale(.30) rotate(-14deg); }
+  26%     { transform: translate(304px, 150px) scale(.72) rotate(8deg); }
+  34%     { transform: translate(318px, 178px) scale(1.28) rotate(0deg); }
+  66%     { transform: translate(320px, 181px) scale(1.34) rotate(-3deg); }
+  78%     { transform: translate(308px, 162px) scale(1.02) rotate(5deg); }
+  88%     { transform: translate(294px, 142px) scale(.72) rotate(-4deg); }
+  94%     { transform: translate(288px, 135px) scale(.58) rotate(0deg); }
+  100%    { transform: translate(288px, 135px) scale(.58) rotate(0deg); }
+}
+
+.fishing .netcloth { animation-name: netcast-big !important; }
+
+@media (prefers-reduced-motion: reduce) {
+  .fishing .netcloth { animation-name: netcast-big !important; }
+}
+
+/* ===================== the scene, second pass =====================
+   Boat to the left, fisherman on its right end, net cast into open water on
+   the right. Only the keel sits below the waterline.                       */
+
+@keyframes netcast2 {
+  0%, 12% { transform: translate(246px, 106px) scale(.26) rotate(-12deg); }
+  26%     { transform: translate(310px, 150px) scale(.62) rotate(10deg); }
+  34%     { transform: translate(380px, 194px) scale(1.12) rotate(0deg); }
+  66%     { transform: translate(383px, 196px) scale(1.16) rotate(-3deg); }
+  78%     { transform: translate(330px, 168px) scale(.86) rotate(5deg); }
+  88%     { transform: translate(276px, 132px) scale(.62) rotate(-4deg); }
+  94%     { transform: translate(252px, 116px) scale(.5) rotate(0deg); }
+  100%    { transform: translate(252px, 116px) scale(.5) rotate(0deg); }
+}
+
+.fishing .netcloth {
+  transform-box: view-box;
+  transform-origin: 0 0;
+  animation: netcast2 10s cubic-bezier(.34,.9,.4,1) forwards !important;
+}
+
+.fishing .arms {
+  transform-box: view-box;
+  transform-origin: 211px 118px;
+  animation: armswork 10s cubic-bezier(.4,0,.3,1) forwards !important;
+}
+
+
+/* the moment it lands: a short, bright disturbance, then gone */
+
+@keyframes splash {
+  0%, 32%  { opacity: 0; transform: translateY(6px) scale(.6); }
+  35%      { opacity: 1; transform: translateY(0) scale(1); }
+  40%      { opacity: .85; transform: translateY(-6px) scale(1.15); }
+  46%      { opacity: 0; transform: translateY(-14px) scale(1.3); }
+  100%     { opacity: 0; }
+}
+
+/* the scene must never be clipped by the card */
+.result.pending .verdict-head { overflow: visible; }
+.fishing svg { overflow: visible; }
+
+/* the wake breathes with the boat */
+.fishing .wake {
+  animation: wake 4.2s ease-in-out infinite;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+@keyframes wake {
+  0%, 100% { opacity: .45; transform: scaleX(1) translateX(0); }
+  50%      { opacity: .8;  transform: scaleX(1.03) translateX(1px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fishing .wake { animation: wake 4.2s ease-in-out infinite !important; }
+}
+
+/* ---------------------------------------------------- reveal on scroll */
+
+.reveal {
+  opacity: 0;
+  transform: translateY(14px);
+  transition: opacity .6s cubic-bezier(.22,1,.36,1), transform .6s cubic-bezier(.22,1,.36,1);
+}
+
+.reveal.in { opacity: 1; transform: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal { opacity: 1 !important; transform: none !important; }
+}
+
+/* a quiet affordance: you can just press Enter */
+.keyhint {
+  margin-left: auto;
+  color: var(--faint);
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.keyhint kbd {
+  padding: 2px 6px;
+  border: 1px solid var(--line-hi);
+  border-bottom-width: 2px;
+  border-radius: 5px;
+  font-family: inherit;
+  font-size: 0.62rem;
+  color: var(--muted);
+}
+
+/* ============ the dial lives inside the picture while scanning ============
+   One frame: needle on the far left, boat and fisherman to its right, net
+   thrown into open water beyond them. */
+
+.result.pending .verdict-head {
+  display: block;
+  position: relative;
+  padding: 14px 18px 10px 18px;
+  overflow: visible;
+}
+
+.result.pending .verdict-text { display: block; }
+
+.result.pending .gauge {
+  position: absolute;
+  left: 18px;
+  top: 46%;
+  transform: translateY(-50%);
+  width: 158px;
+  height: 138px;
+  z-index: 4;
+  pointer-events: none;
+}
+
+.result.pending .fishing { margin: 0; max-width: none; }
+.result.pending .verdict-url { opacity: 0.5; margin-bottom: 2px; }
+.result.pending .block-title,
+.result.pending .thinking-row { margin-top: 14px; }
+
+.result.pending .gauge {
+  position: absolute;
+  right: 16px;
+  left: auto;
+  top: 46%;
+  transform: translateY(-50%);
+  width: 158px;
+  height: 138px;
+  z-index: 4;
+  pointer-events: none;
+}
+
+/* the net is positioned by JavaScript now, so the CSS animation must stand down */
+.fishing .netcloth { animation: none !important; }
+.fishing .tether { stroke-linejoin: round; }
+
+/* ============ every part of the scene runs on the same clock ============
+   The net lands 34% into the sweep, so the splash, ripples, arms and the catch
+   are all gated on `.go`, which is added when the sweep begins - not when the
+   card is rendered. */
+
+.fishing .arms { animation: none !important; }
+.fishing.go .arms { animation: armswork 6.6s cubic-bezier(.4,0,.3,1) forwards !important; }
+
+.fishing .caught { opacity: 0; animation: none !important; }
+.fishing.go .caught { animation: catchup66 6.6s linear forwards !important; }
+
+@keyframes catchup66 {
+  0%, 56% { opacity: 0; }
+  60%     { opacity: 1; transform: translateY(4px) scale(.9); }
+  100%    { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+
+@keyframes ripple66 {
+  0%   { opacity: 0; transform: scale(.3); }
+  10%  { opacity: .8; }
+  100% { opacity: 0; transform: scale(2.8); }
+}
+
+
+@keyframes splash66 {
+  0%   { opacity: 0; transform: translateY(6px) scale(.6); }
+  12%  { opacity: 1; transform: translateY(0) scale(1); }
+  45%  { opacity: .8; transform: translateY(-8px) scale(1.2); }
+  100% { opacity: 0; transform: translateY(-16px) scale(1.35); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fishing.go .arms { animation: armswork 6.6s cubic-bezier(.4,0,.3,1) forwards !important; }
+  .fishing.go .caught { animation: catchup66 6.6s linear forwards !important; }
+        }
+
+/* ================== one scene clock (ten seconds), one dial clock ==================
+   The scene starts at render. Its ten-second timeline puts the net in the water at
+   34%, so the impact is triggered from JavaScript at that frame rather than by a CSS
+   delay that cannot know when the net actually lands. The dial starts at 3.4s and
+   finishes at 10s with the scene. */
+
+.fishing.go .arms { animation: armswork 10s cubic-bezier(.4,0,.3,1) forwards !important; }
+.fishing.go .caught { animation: catchup10b 10s linear forwards !important; }
+
+@keyframes catchup10b {
+  0%, 56% { opacity: 0; }
+  60%     { opacity: 1; transform: translateY(4px) scale(.9); }
+  100%    { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+
+@media (prefers-reduced-motion: reduce) {
+  .fishing.go .arms { animation: armswork 10s cubic-bezier(.4,0,.3,1) forwards !important; }
+  .fishing.go .caught { animation: catchup10b 10s linear forwards !important; }
+        }
+
+/* ============================== act two: the reaction ==============================
+   Ten seconds of cast and haul, then he reacts to what is in the net, then the
+   camera moves in before the verdict takes the card. */
+
+.fisher, .catch-dark, .catch-odd, .catch-plain { transform-box: fill-box; transform-origin: center; }
+
+/* pleased: rocks back, chin up */
+.fishing[data-catch="plain"].reaction .fisher { animation: cheer 1.8s ease-in-out infinite; }
+@keyframes cheer {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  35%      { transform: translateY(-3px) rotate(-3deg); }
+  70%      { transform: translateY(0) rotate(2deg); }
+}
+
+/* alarmed: recoils, then trembles */
+.fishing[data-catch="dark"].reaction .fisher { animation: recoil 1.1s ease-out 3; }
+@keyframes recoil {
+  0%   { transform: translateX(0) rotate(0deg); }
+  20%  { transform: translateX(-6px) rotate(-6deg); }
+  45%  { transform: translateX(-3px) rotate(-2deg); }
+  70%  { transform: translateX(-5px) rotate(-5deg); }
+  100% { transform: translateX(0) rotate(0deg); }
+}
+.fishing[data-catch="dark"].reaction .catch-dark { animation: jitter .32s steps(2) infinite; }
+@keyframes jitter {
+  0%   { transform: translate(0, 0) rotate(0deg); }
+  50%  { transform: translate(1px, -1px) rotate(4deg); }
+  100% { transform: translate(0, 0) rotate(0deg); }
+}
+
+/* puzzled: a slow head tilt, twice */
+.fishing[data-catch="odd"].reaction .fisher { animation: ponder 2.2s ease-in-out infinite; }
+@keyframes ponder {
+  0%, 100% { transform: rotate(0deg); }
+  40%      { transform: rotate(7deg); }
+  60%      { transform: rotate(-4deg); }
+}
+
+/* ============================== act three: the zoom ============================== */
+.fishing svg { transform-origin: 62% 78%; transition: transform 1.6s cubic-bezier(.6,0,.25,1); }
+.fishing.zoom svg { transform: scale(1.9); }
+.fishing.zoom .caught { filter: drop-shadow(0 0 12px rgba(255,255,255,.18)); }
+
+/* the zoom is a close-up: the dial steps back so it does not float over the shot */
+.result.zooming .gauge { opacity: .18; transition: opacity 1s ease; }
+.fishing.zoom svg { transform: scale(1.6); }
+
+/* the reaction reads better with a touch more movement in the boat */
+.fishing.reaction .boat { animation: rock 1.6s ease-in-out infinite; }
+@keyframes rock {
+  0%, 100% { transform: rotate(0deg) translateY(0); }
+  40%      { transform: rotate(-1.4deg) translateY(-1px); }
+  70%      { transform: rotate(1deg) translateY(0); }
+}
+
+/* ===================== the transition: a slower, carried move =====================
+   Zoom is a push-in of 1.8s, held, and then a wash of ripples crosses the frame and
+   the card rises through it. Nothing snaps. */
+
+.fishing svg { transform-origin: 60% 76%; transition: transform 1.8s cubic-bezier(.35,0,.2,1); }
+.fishing.zoom svg { transform: scale(1.5); }
+
+
+/* the catch lifts into his hands as he starts to examine it */
+.fishing.examine .caught { animation: examine 2.4s ease-in-out infinite; }
+@keyframes examine {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50%      { transform: translateY(-2px) rotate(-4deg); }
+}
+
+.fishing.examine .fisher { animation: inspect 3s ease-in-out infinite; }
+@keyframes inspect {
+  0%, 100% { transform: rotate(0deg) translateY(0); }
+  50%      { transform: rotate(2.5deg) translateY(-1px); }
+}
+
+/* the wash: three rings cross the frame, and the scene dissolves behind them */
+
+  to   { transform: scale(9); opacity: 0; }
+}
+
+  60%  { opacity: .5; filter: blur(2px); }
+  100% { opacity: 0; filter: blur(6px); }
+}
+
+.wash circle { transform-box: fill-box; transform-origin: center; }
+
+/* ============ the verdict arrives out of the catch ============ */
+
+.veil {
+  position: absolute;
+  inset: 0;
+  z-index: 9;
+  pointer-events: none;
+  background: var(--tone, #43e8c8);
+  opacity: 0.92;
+  clip-path: circle(0px at var(--cx, 50%) var(--cy, 50%));
+  transition: clip-path .72s cubic-bezier(.4, 0, .2, 1), opacity .7s ease .05s;
+}
+
+.veil.open { clip-path: circle(140% at var(--cx, 50%) var(--cy, 50%)); }
+.veil.clear { opacity: 0; }
+
+/* the dial keeps its colour through the zoom: it is evidence, not scenery */
+.result.zooming .gauge { opacity: 1; }
+
+/* ------------------------------- drips off the hauled net ------------------------------- */
+.fishing .drip { opacity: 0; }
+
+/* ------------------------------- the water the verdict rises through --------------------- */
+.waterline {
+  position: absolute;
+  inset: 0;
+  z-index: 8;
+  pointer-events: none;
+  border-radius: inherit;
+  opacity: 0;
+  background:
+    radial-gradient(120% 80% at 30% 20%, rgba(140, 240, 230, .14), transparent 60%),
+    radial-gradient(90% 70% at 75% 60%, rgba(60, 160, 190, .22), transparent 65%),
+    linear-gradient(180deg, #0A2A38 0%, #06171F 55%, #040D12 100%);
+  transition: opacity 1s cubic-bezier(.4,0,.2,1);
+}
+
+.waterline::after {
+  content: "";
+  position: absolute;
+  inset: -30%;
+  background:
+    repeating-radial-gradient(circle at 50% 120%,
+      rgba(150, 240, 235, .10) 0 2px, transparent 2px 14px);
+  animation: shimmer 2.4s linear infinite;
+  opacity: .9;
+}
+
+@keyframes shimmer {
+  from { transform: translateY(0) scale(1); }
+  to   { transform: translateY(-14px) scale(1.06); }
+}
+
+.waterline.rise { opacity: 1; }
+.waterline.fall { opacity: 0; transition: opacity 1.1s cubic-bezier(.4,0,.2,1) .1s; }
+
+/* the curtain covers the whole result, so nothing of the report shows through early */
+.result { position: relative; }
+.waterline { border-radius: var(--radius-lg); }
+
+.view { position: relative; }
+.waterline {
+  position: absolute;
+  inset: 0;
+  border-radius: 0;
+  z-index: 20;
+}

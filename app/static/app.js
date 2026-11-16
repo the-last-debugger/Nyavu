@@ -115,13 +115,9 @@
 
   /* Skip: jump the theatre to its end. The result is already known; the animation is
      a presentation of it, never a delay in computing it. */
+  /* Skip: land on the finished state immediately, without the theatre. */
   function finishNow() {
     sweepToken++;
-    const veilHost = document.querySelector(".result");
-    if (veilHost && veilHost.classList.contains("pending")) {
-      revealWithCircle(document);
-      return;
-    }
     const card = document.querySelector(".result.pending");
     if (!card) return;
     const g = card.querySelector(".gauge");
@@ -134,12 +130,16 @@
     if (ro) ro.textContent = target;
     const cap = card.querySelector(".readout small");
     if (cap) cap.textContent = "risk";
+    const scene = card.querySelector(".fishing");
+    if (scene) scene.style.display = "none";
     card.classList.remove("pending");
+    card.classList.remove("zooming");
     const line = document.getElementById("thinking");
     if (line && line.parentElement) line.parentElement.remove();
     const skip = document.getElementById("skipBtn");
     if (skip) skip.remove();
   }
+
 
   document.addEventListener("click", (event) => {
     if (event.target && event.target.id === "skipBtn") finishNow();
@@ -233,76 +233,94 @@
      a transition that carries the eye into the card. Each beat is given time to land
      rather than being packed tight. */
 
-  /* The splash is animated in JavaScript, not CSS. Two clocks and a cascade of
-     !important rules made the CSS version unreliable; setting opacity and scale
-     directly, on the frame the mesh meets the water, cannot drift. */
-  function fireSplash(root) {
-    const splash = root.querySelector(".splash");
-    const rings = Array.from(root.querySelectorAll(".ripple"));
-    if (splash) {
-      splash.style.animation = "none";
-      splash.style.transformBox = "fill-box";
-      splash.style.transformOrigin = "center";
-    }
-    rings.forEach((r) => {
-      r.style.animation = "none";
-      r.style.transformBox = "fill-box";
-      r.style.transformOrigin = "center";
-      r.style.opacity = "0";
-    });
+  /* ---------------------------------------------------------------------------
+     The whole performance, on one clock. Every beat is a timestamp, and each
+     visual is animated here rather than in CSS, because two systems claiming the
+     same property is how the splash ended up both everywhere and nowhere.
+
+       0.0s  net leaves his hands
+       4.7s  it meets the water: a short burst, then gone
+       9.4s  net aboard, fish in his hands - the dial starts
+      13.4s  the dial settles and he reacts to what he caught
+      15.2s  camera pushes in on the catch
+      18.8s  the scene sinks into water and the verdict rises out of it
+     --------------------------------------------------------------------------- */
+  const BEAT = {
+    impact: 4700,
+    fish: 9400,
+    react: 13400,
+    zoom: 15200,
+    sink: 18800,
+    end: 21200,
+  };
+
+  function resetArtifacts(scene) {
+    [scene.querySelector(".splash"), ...scene.querySelectorAll(".ripple")]
+      .forEach((el) => {
+        if (!el) return;
+        el.style.animation = "none";
+        el.style.opacity = "0";
+      });
+  }
+
+  function burst(root) {
+    const scene = root.querySelector(".fishing");
+    const splash = scene && scene.querySelector(".splash");
+    const rings = scene ? Array.from(scene.querySelectorAll(".ripple")) : [];
+    if (!scene) return;
 
     const t0 = performance.now();
-    const LIFE = 1700;
+    const LIFE = 900;
 
     function frame(now) {
       const k = Math.min(1, (now - t0) / LIFE);
-
       if (splash) {
-        splash.style.opacity = String(Math.max(0, 1 - Math.pow(k, 2.2)));
-        splash.style.transform =
-          `translateY(${(-16 * k).toFixed(1)}px) scale(${(1 + 0.55 * k).toFixed(2)})`;
+        splash.style.opacity = String(Math.max(0, 1 - k * k));
+        splash.style.transform = `translateY(${(-10 * k).toFixed(1)}px) scale(${(1 + 0.4 * k).toFixed(2)})`;
+        splash.style.transformBox = "fill-box";
+        splash.style.transformOrigin = "center";
       }
       rings.forEach((r, i) => {
-        const kk = Math.max(0, Math.min(1, (now - t0 - i * 260) / 1300));
-        r.style.opacity = kk > 0 ? String((1 - kk) * 0.75) : "0";
-        r.style.transform = `scale(${(0.3 + kk * 2.8).toFixed(2)})`;
+        const kk = Math.max(0, Math.min(1, (now - t0 - i * 120) / 800));
+        r.style.opacity = kk > 0 ? String((1 - kk) * 0.7) : "0";
+        r.style.transform = `scale(${(0.3 + kk * 2.4).toFixed(2)})`;
+        r.style.transformBox = "fill-box";
+        r.style.transformOrigin = "center";
       });
-
       if (k < 1) requestAnimationFrame(frame);
     }
     requestAnimationFrame(frame);
   }
 
+  function drip(root) {
+    const scene = root.querySelector(".fishing");
+    const drops = scene ? Array.from(scene.querySelectorAll(".drip")) : [];
+    if (!drops.length) return;
+    const t0 = performance.now();
+    function frame(now) {
+      const k = Math.min(1, (now - t0) / 2600);
+      drops.forEach((d, i) => {
+        const kk = Math.max(0, Math.min(1, (now - t0 - i * 260) / 1400));
+        d.style.opacity = kk > 0 && kk < 1 ? String(0.9 * (1 - kk)) : "0";
+        d.style.transform = `translateY(${(kk * 26).toFixed(1)}px)`;
+      });
+      if (k < 1) requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+  }
 
-  /* The verdict arrives out of the catch, not on top of it.
-     A circle opens from the fish's position in the verdict's own colour, the card
-     swaps behind it, then the circle clears and the text staggers in. No text is
-     ever crossfaded over other text. */
-  function revealWithCircle(root) {
+  /* A vertical curtain of water rises over the finished scene, its ripples spreading
+     outward. It holds while the card swaps behind it, then the ripples dissipate and
+     the verdict is simply there. Nothing flashes; nothing crossfades. */
+  function waterCurtain(root) {
     const card = root.querySelector(".result");
     if (!card) return;
-    const head = card.querySelector(".verdict-head");
-    const caught = root.querySelector(".caught");
-    const gauge = card.querySelector(".gauge");
-    const tone = (gauge && getComputedStyle(gauge).getPropertyValue("--tone")) || "#43e8c8";
-
-    let cx = (head ? head.clientWidth / 2 : 300);
-    let cy = (head ? head.clientHeight / 2 : 200);
-    if (caught) {
-      const r = caught.getBoundingClientRect();
-      const h = head.getBoundingClientRect();
-      cx = r.left - h.left + r.width / 2;
-      cy = r.top - h.top + r.height / 2;
-    }
-
-    const veil = document.createElement("div");
-    veil.className = "veil";
-    veil.style.setProperty("--cx", `${cx.toFixed(0)}px`);
-    veil.style.setProperty("--cy", `${cy.toFixed(0)}px`);
-    veil.style.setProperty("--tone", tone.trim());
-    head.appendChild(veil);
-
-    requestAnimationFrame(() => veil.classList.add("open"));
+    // cover the whole view, so the card and the reasons below it are both hidden
+    const stage = card.closest(".view") || card;
+    const water = document.createElement("div");
+    water.className = "waterline";
+    stage.appendChild(water);
+    requestAnimationFrame(() => water.classList.add("rise"));
 
     setTimeout(() => {
       card.classList.remove("pending");
@@ -311,55 +329,33 @@
       if (line && line.parentElement) line.parentElement.remove();
       const skip = document.getElementById("skipBtn");
       if (skip) skip.remove();
-      veil.classList.add("clear");
-      setTimeout(() => veil.remove(), 800);
-    }, 720);
+    }, 1400);
+
+    setTimeout(() => water.classList.add("fall"), 2200);
+    setTimeout(() => water.remove(), 4200);
   }
 
-  const BEAT = {
-    land: 4700,       // mesh meets the water; the splash used to lead this by ~1s
-    fishUp: 9400,     // net aboard, the catch is in his hands, he starts to examine
-    needleStart: 9400,
-    needleEnd: 13400,
-    zoom: 13400,      // camera begins its move on the catch
-    wash: 15600,      // ripples carry the eye into the card
-    reveal: 17400,
-  };
-
   function runScene(root) {
+    const scene = root.querySelector(".fishing");
+    if (!scene) return;
+    resetArtifacts(scene);
+
     const started = performance.now();
-    let impact = false, examine = false, zoomed = false, wash = false, revealed = false;
+    let impact = false, fish = false, reacted = false, zoomed = false, sank = false;
 
     function frame(now) {
       const elapsed = now - started;
-      const scene = root.querySelector(".fishing");
       updateNet(root, Math.min(1, elapsed / 10000));
 
-      if (!impact && elapsed >= BEAT.land) {
-        impact = true;
-        fireSplash(root);
-      }
-      if (!examine && elapsed >= BEAT.fishUp) {
-        examine = true;
-        if (scene) scene.classList.add("examine");
-      }
-      if (!zoomed && elapsed >= BEAT.zoom) {
-        zoomed = true;
-        if (scene) scene.classList.add("zoom");
-        const card = root.querySelector(".result.pending");
-        if (card) card.classList.add("zooming");
-      }
-      if (!revealed && elapsed >= BEAT.reveal) {
-        revealed = true;
-        revealWithCircle(root);
-        return;
-      }
+      if (!impact && elapsed >= BEAT.impact) { impact = true; burst(root); }
+      if (!fish && elapsed >= BEAT.fish) { fish = true; scene.classList.add("examine"); drip(root); }
+      if (!reacted && elapsed >= BEAT.react) { reacted = true; scene.classList.add("reaction"); }
+      if (!zoomed && elapsed >= BEAT.zoom) { zoomed = true; scene.classList.add("zoom"); }
+      if (!sank && elapsed >= BEAT.sink) { sank = true; waterCurtain(root); return; }
       requestAnimationFrame(frame);
     }
     requestAnimationFrame(frame);
   }
-
-
 
   const TONE_OF = (v) => (v < 35 ? "#35e0a0" : v < 65 ? "#ffb020" : "#ff4d6d");
 
@@ -580,7 +576,12 @@
                     d="M-58 -4 q8 -22 32 -25 q20 -2 27 -15 q9 13 28 15 q23 3 29 25 q-5 21 -30 23 q-22 2 -30 13 q-9 -11 -30 -13 q-27 -3 -26 -23 z"/>
               <path class="cloth front" fill="url(#mesh)" stroke="none"
                     d="M-52 2 q6 -19 28 -22 q18 -2 24 -13 q8 11 25 13 q20 3 26 22 q-4 19 -26 21 q-19 2 -26 11 q-8 -9 -26 -11 q-24 -2 -25 -21 z"/>
-              <g class="caught">
+              <g class="drip-group" fill="#8FF3E2" stroke="none">
+              <circle class="drip" cx="300" cy="150" r="1.6"/>
+              <circle class="drip" cx="314" cy="156" r="1.3"/>
+              <circle class="drip" cx="328" cy="150" r="1.5"/>
+            </g>
+            <g class="caught">
                 <g class="catch-dark">
                   <path d="M-13 2 q9 -11 19 -1 q-4 8 -12 8 z" fill="#200910" stroke="#ff4d6d" stroke-width="2"/>
                   <path d="M-6 -5 l1 -7 M0 -6 l2 -7 M6 -4 l3 -6" stroke="#ff4d6d" stroke-width="2" stroke-linecap="round"/>
