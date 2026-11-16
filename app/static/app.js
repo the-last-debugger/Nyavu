@@ -189,10 +189,14 @@
     [0.34, 352, 194, 1.12, 0],
     [0.66, 355, 196, 1.16, -3],
     [0.78, 330, 168, 0.86, 5],
-    [0.88, 276, 132, 0.62, -4],
-    [0.94, 252, 116, 0.50, 0],
-    [1.00, 252, 116, 0.50, 0],
+    [0.88, 300, 146, 0.62, -4],
+    [0.94, 318, 152, 0.55, 0],
+    [1.00, 318, 152, 0.55, 0],
   ];
+  // one fixed radius per spoke: the rim is never a circle, it is a torn hide
+  const IRREG = [1.12, 0.94, 1.03, 0.86, 1.08, 0.97, 1.15, 0.9, 1.0, 0.88,
+                 1.06, 0.93, 1.11, 0.96, 1.02, 0.87, 1.09, 0.95, 1.13, 0.99];
+
   const HAND_A = [236, 105];
   const HAND_B = [246, 121];
 
@@ -242,43 +246,45 @@
     const { x, y, s } = netState(t);
     const T = performance.now() / 1000;
 
-    const R = 6 + 132 * s;               // it opens wide as it travels
-    const FLAT = 0.42;                    // foreshortened: we see the canopy at an angle
+    const R = 6 + 126 * s;
+    const FLAT = 0.42;
     const N = 20;
-    const DIP = 20 * s;                   // the far rim sits higher, the near rim lower
+    const DIP = 20 * s;
+    const t2 = Math.max(0, Math.min(1, (t - 0.90) / 0.10));   // the last tenth: it is drawn in
 
     const rim = [];
     const far = [];
     for (let i = 0; i < N; i++) {
       const a = (i / N) * Math.PI * 2;
-      const wob = 1
-        + 0.05 * Math.sin(a * 3 + T * 2.1)
-        + 0.03 * Math.sin(a * 5 - T * 1.6);
-      const rr = R * wob;
+      const wob = IRREG[i]
+        * (1 + 0.045 * Math.sin(a * 3 + T * 2.1) + 0.03 * Math.sin(a * 5 - T * 1.6));
+      const rr = R * wob * (1 - 0.55 * t2);
       const ex = Math.cos(a);
       const ey = Math.sin(a);
-      // the rim nearest the viewer dips toward the water; the far side lifts
       const lift = -DIP * ey;
       rim.push([x + rr * ex, y + rr * FLAT * ey + lift + Math.sin(a + T * 1.25) * 3 * s]);
-      far.push([x + rr * 0.62 * ex, y - rr * FLAT * 0.55 * ey - DIP * 0.8 + Math.sin(a - T * 1.1) * 2 * s]);
+      far.push([x + rr * 0.60 * ex, y - rr * FLAT * 0.55 * ey - DIP * 0.8 + Math.sin(a - T * 1.1) * 2 * s]);
     }
 
     const fill = body.querySelector(".net-fill");
     if (fill) fill.setAttribute("d", smoothClosed(rim) + smoothClosed(far));
 
-    // spokes from the crown down to the near rim, and the join to the far rim
+    // spokes, cross-links and rings: enough lines to read as holes, not a scaffold
     const hub = [x, y - DIP * 1.5 - R * 0.10];
     let d = "";
     for (let i = 0; i < N; i++) {
       const p = rim[i];
       const f = far[i];
+      const n = rim[(i + 1) % N];
       d += `M${hub[0].toFixed(1)} ${hub[1].toFixed(1)}` +
            ` Q${((hub[0] + p[0]) / 2 + Math.sin(T * 1.6) * 2).toFixed(1)}` +
            ` ${((hub[1] + p[1]) / 2 + 2).toFixed(1)}` +
            ` ${p[0].toFixed(1)} ${p[1].toFixed(1)}`;
       d += `M${f[0].toFixed(1)} ${f[1].toFixed(1)} L${p[0].toFixed(1)} ${p[1].toFixed(1)}`;
+      // a diagonal cross-link, so the interior is diamonds rather than wedges
+      d += `M${f[0].toFixed(1)} ${f[1].toFixed(1)} L${n[0].toFixed(1)} ${n[1].toFixed(1)}`;
     }
-    [0.42, 0.74].forEach((k, idx) => {
+    [0.20, 0.36, 0.52, 0.68, 0.84].forEach((k, idx) => {
       const ring = rim.map(([px, py]) => [
         hub[0] + (px - hub[0]) * k,
         hub[1] + (py - hub[1]) * k + Math.sin(T * 1.1 + idx * 1.7) * 2,
@@ -288,28 +294,34 @@
     const mesh = body.querySelector(".net-mesh");
     if (mesh) mesh.setAttribute("d", d);
 
-    // the catch rides in the net and fights hard
-    const caught = body.querySelector(".caught");
-    if (caught) {
-      const onWater = t > 0.40 && t < 0.72;
-      const amp = onWater ? 7 : 2.5;
-      const jx = Math.sin(T * 12) * amp + Math.sin(T * 19.3) * amp * 0.55;
-      const jy = Math.cos(T * 14.7) * amp + Math.sin(T * 8.1) * amp * 0.45;
-      const rot = onWater ? Math.sin(T * 11) * 34 : Math.sin(T * 16) * 12;
-      caught.setAttribute("transform",
-        `translate(${(x + jx).toFixed(1)}, ${(y + 8 * s + jy).toFixed(1)}) rotate(${rot.toFixed(1)})`);
-    }
+    // from the last tenth the net is gone, but the catch is not: fade the cloth only
+    const delivered = t2 >= 1;
+    const scene = root.querySelector(".fishing");
+    if (scene) scene.classList.toggle("delivered", t2 > 0.55);
+    const clothFade = String(Math.max(0, 1 - t2 * 1.6));
+    [fill, mesh].forEach((el) => { if (el) el.style.opacity = clothFade; });
 
-    // the rope from his hands to the crown
-    const rope = body.parentElement.querySelector(".rope");
-    const ropeHi = body.parentElement.querySelector(".rope-hi");
-    if (rope) {
-      const cxp = (HAND_A[0] + hub[0]) / 2;
-      const cyp = (HAND_A[1] + hub[1]) / 2 + 10 * s + 2;
-      const dd = `M${HAND_A[0]} ${HAND_A[1]} Q${cxp.toFixed(1)} ${cyp.toFixed(1)} ${hub[0].toFixed(1)} ${hub[1].toFixed(1)}`;
-      rope.setAttribute("d", dd);
-      if (ropeHi) ropeHi.setAttribute("d", dd);
-      rope.setAttribute("stroke-width", (4.6 * Math.max(0.5, s)).toFixed(1));
+    const caught = root.querySelector(".caught");
+    if (caught) {
+      if (delivered || t2 > 0.55) {
+        // held up in front of him, still twitching but no longer thrashing
+        const jx = Math.sin(T * 9) * 1.2;
+        const jy = Math.cos(T * 11) * 1.2;
+        // held up at the 20th size: from here on, the catch is the only subject
+        caught.setAttribute("transform",
+          `translate(${(HAND_A[0] + 26 + jx).toFixed(1)}, ${(HAND_A[1] - 12 + jy).toFixed(1)}) ` +
+          `rotate(${(Math.sin(T * 7) * 6).toFixed(1)}) scale(3.1)`);
+        caught.style.opacity = "1";
+      } else {
+        const onWater = t > 0.40 && t < 0.78;
+        const amp = onWater ? 7 : 2.5;
+        const jx = Math.sin(T * 12) * amp + Math.sin(T * 19.3) * amp * 0.55;
+        const jy = Math.cos(T * 14.7) * amp + Math.sin(T * 8.1) * amp * 0.45;
+        const rot = onWater ? Math.sin(T * 11) * 34 : Math.sin(T * 16) * 12;
+        caught.setAttribute("transform",
+          `translate(${(x + jx).toFixed(1)}, ${(y + 8 * s + jy).toFixed(1)}) rotate(${rot.toFixed(1)})`);
+        caught.style.opacity = "1";
+      }
     }
 
     const wet = root.querySelector(".wetnet");
@@ -629,6 +641,25 @@
     setTimeout(() => water.remove(), 13600);
   }
 
+
+  /* The zoom is a camera move, not a CSS scale: the viewBox narrows onto the catch,
+     so nothing can be pushed out of frame and the framing is exact. */
+  function cameraPush(root, to, ms) {
+    const svg = root.querySelector(".fishing svg");
+    if (!svg) return;
+    const from = (svg.getAttribute("viewBox") || "0 12 610 236").split(/\s+/).map(Number);
+    const t0 = performance.now();
+
+    function frame(now) {
+      const k = Math.min(1, (now - t0) / ms);
+      const e = k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
+      const v = from.map((a, i) => a + (to[i] - a) * e);
+      svg.setAttribute("viewBox", v.map((n) => n.toFixed(1)).join(" "));
+      if (k < 1) requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+  }
+
   function runScene(root) {
     const scene = root.querySelector(".fishing");
     if (!scene) return;
@@ -653,7 +684,7 @@
       if (!done.react && elapsed >= BEAT.react) { done.react = true; scene.classList.add("reaction"); }
       if (!done.zoom && elapsed >= BEAT.zoom) {
         done.zoom = true;
-        scene.classList.add("zoom");
+        cameraPush(root, [150, 34, 300, 160], 2400);
         if (card) card.classList.add("dialcoming");
         done.stopTalk = startMonologue(root);
       }
@@ -937,6 +968,16 @@
                 <circle cx="224" cy="125" r="3.4" fill="#263947"/>
                 <path d="M224 125 L238 120" stroke="#3A5666" stroke-width="5" fill="none" stroke-linecap="round"/>
               </g>
+            
+                <g class="catch-odd">
+                  <circle cx="0" cy="2" r="8.5" fill="#1C1608" stroke="#ffb020" stroke-width="2"/>
+                  <path d="M-4 -3 q6 -6 6 5" stroke="#ffb020" stroke-width="2" fill="none" stroke-linecap="round"/>
+                </g>
+                <g class="catch-plain">
+                  <path d="M-15 2 q10 -8 21 0 q-11 8 -21 0 z" fill="#0C2C24" stroke="#35e0a0" stroke-width="2"/>
+                  <path d="M6 2 l8 -5 v10 z" fill="#0C2C24" stroke="#35e0a0" stroke-width="1.8"/>
+                </g>
+              
             </g>
 
             <!-- sea drawn after the boat so only the keel sits under it -->
@@ -964,19 +1005,6 @@
               <circle class="drip" cx="314" cy="156" r="1.3"/>
               <circle class="drip" cx="328" cy="150" r="1.5"/>
             </g>
-            <g class="caught">
-                <g class="catch-dark">
-                  <path d="M-13 2 q9 -11 19 -1 q-4 8 -12 8 z" fill="#200910" stroke="#ff4d6d" stroke-width="2"/>
-                  <path d="M-6 -5 l1 -7 M0 -6 l2 -7 M6 -4 l3 -6" stroke="#ff4d6d" stroke-width="2" stroke-linecap="round"/>
-                </g>
-                <g class="catch-odd">
-                  <circle cx="0" cy="2" r="8.5" fill="#1C1608" stroke="#ffb020" stroke-width="2"/>
-                  <path d="M-4 -3 q6 -6 6 5" stroke="#ffb020" stroke-width="2" fill="none" stroke-linecap="round"/>
-                </g>
-                <g class="catch-plain">
-                  <path d="M-15 2 q10 -8 21 0 q-11 8 -21 0 z" fill="#0C2C24" stroke="#35e0a0" stroke-width="2"/>
-                  <path d="M6 2 l8 -5 v10 z" fill="#0C2C24" stroke="#35e0a0" stroke-width="1.8"/>
-                </g>
               </g>
             </g>
 
@@ -984,21 +1012,37 @@
             <g clip-path="url(#waterBand)" style="pointer-events:none">
               <path class="wetnet" fill="#12495C" fill-opacity="0.85" stroke="none"/>
             </g>
-          </svg>
-          <div class="bubble" aria-live="polite"><span></span></div>
-          <svg class="svg-close" aria-hidden="true" style="display:none"></svg>
-
-            <g class="wash" fill="none" stroke="#8FF3E2" stroke-width="1.4" opacity="0">
+<g class="caught">
+                <g class="catch-dark">
+                  <path d="M-13 2 q9 -11 19 -1 q-4 8 -12 8 z" fill="#200910" stroke="#ff4d6d" stroke-width="2"/>
+                  <path d="M-6 -5 l1 -7 M0 -6 l2 -7 M6 -4 l3 -6" stroke="#ff4d6d" stroke-width="2" stroke-linecap="round"/>
+                </g>
+<g class="wash" fill="none" stroke="#8FF3E2" stroke-width="1.4" opacity="0">
               <circle cx="352" cy="190" r="40"/>
               <circle cx="352" cy="190" r="40"/>
               <circle cx="352" cy="190" r="40"/>
             </g>
-            <g class="splash">
+<g class="splash">
               <path class="spike" d="M352 196 l-9 -20 M358 194 l-2 -24 M364 196 l9 -19" stroke="#B9F7EC" stroke-width="2.6" stroke-linecap="round" fill="none"/>
               <circle class="drop" cx="342" cy="172" r="2.9" fill="#B9F7EC"/>
               <circle class="drop" cx="356" cy="163" r="3.4" fill="#B9F7EC"/>
               <circle class="drop" cx="368" cy="174" r="2.6" fill="#B9F7EC"/>
             </g>
+
+          </svg>
+          <div class="bubble" aria-live="polite"><span></span></div>
+          <div class="held ${r.risk === "high" ? "dark" : r.risk === "medium" ? "odd" : "plain"}" aria-hidden="true">
+            <svg viewBox="-24 -20 48 40">
+              ${r.risk === "high"
+                ? '<path d="M-15 2 q10 -12 21 -1 q-5 9 -13 9 z" fill="#200910" stroke="#ff4d6d" stroke-width="2.2"/><path d="M-7 -6 l1 -8 M0 -7 l2 -8 M7 -5 l3 -7" stroke="#ff4d6d" stroke-width="2.2" stroke-linecap="round"/>'
+                : r.risk === "medium"
+                ? '<circle cx="0" cy="1" r="10.5" fill="#1C1608" stroke="#ffb020" stroke-width="2.2"/><path d="M-5 -3 q7 -7 7 6" stroke="#ffb020" stroke-width="2.2" fill="none" stroke-linecap="round"/>'
+                : '<path d="M-17 2 q11 -9 23 0 q-12 9 -23 0 z" fill="#0C2C24" stroke="#35e0a0" stroke-width="2.2"/><path d="M7 2 l9 -6 v12 z" fill="#0C2C24" stroke="#35e0a0" stroke-width="2"/>'}
+            </svg>
+          </div>
+
+            
+            
           </svg>
         </div>
           <div class="skeleton" aria-hidden="true"><i></i><i></i><i></i></div>
