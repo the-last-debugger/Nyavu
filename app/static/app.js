@@ -183,15 +183,15 @@
      between his hands and the net has to follow it. In reality the part still held
      stays narrow while the thrown part opens out; on the haul it reverses. */
   const NET_KEY = [
-    [0.00, 246, 106, 0.26, -12],
-    [0.12, 246, 106, 0.26, -12],
+    [0.00, 268, 158, 0.10, -8],
+    [0.12, 268, 158, 0.14, -8],
     [0.26, 310, 150, 0.62, 10],
     [0.34, 352, 194, 1.12, 0],
     [0.66, 355, 196, 1.16, -3],
     [0.78, 330, 168, 0.86, 5],
-    [0.88, 300, 146, 0.62, -4],
-    [0.94, 318, 152, 0.55, 0],
-    [1.00, 318, 152, 0.55, 0],
+    [0.88, 286, 148, 0.62, -4],
+    [0.94, 254, 124, 0.42, 0],
+    [1.00, 250, 116, 0.34, 0],
   ];
   // one fixed radius per spoke: the rim is never a circle, it is a torn hide
   const IRREG = [1.12, 0.94, 1.03, 0.86, 1.08, 0.97, 1.15, 0.9, 1.0, 0.88,
@@ -297,7 +297,11 @@
     // from the last tenth the net is gone, but the catch is not: fade the cloth only
     const delivered = t2 >= 1;
     const scene = root.querySelector(".fishing");
-    if (scene) scene.classList.toggle("delivered", t2 > 0.55);
+    if (scene) {
+      // it looks like a fish until it is in his hands, then it shows what it is
+      scene.classList.toggle("revealed", t2 > 0.55);
+      scene.classList.toggle("delivered", t2 > 0.55);
+    }
     const clothFade = String(Math.max(0, 1 - t2 * 1.6));
     [fill, mesh].forEach((el) => { if (el) el.style.opacity = clothFade; });
 
@@ -308,9 +312,11 @@
         const jx = Math.sin(T * 9) * 1.2;
         const jy = Math.cos(T * 11) * 1.2;
         // held up at the 20th size: from here on, the catch is the only subject
-        caught.setAttribute("transform",
-          `translate(${(HAND_A[0] + 26 + jx).toFixed(1)}, ${(HAND_A[1] - 12 + jy).toFixed(1)}) ` +
-          `rotate(${(Math.sin(T * 7) * 6).toFixed(1)}) scale(3.1)`);
+        caught.style.setProperty("--cx", `${(HAND_A[0] + 26 + jx).toFixed(1)}px`);
+        caught.style.setProperty("--cy", `${(HAND_A[1] - 12 + jy).toFixed(1)}px`);
+        caught.style.setProperty("--cs", "2.6");
+        caught.style.setProperty("--cr", `${(Math.sin(T * 7) * 6).toFixed(1)}deg`);
+        caught.setAttribute("visibility", "visible");
         caught.style.opacity = "1";
       } else {
         const onWater = t > 0.40 && t < 0.78;
@@ -318,8 +324,15 @@
         const jx = Math.sin(T * 12) * amp + Math.sin(T * 19.3) * amp * 0.55;
         const jy = Math.cos(T * 14.7) * amp + Math.sin(T * 8.1) * amp * 0.45;
         const rot = onWater ? Math.sin(T * 11) * 34 : Math.sin(T * 16) * 12;
-        caught.setAttribute("transform",
-          `translate(${(x + jx).toFixed(1)}, ${(y + 8 * s + jy).toFixed(1)}) rotate(${rot.toFixed(1)})`);
+        // a real fish inside a real net: big enough to see, and only once it is caught
+        const visible = t > 0.30;
+        const size = (2.2 + 0.9 * Math.min(1, s)).toFixed(2);
+        // variables, not a transform string: CSS composes it, so nothing can clobber it
+        caught.style.setProperty("--cx", `${(x + jx).toFixed(1)}px`);
+        caught.style.setProperty("--cy", `${(y + 8 * s + jy).toFixed(1)}px`);
+        caught.style.setProperty("--cs", size);
+        caught.style.setProperty("--cr", `${rot.toFixed(1)}deg`);
+        caught.setAttribute("visibility", visible ? "visible" : "hidden");
         caught.style.opacity = "1";
       }
     }
@@ -483,7 +496,8 @@
   }
 
   const BEAT = {
-    throw: 2000,
+    ready: 1200,      // he says his line; the net is still out of sight
+    throw: 3200,
     impact: 4900,
     haul: 11000,
     fish: 12500,
@@ -498,6 +512,14 @@
 
   /* He talks while he works. The lines are chosen by what is in the net, and they
      are written in his voice: dry, plain, never a marketing sentence. */
+  /* He speaks before he works. */
+  const OPENERS = [
+    "Here we go again.",
+    "Right. Let's see what the sea brought us.",
+    "Another one. Hold my hat.",
+    "Same water, new trouble.",
+  ];
+
   /* His lines. The deck is reshuffled every scan, one lesson is slipped in, and the
      phish/fish pun belongs to the dark catch where it actually applies. */
   const LINES = {
@@ -696,11 +718,20 @@
     window.__beatOf = (ms) => Math.round(ms);
     const done = {};
 
+    // he speaks before he works
+    const bubble = scene.querySelector(".bubble");
+    if (bubble) {
+      const span = bubble.querySelector("span");
+      if (span) span.textContent = OPENERS[Math.floor(Math.random() * OPENERS.length)];
+      bubble.classList.add("on");
+    }
+
     function frame(now) {
       const elapsed = now - started;
       // the net works on its own ten seconds inside the longer scene
       const netT = Math.min(1, Math.max(0, (elapsed - BEAT.throw + 1200) / 10000));
-      updateNet(root, netT);
+      if (scene) scene.classList.toggle("castable", elapsed >= BEAT.ready);
+      updateNet(root, elapsed >= BEAT.ready ? netT : 0);
 
       if (!done.impact && elapsed >= BEAT.impact) { done.impact = true; burst(root); }
       if (!done.fish && elapsed >= BEAT.fish) { done.fish = true; scene.classList.add("examine"); drip(root); }
@@ -898,24 +929,9 @@
               </filter>
             </defs>
 
-            <defs>
-              <!-- moonlight: a cool wash from the crescent across the sky and water -->
-              <radialGradient id="moonlight" cx="54%" cy="14%" r="62%">
-                <stop offset="0%" stop-color="#BFE9F7" stop-opacity="0.30"/>
-                <stop offset="30%" stop-color="#6FB4CE" stop-opacity="0.13"/>
-                <stop offset="70%" stop-color="#1C3B4C" stop-opacity="0.04"/>
-                <stop offset="100%" stop-color="#050B11" stop-opacity="0"/>
-              </radialGradient>
-              <!-- the water takes the moon too, from above -->
-              <linearGradient id="moonwater" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stop-color="#2E6D82" stop-opacity="0.55"/>
-                <stop offset="100%" stop-color="#0A2430" stop-opacity="0"/>
-              </linearGradient>
-            </defs>
             <rect x="0" y="0" width="610" height="172" fill="#070E15"/>
             <rect x="0" y="0" width="610" height="236" fill="url(#moonlight)"/>
-            <!-- a crescent: the disc with an offset disc subtracted from it.
-                 Placed left of centre, because the dial owns the right of the frame. -->
+
             <mask id="crescent">
               <circle cx="318" cy="38" r="18" fill="#ffffff"/>
               <circle cx="310" cy="32" r="15.4" fill="#000000"/>
@@ -951,7 +967,6 @@
               <path class="beam" d="M476 122 l30 -12 v24 z" fill="#8FF3E2" stroke="none" opacity="0.10"/>
             </g>
 
-            <!-- the boat: gunwale at 150, keel at 180, waterline at 172 => a quarter under -->
             <g class="boat">
               <!-- freeboard: gunwale at 140, keel at 182, waterline at 172 -->
               <path d="M28 140 q10 30 52 38 q60 10 128 0 q34 -6 46 -38 z"
@@ -964,10 +979,6 @@
               <rect x="168" y="147" width="92" height="5" rx="2.5"
                     fill="#182833" stroke="#3A5666" stroke-width="1.4"/>
             </g>
-
-            <!-- the hull has its own small wake where it meets the surface -->
-            <path class="wake" d="M26 173 q46 -5 92 0 q40 4 82 0 q18 -2 34 0"
-                  fill="none" stroke="#1D4A57" stroke-width="1.6" stroke-linecap="round"/>
 
             <g class="fisher">
               <!-- trousers: thigh along the thwart, shin dropping to the boards -->
@@ -1003,7 +1014,7 @@
               
             </g>
 
-            <!-- sea drawn after the boat so only the keel sits under it -->
+            <!-- the sea is drawn after the boat, so only the keel sits under it -->
             <rect x="0" y="172" width="610" height="88" fill="url(#seaG)"/>
             <rect x="0" y="172" width="610" height="26" fill="url(#moonwater)"/>
             <path d="M0 172 h610" stroke="#12303A" stroke-width="1.2"/>
@@ -1012,73 +1023,47 @@
             <circle class="ripple r2" cx="352" cy="196" r="10"/>
             <circle class="ripple r3" cx="352" cy="196" r="10"/>
 
-            <!-- the net is drawn live: a rim, rings and spokes recomputed every frame,
-                 so it opens when thrown, sags under its own weight, and sways. -->
-            <path class="rope" fill="none" stroke="#1B3341" stroke-width="4.2"
-                  stroke-linecap="round" d=""/>
-            <path class="rope-hi" fill="none" stroke="#4E7B8C" stroke-width="1.2"
-                  stroke-linecap="round" opacity="0.7" d=""/>
+            <path class="rope" fill="none" stroke="#1B3341" stroke-width="4.2" stroke-linecap="round" d=""/>
+            <path class="rope-hi" fill="none" stroke="#4E7B8C" stroke-width="1.2" stroke-linecap="round" opacity="0.7" d=""/>
 
             <g class="netlive">
               <path class="net-fill" fill="url(#mesh)" fill-opacity="0.96" stroke="none" d=""/>
-              <path class="net-mesh" fill="none" stroke="#4E7B8C" stroke-width="0.9"
-                    stroke-opacity="0.85" d=""/>
+              <path class="net-mesh" fill="none" stroke="#4E7B8C" stroke-width="0.9" stroke-opacity="0.85" d=""/>
               <g class="drip-group" fill="#8FF3E2" stroke="none">
-              <circle class="drip" cx="300" cy="150" r="1.6"/>
-              <circle class="drip" cx="314" cy="156" r="1.3"/>
-              <circle class="drip" cx="328" cy="150" r="1.5"/>
-            </g>
+                <circle class="drip" cx="300" cy="150" r="1.6"/>
+                <circle class="drip" cx="314" cy="156" r="1.3"/>
+                <circle class="drip" cx="328" cy="150" r="1.5"/>
               </g>
             </g>
 
-            <!-- drawn after the net, in world coordinates, so the water can show through it -->
+            <g class="caught">
+              <circle class="catch-halo" r="17" fill="rgba(3, 9, 13, .55)"/>
+              <g class="catch-dark">
+                <path d="M-13 2 q9 -11 19 -1 q-4 8 -12 8 z" fill="#200910" stroke="#ff4d6d" stroke-width="2"/>
+                <path d="M-6 -5 l1 -7 M0 -6 l2 -7 M6 -4 l3 -6" stroke="#ff4d6d" stroke-width="2" stroke-linecap="round"/>
+              </g>
+              <g class="catch-odd">
+                <circle cx="0" cy="2" r="8.5" fill="#1C1608" stroke="#ffb020" stroke-width="2"/>
+                <path d="M-4 -3 q6 -6 6 5" stroke="#ffb020" stroke-width="2" fill="none" stroke-linecap="round"/>
+              </g>
+              <g class="catch-plain">
+                <path d="M-15 2 q10 -8 21 0 q-11 8 -21 0 z" fill="#0C2C24" stroke="#35e0a0" stroke-width="2"/>
+                <path d="M6 2 l8 -5 v10 z" fill="#0C2C24" stroke="#35e0a0" stroke-width="1.8"/>
+              </g>
+            </g>
+
             <g clip-path="url(#waterBand)" style="pointer-events:none">
               <path class="wetnet" fill="#12495C" fill-opacity="0.85" stroke="none"/>
             </g>
-<g class="caught">
-                <g class="catch-dark">
-                  <path d="M-13 2 q9 -11 19 -1 q-4 8 -12 8 z" fill="#200910" stroke="#ff4d6d" stroke-width="2"/>
-                  <path d="M-6 -5 l1 -7 M0 -6 l2 -7 M6 -4 l3 -6" stroke="#ff4d6d" stroke-width="2" stroke-linecap="round"/>
-                </g>
-<g class="wash" fill="none" stroke="#8FF3E2" stroke-width="1.4" opacity="0">
-              <circle cx="352" cy="190" r="40"/>
-              <circle cx="352" cy="190" r="40"/>
-              <circle cx="352" cy="190" r="40"/>
-            </g>
-<g class="splash">
+
+            <g class="splash">
               <path class="spike" d="M352 196 l-9 -20 M358 194 l-2 -24 M364 196 l9 -19" stroke="#B9F7EC" stroke-width="2.6" stroke-linecap="round" fill="none"/>
               <circle class="drop" cx="342" cy="172" r="2.9" fill="#B9F7EC"/>
               <circle class="drop" cx="356" cy="163" r="3.4" fill="#B9F7EC"/>
               <circle class="drop" cx="368" cy="174" r="2.6" fill="#B9F7EC"/>
             </g>
-
           </svg>
           <div class="bubble" aria-live="polite"><span></span></div>
-          <div class="held ${r.risk === "high" ? "dark" : r.risk === "medium" ? "odd" : "plain"}" aria-hidden="true">
-            <svg viewBox="-24 -20 48 40">
-              ${r.risk === "high"
-                ? '<path d="M-15 2 q10 -12 21 -1 q-5 9 -13 9 z" fill="#200910" stroke="#ff4d6d" stroke-width="2.2"/><path d="M-7 -6 l1 -8 M0 -7 l2 -8 M7 -5 l3 -7" stroke="#ff4d6d" stroke-width="2.2" stroke-linecap="round"/>'
-                : r.risk === "medium"
-                ? '<circle cx="0" cy="1" r="10.5" fill="#1C1608" stroke="#ffb020" stroke-width="2.2"/><path d="M-5 -3 q7 -7 7 6" stroke="#ffb020" stroke-width="2.2" fill="none" stroke-linecap="round"/>'
-                : '<path d="M-17 2 q11 -9 23 0 q-12 9 -23 0 z" fill="#0C2C24" stroke="#35e0a0" stroke-width="2.2"/><path d="M7 2 l9 -6 v12 z" fill="#0C2C24" stroke="#35e0a0" stroke-width="2"/>'}
-            </svg>
-          </div>
-
-            
-            
-          </svg>
-        </div>
-          <div class="skeleton" aria-hidden="true"><i></i><i></i><i></i></div>
-          ${r.suggested ? `<p class="suggest">You may have meant
-             <strong>${escapeHtml(r.suggested.domain)}</strong> — that address is in our
-             reference list for ${escapeHtml(r.suggested.brand)}. We cannot verify official
-             sites, so only open it if you trust the address.</p>` : ""}
-          <div class="meta-row">
-            <span><b>Host</b> ${escapeHtml(r.host)}</span>
-            ${r.verdict === "phishing"
-              ? `<span><b>Model score</b> ${(r.probability * 100).toFixed(1)}</span>` : ""}
-            <span><b>Latency</b> ${r.inference_ms} ms</span>
-          </div>
         </div>
       </div>
       <div class="thinking-row">
