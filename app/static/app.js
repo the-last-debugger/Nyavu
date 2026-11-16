@@ -279,7 +279,7 @@
           <p class="verdict-url">${escapeHtml(r.url)}</p>
 
         <div class="fishing" data-catch="${r.risk === "high" ? "dark" : r.risk === "medium" ? "odd" : "plain"}" aria-hidden="true">
-          <svg viewBox="0 0 460 250" preserveAspectRatio="xMidYMid meet">
+          <svg viewBox="0 0 520 260" preserveAspectRatio="xMidYMid meet">
             <defs>
               <linearGradient id="seaG" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%" stop-color="#0C2833"/>
@@ -289,15 +289,9 @@
                 <stop offset="0%" stop-color="#1B3A44"/>
                 <stop offset="100%" stop-color="#0A1A22"/>
               </radialGradient>
-
-              <!-- real netting: a diamond lattice, not a solid circle -->
-              <pattern id="mesh" width="9" height="9" patternUnits="userSpaceOnUse"
-                       patternTransform="rotate(45)">
-                <path d="M0 0 V9 M0 0 H9" stroke="#3fd9c0" stroke-width="1.15"
-                      fill="none" opacity="0.75"/>
+              <pattern id="mesh" width="9" height="9" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+                <path d="M0 0 V9 M0 0 H9" stroke="#3fd9c0" stroke-width="1.15" fill="none" opacity="0.75"/>
               </pattern>
-
-              <!-- the cloth breathes: slow turbulence displaces the net as it moves -->
               <filter id="flutter" x="-30%" y="-30%" width="160%" height="160%">
                 <feTurbulence type="fractalNoise" baseFrequency="0.014 0.022" numOctaves="2" seed="7" result="noise">
                   <animate attributeName="baseFrequency" dur="10s" repeatCount="indefinite"
@@ -308,47 +302,59 @@
               </filter>
             </defs>
 
-            <rect x="0" y="0" width="460" height="152" fill="#050B11"/>
-            <circle cx="386" cy="44" r="19" fill="url(#moonG)"/>
-            <rect x="0" y="150" width="460" height="100" fill="url(#seaG)"/>
-            <path d="M0 150 h460" stroke="#12303A" stroke-width="1.2"/>
+            <rect x="0" y="0" width="520" height="172" fill="#050B11"/>
+            <circle cx="470" cy="40" r="18" fill="url(#moonG)"/>
 
-            <circle class="ripple r1" cx="322" cy="180" r="10"/>
-            <circle class="ripple r2" cx="322" cy="180" r="10"/>
-            <circle class="ripple r3" cx="322" cy="180" r="10"/>
-
+            <!-- the boat: gunwale at 150, keel at 180, waterline at 172 => a quarter under -->
             <g class="boat">
-              <path d="M156 152 q38 28 100 28 q62 0 94 -28 z" fill="#060C12" stroke="#1E2E3A" stroke-width="2.4"/>
-              <path d="M164 149 h180" stroke="#263947" stroke-width="3.4" stroke-linecap="round"/>
+              <!-- freeboard: gunwale at 140, keel at 182, waterline at 172 -->
+              <path d="M28 140 q10 30 52 38 q60 10 128 0 q34 -6 46 -38 z"
+                    fill="#080F16" stroke="#1E2E3A" stroke-width="2.4"/>
+              <path d="M22 138 h258" stroke="#2A3D4C" stroke-width="4" stroke-linecap="round"/>
+              <path d="M40 146 q10 18 44 24 q54 8 112 0 q26 -4 40 -24"
+                    fill="none" stroke="#16242F" stroke-width="1.4"/>
             </g>
 
             <g class="fisher">
-              <path class="torso" d="M236 114 q13 -28 32 -6 l-6 34 h-23 z" fill="#060C12" stroke="#263947" stroke-width="2.2"/>
-              <circle class="head" cx="252" cy="97" r="10.5" fill="#060C12" stroke="#263947" stroke-width="2.2"/>
-              <path class="hat" d="M235 91 q17 -19 34 0 l9 5 h-52 z" fill="#060C12" stroke="#263947" stroke-width="2.2"/>
-              <g class="arms">
-                <!-- upper arm, elbow, forearm, hand - per side, so the bend shows -->
-                <path class="limb" d="M249 115 L264 114" stroke="#263947" stroke-width="6.2"
-                      fill="none" stroke-linecap="round"/>
-                <circle class="elbow" cx="264" cy="114" r="3.6" fill="#263947"/>
-                <path class="limb" d="M264 114 L281 104" stroke="#263947" stroke-width="5.2"
-                      fill="none" stroke-linecap="round"/>
-                <path class="hand" d="M281 104 q4 -3 6 1 q2 4 -3 5 z" fill="#263947"/>
+              <!-- trousers: thigh along the thwart, shin dropping to the boards -->
+              <path class="trouser" d="M196 140 q22 -4 40 2 l2 12 q-22 6 -42 0 z"
+                    fill="#0B141A" stroke="#263947" stroke-width="2"/>
+              <path class="trouser" d="M232 152 q8 2 8 12 l-2 12 h-12 l2 -22 z"
+                    fill="#0B141A" stroke="#263947" stroke-width="2"/>
+              <path class="shirt" d="M198 112 q14 -16 26 0 l4 30 h-34 z"
+                    fill="#0A1218" stroke="#263947" stroke-width="2.2"/>
+              <circle class="head" cx="211" cy="100" r="10.5" fill="#0A1218" stroke="#263947" stroke-width="2.2"/>
+              <path class="hat" d="M194 94 q17 -19 34 0 l9 5 h-52 z" fill="#0A1218" stroke="#263947" stroke-width="2.2"/>
 
-                <path class="limb" d="M254 122 L269 122" stroke="#263947" stroke-width="6.2"
-                      fill="none" stroke-linecap="round"/>
-                <circle class="elbow" cx="269" cy="122" r="3.6" fill="#263947"/>
-                <path class="limb" d="M269 122 L285 114" stroke="#263947" stroke-width="5.2"
-                      fill="none" stroke-linecap="round"/>
-                <path class="hand" d="M285 114 q4 -3 6 1 q2 4 -3 5 z" fill="#263947"/>
+              <!-- arms: upper, elbow, forearm; no filled hands -->
+              <g class="arms">
+                <path d="M214 118 L226 116" stroke="#263947" stroke-width="6" fill="none" stroke-linecap="round"/>
+                <circle cx="226" cy="116" r="3.4" fill="#263947"/>
+                <path d="M226 116 L240 110" stroke="#263947" stroke-width="5" fill="none" stroke-linecap="round"/>
+                <path d="M212 126 L224 125" stroke="#263947" stroke-width="6" fill="none" stroke-linecap="round"/>
+                <circle cx="224" cy="125" r="3.4" fill="#263947"/>
+                <path d="M224 125 L238 120" stroke="#263947" stroke-width="5" fill="none" stroke-linecap="round"/>
               </g>
             </g>
 
-            <!-- the drape: two layered cloths of netting, thrown together -->
+            <!-- sea drawn after the boat so only the keel sits under it -->
+            <rect x="0" y="172" width="520" height="88" fill="url(#seaG)"/>
+            <path d="M0 172 h520" stroke="#12303A" stroke-width="1.2"/>
+
+            <circle class="ripple r1" cx="386" cy="196" r="10"/>
+            <circle class="ripple r2" cx="386" cy="196" r="10"/>
+            <circle class="ripple r3" cx="386" cy="196" r="10"/>
+
+            <g class="splash">
+              <path class="spike" d="M386 196 l-9 -20 M392 194 l-2 -24 M398 196 l9 -19" stroke="#7fe6d3" stroke-width="2" stroke-linecap="round" fill="none"/>
+              <circle class="drop" cx="376" cy="176" r="2.2" fill="#7fe6d3"/>
+              <circle class="drop" cx="390" cy="168" r="2.6" fill="#7fe6d3"/>
+              <circle class="drop" cx="402" cy="178" r="2" fill="#7fe6d3"/>
+            </g>
+
             <g class="netcloth" filter="url(#flutter)">
-              <path class="cloth back" fill="url(#mesh)"
-                    d="M-58 -4 q8 -22 32 -25 q20 -2 27 -15 q9 13 28 15 q23 3 29 25 q-5 21 -30 23 q-22 2 -30 13 q-9 -11 -30 -13 q-27 -3 -26 -23 z"
-                    fill-opacity="0.5"/>
+              <path class="cloth back" fill="url(#mesh)" fill-opacity="0.5"
+                    d="M-58 -4 q8 -22 32 -25 q20 -2 27 -15 q9 13 28 15 q23 3 29 25 q-5 21 -30 23 q-22 2 -30 13 q-9 -11 -30 -13 q-27 -3 -26 -23 z"/>
               <path class="cloth front" fill="url(#mesh)"
                     d="M-52 2 q6 -19 28 -22 q18 -2 24 -13 q8 11 25 13 q20 3 26 22 q-4 19 -26 21 q-19 2 -26 11 q-8 -9 -26 -11 q-24 -2 -25 -21 z"/>
               <g class="caught">
