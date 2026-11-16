@@ -2077,3 +2077,7 @@ body.has-result .explain {
   z-index: 4;
   pointer-events: none;
 }
+
+/* the net is positioned by JavaScript now, so the CSS animation must stand down */
+.fishing .netcloth { animation: none !important; }
+.fishing .tether { stroke-linejoin: round; }

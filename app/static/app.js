@@ -148,6 +148,64 @@
      The dial is the product's only feedback that a scan happened; shortening it
      was hiding the feature on machines with Windows animation effects disabled.
      The decorative animations elsewhere still honour the preference. */
+
+  /* The net is driven from JavaScript rather than CSS, because the strip of netting
+     between his hands and the net has to follow it. In reality the part still held
+     stays narrow while the thrown part opens out; on the haul it reverses. */
+  const NET_KEY = [
+    [0.00, 246, 106, 0.26, -12],
+    [0.12, 246, 106, 0.26, -12],
+    [0.26, 310, 150, 0.62, 10],
+    [0.34, 352, 194, 1.12, 0],
+    [0.66, 355, 196, 1.16, -3],
+    [0.78, 330, 168, 0.86, 5],
+    [0.88, 276, 132, 0.62, -4],
+    [0.94, 252, 116, 0.50, 0],
+    [1.00, 252, 116, 0.50, 0],
+  ];
+  const HAND_A = [236, 105];
+  const HAND_B = [246, 121];
+
+  function netState(t) {
+    for (let i = 0; i < NET_KEY.length - 1; i++) {
+      const [t0, x0, y0, s0, r0] = NET_KEY[i];
+      const [t1, x1, y1, s1, r1] = NET_KEY[i + 1];
+      if (t >= t0 && t <= t1) {
+        const k = (t - t0) / (t1 - t0);
+        const e = k * k * (3 - 2 * k);
+        return {
+          x: x0 + (x1 - x0) * e,
+          y: y0 + (y1 - y0) * e,
+          s: s0 + (s1 - s0) * e,
+          r: r0 + (r1 - r0) * e,
+        };
+      }
+    }
+    const last = NET_KEY[NET_KEY.length - 1];
+    return { x: last[1], y: last[2], s: last[3], r: last[4] };
+  }
+
+  function updateNet(root, t) {
+    const cloth = root.querySelector(".netcloth");
+    const tether = root.querySelector(".tether");
+    if (!cloth) return;
+    const { x, y, s, r } = netState(t);
+    cloth.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px) scale(${s.toFixed(3)}) rotate(${r.toFixed(1)}deg)`;
+
+    if (tether) {
+      // the mouth of the net: the edge nearest his hands
+      const half = 58 * s;
+      const lift = 26 * s;
+      const nl = [x - half, y - lift];
+      const nr = [x + half, y - lift];
+      tether.setAttribute("d",
+        `M${HAND_A[0]} ${HAND_A[1]} L${nl[0].toFixed(1)} ${nl[1].toFixed(1)} ` +
+        `L${nr[0].toFixed(1)} ${nr[1].toFixed(1)} L${HAND_B[0]} ${HAND_B[1]} Z`);
+      // slack under water: the strip darkens as it sinks
+      tether.setAttribute("fill-opacity", t > 0.3 && t < 0.7 ? "0.35" : "0.55");
+    }
+  }
+
   const TONE_OF = (v) => (v < 35 ? "#35e0a0" : v < 65 ? "#ffb020" : "#ff4d6d");
 
   function sweepNeedle(root) {
@@ -162,6 +220,7 @@
     const duration = 10000;
 
     if (caption) caption.textContent = "examining";
+    updateNet(document, 0);
 
     const ease = (x) => {
       const k = Math.min(1, Math.max(0, x));
@@ -211,6 +270,7 @@
         if (token !== sweepToken) return;   // a newer scan took over
         g.style.setProperty("--p", value.toFixed(2));
         g.style.setProperty("--tone", TONE_OF(value));
+        updateNet(document, t);
         if (readout) readout.textContent = Math.round(value);
 
         if (t < 1) {
@@ -362,6 +422,9 @@
               <circle class="drop" cx="356" cy="168" r="2.6" fill="#7fe6d3"/>
               <circle class="drop" cx="368" cy="178" r="2" fill="#7fe6d3"/>
             </g>
+
+            <path class="tether" fill="url(#mesh)" fill-opacity="0.55"
+                  stroke="#3fd9c0" stroke-width="0.8" d=""/>
 
             <g class="netcloth" filter="url(#flutter)">
               <path class="cloth back" fill="url(#mesh)" fill-opacity="0.5"
