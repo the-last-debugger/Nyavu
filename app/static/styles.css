@@ -2128,3 +2128,34 @@ body.has-result .explain {
   .fishing.go .r3 { animation: ripple66 2.6s ease-out 3.10s forwards !important; }
   .fishing.go .splash { animation: splash66 1.6s ease-out 2.20s forwards !important; }
 }
+
+/* ================== one scene clock (ten seconds), one dial clock ==================
+   The scene starts at render. Its ten-second timeline puts the net in the water at
+   34%, so the impact is triggered from JavaScript at that frame rather than by a CSS
+   delay that cannot know when the net actually lands. The dial starts at 3.4s and
+   finishes at 10s with the scene. */
+
+.fishing.go .arms { animation: armswork 10s cubic-bezier(.4,0,.3,1) forwards !important; }
+.fishing.go .caught { animation: catchup10b 10s linear forwards !important; }
+
+@keyframes catchup10b {
+  0%, 56% { opacity: 0; }
+  60%     { opacity: 1; transform: translateY(4px) scale(.9); }
+  100%    { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.fishing .r1, .fishing .r2, .fishing .r3, .fishing .splash { animation: none !important; }
+
+.fishing.impact .splash { animation: splash66 1.6s ease-out forwards !important; }
+.fishing.impact .r1 { animation: ripple66 2.6s ease-out forwards !important; }
+.fishing.impact .r2 { animation: ripple66 2.6s ease-out .35s forwards !important; }
+.fishing.impact .r3 { animation: ripple66 2.6s ease-out .80s forwards !important; }
+
+@media (prefers-reduced-motion: reduce) {
+  .fishing.go .arms { animation: armswork 10s cubic-bezier(.4,0,.3,1) forwards !important; }
+  .fishing.go .caught { animation: catchup10b 10s linear forwards !important; }
+  .fishing.impact .splash { animation: splash66 1.6s ease-out forwards !important; }
+  .fishing.impact .r1 { animation: ripple66 2.6s ease-out forwards !important; }
+  .fishing.impact .r2 { animation: ripple66 2.6s ease-out .35s forwards !important; }
+  .fishing.impact .r3 { animation: ripple66 2.6s ease-out .80s forwards !important; }
+}

@@ -216,6 +216,29 @@
     }
   }
 
+
+  /* The scene runs on its own ten-second clock from the moment the card appears.
+     The dial waits for the landing, then runs its own shorter sweep; the two are
+     separate clocks so retiming one never drags the other. */
+  function runScene(root, durationMs) {
+    const started = performance.now();
+    let impactDone = false;
+
+    function frame(now) {
+      const t = Math.min(1, (now - started) / durationMs);
+      updateNet(root, t);
+
+      // the splash belongs to the frame the net meets the water, not to a CSS delay
+      if (!impactDone && t >= 0.34) {
+        impactDone = true;
+        const scene = root.querySelector(".fishing");
+        if (scene) scene.classList.add("impact");
+      }
+      if (t < 1) requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+  }
+
   const TONE_OF = (v) => (v < 35 ? "#35e0a0" : v < 65 ? "#ffb020" : "#ff4d6d");
 
   function sweepNeedle(root) {
@@ -226,13 +249,14 @@
     const caption = g.querySelector(".readout small");
 
     const token = ++sweepToken;
-    const pause = 2244;   // the net meets the water here; the dial then observes
-    const duration = 4360;
+    const pause = 3400;   // the net meets the water at 34% of ten seconds
+    const duration = 6600;
 
     if (caption) caption.textContent = "examining";
     const scene = document.querySelector(".fishing");
     if (scene) scene.classList.add("go");
     updateNet(document, 0);
+    runScene(document, 10000);
 
     const ease = (x) => {
       const k = Math.min(1, Math.max(0, x));
@@ -282,7 +306,6 @@
         if (token !== sweepToken) return;   // a newer scan took over
         g.style.setProperty("--p", value.toFixed(2));
         g.style.setProperty("--tone", TONE_OF(value));
-        updateNet(document, t);
         if (readout) readout.textContent = Math.round(value);
 
         if (t < 1) {
@@ -445,9 +468,6 @@
                     d="M-58 -4 q8 -22 32 -25 q20 -2 27 -15 q9 13 28 15 q23 3 29 25 q-5 21 -30 23 q-22 2 -30 13 q-9 -11 -30 -13 q-27 -3 -26 -23 z"/>
               <path class="cloth front" fill="url(#mesh)" stroke="none"
                     d="M-52 2 q6 -19 28 -22 q18 -2 24 -13 q8 11 25 13 q20 3 26 22 q-4 19 -26 21 q-19 2 -26 11 q-8 -9 -26 -11 q-24 -2 -25 -21 z"/>
-              <g clip-path="url(#waterBand)" style="pointer-events:none">
-                <path class="wetnet" fill="#0B3546" fill-opacity="0.82" stroke="none" transform=""/>
-              </g>
               <g class="caught">
                 <g class="catch-dark">
                   <path d="M-13 2 q9 -11 19 -1 q-4 8 -12 8 z" fill="#200910" stroke="#ff4d6d" stroke-width="2"/>
@@ -462,6 +482,11 @@
                   <path d="M6 2 l8 -5 v10 z" fill="#0C2C24" stroke="#35e0a0" stroke-width="1.8"/>
                 </g>
               </g>
+            </g>
+
+            <!-- drawn after the net, in world coordinates, so the water can show through it -->
+            <g clip-path="url(#waterBand)" style="pointer-events:none">
+              <path class="wetnet" fill="#0B3546" fill-opacity="0.85" stroke="none"/>
             </g>
           </svg>
         </div>
