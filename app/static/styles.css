@@ -4277,3 +4277,53 @@ body.verdict-open { overflow: hidden; }
 /* the populated table gets a little more air */
 .table td, .table th { padding: 12px 14px; }
 .table tbody tr:hover { background: rgba(255, 255, 255, .025); }
+
+/* ===================== the bulk drop zone ===================== */
+.bulk-form {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.dropzone {
+  flex: 1 1 420px;
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  padding: 26px 22px;
+  border: 1.5px dashed var(--line-hi);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, .014);
+  text-align: center;
+  cursor: pointer;
+  transition: border-color .25s ease, background .25s ease, transform .25s ease;
+}
+
+.dropzone:hover { border-color: rgba(67, 232, 200, .45); background: rgba(67, 232, 200, .03); }
+.dropzone.over {
+  border-color: var(--mint);
+  background: rgba(67, 232, 200, .07);
+  transform: translateY(-1px);
+}
+
+.dropzone input[type="file"] {
+  position: absolute;
+  width: 1px; height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.drop-mark { color: var(--mint); opacity: .9; }
+.drop-mark svg { width: 26px; height: 26px; }
+.drop-title { font-size: 0.95rem; color: var(--ink); }
+.drop-hint { font-size: 0.78rem; color: var(--muted); }
+.drop-file {
+  margin-top: 4px;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: .06em;
+  color: var(--faint);
+}
+.dropzone.has-file .drop-file { color: var(--mint); }
+.dropzone.has-file { border-style: solid; }

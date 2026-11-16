@@ -159,8 +159,19 @@
       <p class="lede">Upload a CSV with a <code>url</code> column (or one URL per line).
         Up to 200 URLs per run — useful for triaging a suspicious mail campaign.</p>
     </div>
-    <form id="bulkForm" class="panel">
-      <input type="file" id="bulkFile" accept=".csv,.txt" required />
+    <form id="bulkForm" class="panel bulk-form">
+      <label class="dropzone" id="bulkDrop" for="bulkFile">
+        <input type="file" id="bulkFile" accept=".csv,.txt" required />
+        <span class="drop-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+            <path d="M12 16V4m0 0L7.5 8.5M12 4l4.5 4.5"/>
+            <path d="M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/>
+          </svg>
+        </span>
+        <span class="drop-title">Drop a CSV here, or choose a file</span>
+        <span class="drop-hint">One URL per line, or a column named <code>url</code> · up to 200</span>
+        <span class="drop-file" id="bulkFileName">No file chosen</span>
+      </label>
       <button class="btn primary" type="submit">Screen list</button>
     </form>
     <div id="bulkResult" class="panel hidden"></div>

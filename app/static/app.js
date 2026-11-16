@@ -1277,6 +1277,39 @@
   }
 
   /* --------------------------------------------------------------- history */
+
+  /* The drop zone: a file input that can also be dropped onto, with the chosen name
+     shown in place of the browser's default control. */
+  (function wireBulkDrop() {
+    const drop = document.getElementById("bulkDrop");
+    const input = document.getElementById("bulkFile");
+    const name = document.getElementById("bulkFileName");
+    if (!drop || !input) return;
+
+    const show = () => {
+      const f = input.files && input.files[0];
+      if (name) name.textContent = f ? f.name : "No file chosen";
+      drop.classList.toggle("has-file", !!f);
+    };
+
+    input.addEventListener("change", show);
+
+    ["dragenter", "dragover"].forEach((evt) =>
+      drop.addEventListener(evt, (e) => { e.preventDefault(); drop.classList.add("over"); }));
+
+    ["dragleave", "drop"].forEach((evt) =>
+      drop.addEventListener(evt, (e) => { e.preventDefault(); drop.classList.remove("over"); }));
+
+    drop.addEventListener("drop", (e) => {
+      const files = e.dataTransfer && e.dataTransfer.files;
+      if (!files || !files.length) return;
+      const dt = new DataTransfer();
+      dt.items.add(files[0]);
+      input.files = dt.files;
+      show();
+    });
+  })();
+
   async function loadHistory() {
     const tbody = $("#historyTable tbody");
     const empty = $("#historyEmpty");
