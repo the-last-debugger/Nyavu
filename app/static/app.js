@@ -397,6 +397,42 @@
   }
 
 
+
+  /* ---------------------------------------------------------------- liveliness */
+
+  // Hero parallax: the orbital mark leans away from the pointer. A few degrees is
+  // enough to make the page feel like a surface rather than a picture.
+  document.addEventListener("pointermove", (event) => {
+    const hero = document.querySelector(".hero");
+    const visual = document.querySelector(".hero-visual");
+    if (!hero || !visual) return;
+    const r = hero.getBoundingClientRect();
+    if (event.clientX < r.left || event.clientX > r.right ||
+        event.clientY < r.top || event.clientY > r.bottom) return;
+    const dx = (event.clientX - (r.left + r.width / 2)) / (r.width / 2);
+    const dy = (event.clientY - (r.top + r.height / 2)) / (r.height / 2);
+    visual.style.setProperty("--rx", `${(-dy * 7).toFixed(2)}deg`);
+    visual.style.setProperty("--ry", `${(dx * 9).toFixed(2)}deg`);
+  }, { passive: true });
+
+  // Magnetic primary button: it leans toward the pointer, then springs back.
+  document.addEventListener("pointermove", (event) => {
+    const btn = event.target.closest && event.target.closest(".btn.primary");
+    if (!btn) return;
+    const r = btn.getBoundingClientRect();
+    const dx = (event.clientX - (r.left + r.width / 2)) / (r.width / 2);
+    const dy = (event.clientY - (r.top + r.height / 2)) / (r.height / 2);
+    btn.style.setProperty("--bx", `${(dx * 3).toFixed(2)}px`);
+    btn.style.setProperty("--by", `${(dy * 2).toFixed(2)}px`);
+  }, { passive: true });
+
+  document.addEventListener("pointerout", (event) => {
+    const btn = event.target.closest && event.target.closest(".btn.primary");
+    if (!btn) return;
+    btn.style.setProperty("--bx", "0px");
+    btn.style.setProperty("--by", "0px");
+  }, { passive: true });
+
   /* A light that follows the pointer across cards. Cheap, and it makes a static
      panel feel like a surface rather than a picture. */
   document.addEventListener("pointermove", (event) => {
