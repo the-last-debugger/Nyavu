@@ -337,6 +337,26 @@
       }
     }
 
+    /* The rope joins the grip of his hands to the crown of the net. Measured between
+       those two points, it appears as the net leaves him and shortens by itself as it
+       is drawn back - no separate animation to keep in step. */
+    const ropeGroup = root.querySelector(".ropeline");
+    const rope = root.querySelector(".rope");
+    const ropeHi = root.querySelector(".rope-hi");
+    if (ropeGroup && rope) {
+      const grip = [(HAND_A[0] + HAND_B[0]) / 2, (HAND_A[1] + HAND_B[1]) / 2];
+      const span = Math.hypot(hub[0] - grip[0], hub[1] - grip[1]);
+      ropeGroup.style.opacity = span > 8 && t < 0.97 ? "1" : "0";
+
+      const sag = Math.min(16, span * 0.2);
+      const cxp = (grip[0] + hub[0]) / 2;
+      const cyp = (grip[1] + hub[1]) / 2 + sag;
+      const d = `M${grip[0].toFixed(1)} ${grip[1].toFixed(1)}`
+              + ` Q${cxp.toFixed(1)} ${cyp.toFixed(1)} ${hub[0].toFixed(1)} ${hub[1].toFixed(1)}`;
+      rope.setAttribute("d", d);
+      if (ropeHi) ropeHi.setAttribute("d", d);
+    }
+
     const wet = root.querySelector(".wetnet");
     if (wet) {
       wet.setAttribute("d", smoothClosed(rim));
@@ -406,106 +426,9 @@
   /* The verdict is the product's answer, so it gets the stage rather than sitting in
      the page flow. A blurred backdrop, the card lifted above it, and a way out that
      returns everything to normal. */
-  let activeModal = null;   // { shell, backdrop, home }
 
   /* The card keeps its own layout; the modal is a shell around it. Wrapping rather
      than restyling means the verdict looks exactly as designed, at any size. */
-  function openVerdictModal(card) {
-    closeVerdictModal(true);
-
-    const backdrop = document.createElement("div");
-    backdrop.className = "backdrop";
-
-    const shell = document.createElement("div");
-    shell.className = "modal-shell";
-    shell.setAttribute("role", "dialog");
-    shell.setAttribute("aria-modal", "true");
-    shell.setAttribute("aria-label", "Verdict");
-
-    const close = document.createElement("button");
-    close.type = "button";
-    close.className = "modal-close";
-    close.textContent = "Close";
-    shell.appendChild(close);
-
-    /* A skeleton of the card, in the same space, so the water has something to hand
-       over to. It fades once the real card is ready, never snapping. */
-    const skeleton = document.createElement("div");
-    skeleton.className = "verdict-skeleton";
-    // the skeleton copies the verdict's shape, so the hand-over is a fill, not a swap
-    skeleton.innerHTML = `
-      <div class="sk-head">
-        <span class="sk sk-gauge"></span>
-        <div class="sk-body">
-          <span class="sk sk-badge"></span>
-          <span class="sk sk-title"></span>
-          <span class="sk sk-url"></span>
-          <span class="sk sk-suggest"></span>
-          <span class="sk sk-meta"></span>
-        </div>
-      </div>
-      <span class="sk sk-subtitle"></span>
-      <span class="sk sk-row"></span>
-      <span class="sk sk-row"></span>
-      <span class="sk sk-row"></span>
-      <span class="sk sk-row"></span>
-      <span class="sk sk-row short"></span>
-      <span class="sk sk-subtitle small"></span>`;
-    shell.appendChild(skeleton);
-
-    document.body.appendChild(backdrop);
-    document.body.appendChild(shell);
-
-    const home = card.parentElement;
-    shell.appendChild(card);
-    card.classList.add("in-modal", "card-pending");
-
-    requestAnimationFrame(() => {
-      backdrop.classList.add("on");
-      shell.classList.add("on");
-    });
-
-    document.body.classList.add("verdict-open");
-    activeModal = { shell, backdrop, home, skeleton };
-
-    // the skeleton gives way once the water is gone
-    setTimeout(() => {
-      skeleton.classList.add("gone");
-      card.classList.remove("card-pending");
-      setTimeout(() => skeleton.remove(), 700);
-    }, 1500);
-
-    const shut = () => closeVerdictModal();
-    close.addEventListener("click", shut, { once: true });
-    backdrop.addEventListener("click", shut, { once: true });
-    // the shell is full-bleed now, so a click on it but off the card also closes
-    shell.addEventListener("click", (e) => {
-      if (!card.contains(e.target) && !close.contains(e.target)) shut();
-    });
-    document.addEventListener("keydown", function esc(e) {
-      if (e.key !== "Escape") return;
-      document.removeEventListener("keydown", esc);
-      shut();
-    });
-  }
-
-  function closeVerdictModal(silent) {
-    if (!activeModal) return;
-    const { shell, backdrop, home } = activeModal;
-    activeModal = null;
-
-    const card = shell.querySelector(".result");
-    if (card) {
-      card.classList.remove("in-modal");
-      if (home) home.appendChild(card);
-    }
-    shell.classList.remove("on");
-    backdrop.classList.remove("on");
-    document.body.classList.remove("verdict-open");
-    setTimeout(() => { shell.remove(); backdrop.remove(); }, 420);
-    if (!silent) window.scrollTo({ top: 0, behavior: "smooth" });
-  }
-
   const BEAT = {
     ready: 1200,      // he says his line; the net is still out of sight
     throw: 3200,
@@ -1053,8 +976,10 @@
             <circle class="ripple r2" cx="352" cy="196" r="10"/>
             <circle class="ripple r3" cx="352" cy="196" r="10"/>
 
-            <path class="rope" fill="none" stroke="#1B3341" stroke-width="4.2" stroke-linecap="round" d=""/>
-            <path class="rope-hi" fill="none" stroke="#4E7B8C" stroke-width="1.2" stroke-linecap="round" opacity="0.7" d=""/>
+            <g class="ropeline">
+              <path class="rope" fill="none" stroke="#16232B" stroke-width="3" stroke-linecap="round" d=""/>
+              <path class="rope-hi" fill="none" stroke="#5C8A9C" stroke-width="1" stroke-linecap="round" opacity="0.55" d=""/>
+            </g>
 
             <g class="netlive">
               <path class="net-fill" fill="url(#mesh)" fill-opacity="0.96" stroke="none" d=""/>
