@@ -279,7 +279,7 @@
           <p class="verdict-url">${escapeHtml(r.url)}</p>
 
         <div class="fishing" data-catch="${r.risk === "high" ? "dark" : r.risk === "medium" ? "odd" : "plain"}" aria-hidden="true">
-          <svg viewBox="0 0 520 260" preserveAspectRatio="xMidYMid meet">
+          <svg viewBox="0 12 610 236" preserveAspectRatio="xMidYMid meet">
             <defs>
               <linearGradient id="seaG" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%" stop-color="#0C2833"/>
@@ -302,7 +302,7 @@
               </filter>
             </defs>
 
-            <rect x="0" y="0" width="520" height="172" fill="#050B11"/>
+            <rect x="0" y="0" width="610" height="172" fill="#050B11"/>
             <circle cx="470" cy="40" r="18" fill="url(#moonG)"/>
 
             <!-- the boat: gunwale at 150, keel at 180, waterline at 172 => a quarter under -->
@@ -349,18 +349,18 @@
             </g>
 
             <!-- sea drawn after the boat so only the keel sits under it -->
-            <rect x="0" y="172" width="520" height="88" fill="url(#seaG)"/>
-            <path d="M0 172 h520" stroke="#12303A" stroke-width="1.2"/>
+            <rect x="0" y="172" width="610" height="88" fill="url(#seaG)"/>
+            <path d="M0 172 h610" stroke="#12303A" stroke-width="1.2"/>
 
-            <circle class="ripple r1" cx="386" cy="196" r="10"/>
-            <circle class="ripple r2" cx="386" cy="196" r="10"/>
-            <circle class="ripple r3" cx="386" cy="196" r="10"/>
+            <circle class="ripple r1" cx="352" cy="196" r="10"/>
+            <circle class="ripple r2" cx="352" cy="196" r="10"/>
+            <circle class="ripple r3" cx="352" cy="196" r="10"/>
 
             <g class="splash">
-              <path class="spike" d="M386 196 l-9 -20 M392 194 l-2 -24 M398 196 l9 -19" stroke="#7fe6d3" stroke-width="2" stroke-linecap="round" fill="none"/>
-              <circle class="drop" cx="376" cy="176" r="2.2" fill="#7fe6d3"/>
-              <circle class="drop" cx="390" cy="168" r="2.6" fill="#7fe6d3"/>
-              <circle class="drop" cx="402" cy="178" r="2" fill="#7fe6d3"/>
+              <path class="spike" d="M352 196 l-9 -20 M358 194 l-2 -24 M364 196 l9 -19" stroke="#7fe6d3" stroke-width="2" stroke-linecap="round" fill="none"/>
+              <circle class="drop" cx="342" cy="176" r="2.2" fill="#7fe6d3"/>
+              <circle class="drop" cx="356" cy="168" r="2.6" fill="#7fe6d3"/>
+              <circle class="drop" cx="368" cy="178" r="2" fill="#7fe6d3"/>
             </g>
 
             <g class="netcloth" filter="url(#flutter)">
@@ -416,6 +416,26 @@
 
 
   /* ---------------------------------------------------------------- liveliness */
+
+
+  /* Sections rise as they come into view. */
+  const revealer = new IntersectionObserver((entries) => {
+    entries.forEach((entry, i) => {
+      if (!entry.isIntersecting) return;
+      entry.target.style.transitionDelay = `${Math.min(i * 60, 240)}ms`;
+      entry.target.classList.add("in");
+      revealer.unobserve(entry.target);
+    });
+  }, { rootMargin: "0px 0px -12% 0px", threshold: 0.08 });
+
+  function watchSections() {
+    document.querySelectorAll(".step, .panel, .stats-strip, .spark-card")
+      .forEach((el) => {
+        if (el.classList.contains("in")) return;
+        el.classList.add("reveal");
+        revealer.observe(el);
+      });
+  }
 
   // Hero parallax: the orbital mark leans away from the pointer. A few degrees is
   // enough to make the page feel like a surface rather than a picture.
@@ -743,6 +763,7 @@
   loadStats();
   loadSparkline();
   loadCorpusSize();
+  watchSections();
 
   // Deep link: /?u=<url> pre-fills and analyses immediately, which also makes the
   // result shareable and the screen reproducible for documentation.
