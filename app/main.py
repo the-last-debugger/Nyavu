@@ -197,6 +197,13 @@ def get_stats():
     return db.stats()
 
 
+@app.get("/api/stats/daily")
+def get_daily_stats(days: int = 14):
+    """Scan volume per day, for the sparkline. This service's own traffic only."""
+    days = max(2, min(days, 60))
+    return {"days": db.daily_scans(days)}
+
+
 # --------------------------------------------------------------------------- #
 # Auth
 # --------------------------------------------------------------------------- #

@@ -250,6 +250,19 @@ def recent_scans(limit: int = 20, user_id: int | None = None):
     return [dict(r) for r in rows]
 
 
+def daily_scans(days: int = 14):
+    """Scan counts per calendar day, oldest first.
+
+    substr() is used rather than a date-cast because the column is ISO text and the
+    same expression works on both SQLite and Postgres.
+    """
+    with connect() as c:
+        rows = c.execute(
+            "SELECT substr(created_at, 1, 10) AS day, COUNT(*) AS n "
+            "FROM scans GROUP BY day ORDER BY day DESC LIMIT ?", (days,)).fetchall()
+    return [{"day": r["day"], "count": int(r["n"])} for r in reversed(rows)]
+
+
 def stats():
     with connect() as c:
         total = c.execute("SELECT COUNT(*) AS n FROM scans").fetchone()["n"]

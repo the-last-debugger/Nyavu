@@ -20,7 +20,7 @@
     $$("#nav a").forEach(a => a.classList.toggle("active", a.getAttribute("href") === "#" + target));
     if (target === "history") loadHistory();
     if (target === "model") loadModel();
-    if (target === "detector") loadStats();
+    if (target === "detector") { loadStats(); loadSparkline(); }
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
   window.addEventListener("hashchange", route);
@@ -49,6 +49,7 @@
       });
       render(r);
       loadStats();
+      loadSparkline();
       loadHistory();
     } catch (err) {
       result.classList.remove("hidden");
@@ -106,6 +107,8 @@
      that dithers between bands before locking on. 7.8 seconds in total: long
      enough to watch, short enough not to be an insult. Reduced-motion users get
      a short version rather than none - the number still has to arrive. */
+  let sweepToken = 0;
+
   function sweepNeedle(root) {
     const g = root.querySelector(".gauge");
     if (!g) return;
@@ -114,6 +117,7 @@
     const caption = g.querySelector(".readout small");
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
+    const token = ++sweepToken;
     const pause = reduce ? 0 : 600;
     const duration = reduce ? 420 : 7800;
 
@@ -139,6 +143,7 @@
         g.style.setProperty("--p", value.toFixed(2));
         if (readout) readout.textContent = Math.round(value);
 
+        if (token !== sweepToken) return;   // a newer scan took over
         if (t < 1) {
           requestAnimationFrame(frame);
         } else {
@@ -229,6 +234,65 @@
   }, { passive: true });
 
   /* ----------------------------------------------------------------- stats */
+
+  /* A 14-day volume line. Drawn from /api/stats/daily, so it shows this service's
+     own traffic and never implies knowledge of the wider internet. */
+  function drawSparkline(days) {
+    const holder = document.getElementById("spark");
+    if (!holder || !days || !days.length) return;
+
+    // The API returns only days that have rows. A day with no scans is a real zero,
+    // so the series is filled out before it is drawn rather than left gappy.
+    const span = 14;
+    const byDay = new Map(days.map(d => [d.day, d.count]));
+    const last = new Date(days[days.length - 1].day + "T00:00:00");
+    const series = [];
+    for (let i = span - 1; i >= 0; i--) {
+      const d = new Date(last);
+      d.setDate(last.getDate() - i);
+      const key = d.toISOString().slice(0, 10);
+      series.push({ day: key, count: byDay.get(key) || 0 });
+    }
+
+    const busy = series.filter(d => d.count > 0);
+    const w = 260, h = 52, pad = 7;
+    const max = Math.max(...series.map(d => d.count), 1);
+    const step = (w - pad * 2) / (series.length - 1);
+    const points = series.map((d, i) => [
+      pad + i * step,
+      h - pad - (d.count / max) * (h - pad * 2),
+    ]);
+
+    const line = points.map((p, i) => `${i ? "L" : "M"}${p[0].toFixed(1)},${p[1].toFixed(1)}`).join(" ");
+    const area = `${line} L${points[points.length - 1][0].toFixed(1)},${h - pad} L${pad},${h - pad} Z`;
+    const dots = series.map((d, i) => d.count > 0
+      ? `<circle class="spark-dot" cx="${points[i][0].toFixed(1)}" cy="${points[i][1].toFixed(1)}" r="2.2" />`
+      : "").join("");
+
+    const total = series.reduce((sum, d) => sum + d.count, 0);
+    const caption = busy.length
+      ? `last ${span} days · ${total} inspections on ${busy.length} day${busy.length === 1 ? "" : "s"}`
+      : `last ${span} days · no inspections recorded yet`;
+
+    holder.innerHTML = `
+      <svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" aria-hidden="true">
+        <line class="spark-base" x1="${pad}" y1="${h - pad}" x2="${w - pad}" y2="${h - pad}" />
+        <path class="spark-area" d="${area}" />
+        <path class="spark-line" d="${line}" />
+        ${dots}
+      </svg>
+      <span class="spark-cap">${caption}</span>`;
+    holder.classList.add("ready");
+  }
+
+
+  async function loadSparkline() {
+    try {
+      const data = await api("/api/stats/daily?days=14");
+      drawSparkline(data.days);
+    } catch { /* the strip is decoration until data exists */ }
+  }
+
   async function loadStats() {
     try {
       const s = await api("/api/stats");
@@ -450,6 +514,7 @@
   route();
   refreshAccount();
   loadStats();
+  loadSparkline();
   loadCorpusSize();
 
   // Deep link: /?u=<url> pre-fills and analyses immediately, which also makes the
