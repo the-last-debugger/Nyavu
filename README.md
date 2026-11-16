@@ -9,7 +9,8 @@ characteristics that produced it.
 A COMP324 team project at Kabarak University, built to be reproducible, honest about its
 accuracy, and cheap enough to run for nothing.
 
-**Live:** <https://nyavu.onrender.com>
+**Web:** <https://nyavu.onrender.com>
+**Android:** [download the APK](https://github.com/the-last-debugger/Nyavu/releases/latest/download/Nyavu.apk) · [all releases](https://github.com/the-last-debugger/Nyavu/releases)
 
 ---
 
@@ -45,7 +46,7 @@ URL ──► registrable domain ──► 17 numeric features ──► logisti
 | F1 / ROC-AUC | 0.740 / 0.829 |
 | False-positive rate | **19.8%** on the bare model |
 | Cross-validation | 5 grouped folds, F1 0.727 ± 0.013 |
-| Inference | ~20–130 ms per URL, CPU only |
+| Inference | 12.9 ms locally, ~290 ms on the free hosting tier |
 
 **Why 75% and not the 97% common in the literature.** Published figures are usually inflated by a
 collection artefact: benign feeds list bare domains while phishing feeds list full hosts, so the
@@ -56,6 +57,17 @@ number above is what remains after the data was curated honestly.
 **Because 19.8% is unusable in front of a person**, the deployed system adds a reputation prior:
 a domain inside the Tranco top 100,000 is never flagged on name evidence alone. The trade-off is
 stated rather than hidden — phishing hosted on a popular domain is missed.
+
+## What it looks like
+
+| | |
+|---|---|
+| ![Web](docs/screen-final.png) | ![Verdict](docs/screen-verdict.png) |
+| ![Extension](docs/screen-extension.png) | ![Android](docs/android-mock.png) |
+
+The dial sweeps for seven seconds — slow, then accelerating, then frantic — before it settles on
+the score. That is longer than a UI should take and it is deliberate: the number is the product's
+only claim, and it should look measured rather than assigned.
 
 ## Privacy
 
@@ -74,11 +86,22 @@ stated rather than hidden — phishing hosted on a popular domain is missed.
 | POST | `/api/scan/bulk` | Screen a CSV or newline-separated list (max 200) |
 | POST | `/api/auth/register` · `/api/auth/login` · `/api/auth/logout` | Optional accounts |
 | GET | `/api/history` | The signed-in user's own scans |
-| GET | `/api/stats` | Scan counts for this service |
+| GET | `/api/stats` · `/api/stats/daily` | Totals, and volume per day for the sparkline |
 | GET | `/api/model` | Model name and the full comparison table |
-| GET | `/api/health` | Liveness and whether the model is loaded |
+| GET | `/api/health` | Liveness, storage backend, whether the model is loaded |
+| GET | `/download/nyavu.apk` | Redirects to the latest Android release |
 
 Rate limited in-process: 30 predictions/min per IP, 10 auth attempts/min, 5 bulk uploads/min.
+
+## Infrastructure
+
+| | |
+|---|---|
+| Hosting | Render, free tier, Frankfurt — no Docker, builds from `requirements.txt` |
+| Storage | Neon Postgres (pooled). Survives redeploys; verified by forcing one |
+| Fallback | SQLite at `NYAVU_DB_PATH` when `DATABASE_URL` is unset, for local work |
+| Keep-alive | UptimeRobot every 5 minutes; a GitHub Action as backstop |
+| Cost | £0 |
 
 ## Run it
 
@@ -96,15 +119,18 @@ python tests/run_tests.py        # 11 end-to-end checks against a running servic
 ```
 
 Covers classification, the reputation prior, malformed input, bulk screening, and the
-history-privacy rule.
+history-privacy rule. Also runs against the deployment: set `NYAVU_BASE`.
 
 ## Clients
 
 | Client | State | Notes |
 |---|---|---|
-| Web app (PWA) | Working | Installable; works offline for the shell |
-| Browser extension | Working | Warns before a phishing page loads; per-host notifications |
-| Android agent | Built, unverified | Share-sheet and DNS filter present; not yet exercised on a device |
+| Web app (PWA) | Working | Installable; needle dial, sparkline, model charts |
+| Browser extension | Working | Blocks on likely phishing; warning page matches the product |
+| Android agent | Working, unverified on device | Ring home screen; share target and DNS filter present |
+
+**Known gap:** the Android share sheet and DNS filter have not been exercised on a physical
+device. The code compiles and installs; nobody has watched it work.
 
 ## Limitations
 

@@ -1,14 +1,15 @@
 package ke.nyavu.shusha
 
 import android.app.Activity
+import android.app.AlertDialog
 import android.content.Intent
-import android.graphics.Color
 import android.graphics.Typeface
 import android.graphics.drawable.GradientDrawable
 import android.net.VpnService
 import android.os.Bundle
 import android.text.InputType
 import android.view.Gravity
+import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.LinearLayout
@@ -16,131 +17,121 @@ import android.widget.ScrollView
 import android.widget.TextView
 
 /**
- * Home screen.
+ * Home screen: what is protecting you, the action you came for, and the controls.
  *
- * One page, three things in order of importance: what Nyavu is doing for you right
- * now, the action you came for, and the controls that change its behaviour. The
- * service address sits at the bottom because it is configuration, not a feature.
+ * The ring is the honest count of active protections - never a score of how safe the
+ * device is, which Nyavu cannot know.
  */
 class MainActivity : Activity() {
 
+    private lateinit var ring: RingView
+    private lateinit var ringLabel: TextView
+    private lateinit var ringSub: TextView
+    private lateinit var dnsState: TextView
+    private lateinit var dnsBar: View
+    private lateinit var dnsAction: TextView
+    private lateinit var urlField: EditText
     private lateinit var status: TextView
-    private lateinit var orb: TextView
-    private lateinit var orbLabel: TextView
-    private lateinit var filterButton: Button
 
-    private fun dp(value: Int): Int = (value * resources.displayMetrics.density).toInt()
+    private val ink = 0xFFEEF2FA.toInt()
+    private val muted = 0xFF939FB5.toInt()
+    private val faint = 0xFF5B667D.toInt()
+    private val accent = 0xFF43E8C8.toInt()
+    private val safe = 0xFF35E0A0.toInt()
 
-    private fun panel(fill: Int = 0xFF0A1018.toInt()): GradientDrawable =
+    private fun dp(v: Int) = (v * resources.displayMetrics.density).toInt()
+
+    private fun panel(fill: Int = 0xFF0A1018.toInt(), radius: Int = 20): GradientDrawable =
         GradientDrawable().apply {
             setColor(fill)
-            cornerRadius = dp(20).toFloat()
+            cornerRadius = dp(radius).toFloat()
             setStroke(dp(1), 0xFF1B2430.toInt())
         }
 
-    private fun pill(fill: Int): GradientDrawable = GradientDrawable().apply {
-        setColor(fill)
-        cornerRadius = dp(28).toFloat()
-    }
-
-    private fun outline(): GradientDrawable = GradientDrawable().apply {
-        setColor(Color.TRANSPARENT)
-        cornerRadius = dp(28).toFloat()
-        setStroke(dp(1), 0xFF2A3546.toInt())
+    private fun label(text: String): TextView = TextView(this).apply {
+        this.text = text
+        textSize = 9.5f
+        setTextColor(faint)
+        letterSpacing = 0.2f
+        typeface = Typeface.DEFAULT_BOLD
+        setPadding(0, dp(22), 0, dp(10))
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         window.statusBarColor = 0xFF04060B.toInt()
         window.navigationBarColor = 0xFF04060B.toInt()
 
         val scroll = ScrollView(this).apply { setBackgroundColor(0xFF04060B.toInt()) }
         val page = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            setPadding(dp(22), dp(34), dp(22), dp(40))
+            setPadding(dp(22), dp(30), dp(22), dp(36))
         }
         scroll.addView(page)
 
-        /* ---------------------------------------------------------- identity */
-        val brand = TextView(this).apply {
+        /* ------------------------------------------------------------ identity */
+        page.addView(TextView(this).apply {
             text = "Nyavu"
-            textSize = 30f
-            setTextColor(0xFFEEF2FA.toInt())
+            textSize = 28f
+            setTextColor(ink)
             typeface = Typeface.DEFAULT_BOLD
-        }
-        val tagline = TextView(this).apply {
+        })
+        page.addView(TextView(this).apply {
             text = "Your personal link inspector"
-            textSize = 13.5f
-            setTextColor(0xFF6E7A90.toInt())
-            setPadding(0, dp(4), 0, dp(24))
-        }
-        page.addView(brand)
-        page.addView(tagline)
+            textSize = 13f
+            setTextColor(faint)
+            setPadding(0, dp(3), 0, dp(20))
+        })
 
-        /* ------------------------------------------------------------- state */
-        val heroCard = LinearLayout(this).apply {
+        /* --------------------------------------------------------------- ring */
+        val hero = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             gravity = Gravity.CENTER_HORIZONTAL
             background = panel()
-            setPadding(0, dp(26), 0, dp(26))
+            setPadding(0, dp(22), 0, dp(22))
         }
+        ring = RingView(this)
+        hero.addView(ring, LinearLayout.LayoutParams(dp(184), dp(184)))
 
-        orb = TextView(this).apply {
-            text = "\uD83D\uDEE1"
-            textSize = 34f
-            gravity = Gravity.CENTER
-            background = GradientDrawable().apply {
-                shape = GradientDrawable.OVAL
-                setColor(0xFF0C1A1A.toInt())
-                setStroke(dp(2), 0xFF2E7D6B.toInt())
-            }
-        }
-        heroCard.addView(orb, LinearLayout.LayoutParams(dp(108), dp(108)))
-
-        orbLabel = TextView(this).apply {
-            text = "Ready"
-            textSize = 19f
-            setTextColor(0xFFEEF2FA.toInt())
+        ringLabel = TextView(this).apply {
+            textSize = 17f
+            setTextColor(ink)
             typeface = Typeface.DEFAULT_BOLD
             gravity = Gravity.CENTER
-            setPadding(0, dp(16), 0, dp(2))
+            setPadding(dp(20), dp(14), dp(20), 0)
         }
-        heroCard.addView(orbLabel)
+        hero.addView(ringLabel)
 
-        val orbHint = TextView(this).apply {
-            text = "Nothing to report. Inspect a link to begin."
-            textSize = 12.5f
-            setTextColor(0xFF6E7A90.toInt())
+        ringSub = TextView(this).apply {
+            textSize = 12f
+            setTextColor(faint)
             gravity = Gravity.CENTER
-            setPadding(dp(20), 0, dp(20), 0)
+            setPadding(dp(24), dp(3), dp(24), 0)
         }
-        heroCard.addView(orbHint)
+        hero.addView(ringSub)
 
-        page.addView(heroCard, LinearLayout.LayoutParams(
+        page.addView(hero, LinearLayout.LayoutParams(
             LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT
-        ).apply { bottomMargin = dp(18) })
+        ).apply { bottomMargin = dp(14) })
 
         /* ------------------------------------------------------------- action */
         val actionCard = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             background = panel()
-            setPadding(dp(18), dp(20), dp(18), dp(20))
+            setPadding(dp(16), dp(16), dp(16), dp(16))
         }
-
-        val actionLabel = TextView(this).apply {
+        actionCard.addView(TextView(this).apply {
             text = "INSPECT A LINK"
-            textSize = 10.5f
-            setTextColor(0xFF5B667D.toInt())
-            letterSpacing = 0.18f
+            textSize = 9.5f
+            setTextColor(faint)
+            letterSpacing = 0.2f
             typeface = Typeface.DEFAULT_BOLD
-        }
-        actionCard.addView(actionLabel)
+        })
 
-        val urlField = EditText(this).apply {
+        urlField = EditText(this).apply {
             hint = "Paste a link"
             setHintTextColor(0xFF4E5A70.toInt())
-            setTextColor(0xFFEEF2FA.toInt())
+            setTextColor(ink)
             textSize = 14.5f
             setSingleLine()
             inputType = InputType.TYPE_TEXT_VARIATION_URI
@@ -149,161 +140,283 @@ class MainActivity : Activity() {
                 cornerRadius = dp(14).toFloat()
                 setStroke(dp(1), 0xFF1E2836.toInt())
             }
-            setPadding(dp(14), dp(12), dp(14), dp(12))
+            setPadding(dp(14), dp(11), dp(14), dp(11))
         }
         actionCard.addView(urlField, LinearLayout.LayoutParams(
             LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT
-        ).apply { topMargin = dp(10) })
+        ).apply { topMargin = dp(9) })
 
-        val inspect = Button(this).apply {
+        actionCard.addView(Button(this).apply {
             text = "Inspect link"
             textSize = 15f
             isAllCaps = false
             typeface = Typeface.DEFAULT_BOLD
             setTextColor(0xFF032620.toInt())
-            background = pill(0xFF43E8C8.toInt())
-            setOnClickListener {
-                val link = urlField.text.toString().trim()
-                if (link.isNotEmpty()) {
-                    startActivity(Intent(this@MainActivity, LinkGateActivity::class.java).apply {
-                        action = Intent.ACTION_SEND
-                        type = "text/plain"
-                        putExtra(Intent.EXTRA_TEXT, link)
-                    })
-                } else {
-                    urlField.error = "Paste a link first"
-                }
+            background = GradientDrawable().apply {
+                setColor(accent)
+                cornerRadius = dp(26).toFloat()
             }
+            setOnClickListener { inspect() }
+        }, LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT, dp(50)
+        ).apply { topMargin = dp(12) })
+
+        status = TextView(this).apply {
+            textSize = 11.5f
+            setTextColor(faint)
+            setPadding(0, dp(10), 0, 0)
         }
-        actionCard.addView(inspect, LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.MATCH_PARENT, dp(52)
-        ).apply { topMargin = dp(14) })
+        actionCard.addView(status)
 
         page.addView(actionCard, LinearLayout.LayoutParams(
             LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT
-        ).apply { bottomMargin = dp(14) })
+        ).apply { bottomMargin = dp(6) })
+
+        /* ------------------------------------------------------- quick action */
+        page.addView(label("QUICK ACTIONS"))
+
+        val tiles = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
+        tiles.addView(tile("\uD83D\uDD0D", "Inspect\nlink") {
+            urlField.requestFocus()
+        }, LinearLayout.LayoutParams(0, dp(88), 1f).apply { rightMargin = dp(8) })
+        tiles.addView(tile("\uD83D\uDCF6", "DNS\nfilter") { toggleFilter() },
+            LinearLayout.LayoutParams(0, dp(88), 1f).apply { rightMargin = dp(8) })
+        tiles.addView(tile("\u2139", "About\nNyavu") { showAbout() },
+            LinearLayout.LayoutParams(0, dp(88), 1f))
+        page.addView(tiles)
 
         /* --------------------------------------------------------- protection */
-        val protectCard = LinearLayout(this).apply {
+        page.addView(label("PROTECTION"))
+
+        page.addView(card("Link inspection", "Always on", true,
+            "Every link you send to Nyavu is scored by the model and explained."),
+            LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT
+            ).apply { bottomMargin = dp(10) })
+
+        val dns = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             background = panel()
-            setPadding(dp(18), dp(18), dp(18), dp(18))
+            setPadding(dp(16), dp(15), dp(16), dp(14))
         }
-
-        status = TextView(this).apply {
-            text = ""
+        val dnsHead = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
+        dnsHead.addView(TextView(this).apply {
+            text = "DNS filter"
             textSize = 13.5f
-            setTextColor(0xFF939FB5.toInt())
-            setLineSpacing(dp(2).toFloat(), 1f)
+            setTextColor(ink)
+            typeface = Typeface.DEFAULT_BOLD
+            layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
+        })
+        dnsState = TextView(this).apply {
+            textSize = 9.5f
+            letterSpacing = 0.12f
+            typeface = Typeface.DEFAULT_BOLD
+            setPadding(dp(9), dp(4), dp(9), dp(4))
         }
-        protectCard.addView(status)
+        dnsHead.addView(dnsState)
+        dns.addView(dnsHead)
 
-        filterButton = Button(this).apply {
-            text = "Start DNS filtering"
-            textSize = 14f
-            isAllCaps = false
-            setTextColor(0xFFB9C6DD.toInt())
-            background = outline()
-            setOnClickListener { requestVpn() }
+        dnsBar = View(this)
+        dns.addView(dnsBar, LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT, dp(3)
+        ).apply { topMargin = dp(9) })
+
+        dns.addView(TextView(this).apply {
+            text = "Blocks known phishing and advertising domains for every app. It checks " +
+                   "names, not pages, so it cannot catch a site that is not already listed."
+            textSize = 11.5f
+            setTextColor(faint)
+            setPadding(0, dp(9), 0, dp(4))
+        })
+
+        dnsAction = TextView(this).apply {
+            textSize = 12f
+            setTextColor(muted)
+            setPadding(0, dp(8), 0, 0)
+            setOnClickListener { toggleFilter() }
         }
-        protectCard.addView(filterButton, LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.MATCH_PARENT, dp(46)
-        ).apply { topMargin = dp(14) })
+        dns.addView(dnsAction)
 
-        val stop = Button(this).apply {
-            text = "Stop filtering"
-            textSize = 13f
-            isAllCaps = false
-            setTextColor(0xFF6E7A90.toInt())
-            background = null
-            setOnClickListener {
-                stopService(Intent(this@MainActivity, NyavuVpnService::class.java))
-                refresh()
-            }
-        }
-        protectCard.addView(stop, LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.MATCH_PARENT, dp(40)
-        ).apply { topMargin = dp(2) })
-
-        page.addView(protectCard, LinearLayout.LayoutParams(
+        page.addView(dns, LinearLayout.LayoutParams(
             LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT
-        ).apply { bottomMargin = dp(14) })
+        ).apply { bottomMargin = dp(10) })
+
+        page.addView(card("Share to Nyavu", "Available", true,
+            "Open the share sheet on any link and choose Nyavu. No notification access " +
+            "is requested."))
 
         /* ------------------------------------------------------------ service */
-        val configCard = LinearLayout(this).apply {
+        page.addView(label("SERVICE ADDRESS"))
+        val config = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            background = panel(0xFF080D14.toInt())
-            setPadding(dp(18), dp(16), dp(18), dp(16))
+            background = panel(0xFF080D14.toInt(), 16)
+            setPadding(dp(16), dp(14), dp(16), dp(12))
         }
-        val configLabel = TextView(this).apply {
-            text = "SERVICE ADDRESS"
-            textSize = 10f
-            setTextColor(0xFF4E5A70.toInt())
-            letterSpacing = 0.18f
-            typeface = Typeface.DEFAULT_BOLD
-        }
-        configCard.addView(configLabel)
-
         val apiField = EditText(this).apply {
             setText(NyavuApi.base(this@MainActivity))
-            textSize = 12.5f
-            setTextColor(0xFF939FB5.toInt())
+            textSize = 12f
+            setTextColor(muted)
             setSingleLine()
             inputType = InputType.TYPE_TEXT_VARIATION_URI
         }
-        configCard.addView(apiField, LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT
-        ).apply { topMargin = dp(6) })
-
-        val saveApi = Button(this).apply {
+        config.addView(apiField)
+        config.addView(TextView(this).apply {
             text = "Save address"
-            textSize = 12.5f
-            isAllCaps = false
-            setTextColor(0xFF43E8C8.toInt())
-            background = null
+            textSize = 12f
+            setTextColor(accent)
+            setPadding(0, dp(6), 0, 0)
             setOnClickListener {
                 val value = apiField.text.toString().trim().trimEnd('/')
                 getSharedPreferences("nyavu", MODE_PRIVATE).edit()
                     .putString("apiBase", value).apply()
                 status.text = "Saved. Links will be checked against $value"
             }
-        }
-        configCard.addView(saveApi)
+        })
+        page.addView(config)
 
-        page.addView(configCard)
-
-        val footNote = TextView(this).apply {
-            text = "Nyavu reads the address, never the page. Nothing you inspect is sent " +
-                   "to the site itself, and no notification access is requested."
-            textSize = 11.5f
+        page.addView(TextView(this).apply {
+            text = "Nyavu reads the address, never the page. Nothing you inspect is sent to " +
+                   "the site itself."
+            textSize = 11f
             setTextColor(0xFF4E5A70.toInt())
             setLineSpacing(dp(2).toFloat(), 1f)
-            setPadding(0, dp(18), 0, 0)
-        }
-        page.addView(footNote)
+            setPadding(0, dp(16), 0, 0)
+        })
 
         setContentView(scroll)
         refresh()
     }
 
-    /** Reflects the filter state without pretending it is more than it is. */
-    private fun refresh() {
-        val on = NyavuVpnService.running
-        status.text = if (on) {
-            "DNS filter is on. Known phishing and advertising domains are blocked for " +
-            "every app on this device. It does not inspect pages, and it cannot catch a " +
-            "site that is not already on the list."
+    private fun tile(glyph: String, text: String, onClick: () -> Unit): LinearLayout =
+        LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            gravity = Gravity.CENTER
+            background = panel(0xFF0A1018.toInt(), 16)
+            setOnClickListener { onClick() }
+            addView(TextView(this@MainActivity).apply {
+                this.text = glyph
+                textSize = 19f
+                alpha = 0.9f
+            })
+            addView(TextView(this@MainActivity).apply {
+                this.text = text
+                textSize = 10.5f
+                gravity = Gravity.CENTER
+                setTextColor(0xFFC3CDDD.toInt())
+                setPadding(0, dp(7), 0, 0)
+            })
+        }
+
+    private fun card(title: String, state: String, on: Boolean, body: String): LinearLayout {
+        val box = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            background = panel()
+            setPadding(dp(16), dp(15), dp(16), dp(14))
+        }
+        val head = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
+        head.addView(TextView(this).apply {
+            text = title
+            textSize = 13.5f
+            setTextColor(ink)
+            typeface = Typeface.DEFAULT_BOLD
+            layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
+        })
+        head.addView(TextView(this).apply {
+            text = state.uppercase()
+            textSize = 9.5f
+            letterSpacing = 0.12f
+            typeface = Typeface.DEFAULT_BOLD
+            setTextColor(if (on) safe else muted)
+            setPadding(dp(9), dp(4), dp(9), dp(4))
+            background = GradientDrawable().apply {
+                cornerRadius = dp(20).toFloat()
+                setColor(if (on) 0x1A35E0A0 else 0x0DFFFFFF)
+                setStroke(dp(1), if (on) 0x7335E0A0.toInt() else 0xFF232E3D.toInt())
+            }
+        })
+        box.addView(head)
+
+        box.addView(View(this).apply {
+            setBackgroundColor(if (on) safe else 0xFF141C27.toInt())
+        }, LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT, dp(3)
+        ).apply { topMargin = dp(9) })
+
+        box.addView(TextView(this).apply {
+            text = body
+            textSize = 11.5f
+            setTextColor(faint)
+            setLineSpacing(dp(2).toFloat(), 1f)
+            setPadding(0, dp(9), 0, 0)
+        })
+        return box
+    }
+
+    private fun inspect() {
+        val link = urlField.text.toString().trim()
+        if (link.isEmpty()) {
+            urlField.error = "Paste a link first"
+            return
+        }
+        startActivity(Intent(this, LinkGateActivity::class.java).apply {
+            action = Intent.ACTION_SEND
+            type = "text/plain"
+            putExtra(Intent.EXTRA_TEXT, link)
+        })
+    }
+
+    private fun toggleFilter() {
+        if (NyavuVpnService.running) {
+            stopService(Intent(this, NyavuVpnService::class.java))
+            status.postDelayed({ refresh() }, 400)
         } else {
-            "DNS filter is off. Only links you send to Nyavu are inspected. If another " +
-            "VPN is active, Android allows just one \u2014 turn the other off first."
+            requestVpn()
         }
-        orbLabel.text = if (on) "Protection on" else "Ready"
-        orb.background = GradientDrawable().apply {
-            shape = GradientDrawable.OVAL
-            setColor(if (on) 0xFF0B1F1A.toInt() else 0xFF0C1A1A.toInt())
-            setStroke(dp(2), if (on) 0xFF35E0A0.toInt() else 0xFF2E7D6B.toInt())
+    }
+
+    private fun showAbout() {
+        AlertDialog.Builder(this)
+            .setTitle("Nyavu")
+            .setMessage(
+                "A link inspector built on a logistic-regression model trained on 17,730 " +
+                "addresses.\n\nIt judges the address only - it never opens the page, so the " +
+                "site you check never learns you looked.\n\nOn our held-out data the model is " +
+                "right about 75% of the time. Treat a verdict as one signal, not a guarantee.\n\n" +
+                "Kabarak University - COMP324 team project."
+            )
+            .setPositiveButton("Close", null)
+            .show()
+    }
+
+    /** The ring counts what is actually on, not how safe the device is. */
+    private fun refresh() {
+        val dnsOn = NyavuVpnService.running
+        val active = 2 + if (dnsOn) 1 else 0          // inspection + share target, plus DNS
+
+        ring.accent = accent
+        ring.captionText = "of 3"
+        ring.setProgress(active / 3f, active.toString())
+
+        ringLabel.text = when (active) {
+            3 -> "All three protections are on"
+            2 -> "Two of three protections active"
+            else -> "One protection active"
         }
-        filterButton.text = if (on) "Restart filtering" else "Start DNS filtering"
+        ringSub.text = if (dnsOn) {
+            "Link inspection on - DNS filter on"
+        } else {
+            "Link inspection on - DNS filter off"
+        }
+
+        dnsState.text = if (dnsOn) "ON" else "OFF"
+        dnsState.setTextColor(if (dnsOn) safe else muted)
+        dnsState.background = GradientDrawable().apply {
+            cornerRadius = dp(20).toFloat()
+            setColor(if (dnsOn) 0x1A35E0A0 else 0x0DFFFFFF)
+            setStroke(dp(1), if (dnsOn) 0x7335E0A0.toInt() else 0xFF232E3D.toInt())
+        }
+        dnsBar.setBackgroundColor(if (dnsOn) safe else 0xFF141C27.toInt())
+        dnsAction.text = if (dnsOn) "Stop filtering" else "Start filtering"
     }
 
     private fun requestVpn() {
@@ -312,7 +425,7 @@ class MainActivity : Activity() {
             startActivityForResult(intent, REQ_VPN)
         } else {
             startService(Intent(this, NyavuVpnService::class.java))
-            status.postDelayed({ refresh() }, 600)
+            status.postDelayed({ refresh() }, 700)
         }
     }
 
@@ -320,13 +433,13 @@ class MainActivity : Activity() {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == REQ_VPN && resultCode == RESULT_OK) {
             startService(Intent(this, NyavuVpnService::class.java))
-            status.postDelayed({ refresh() }, 600)
+            status.postDelayed({ refresh() }, 700)
         }
     }
 
     override fun onResume() {
         super.onResume()
-        if (::status.isInitialized) refresh()
+        if (::ring.isInitialized) refresh()
     }
 
     companion object {
