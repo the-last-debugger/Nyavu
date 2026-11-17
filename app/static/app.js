@@ -1397,11 +1397,11 @@
           }).join("")}
         </div>
         <h3 class="block-title">Full comparison — domain-disjoint hold-out set</h3>
-        <table class="table">
+        <div class="table-scroll"><table class="table">
           <thead><tr><th>Model</th><th>Accuracy</th><th>Precision</th><th>Recall</th>
             <th>F1</th><th>ROC-AUC</th><th>False positive rate</th><th>ms / URL</th></tr></thead>
           <tbody>${rows}</tbody>
-        </table>
+        </table></div>
         <h3 class="block-title">How it works</h3>
         <p class="lede">Each URL is reduced to its registrable domain and converted into
         17 numeric domain features plus character n-gram features of the domain name.
@@ -1427,13 +1427,13 @@
       out.innerHTML = `
         <p class="lede"><strong>${r.flagged}</strong> of <strong>${r.count}</strong>
         URLs were flagged as phishing.</p>
-        <table class="table">
+        <div class="table-scroll"><table class="table">
           <thead><tr><th>Host</th><th>Verdict</th><th>Score</th></tr></thead>
           <tbody>${r.results.map(x => `
             <tr><td title="${escapeHtml(x.url)}">${escapeHtml(x.host || x.url)}</td>
             <td><span class="pill ${x.risk}">${escapeHtml(x.verdict)}</span></td>
             <td>${x.probability === null ? "—" : (x.probability * 100).toFixed(1) + "%"}</td></tr>`).join("")}
-          </tbody></table>`;
+          </tbody></table></div>`;
       loadStats();
     } catch (err) {
       out.innerHTML = `<p class="error">${escapeHtml(err.message)}</p>`;
