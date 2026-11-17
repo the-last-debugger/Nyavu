@@ -4960,3 +4960,99 @@ h1, .hero h1 {
   font-size: 1rem !important;
   letter-spacing: 0 !important;
 }
+
+/* =====================================================================
+   Action is bone, meaning keeps its colour
+
+   The mint was doing two jobs at once: primary button and "legitimate" verdict. That is
+   why it read wrong. Actions are now bone on near-black, so red and green can mean what
+   they say and nothing else.
+   ===================================================================== */
+:root {
+  --action: #E9E3D6;
+  --action-hover: #F4EFE4;
+  --action-ink: #14171C;
+}
+
+.btn.primary,
+.input-row .btn.primary {
+  background: var(--action) !important;
+  color: var(--action-ink) !important;
+  border-color: transparent !important;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, .5) inset, 0 6px 18px rgba(0, 0, 0, .35) !important;
+  font-weight: 600;
+}
+
+.btn.primary:hover,
+.input-row .btn.primary:hover {
+  background: var(--action-hover) !important;
+  transform: translateY(-1px);
+}
+
+.nav a.active {
+  background: rgba(233, 227, 214, .10) !important;
+  color: var(--text) !important;
+  box-shadow: none !important;
+}
+
+/* links read as writing, not as buttons */
+a { color: #CFE9E2; text-decoration-color: rgba(207, 233, 226, .35); }
+a:hover { text-decoration-color: currentColor; }
+
+/* the limits: one paragraph, then a footnote line */
+.limits { max-width: 76ch; }
+.limits-more {
+  margin: 18px 0 0;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+.limits-more .sep { margin: 0 10px; color: var(--faint); }
+
+/* footer: a note and a list, not a legal dump */
+.foot {
+  display: grid;
+  gap: 10px;
+  margin-top: 64px;
+  padding-top: 22px;
+  border-top: 1px solid rgba(255, 255, 255, .08);
+}
+
+.foot-note {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+.foot-links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px 20px;
+  margin: 0;
+  font-size: 0.84rem;
+}
+
+.foot-credit {
+  margin-left: auto;
+  color: var(--faint);
+  font-size: 0.78rem;
+}
+
+/* code is a reference, not an announcement */
+code, kbd, samp {
+  background: rgba(255, 255, 255, .055) !important;
+  color: #D9DEE5 !important;
+  border-color: rgba(255, 255, 255, .08) !important;
+  border-radius: 5px;
+}
+
+/* the QR control sits next to a bone button, so it should be neutral too */
+.input-row .btn.icon {
+  background: rgba(10, 18, 25, .06) !important;
+  border-color: rgba(10, 18, 25, .16) !important;
+  color: #1A222A !important;
+}
+
+.input-row .btn.icon:hover { background: rgba(10, 18, 25, .11) !important; }
