@@ -79,6 +79,7 @@
       loadHistory();
     } catch (err) {
       result.classList.remove("hidden");
+  ensureClose(result);
       result.innerHTML = `<div class="verdict-text"><span class="badge high">Error</span>
         <p class="verdict-url">${escapeHtml(err.message)}</p></div>`;
     } finally {
@@ -166,6 +167,7 @@
     if (scene) scene.style.display = "none";
     card.classList.remove("pending");
     card.classList.remove("zooming");
+    ensureClose(card);
     // the skip path must show the same verdict as the theatrical one
     card.classList.add("verdict-shown");
     normaliseCard(card);
@@ -704,6 +706,7 @@
 
       setTimeout(() => {
         card.innerHTML = verdict;
+        ensureClose(card);
         card.classList.add("verdict-shown");
         card.classList.remove("pending");
         card.classList.remove("zooming");
@@ -923,6 +926,7 @@
 
     document.body.classList.add("has-result");
     result.classList.remove("hidden");
+  ensureClose(result);
 
     /* The card element survives between scans, so anything the previous run set on it
        has to be cleared here. Without this the dial arrives already visible on the
@@ -1528,6 +1532,125 @@
     } catch (err) {
       $("#authError").textContent = err.message;
     }
+  });
+
+  /* ---------------------------------------------------------- alternative sign in */
+  (async function initAltAuth() {
+    const googleBtn = $("#googleBtn");
+    const alt = $("#authAlt");
+    const phoneStep = $("#phoneStep");
+    const phoneBtn = $("#phoneBtn");
+    const phoneBack = $("#phoneBack");
+    const phoneSend = $("#phoneSend");
+    const phoneVerify = $("#phoneVerify");
+    const phoneError = $("#phoneError");
+    const authOr = $("#authOr");
+    const emailForm = $("#authForm");
+    if (!googleBtn || !phoneStep) return;
+
+    let methods = { google: false, phone: false, sms: false };
+    try {
+      methods = await fetch("/api/auth/methods").then((r) => r.json());
+    } catch { /* offline: keep email only */ }
+
+    // never offer a method that cannot work
+    if (!methods.google) googleBtn.remove();
+    if (!methods.phone) { phoneBtn.remove(); }
+    if (!methods.google && !methods.phone) { alt.remove(); authOr.remove(); }
+
+    const showPhone = (on) => {
+      phoneStep.classList.toggle("hidden", !on);
+      emailForm.classList.toggle("hidden", on);
+      if (authOr) authOr.classList.toggle("hidden", on);
+      if (alt) alt.classList.toggle("hidden", on);
+      if (on) $("#phoneInput").focus();
+    };
+
+    phoneBtn.addEventListener("click", () => showPhone(true));
+    phoneBack.addEventListener("click", () => showPhone(false));
+
+    phoneSend.addEventListener("click", async () => {
+      phoneError.textContent = "";
+      const phone = $("#phoneInput").value.trim();
+      if (phone.length < 7) { phoneError.textContent = "Enter a phone number."; return; }
+      phoneSend.disabled = true;
+      phoneSend.textContent = "Sending…";
+      try {
+        const res = await fetch("/api/auth/phone/start", {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ phone }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || "Could not send the code.");
+        $("#phoneCodeStep").classList.remove("hidden");
+        phoneSend.textContent = data.channel === "sms" ? "Code sent" : "Code sent (see server log)";
+        $("#phoneCode").focus();
+      } catch (err) {
+        phoneError.textContent = err.message;
+        phoneSend.disabled = false;
+        phoneSend.textContent = "Send me a code";
+      }
+    });
+
+    phoneVerify.addEventListener("click", async () => {
+      phoneError.textContent = "";
+      const phone = $("#phoneInput").value.trim();
+      const code = $("#phoneCode").value.trim();
+      if (code.length < 4) { phoneError.textContent = "Enter the code."; return; }
+      try {
+        const res = await fetch("/api/auth/phone/verify", {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ phone, code }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || "That code was not accepted.");
+        $("#authModal").classList.add("hidden");
+        refreshAccount(); loadHistory(); loadStats();
+      } catch (err) {
+        phoneError.textContent = err.message;
+      }
+    });
+  })();
+
+  /* ------------------------------------------------------------- dismissing it all
+     A verdict is a moment, not a page. It can be closed, and the detector, the brand
+     and the Escape key all return to a clean sheet. */
+  /* A verdict nobody wants any more should be one click from gone. */
+  function ensureClose(card) {
+    if (!card || card.querySelector(".verdict-close")) return;
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "verdict-close";
+    btn.setAttribute("aria-label", "Dismiss this verdict");
+    btn.innerHTML = "\u00d7";
+    btn.addEventListener("click", () => dismissResult());
+    card.appendChild(btn);
+  }
+
+  function dismissResult() {
+    const card = $("#result");
+    if (!card) return;
+    card.dataset.dismissed = "1";
+    cancelAnimationFrame(card._raf || 0);
+    card.innerHTML = "";
+    card.classList.remove("pending", "verdict-shown", "dialcoming", "zooming", "drowning");
+    card.classList.add("hidden");
+    document.body.classList.remove("has-result");
+    $("#urlInput").value = "";
+    history.replaceState({}, "", location.pathname);
+  }
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && document.body.classList.contains("has-result")) {
+      dismissResult();
+    }
+  });
+
+  document.querySelectorAll('.nav a[href="#detector"], .brand').forEach((el) => {
+    el.addEventListener("click", () => {
+      if (document.body.classList.contains("has-result")) dismissResult();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
   });
 
   /* ------------------------------------------------------------------- PWA */

@@ -14,7 +14,7 @@ import hashlib
 import os
 import secrets
 from contextlib import contextmanager
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DB_PATH = os.environ.get("NYAVU_DB_PATH") or os.path.join(ROOT, "data", "nyavu.db")
@@ -278,3 +278,98 @@ def record_model(name: str, version: str, accuracy: float, f1: float) -> None:
         c.execute(
             "INSERT INTO models (name, version, accuracy, f1, trained_at, is_active) "
             "VALUES (?,?,?,?,?,1)", (name, version, accuracy, f1, now()))
+
+# --------------------------------------------------------------------------- #
+# Alternative sign-in: OAuth identities and phone numbers
+# --------------------------------------------------------------------------- #
+def migrate_auth() -> None:
+    """Add the columns that social and phone sign-in need.
+
+    SQLite cannot add a NOT NULL column without a default, and neither backend can drop
+    NOT NULL in place, so accounts created this way carry a random password hash that is
+    never usable. The email stays the primary identity.
+    """
+    cols = [("phone", "TEXT"), ("google_sub", "TEXT")]
+    with connect() as c:
+        for name, kind in cols:
+            try:
+                if USE_PG:
+                    c.execute(f"ALTER TABLE users ADD COLUMN IF NOT EXISTS {name} {kind}")
+                else:
+                    c.execute(f"ALTER TABLE users ADD COLUMN {name} {kind}")
+            except Exception:
+                pass
+        try:
+            c.execute("CREATE UNIQUE INDEX IF NOT EXISTS users_phone_idx ON users (phone)")
+        except Exception:
+            pass
+        try:
+            c.execute("""CREATE TABLE IF NOT EXISTS phone_otps (
+                           phone      TEXT PRIMARY KEY,
+                           code_hash  TEXT NOT NULL,
+                           expires_at TEXT NOT NULL,
+                           attempts   INTEGER NOT NULL DEFAULT 0)""")
+        except Exception:
+            pass
+
+
+def _random_hash() -> str:
+    return hash_password(secrets.token_urlsafe(24))
+
+
+def create_social_user(email: str, full_name: str, google_sub: str = ""):
+    with connect() as c:
+        return _insert_id(
+            c,
+            "INSERT INTO users (email, full_name, password_hash, created_at, google_sub) VALUES (?,?,?,?,?)",
+            (email.lower().strip(), full_name.strip() or email.split("@")[0], _random_hash(), now(), google_sub or None),
+        )
+
+
+def link_google_sub(user_id: int, google_sub: str) -> None:
+    with connect() as c:
+        c.execute("UPDATE users SET google_sub = ? WHERE id = ?", (google_sub, user_id))
+
+
+def create_phone_user(phone: str):
+    """A phone account keyed on a synthetic address the user never sees."""
+    email = f"{phone.lstrip('+').replace(' ', '')}@phone.nyavu.local"
+    with connect() as c:
+        return _insert_id(
+            c,
+            "INSERT INTO users (email, full_name, password_hash, created_at, phone) VALUES (?,?,?,?,?)",
+            (email, phone, _random_hash(), now(), phone),
+        )
+
+
+def get_user_by_phone(phone: str):
+    with connect() as c:
+        return c.execute("SELECT * FROM users WHERE phone = ?", (phone,)).fetchone()
+
+
+def save_otp(phone: str, code: str, ttl_seconds: int = 300) -> None:
+    expires = (datetime.now(timezone.utc) + timedelta(seconds=ttl_seconds)).isoformat(timespec="seconds")
+    with connect() as c:
+        c.execute("DELETE FROM phone_otps WHERE phone = ?", (phone,))
+        c.execute("INSERT INTO phone_otps (phone, code_hash, expires_at, attempts) VALUES (?,?,?,0)",
+                  (phone, hash_password(code), expires))
+
+
+def check_otp(phone: str, code: str):
+    """Return True when the code matches and has not expired. Bounded attempts."""
+    with connect() as c:
+        row = c.execute("SELECT * FROM phone_otps WHERE phone = ?", (phone,)).fetchone()
+        if not row:
+            return False
+        row = dict(row)
+        if row["attempts"] >= 5:
+            c.execute("DELETE FROM phone_otps WHERE phone = ?", (phone,))
+            return False
+        c.execute("UPDATE phone_otps SET attempts = attempts + 1 WHERE phone = ?", (phone,))
+        if datetime.fromisoformat(row["expires_at"]) < datetime.now(timezone.utc):
+            c.execute("DELETE FROM phone_otps WHERE phone = ?", (phone,))
+            return False
+        ok = verify_password(code, row["code_hash"])
+        if ok:
+            c.execute("DELETE FROM phone_otps WHERE phone = ?", (phone,))
+        return ok

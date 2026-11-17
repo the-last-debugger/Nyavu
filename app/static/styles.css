@@ -5369,3 +5369,165 @@ code, kbd, samp {
   fill: none !important;
   opacity: .8;
 }
+
+/* =====================================================================
+   Alternative sign-in, and a verdict you can put down
+   ===================================================================== */
+.auth-alt { display: grid; gap: 10px; margin-bottom: 4px; }
+
+.auth-google {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 11px 14px;
+  border-radius: 10px;
+  background: #F4F1EA;
+  color: #14171C !important;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-decoration: none !important;
+  border: 1px solid rgba(0, 0, 0, .12);
+  transition: background .2s ease;
+}
+
+.auth-google:hover { background: #FFFFFF; }
+.auth-google svg { width: 18px; height: 18px; }
+
+.auth-phone {
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: none;
+  border: 1px solid rgba(255, 255, 255, .14);
+  color: var(--muted);
+  font-family: var(--font-body);
+  font-size: 0.86rem;
+  cursor: pointer;
+  transition: color .2s ease, border-color .2s ease;
+}
+
+.auth-phone:hover { color: var(--text); border-color: rgba(255, 255, 255, .3); }
+
+.auth-or {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 14px 0;
+  color: var(--faint);
+  font-size: 0.76rem;
+}
+
+.auth-or::before,
+.auth-or::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: rgba(255, 255, 255, .1);
+}
+
+.auth-phone-step { display: grid; gap: 10px; }
+.auth-phone-step input {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, .05);
+  border: 1px solid rgba(255, 255, 255, .12);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+}
+
+#phoneCodeStep { display: grid; gap: 10px; }
+
+/* the verdict can be dismissed from its own corner */
+.verdict-close {
+  position: absolute;
+  top: 14px;
+  right: 16px;
+  z-index: 3;
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, .14);
+  background: rgba(10, 14, 20, .7);
+  color: var(--muted);
+  font-size: 1.05rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: color .2s ease, border-color .2s ease, background .2s ease;
+}
+
+.verdict-close:hover {
+  color: var(--text);
+  border-color: rgba(255, 255, 255, .35);
+  background: rgba(20, 26, 34, .9);
+}
+
+.result { position: relative; }
+
+/* =====================================================================
+   The auth card
+
+   The new controls exposed that the modal had no panel of its own: fields, buttons and
+   the close control were stacking on the page behind it.
+   ===================================================================== */
+.modal-card {
+  position: relative;
+  width: min(430px, calc(100vw - 32px));
+  max-height: 88vh;
+  overflow-y: auto;
+  padding: 28px 26px 24px;
+  background: #0A0F15;
+  border: 1px solid rgba(255, 255, 255, .10);
+  border-radius: 16px;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, .65);
+}
+
+.modal-card h2 {
+  margin: 0 0 18px;
+  font-family: var(--font-serif);
+  font-size: 1.65rem;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+}
+
+.modal-card .btn,
+.modal-card .auth-google,
+.modal-card .auth-phone {
+  width: 100%;
+  justify-content: center;
+}
+
+.modal-card .btn.ghost {
+  margin-top: 14px;
+  border-color: rgba(255, 255, 255, .12);
+  color: var(--muted);
+}
+
+.modal-card input {
+  width: 100%;
+  margin-bottom: 10px;
+  padding: 11px 13px;
+  background: rgba(255, 255, 255, .05);
+  border: 1px solid rgba(255, 255, 255, .12);
+  border-radius: 10px;
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 0.94rem;
+}
+
+.modal-card input:focus {
+  outline: none;
+  border-color: rgba(233, 227, 214, .5);
+  box-shadow: 0 0 0 3px rgba(233, 227, 214, .12);
+}
+
+.modal-card .switch {
+  margin: 14px 0 0;
+  font-size: 0.84rem;
+  text-align: center;
+}
+
+.modal-card .error { min-height: 1.1em; }

@@ -2,6 +2,11 @@
 from __future__ import annotations
 
 import csv
+import json
+import urllib.request
+import urllib.parse
+import secrets
+import base64
 import io
 import os
 import re
@@ -30,6 +35,7 @@ state: dict = {}
 @app.on_event("startup")
 def _startup() -> None:
     db.init_db()
+    db.migrate_auth()
     state["predictor"] = Predictor()
     m = state["predictor"].info()["metrics"]
     db.record_model(state["predictor"].info()["model"], "1.0.0",
@@ -274,6 +280,181 @@ def login(payload: Credentials, response: Response):
     response.set_cookie("pg_session", token, httponly=True, samesite="lax",
                         secure=cookie_secure(), max_age=604800)
     return {"authenticated": True, "email": user["email"], "full_name": user["full_name"]}
+
+
+# --------------------------------------------------------------------------- #
+# Sign in with Google, or with a phone number
+#
+# Both are optional and driven by the environment. The methods endpoint tells the
+# browser which ones are actually configured, so the page never offers a button that
+# cannot work. Phone codes go through Africa's Talking or Twilio when credentials are
+# present; without them the code is written to the log and the response says so, which
+# is what makes the flow testable locally.
+# --------------------------------------------------------------------------- #
+class PhoneIn(BaseModel):
+    phone: str = Field(..., min_length=7, max_length=24)
+
+
+class PhoneVerifyIn(BaseModel):
+    phone: str = Field(..., min_length=7, max_length=24)
+    code: str = Field(..., min_length=4, max_length=8)
+
+
+def _oauth_redirect(request: Request) -> str:
+    base = os.getenv("OAUTH_REDIRECT_BASE") or str(request.base_url).rstrip("/")
+    return f"{base}/api/auth/google/callback"
+
+
+def _sms_configured() -> bool:
+    return bool(os.getenv("AT_API_KEY") and os.getenv("AT_USERNAME")) or \
+           bool(os.getenv("TWILIO_ACCOUNT_SID") and os.getenv("TWILIO_AUTH_TOKEN"))
+
+
+def normalise_phone(raw: str) -> str:
+    digits = "".join(ch for ch in raw if ch.isdigit() or ch == "+")
+    if not digits.startswith("+"):
+        digits = "+" + digits.lstrip("+")
+    if digits.startswith("+0"):
+        digits = "+254" + digits[2:]
+    elif len(digits) == 10 and digits.startswith("+7"):
+        digits = "+254" + digits[2:]
+    return digits
+
+
+def send_otp(phone: str, code: str) -> str:
+    """Return 'sms' when sent, 'log' when there is no provider."""
+    body = f"Nyavu verification code: {code}. It expires in five minutes."
+    if os.getenv("AT_API_KEY") and os.getenv("AT_USERNAME"):
+        data = urllib.parse.urlencode({
+            "username": os.getenv("AT_USERNAME"),
+            "to": phone,
+            "message": body,
+            "from": os.getenv("AT_SENDER_ID", ""),
+        }).encode()
+        req = urllib.request.Request("https://api.africastalking.com/version1/messaging", data=data,
+                                     headers={"apiKey": os.getenv("AT_API_KEY"),
+                                              "Content-Type": "application/x-www-form-urlencoded"})
+        try:
+            urllib.request.urlopen(req, timeout=15).read()
+            return "sms"
+        except Exception as exc:
+            print("SMS send failed:", exc)
+            return "log"
+    if os.getenv("TWILIO_ACCOUNT_SID") and os.getenv("TWILIO_AUTH_TOKEN"):
+        sid = os.getenv("TWILIO_ACCOUNT_SID")
+        data = urllib.parse.urlencode({"To": phone, "From": os.getenv("TWILIO_FROM", ""),
+                                       "Body": body}).encode()
+        token = base64.b64encode(f"{sid}:{os.getenv('TWILIO_AUTH_TOKEN')}".encode()).decode()
+        req = urllib.request.Request(f"https://api.twilio.com/2010-04-01/Accounts/{sid}/Messages.json",
+                                     data=data, headers={"Authorization": f"Basic {token}"})
+        try:
+            urllib.request.urlopen(req, timeout=15).read()
+            return "sms"
+        except Exception as exc:
+            print("SMS send failed:", exc)
+            return "log"
+    print(f"[dev] OTP for {phone}: {code}")
+    return "log"
+
+
+@app.get("/api/auth/methods")
+def auth_methods():
+    return {
+        "password": True,
+        "google": bool(os.getenv("GOOGLE_CLIENT_ID") and os.getenv("GOOGLE_CLIENT_SECRET")),
+        "phone": True,
+        "sms": _sms_configured(),
+    }
+
+
+@app.get("/api/auth/google/start")
+def google_start(request: Request):
+    cid = os.getenv("GOOGLE_CLIENT_ID")
+    if not (cid and os.getenv("GOOGLE_CLIENT_SECRET")):
+        raise HTTPException(status_code=400, detail="Google sign-in is not configured.")
+    state = secrets.token_urlsafe(24)
+    params = urllib.parse.urlencode({
+        "client_id": cid,
+        "redirect_uri": _oauth_redirect(request),
+        "response_type": "code",
+        "scope": "openid email profile",
+        "state": state,
+        "prompt": "select_account",
+    })
+    response = RedirectResponse(f"https://accounts.google.com/o/oauth2/v2/auth?{params}")
+    response.set_cookie("pg_oauth_state", state, httponly=True, samesite="lax",
+                        secure=cookie_secure(), max_age=600)
+    return response
+
+
+@app.get("/api/auth/google/callback")
+def google_callback(request: Request, code: str = "", state: str = "", error: str = ""):
+    if error or not code:
+        return RedirectResponse("/?auth=cancelled")
+    if not state or state != request.cookies.get("pg_oauth_state"):
+        return RedirectResponse("/?auth=state")
+    cid, secret = os.getenv("GOOGLE_CLIENT_ID"), os.getenv("GOOGLE_CLIENT_SECRET")
+    if not (cid and secret):
+        return RedirectResponse("/?auth=unconfigured")
+    data = urllib.parse.urlencode({
+        "code": code,
+        "client_id": cid,
+        "client_secret": secret,
+        "redirect_uri": _oauth_redirect(request),
+        "grant_type": "authorization_code",
+    }).encode()
+    try:
+        with urllib.request.urlopen("https://oauth2.googleapis.com/token", data=data, timeout=20) as r:
+            tokens = json.loads(r.read())
+        with urllib.request.urlopen("https://openidconnect.googleapis.com/v1/userinfo",
+                                    headers={"Authorization": f"Bearer {tokens['access_token']}"},
+                                    timeout=20) as r:
+            info = json.loads(r.read())
+    except Exception as exc:
+        print("Google sign-in failed:", exc)
+        return RedirectResponse("/?auth=failed")
+
+    email = (info.get("email") or "").lower()
+    if not email:
+        return RedirectResponse("/?auth=noemail")
+    user = db.get_user_by_email(email)
+    if not user:
+        uid = db.create_social_user(email, info.get("name", ""), info.get("sub", ""))
+        user = db.get_user_by_email(email)
+    elif info.get("sub") and not user.get("google_sub"):
+        db.link_google_sub(user["id"], info["sub"])
+
+    token = db.create_session(user["id"])
+    response = RedirectResponse("/?auth=ok")
+    response.set_cookie("pg_session", token, httponly=True, samesite="lax",
+                        secure=cookie_secure(), max_age=604800)
+    return response
+
+
+@app.post("/api/auth/phone/start")
+def phone_start(payload: PhoneIn):
+    phone = normalise_phone(payload.phone)
+    if len(phone) < 9:
+        raise HTTPException(status_code=422, detail="That does not look like a phone number.")
+    code = f"{secrets.randbelow(1000000):06d}"
+    db.save_otp(phone, code)
+    channel = send_otp(phone, code)
+    return {"sent": True, "channel": channel}
+
+
+@app.post("/api/auth/phone/verify")
+def phone_verify(payload: PhoneVerifyIn, response: Response):
+    phone = normalise_phone(payload.phone)
+    if not db.check_otp(phone, payload.code.strip()):
+        raise HTTPException(status_code=401, detail="That code is wrong or has expired.")
+    user = db.get_user_by_phone(phone)
+    if not user:
+        db.create_phone_user(phone)
+        user = db.get_user_by_phone(phone)
+    token = db.create_session(user["id"])
+    response.set_cookie("pg_session", token, httponly=True, samesite="lax",
+                        secure=cookie_secure(), max_age=604800)
+    return {"authenticated": True, "phone": phone, "full_name": user["full_name"]}
 
 
 @app.post("/api/auth/logout")
