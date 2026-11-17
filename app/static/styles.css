@@ -5231,3 +5231,141 @@ code, kbd, samp {
   font-size: 1.05rem;
   color: var(--text) !important;
 }
+
+/* =====================================================================
+   The last two boxes on the site
+
+   Bulk was a dashed rectangle inside a bordered panel; history was a large bordered
+   empty state with everything centred. Both are quiet blocks with rules now.
+   ===================================================================== */
+
+#bulk .panel.bulk-form {
+  display: grid !important;
+  gap: 20px;
+  background: none !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+}
+
+#bulk .dropzone {
+  display: grid !important;
+  place-items: center;
+  gap: 7px;
+  min-height: 190px;
+  padding: 30px 24px !important;
+  background: none !important;
+  border: 0 !important;
+  border-top: 1px solid rgba(255, 255, 255, .10) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, .10) !important;
+  border-radius: 0 !important;
+  text-align: center;
+  transition: background .25s ease;
+}
+
+#bulk .dropzone:hover,
+#bulk .dropzone.over {
+  background: rgba(233, 227, 214, .035) !important;
+}
+
+#bulk .drop-mark svg {
+  width: 24px;
+  height: 24px;
+  color: var(--faint);
+  stroke-width: 1.4;
+}
+
+#bulk .drop-title {
+  font-family: var(--font-serif) !important;
+  font-size: 1.2rem !important;
+  font-weight: 400 !important;
+  letter-spacing: -0.01em !important;
+  color: var(--text) !important;
+}
+
+#bulk .drop-hint {
+  font-size: 0.84rem !important;
+  color: var(--muted) !important;
+}
+
+#bulk .bulk-form .btn {
+  justify-self: start;
+}
+
+/* history: a note, not a card */
+#history .panel {
+  background: none !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+}
+
+#history .empty-state {
+  display: block !important;
+  padding: 26px 0 0 !important;
+  border: 0 !important;
+  border-top: 1px solid rgba(255, 255, 255, .08) !important;
+  border-radius: 0 !important;
+  text-align: left !important;
+  background: none !important;
+}
+
+#history .empty-state svg {
+  width: 30px;
+  height: 30px;
+  color: var(--faint) !important;
+  stroke: var(--faint) !important;
+  margin: 0 0 12px !important;
+  display: block;
+}
+
+#history .empty-state h3,
+#history .empty-state h2,
+#history .empty-state strong {
+  display: block;
+  font-family: var(--font-serif) !important;
+  font-size: 1.3rem !important;
+  font-weight: 400 !important;
+  letter-spacing: -0.01em !important;
+  color: var(--text) !important;
+  margin: 0 0 8px !important;
+}
+
+#history .empty-state p {
+  max-width: 52ch;
+  margin: 0 0 18px !important;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: var(--muted) !important;
+}
+
+#history .empty-state .btn { margin: 0 !important; }
+
+/* the empty state was centring from a parent rule; align it left at every level */
+#history .empty-state {
+  display: block !important;
+  place-items: initial !important;
+  justify-items: initial !important;
+  align-items: initial !important;
+  text-align: left !important;
+}
+
+#history .empty-state *,
+#history .empty-state p,
+#history .empty-state h2,
+#history .empty-state h3 {
+  text-align: left !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+
+#history .empty-state svg,
+#history .empty-state svg * {
+  margin-left: 0 !important;
+  color: var(--faint) !important;
+  stroke: var(--faint) !important;
+  fill: none !important;
+  opacity: .8;
+}
