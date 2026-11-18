@@ -1,347 +1,530 @@
 package ke.nyavu.shusha
 
 import android.app.Activity
-import android.app.AlertDialog
+import android.content.ActivityNotFoundException
 import android.content.Intent
-import android.graphics.Typeface
-import android.graphics.drawable.GradientDrawable
+import android.net.Uri
 import android.os.Bundle
 import android.text.InputType
 import android.view.Gravity
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
+import android.widget.FrameLayout
 import android.widget.LinearLayout
 import android.widget.ScrollView
 import android.widget.TextView
+import org.json.JSONObject
 
 /**
- * Home screen: what is protecting you, the action you came for, and the controls.
+ * The product, on a phone: detector, bulk, history and model, the same four screens the site
+ * has, in the same order and the same voice.
  *
- * The ring is the honest count of active protections - never a score of how safe the
- * device is, which Nyavu cannot know.
+ * Built with plain Android views deliberately. The app is small, the screens are layouts of
+ * text and rules rather than long dynamic lists, and a framework would add a dependency
+ * without adding behaviour.
  */
 class MainActivity : Activity() {
 
-    private lateinit var ring: RingView
-    private lateinit var ringLabel: TextView
-    private lateinit var ringSub: TextView
-    private lateinit var urlField: EditText
-    private lateinit var status: TextView
+    private lateinit var body: FrameLayout
+    private lateinit var navBar: LinearLayout
+    private lateinit var accountLabel: TextView
+    private val tabs = listOf("Detector", "Bulk", "History", "Model")
 
-    // the palette lives in NyavuTheme, so a screen cannot drift back to the old mint
-    private val ink get() = NyavuTheme.ink
-    private val muted get() = NyavuTheme.muted
-    private val faint get() = NyavuTheme.faint
-    private val accent = NyavuTheme.ACCENT
-    private val safe = NyavuTheme.SAFE
+    private val samples = listOf(
+        "safaricom.co.ke",
+        "safaricom-secure-login.tk",
+        "mpesa.co.ke.verify-account.top",
+    )
 
-    private fun dp(v: Int) = (v * resources.displayMetrics.density).toInt()
-
-    private fun panel(fill: Int = 0xFF0A1018.toInt(), radius: Int = 20): GradientDrawable =
-        GradientDrawable().apply {
-            setColor(fill)
-            cornerRadius = dp(radius).toFloat()
-            setStroke(dp(1), 0xFF1B2430.toInt())
-        }
-
-    private fun label(text: String): TextView = TextView(this).apply {
-        this.text = text
-        textSize = 9.5f
-        setTextColor(faint)
-        letterSpacing = 0.2f
-        typeface = Typeface.DEFAULT_BOLD
-        setPadding(0, dp(22), 0, dp(10))
-    }
+    private fun dp(v: Int) = NyavuTheme.dp(this, v)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         window.statusBarColor = NyavuTheme.BG
         window.navigationBarColor = NyavuTheme.BG
 
-        val scroll = ScrollView(this).apply { setBackgroundColor(NyavuTheme.BG) }
-        val page = LinearLayout(this).apply {
+        val root = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            setPadding(dp(22), dp(30), dp(22), dp(36))
+            setBackgroundColor(NyavuTheme.BG)
         }
-        scroll.addView(page)
 
-        /* ------------------------------------------------------------ identity */
-        page.addView(TextView(this).apply {
-            text = "Nyavu"
-            textSize = 28f
-            setTextColor(ink)
-            typeface = Typeface.DEFAULT_BOLD
-        })
-        page.addView(TextView(this).apply {
-            text = "Your personal link inspector"
-            textSize = 13f
-            setTextColor(faint)
-            setPadding(0, dp(3), 0, dp(20))
-        })
-
-        /* --------------------------------------------------------------- ring */
-        val hero = LinearLayout(this).apply {
+        val header = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+            setPadding(dp(20), dp(18), dp(20), dp(10))
+        }
+        header.addView(LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            gravity = Gravity.CENTER_HORIZONTAL
-            background = panel()
-            setPadding(0, dp(22), 0, dp(22))
-        }
-        ring = RingView(this)
-        hero.addView(ring, LinearLayout.LayoutParams(dp(184), dp(184)))
-
-        ringLabel = TextView(this).apply {
-            textSize = 17f
-            setTextColor(ink)
-            typeface = Typeface.DEFAULT_BOLD
-            gravity = Gravity.CENTER
-            setPadding(dp(20), dp(14), dp(20), 0)
-        }
-        hero.addView(ringLabel)
-
-        ringSub = TextView(this).apply {
-            textSize = 12f
-            setTextColor(faint)
-            gravity = Gravity.CENTER
-            setPadding(dp(24), dp(3), dp(24), 0)
-        }
-        hero.addView(ringSub)
-
-        page.addView(hero, LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT
-        ).apply { bottomMargin = dp(14) })
-
-        /* ------------------------------------------------------------- action */
-        val actionCard = LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
-            background = panel()
-            setPadding(dp(16), dp(16), dp(16), dp(16))
-        }
-        actionCard.addView(TextView(this).apply {
-            text = "INSPECT A LINK"
-            textSize = 9.5f
-            setTextColor(faint)
-            letterSpacing = 0.2f
-            typeface = Typeface.DEFAULT_BOLD
-        })
-
-        urlField = EditText(this).apply {
-            hint = "Paste a link"
-            setHintTextColor(0xFF4E5A70.toInt())
-            setTextColor(ink)
-            textSize = 14.5f
-            setSingleLine()
-            inputType = InputType.TYPE_TEXT_VARIATION_URI
-            background = GradientDrawable().apply {
-                setColor(0xFF111823.toInt())
-                cornerRadius = dp(14).toFloat()
-                setStroke(dp(1), 0xFF1E2836.toInt())
-            }
-            setPadding(dp(14), dp(11), dp(14), dp(11))
-        }
-        actionCard.addView(urlField, LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT
-        ).apply { topMargin = dp(9) })
-
-        actionCard.addView(Button(this).apply {
-            text = "Inspect link"
-            textSize = 15f
-            isAllCaps = false
-            typeface = Typeface.DEFAULT_BOLD
-            setTextColor(0xFF032620.toInt())
-            background = GradientDrawable().apply {
-                setColor(accent)
-                cornerRadius = dp(26).toFloat()
-            }
-            setOnClickListener { inspect() }
-        }, LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.MATCH_PARENT, dp(50)
-        ).apply { topMargin = dp(12) })
-
-        status = TextView(this).apply {
-            textSize = 11.5f
-            setTextColor(faint)
-            setPadding(0, dp(10), 0, 0)
-        }
-        actionCard.addView(status)
-
-        page.addView(actionCard, LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT
-        ).apply { bottomMargin = dp(6) })
-
-        /* ------------------------------------------------------- quick action */
-        page.addView(label("QUICK ACTIONS"))
-
-        val tiles = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
-        tiles.addView(tile("\uD83D\uDD0D", "Inspect\nlink") {
-            urlField.requestFocus()
-        }, LinearLayout.LayoutParams(0, dp(88), 1f).apply { rightMargin = dp(8) })
-        tiles.addView(tile("\u2139", "About\nNyavu") { showAbout() },
-            LinearLayout.LayoutParams(0, dp(88), 1f))
-        page.addView(tiles)
-
-        /* --------------------------------------------------------- protection */
-        page.addView(label("PROTECTION"))
-
-        page.addView(card("Link inspection", "Always on", true,
-            "Every link you send to Nyavu is scored by the model and explained."),
-            LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT
-            ).apply { bottomMargin = dp(10) })
-
-        page.addView(card("Share to Nyavu", "Available", true,
-            "Open the share sheet on any link and choose Nyavu. No notification access " +
-            "is requested."))
-
-        /* ------------------------------------------------------------ service */
-        page.addView(label("SERVICE ADDRESS"))
-        val config = LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
-            background = panel(0xFF080D14.toInt(), 16)
-            setPadding(dp(16), dp(14), dp(16), dp(12))
-        }
-        val apiField = EditText(this).apply {
-            setText(NyavuApi.base(this@MainActivity))
-            textSize = 12f
-            setTextColor(muted)
-            setSingleLine()
-            inputType = InputType.TYPE_TEXT_VARIATION_URI
-        }
-        config.addView(apiField)
-        config.addView(TextView(this).apply {
-            text = "Save address"
-            textSize = 12f
-            setTextColor(accent)
-            setPadding(0, dp(6), 0, 0)
-            setOnClickListener {
-                val value = apiField.text.toString().trim().trimEnd('/')
-                getSharedPreferences("nyavu", MODE_PRIVATE).edit()
-                    .putString("apiBase", value).apply()
-                status.text = "Saved. Links will be checked against $value"
-            }
-        })
-        page.addView(config)
-
-        page.addView(TextView(this).apply {
-            text = "Nyavu reads the address, never the page. Nothing you inspect is sent to " +
-                   "the site itself."
-            textSize = 11f
-            setTextColor(0xFF4E5A70.toInt())
-            setLineSpacing(dp(2).toFloat(), 1f)
-            setPadding(0, dp(16), 0, 0)
-        })
-
-        setContentView(scroll)
-        refresh()
-    }
-
-    private fun tile(glyph: String, text: String, onClick: () -> Unit): LinearLayout =
-        LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
-            gravity = Gravity.CENTER
-            background = panel(0xFF0A1018.toInt(), 16)
-            setOnClickListener { onClick() }
             addView(TextView(this@MainActivity).apply {
-                this.text = glyph
-                textSize = 19f
-                alpha = 0.9f
+                text = "Nyavu"
+                textSize = 24f
+                setTextColor(NyavuTheme.ink)
+                typeface = NyavuTheme.serif(bold = true)
             })
             addView(TextView(this@MainActivity).apply {
-                this.text = text
-                textSize = 10.5f
+                text = "Your personal link inspector"
+                textSize = 12f
+                setTextColor(NyavuTheme.faint)
+            })
+        }, LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f))
+
+        accountLabel = TextView(this).apply {
+            textSize = 11.5f
+            setTextColor(NyavuTheme.muted)
+            setPadding(dp(12), dp(8), dp(12), dp(8))
+            background = NyavuTheme.pill(this@MainActivity, 0x0DFFFFFF, 0x1FFFFFFF)
+        }
+        header.addView(accountLabel)
+        root.addView(header)
+
+        body = FrameLayout(this)
+        root.addView(body, LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT, 0, 1f))
+
+        navBar = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            setPadding(dp(10), dp(6), dp(10), dp(12))
+        }
+        tabs.forEachIndexed { index, label ->
+            navBar.addView(TextView(this).apply {
+                text = label
+                textSize = 12f
                 gravity = Gravity.CENTER
-                setTextColor(0xFFC3CDDD.toInt())
-                setPadding(0, dp(7), 0, 0)
+                setPadding(0, dp(10), 0, dp(10))
+                setOnClickListener { select(index) }
+                layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
             })
         }
+        root.addView(navBar)
 
-    private fun card(title: String, state: String, on: Boolean, body: String): LinearLayout {
-        val box = LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
-            background = panel()
-            setPadding(dp(16), dp(15), dp(16), dp(14))
+        setContentView(root)
+        select(0)
+        refreshAccount()
+    }
+
+    private fun select(index: Int) {
+        (0 until navBar.childCount).forEach { i ->
+            val view = navBar.getChildAt(i) as TextView
+            view.setTextColor(if (i == index) NyavuTheme.BONE else NyavuTheme.faint)
+            view.typeface = if (i == index)
+                android.graphics.Typeface.DEFAULT_BOLD else android.graphics.Typeface.DEFAULT
         }
-        val head = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
-        head.addView(TextView(this).apply {
-            text = title
-            textSize = 13.5f
-            setTextColor(ink)
-            typeface = Typeface.DEFAULT_BOLD
-            layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
-        })
-        head.addView(TextView(this).apply {
-            text = state.uppercase()
-            textSize = 9.5f
-            letterSpacing = 0.12f
-            typeface = Typeface.DEFAULT_BOLD
-            setTextColor(if (on) safe else muted)
-            setPadding(dp(9), dp(4), dp(9), dp(4))
-            background = GradientDrawable().apply {
-                cornerRadius = dp(20).toFloat()
-                setColor(if (on) 0x1A35E0A0 else 0x0DFFFFFF)
-                setStroke(dp(1), if (on) 0x7335E0A0.toInt() else 0xFF232E3D.toInt())
+        body.removeAllViews()
+        body.addView(
+            when (index) {
+                0 -> detectorScreen()
+                1 -> bulkScreen()
+                2 -> historyScreen()
+                else -> modelScreen()
             }
-        })
-        box.addView(head)
-
-        box.addView(View(this).apply {
-            setBackgroundColor(if (on) safe else 0xFF141C27.toInt())
-        }, LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.MATCH_PARENT, dp(3)
-        ).apply { topMargin = dp(9) })
-
-        box.addView(TextView(this).apply {
-            text = body
-            textSize = 11.5f
-            setTextColor(faint)
-            setLineSpacing(dp(2).toFloat(), 1f)
-            setPadding(0, dp(9), 0, 0)
-        })
-        return box
+        )
     }
 
-    private fun inspect() {
-        val link = urlField.text.toString().trim()
-        if (link.isEmpty()) {
-            urlField.error = "Paste a link first"
-            return
+    private fun page(): Pair<ScrollView, LinearLayout> {
+        val scroll = ScrollView(this)
+        val column = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(dp(20), dp(8), dp(20), dp(24))
         }
-        startActivity(Intent(this, LinkGateActivity::class.java).apply {
-            action = Intent.ACTION_SEND
-            type = "text/plain"
-            putExtra(Intent.EXTRA_TEXT, link)
+        scroll.addView(column)
+        return scroll to column
+    }
+
+    // ---------------------------------------------------------------- detector
+
+    private fun detectorScreen(): View {
+        val (scroll, column) = page()
+        val field = EditText(this).apply {
+            hint = "Paste a link"
+            setHintTextColor(NyavuTheme.faint)
+            setTextColor(NyavuTheme.ink)
+            textSize = 15f
+            setSingleLine()
+            inputType = InputType.TYPE_TEXT_VARIATION_URI
+            background = FieldStyle.field(this@MainActivity)
+            setPadding(dp(16), dp(13), dp(16), dp(13))
+        }
+        column.addView(field, LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT))
+
+        val analyse = Button(this).apply {
+            text = "Analyse"
+            isAllCaps = false
+            textSize = 15f
+            typeface = android.graphics.Typeface.DEFAULT_BOLD
+            setTextColor(NyavuTheme.ON_BONE)
+            background = NyavuTheme.pill(this@MainActivity, NyavuTheme.BONE, NyavuTheme.BONE, 26)
+        }
+        column.addView(analyse, LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT, dp(50)).apply { topMargin = dp(10) })
+
+        val status = TextView(this).apply {
+            textSize = 12f
+            setTextColor(NyavuTheme.faint)
+            setPadding(0, dp(10), 0, dp(4))
+        }
+        column.addView(status)
+
+        column.addView(NyavuTheme.label(this, "Or try one"))
+        val chips = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
+        samples.forEach { sample ->
+            chips.addView(TextView(this).apply {
+                text = sample
+                textSize = 13f
+                setTextColor(NyavuTheme.muted)
+                typeface = NyavuTheme.mono()
+                setPadding(0, dp(9), 0, dp(9))
+                setOnClickListener {
+                    field.setText(sample)
+                    analyse.performClick()
+                }
+            })
+        }
+        column.addView(chips)
+
+        column.addView(NyavuTheme.label(this, "What it does"))
+        column.addView(TextView(this).apply {
+            text = "Nyavu reads the address, not the page. Nothing is fetched and nothing is " +
+                "stored about you, so there is nothing for a bad link to exploit."
+            textSize = 12.5f
+            setTextColor(NyavuTheme.faint)
+            setLineSpacing(dp(3).toFloat(), 1.1f)
         })
+
+        analyse.setOnClickListener {
+            val link = field.text.toString().trim()
+            if (link.isEmpty()) {
+                field.error = "Paste a link first"
+                return@setOnClickListener
+            }
+            status.text = "Reading the address"
+            analyse.isEnabled = false
+            Thread {
+                val res = runCatching { Api.predict(this, link) }.getOrNull()
+                runOnUiThread {
+                    analyse.isEnabled = true
+                    when {
+                        res == null -> status.text = "Nyavu could not be reached. Check your connection."
+                        !res.ok -> status.text = errorMessage(res.body)
+                        else -> {
+                            status.text = ""
+                            VerdictDialog(this, res.json()) { openLink(it) }.show()
+                            refreshAccount()
+                        }
+                    }
+                }
+            }.start()
+        }
+        return scroll
     }
 
-    private fun showAbout() {
-        AlertDialog.Builder(this)
-            .setTitle("Nyavu")
-            .setMessage(
-                "A link inspector built on a logistic-regression model trained on 17,730 " +
-                "addresses.\n\nIt judges the address only - it never opens the page, so the " +
-                "site you check never learns you looked.\n\nOn our held-out data the model is " +
-                "right about 75% of the time. Treat a verdict as one signal, not a guarantee.\n\n" +
-                "Kabarak University - COMP324 team project."
-            )
-            .setPositiveButton("Close", null)
-            .show()
+    // -------------------------------------------------------------------- bulk
+
+    private fun bulkScreen(): View {
+        val (scroll, column) = page()
+        column.addView(TextView(this).apply {
+            text = "Paste one address per line. Up to two hundred at a time."
+            textSize = 12.5f
+            setTextColor(NyavuTheme.faint)
+            setLineSpacing(dp(3).toFloat(), 1.1f)
+        })
+
+        val field = EditText(this).apply {
+            hint = "example.co.ke\nlogin.example.top"
+            setHintTextColor(NyavuTheme.faint)
+            setTextColor(NyavuTheme.ink)
+            textSize = 13f
+            typeface = NyavuTheme.mono()
+            minLines = 5
+            gravity = Gravity.TOP
+            background = FieldStyle.field(this@MainActivity)
+            setPadding(dp(14), dp(12), dp(14), dp(12))
+        }
+        column.addView(field, LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT, dp(170)).apply { topMargin = dp(12) })
+
+        val run = Button(this).apply {
+            text = "Screen the list"
+            isAllCaps = false
+            textSize = 14f
+            typeface = android.graphics.Typeface.DEFAULT_BOLD
+            setTextColor(NyavuTheme.ON_BONE)
+            background = NyavuTheme.pill(this@MainActivity, NyavuTheme.BONE, NyavuTheme.BONE, 26)
+        }
+        column.addView(run, LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT, dp(48)).apply { topMargin = dp(10) })
+
+        val results = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
+        column.addView(results)
+
+        run.setOnClickListener {
+            val urls = field.text.toString().split("\n").map { it.trim() }.filter { it.isNotEmpty() }
+            if (urls.isEmpty()) {
+                field.error = "Paste at least one address"
+                return@setOnClickListener
+            }
+            run.isEnabled = false
+            results.removeAllViews()
+            results.addView(TextView(this).apply {
+                text = "Screening ${urls.size} addresses"
+                textSize = 12f
+                setTextColor(NyavuTheme.faint)
+            })
+            Thread {
+                val res = runCatching { Api.bulk(this, urls) }.getOrNull()
+                runOnUiThread {
+                    run.isEnabled = true
+                    results.removeAllViews()
+                    if (res == null || !res.ok) {
+                        results.addView(TextView(this).apply {
+                            text = if (res == null) "Nyavu could not be reached."
+                            else errorMessage(res.body)
+                            textSize = 12f
+                            setTextColor(NyavuTheme.WARN)
+                            setPadding(0, dp(10), 0, 0)
+                        })
+                        return@runOnUiThread
+                    }
+                    val data = res.json()
+                    results.addView(TextView(this).apply {
+                        text = "${data.optInt("count")} screened, ${data.optInt("flagged")} flagged"
+                        textSize = 12f
+                        setTextColor(NyavuTheme.muted)
+                        setPadding(0, dp(12), 0, dp(8))
+                    })
+                    val items = data.optJSONArray("results") ?: return@runOnUiThread
+                    for (i in 0 until items.length()) {
+                        val item = items.getJSONObject(i)
+                        val row = LinearLayout(this).apply {
+                            orientation = LinearLayout.HORIZONTAL
+                            setPadding(0, dp(9), 0, dp(9))
+                        }
+                        row.addView(TextView(this).apply {
+                            text = item.optString("host")
+                            textSize = 13f
+                            typeface = NyavuTheme.mono()
+                            setTextColor(NyavuTheme.ink)
+                            layoutParams = LinearLayout.LayoutParams(
+                                0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
+                        })
+                        row.addView(TextView(this).apply {
+                            text = item.optString("verdict", "error")
+                            textSize = 13f
+                            typeface = NyavuTheme.serif()
+                            setTextColor(NyavuTheme.toneFor(item.optString("risk")))
+                            setPadding(dp(8), 0, dp(8), 0)
+                        })
+                        row.addView(TextView(this).apply {
+                            text = if (item.has("probability") && !item.isNull("probability"))
+                                Math.round(item.optDouble("probability") * 100).toString()
+                            else "not scored"
+                            textSize = 12f
+                            typeface = NyavuTheme.mono()
+                            setTextColor(NyavuTheme.faint)
+                        })
+                        results.addView(row)
+                        results.addView(View(this).apply { setBackgroundColor(0x0DFFFFFF) },
+                            LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 1))
+                    }
+                }
+            }.start()
+        }
+        return scroll
     }
 
-    /** The ring counts what is actually on, not how safe the device is. */
-    private fun refresh() {
-        val active = 2                              // link inspection and the share target
+    // ----------------------------------------------------------------- history
 
-        ring.accent = accent
-        ring.captionText = "of 2"
-        ring.setProgress(active / 2f, active.toString())
+    private fun historyScreen(): View {
+        val (scroll, column) = page()
+        column.addView(TextView(this).apply {
+            text = "Your most recent checks. Signing in keeps them; a visitor without an " +
+                "account keeps them on this device's session only."
+            textSize = 12.5f
+            setTextColor(NyavuTheme.faint)
+            setLineSpacing(dp(3).toFloat(), 1.1f)
+        })
+        val list = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
+        column.addView(list)
 
-        ringLabel.text = "Link inspection is on"
-        ringSub.text = "Send a link here, or share one to Nyavu from any app"
+        list.addView(TextView(this).apply {
+            text = "Loading"
+            textSize = 12f
+            setTextColor(NyavuTheme.faint)
+            setPadding(0, dp(12), 0, 0)
+        })
+        Thread {
+            val res = runCatching { Api.history(this) }.getOrNull()
+            runOnUiThread {
+                list.removeAllViews()
+                if (res == null || !res.ok) {
+                    list.addView(TextView(this).apply {
+                        text = "Could not load history."
+                        textSize = 12f
+                        setTextColor(NyavuTheme.WARN)
+                        setPadding(0, dp(12), 0, 0)
+                    })
+                    return@runOnUiThread
+                }
+                val payload = runCatching { res.json() }.getOrNull()
+                val items = payload?.optJSONArray("items")
+                if (items == null || items.length() == 0) {
+                    val note = payload?.optString("note").orEmpty()
+                    list.addView(TextView(this).apply {
+                        text = note.ifEmpty {
+                            "Nothing caught yet. Check a link and it will appear here."
+                        }
+                        textSize = 12.5f
+                        setTextColor(NyavuTheme.faint)
+                        setLineSpacing(dp(3).toFloat(), 1.1f)
+                        setPadding(0, dp(16), 0, 0)
+                    })
+                    return@runOnUiThread
+                }
+                for (i in 0 until items.length()) {
+                    val item = items.getJSONObject(i)
+                    val row = LinearLayout(this).apply {
+                        orientation = LinearLayout.HORIZONTAL
+                        setPadding(0, dp(10), 0, dp(10))
+                    }
+                    row.addView(TextView(this).apply {
+                        text = item.optString("host")
+                        textSize = 13f
+                        typeface = NyavuTheme.mono()
+                        setTextColor(NyavuTheme.ink)
+                        layoutParams = LinearLayout.LayoutParams(
+                            0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
+                    })
+                    row.addView(TextView(this).apply {
+                        text = item.optString("verdict")
+                        textSize = 13f
+                        typeface = NyavuTheme.serif()
+                        setTextColor(NyavuTheme.toneFor(item.optString("risk")))
+                        setPadding(dp(8), 0, dp(8), 0)
+                    })
+                    list.addView(row)
+                    list.addView(View(this).apply { setBackgroundColor(0x0DFFFFFF) },
+                        LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 1))
+                }
+            }
+        }.start()
+        return scroll
     }
 
-    override fun onResume() {
-        super.onResume()
-        if (::ring.isInitialized) refresh()
+    // ------------------------------------------------------------------- model
+
+    private fun modelScreen(): View {
+        val (scroll, column) = page()
+        column.addView(NyavuTheme.label(this, "Classifiers compared"))
+        val table = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
+        column.addView(table)
+        table.addView(TextView(this).apply {
+            text = "Loading"
+            textSize = 12f
+            setTextColor(NyavuTheme.faint)
+        })
+
+        Thread {
+            val res = runCatching { Api.model(this) }.getOrNull()
+            runOnUiThread {
+                table.removeAllViews()
+                if (res == null || !res.ok) {
+                    table.addView(TextView(this).apply {
+                        text = "Could not load the model report."
+                        textSize = 12f
+                        setTextColor(NyavuTheme.WARN)
+                    })
+                    return@runOnUiThread
+                }
+                val data = runCatching { res.json() }.getOrNull() ?: return@runOnUiThread
+                val comparison = data.optJSONObject("comparison")
+                val deployed = data.optString("model", "")
+                if (comparison != null) {
+                    val names = comparison.keys()
+                    while (names.hasNext()) {
+                        val name = names.next()
+                        val row = comparison.getJSONObject(name)
+                        val line = LinearLayout(this).apply {
+                            orientation = LinearLayout.HORIZONTAL
+                            setPadding(0, dp(9), 0, dp(9))
+                        }
+                        line.addView(TextView(this).apply {
+                            text = name + if (name == deployed) "  deployed" else ""
+                            textSize = 12.5f
+                            setTextColor(if (name == deployed) NyavuTheme.ACCENT else NyavuTheme.muted)
+                            layoutParams = LinearLayout.LayoutParams(
+                                0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
+                        })
+                        line.addView(TextView(this).apply {
+                            text = String.format("%.1f%%", row.optDouble("accuracy") * 100)
+                            textSize = 12.5f
+                            typeface = NyavuTheme.mono()
+                            setTextColor(NyavuTheme.ink)
+                        })
+                        table.addView(line)
+                        table.addView(View(this).apply { setBackgroundColor(0x0DFFFFFF) },
+                            LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 1))
+                    }
+                }
+
+                column.addView(NyavuTheme.label(this, "What the measurements say"))
+                column.addView(TextView(this).apply {
+                    text = "On 3,573 held-out addresses the deployed model is right about 75 times " +
+                        "in a hundred, with a false positive rate of 19.8 per cent. A verdict is " +
+                        "an assessment, not a guarantee of safety."
+                    textSize = 12.5f
+                    setTextColor(NyavuTheme.faint)
+                    setLineSpacing(dp(3).toFloat(), 1.1f)
+                })
+            }
+        }.start()
+        return scroll
     }
 
+    // ------------------------------------------------------------------ shared
+
+    private fun refreshAccount() {
+        Thread {
+            val res = runCatching { Api.me(this) }.getOrNull()
+            runOnUiThread {
+                val me = res?.takeIf { it.ok }?.let { runCatching { it.json() }.getOrNull() }
+                val signedIn = me?.optBoolean("authenticated") == true
+                accountLabel.text = if (signedIn) {
+                    me?.optString("full_name")?.ifEmpty { me?.optString("email") } ?: "Account"
+                } else "Sign in"
+                accountLabel.setOnClickListener {
+                    if (signedIn) {
+                        Thread {
+                            Api.logout(this)
+                            runOnUiThread { refreshAccount() }
+                        }.start()
+                    } else {
+                        openLink(NyavuApi.base(this).trimEnd('/') + "/#history")
+                    }
+                }
+            }
+        }.start()
+    }
+
+    private fun errorMessage(body: String): String =
+        runCatching { JSONObject(body).optString("detail") }.getOrNull()
+            ?.takeIf { it.isNotEmpty() } ?: "That did not work. Try again."
+
+    private fun openLink(url: String) {
+        try {
+            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+        } catch (e: ActivityNotFoundException) {
+            // no browser installed
+        }
+    }
+}
+
+/** The field style, kept in one place so it cannot drift between screens. */
+object FieldStyle {
+    fun field(context: android.content.Context): android.graphics.drawable.GradientDrawable =
+        android.graphics.drawable.GradientDrawable().apply {
+            setColor(NyavuTheme.FIELD)
+            cornerRadius = NyavuTheme.dp(context, 14).toFloat()
+            setStroke(NyavuTheme.dp(context, 1), 0x1FFFFFFF)
+        }
 }

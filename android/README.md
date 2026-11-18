@@ -117,3 +117,29 @@ Written down plainly, because "ported" is doing a lot of work in a sentence.
 So: the verdict is ported, the examination is shown but not performed, and the rest of the
 product is absent. Anyone comparing the two side by side will see that immediately, and this
 paragraph exists so the README does not pretend otherwise.
+
+
+---
+
+## 1.0.0: the four screens
+
+The app is no longer a home screen with a link field. It is the product, with the same four
+screens the site has and the same words:
+
+| screen | what it does |
+| --- | --- |
+| Detector | paste or tap a sample, analyse, and the verdict arrives as a dialog over the screen: headline, the address dissected, the number, the reasons and the working folded behind a plus |
+| Bulk | one address per line, up to two hundred, screened in one request against the same endpoint the site's file upload uses |
+| History | the account's recent checks; a visitor without an account is told what the service says, that history needs a sign-in |
+| Model | the three classifiers compared, with the deployed one marked, and the held-out numbers beneath |
+
+The share sheet still works: share a link to Nyavu and the verdict appears.
+
+Performance and comfort tweaks, kept minor: screens are built on demand and discarded when
+another tab is chosen, network work is off the main thread, the bulk request sends one
+multipart body rather than two hundred calls, and the cookie jar is one preference string so
+a session survives between screens.
+
+Known gaps, stated rather than hidden: the examination is shown as a finished dissection
+rather than performed with a cursor, and sign-in opens the website rather than a native
+Google flow.
