@@ -219,188 +219,21 @@
   const HAND_A = [236, 105];
   const HAND_B = [246, 121];
 
-  function netState(t) {
-    for (let i = 0; i < NET_KEY.length - 1; i++) {
-      const [t0, x0, y0, s0, r0] = NET_KEY[i];
-      const [t1, x1, y1, s1, r1] = NET_KEY[i + 1];
-      if (t >= t0 && t <= t1) {
-        const k = (t - t0) / (t1 - t0);
-        const e = k * k * (3 - 2 * k);
-        return {
-          x: x0 + (x1 - x0) * e,
-          y: y0 + (y1 - y0) * e,
-          s: s0 + (s1 - s0) * e,
-          r: r0 + (r1 - r0) * e,
-        };
-      }
-    }
-    const last = NET_KEY[NET_KEY.length - 1];
-    return { x: last[1], y: last[2], s: last[3], r: last[4] };
-  }
+
 
   /* A smooth closed curve through a ring of points: quadratics through the midpoints
      of each pair. Cheap, and it gives the rim the soft, lobed edge a net actually has
      instead of a polygon. */
-  function smoothClosed(pts) {
-    const n = pts.length;
-    const mid = (a, b) => [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2];
-    const m0 = mid(pts[n - 1], pts[0]);
-    let d = `M${m0[0].toFixed(1)} ${m0[1].toFixed(1)}`;
-    for (let i = 0; i < n; i++) {
-      const p = pts[i];
-      const m = mid(p, pts[(i + 1) % n]);
-      d += ` Q${p[0].toFixed(1)} ${p[1].toFixed(1)} ${m[0].toFixed(1)} ${m[1].toFixed(1)}`;
-    }
-    return d + "Z";
-  }
+
 
   /* The net is real geometry, rebuilt every frame: a canopy with a near rim and a
      far rim, so it reads as a cone of cloth rather than a flat wheel, plus rings and
      spokes and a sway driven by two slow sines. A cast net covers ground - it opens
      wide as it flies and settles over the water. */
   /* Camera move on the viewBox: exact framing, and the artwork scales with it. */
-  function cameraPush(root, to, ms) {
-    const svg = root.querySelector(".fishing svg");
-    if (!svg) return;
-    const from = (svg.getAttribute("viewBox") || "-102 -28 813 315").split(/\s+/).map(Number);
-    const t0 = performance.now();
-    function frame(now) {
-      const k = Math.min(1, (now - t0) / ms);
-      const e = k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
-      svg.setAttribute("viewBox", from.map((a, i) => (a + (to[i] - a) * e).toFixed(1)).join(" "));
-      if (k < 1) requestAnimationFrame(frame);
-    }
-    requestAnimationFrame(frame);
-  }
 
-  function updateNet(root, t) {
-    const body = root.querySelector(".netlive");
-    if (!body) return;
 
-    const { x, y, s } = netState(t);
-    const T = performance.now() / 1000;
 
-    const R = 6 + 126 * s;
-    const FLAT = 0.42;
-    const N = 20;
-    const DIP = 20 * s;
-    const t2 = Math.max(0, Math.min(1, (t - 0.90) / 0.10));   // the last tenth: it is drawn in
-
-    const rim = [];
-    const far = [];
-    for (let i = 0; i < N; i++) {
-      const a = (i / N) * Math.PI * 2;
-      // in the water the net lies still and breathes; in the air it flutters
-      const inWater = t > 0.34 && t < 0.78;
-      const swell = inWater ? 0.018 : 0.05;
-      const chop = inWater ? 0.008 : 0.03;
-      const wob = IRREG[i]
-        * (1 + swell * Math.sin(a * 3 + T * (inWater ? 0.8 : 2.1))
-             + chop * Math.sin(a * 5 - T * (inWater ? 0.6 : 1.6)));
-      const rr = R * wob * (1 - 0.55 * t2);
-      const ex = Math.cos(a);
-      const ey = Math.sin(a);
-      const lift = -DIP * ey;
-      rim.push([x + rr * ex, y + rr * FLAT * ey + lift + Math.sin(a + T * 1.25) * 3 * s]);
-      far.push([x + rr * 0.60 * ex, y - rr * FLAT * 0.55 * ey - DIP * 0.8 + Math.sin(a - T * 1.1) * 2 * s]);
-    }
-
-    const fill = body.querySelector(".net-fill");
-    if (fill) fill.setAttribute("d", smoothClosed(rim) + smoothClosed(far));
-
-    // spokes, cross-links and rings: enough lines to read as holes, not a scaffold
-    const hub = [x, y - DIP * 1.5 - R * 0.10];
-    let d = "";
-    for (let i = 0; i < N; i++) {
-      const p = rim[i];
-      const f = far[i];
-      const n = rim[(i + 1) % N];
-      d += `M${hub[0].toFixed(1)} ${hub[1].toFixed(1)}` +
-           ` Q${((hub[0] + p[0]) / 2 + Math.sin(T * 1.6) * 2).toFixed(1)}` +
-           ` ${((hub[1] + p[1]) / 2 + 2).toFixed(1)}` +
-           ` ${p[0].toFixed(1)} ${p[1].toFixed(1)}`;
-      d += `M${f[0].toFixed(1)} ${f[1].toFixed(1)} L${p[0].toFixed(1)} ${p[1].toFixed(1)}`;
-      // a diagonal cross-link, so the interior is diamonds rather than wedges
-      d += `M${f[0].toFixed(1)} ${f[1].toFixed(1)} L${n[0].toFixed(1)} ${n[1].toFixed(1)}`;
-    }
-    [0.20, 0.36, 0.52, 0.68, 0.84].forEach((k, idx) => {
-      const ring = rim.map(([px, py]) => [
-        hub[0] + (px - hub[0]) * k,
-        hub[1] + (py - hub[1]) * k + Math.sin(T * 1.1 + idx * 1.7) * 2,
-      ]);
-      d += smoothClosed(ring);
-    });
-    const mesh = body.querySelector(".net-mesh");
-    if (mesh) mesh.setAttribute("d", d);
-
-    // from the last tenth the net is gone, but the catch is not: fade the cloth only
-    const delivered = t2 >= 1;
-    const scene = root.querySelector(".fishing");
-    if (scene) {
-      // it looks like a fish until it is in his hands, then it shows what it is
-      scene.classList.toggle("revealed", t2 > 0.55);
-      scene.classList.toggle("delivered", t2 > 0.55);
-    }
-    const clothFade = String(Math.max(0, 1 - t2 * 1.6));
-    [fill, mesh].forEach((el) => { if (el) el.style.opacity = clothFade; });
-
-    const caught = root.querySelector(".caught");
-    if (caught && !catchEscaping) {
-      if (delivered || t2 > 0.55) {
-        // held up in front of him, still twitching but no longer thrashing
-        const jx = Math.sin(T * 9) * 1.2;
-        const jy = Math.cos(T * 11) * 1.2;
-        // held up at the 20th size: from here on, the catch is the only subject
-        caught.style.setProperty("transform",
-          `translate(${(HAND_A[0] + 14 + jx).toFixed(1)}px, ${(HAND_A[1] + 2 + jy).toFixed(1)}px) ` +
-          `rotate(${(Math.sin(T * 7) * 6).toFixed(1)}deg) scale(1.15)`, "important");
-        caught.setAttribute("visibility", "visible");
-        caught.style.opacity = "1";
-      } else {
-        const onWater = t > 0.40 && t < 0.78;
-        const amp = onWater ? 7 : 2.5;
-        const jx = Math.sin(T * 12) * amp + Math.sin(T * 19.3) * amp * 0.55;
-        const jy = Math.cos(T * 14.7) * amp + Math.sin(T * 8.1) * amp * 0.45;
-        const rot = onWater ? Math.sin(T * 11) * 34 : Math.sin(T * 16) * 12;
-        // a real fish inside a real net: big enough to see, and only once it is caught
-        const visible = t > 0.30;
-        const size = (0.95 + 0.25 * Math.min(1, s)).toFixed(2);
-        // variables, not a transform string: CSS composes it, so nothing can clobber it
-        // inline !important: a running CSS animation would otherwise win over this
-        caught.style.setProperty("transform",
-          `translate(${(x + jx).toFixed(1)}px, ${(y + 8 * s + jy).toFixed(1)}px) ` +
-          `rotate(${rot.toFixed(1)}deg) scale(${size})`, "important");
-        caught.setAttribute("visibility", visible ? "visible" : "hidden");
-        caught.style.opacity = "1";
-      }
-    }
-
-    /* The rope joins the grip of his hands to the crown of the net. Measured between
-       those two points, it appears as the net leaves him and shortens by itself as it
-       is drawn back - no separate animation to keep in step. */
-    const ropeGroup = root.querySelector(".ropeline");
-    const rope = root.querySelector(".rope");
-    const ropeHi = root.querySelector(".rope-hi");
-    if (ropeGroup && rope) {
-      const grip = [(HAND_A[0] + HAND_B[0]) / 2, (HAND_A[1] + HAND_B[1]) / 2];
-      const span = Math.hypot(hub[0] - grip[0], hub[1] - grip[1]);
-      ropeGroup.style.opacity = span > 8 && t < 0.97 ? "1" : "0";
-
-      const sag = Math.min(16, span * 0.2);
-      const cxp = (grip[0] + hub[0]) / 2;
-      const cyp = (grip[1] + hub[1]) / 2 + sag;
-      const d = `M${grip[0].toFixed(1)} ${grip[1].toFixed(1)}`
-              + ` Q${cxp.toFixed(1)} ${cyp.toFixed(1)} ${hub[0].toFixed(1)} ${hub[1].toFixed(1)}`;
-      rope.setAttribute("d", d);
-      if (ropeHi) ropeHi.setAttribute("d", d);
-    }
-
-    const wet = root.querySelector(".wetnet");
-    if (wet) {
-      wet.setAttribute("d", smoothClosed(rim));
-      wet.setAttribute("fill-opacity", t > 0.34 ? "0.8" : "0");
-    }
-  }
 
 
 
@@ -467,103 +300,21 @@
 
   /* The card keeps its own layout; the modal is a shell around it. Wrapping rather
      than restyling means the verdict looks exactly as designed, at any size. */
-  const BEAT = {
-    ready: 1200,      // he says his line; the net is still out of sight
-    throw: 3200,
-    impact: 4900,
-    haul: 11000,
-    fish: 12500,
-    react: 13500,
-    zoom: 17500,
-    dial: 18500,
-    drown: 21500,
-    outro: 29000,
-    reveal: 33000,
-    end: 41000,
-  };
+
 
 
   /* He talks while he works. The lines are chosen by what is in the net, and they
      are written in his voice: dry, plain, never a marketing sentence. */
   /* He speaks before he works. */
-  const OPENERS = [
-    "Here we go again.",
-    "Right. Let's see what the sea brought us.",
-    "Another one. Hold my hat.",
-    "Same water, new trouble.",
-    "Night shift. Nobody's watching.",
-    "Let's see who's wearing a costume tonight.",
-    "Off we go. Mind the wet.",
-    "The sea keeps its secrets. Not for long.",
-    "One more cast, then I'm done. I always say that.",
-    "Wind's wrong for it. Doesn't matter.",
-  ];
+
 
   /* His lines. The deck is reshuffled every scan, one lesson is slipped in, and the
      phish/fish pun belongs to the dark catch where it actually applies. */
-  const LINES = {
-    plain: [
-      "Clean. Not a thing hiding in it.",
-      "Good weight. Good shape. Off you go.",
-      "Now that's a fish worth the rowing.",
-      "Nothing in the belly but water. Nice.",
-      "Straight as a new rope, this one.",
-      "No teeth. No tricks. Just a fish.",
-      "Honest scales. You don't see many.",
-      "Swims true. I'd put my name on it.",
-      "Nothing here a taxman would argue with.",
-      "Clean as the day it was made.",
-    ],
-    odd: [
-      "Hm. Half a fish.",
-      "Something's off. Hold still, will you.",
-      "You look like a fish. You don't feel like one.",
-      "I've pulled boots out with more sense than you.",
-      "Could be fine. Could be a boot. We wait.",
-      "This one's wearing a disguise, I swear.",
-      "Fins say yes. Face says no.",
-      "I'll be honest with you: I don't know.",
-      "Fifty-fifty. Like a coin in the harbour.",
-      "I've seen this face before. Can't place it.",
-    ],
-    dark: [
-      "Oi. That's not a fish.",
-      "Bait. This one's bait.",
-      "Teeth. Of course it has teeth.",
-      "That's a phish, not a fish. One letter, whole different ocean.",
-      "Careful now. It's dressed up like the real thing.",
-      "See how it smiles? Fish don't smile.",
-      "Beautiful scales. Shame about the teeth.",
-      "It's got the bank's colours on. It's not the bank.",
-      "Nice hat. Wrong fisherman.",
-      "It swam up wearing somebody else's name.",
-    ],
-    lesson: [
-      "Nobody gives away a free catch. Remember that.",
-      "It's the hyphen that gives them away. Always the hyphen.",
-      "If the net looks too good, check the net.",
-      "A real bank never asks you to swim out to it.",
-      "Funny thing about bait: it always looks like dinner.",
-      "Check the harbour, not the flag on the boat.",
-      "One letter moved is a whole new harbour.",
-      "The address is the boat. Look at the boat, not the paint.",
-      "Free things in the water are usually attached to something.",
-      "If they hurry you, they're selling, not helping.",
-      "A .tk doesn't cost enough to be a bank.",
-      "Nobody legitimate asks for your net before you've seen the fish.",
-    ],
-  };
+
   /* He speaks twice while he works and twice while he examines - each line placed on a
      beat so the words and the action agree. The outcome-specific lines do not begin
      until the catch is in his hands, so the verdict is never given away early. */
-  function shuffled(list, n) {
-    const deck = [...list];
-    for (let i = deck.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [deck[i], deck[j]] = [deck[j], deck[i]];
-    }
-    return deck.slice(0, n);
-  }
+
 
   function say(root, text) {
     const bubble = root.querySelector(".bubble");
@@ -574,60 +325,11 @@
     setTimeout(() => bubble.classList.remove("swap"), 180);
   }
 
-  function resetArtifacts(scene) {
-    [scene.querySelector(".splash"), ...scene.querySelectorAll(".ripple")]
-      .forEach((el) => {
-        if (!el) return;
-        el.style.animation = "none";
-        el.style.opacity = "0";
-      });
-  }
 
-  function burst(root) {
-    const scene = root.querySelector(".fishing");
-    const splash = scene && scene.querySelector(".splash");
-    const rings = scene ? Array.from(scene.querySelectorAll(".ripple")) : [];
-    if (!scene) return;
 
-    const t0 = performance.now();
-    const LIFE = 900;
 
-    function frame(now) {
-      const k = Math.min(1, (now - t0) / LIFE);
-      if (splash) {
-        splash.style.opacity = String(Math.max(0, 1 - k * k));
-        splash.style.transform = `translateY(${(-10 * k).toFixed(1)}px) scale(${(1 + 0.4 * k).toFixed(2)})`;
-        splash.style.transformBox = "fill-box";
-        splash.style.transformOrigin = "center";
-      }
-      rings.forEach((r, i) => {
-        const kk = Math.max(0, Math.min(1, (now - t0 - i * 120) / 800));
-        r.style.opacity = kk > 0 ? String((1 - kk) * 0.7) : "0";
-        r.style.transform = `scale(${(0.3 + kk * 2.4).toFixed(2)})`;
-        r.style.transformBox = "fill-box";
-        r.style.transformOrigin = "center";
-      });
-      if (k < 1) requestAnimationFrame(frame);
-    }
-    requestAnimationFrame(frame);
-  }
 
-  function drip(root) {
-    const scene = root.querySelector(".fishing");
-    const drops = scene ? Array.from(scene.querySelectorAll(".drip")) : [];
-    if (!drops.length) return;
-    const t0 = performance.now();
-    function frame(now) {
-      const k = Math.min(1, (now - t0) / 2600);
-      drops.forEach((d, i) => {
-        const kk = Math.max(0, Math.min(1, (now - t0 - i * 260) / 1400));
-        d.style.opacity = kk > 0 && kk < 1 ? String(0.9 * (1 - kk)) : "0";
-        d.style.transform = `translateY(${(kk * 26).toFixed(1)}px)`;
-      });
-      if (k < 1) requestAnimationFrame(frame);
-    }
-    requestAnimationFrame(frame);
-  }
+
 
   /* The scene fades; a skeleton holds the card's exact space; the verdict fills it.
      One container, no shell, no curtain, no movement of the page underneath. */
@@ -650,87 +352,9 @@
 
   /* He goes under, and the catch leaves the way it came - out of the water, up, and
      gone. The jump is computed, so it arcs rather than slides. */
-  function fishEscapes(root) {
-    const caught = root.querySelector(".caught");
-    if (!caught) return;
-    catchEscaping = true;
-    const from = [HAND_A[0] + 14, HAND_A[1] + 2];
-    const t0 = performance.now();
 
-    function frame(now) {
-      const k = Math.min(1, (now - t0) / 2400);
-      const x = from[0] + 120 * k;
-      const y = from[1] - 70 * Math.sin(Math.PI * Math.min(1, k * 1.1)) + 150 * k * k;
-      const spin = 220 * k;
-      caught.style.setProperty("transform",
-        `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px) rotate(${spin.toFixed(1)}deg) scale(1.15)`,
-        "important");
-      caught.style.setProperty("opacity", String(Math.max(0, 1 - Math.max(0, k - 0.75) * 4)), "important");
-      if (k < 1) requestAnimationFrame(frame);
-    }
-    requestAnimationFrame(frame);
-  }
 
-  function handOver(root) {
-    const scene = root.querySelector(".fishing");
-    const card = root.querySelector(".result");
-    if (!card) return;
 
-    const verdict = card._verdictHTML || "";
-    const target = card._target || 0;
-
-    if (scene) {
-      scene.style.transition = "opacity .5s cubic-bezier(.4,0,.2,1)";
-      scene.style.opacity = "0";
-    }
-
-    // hold the card's height through the swap, or the page jumps beneath the reader
-    const held = Math.round(card.getBoundingClientRect().height);
-    card.style.minHeight = `${held}px`;
-
-    setTimeout(() => {
-      // the card's own contents become the skeleton: identical box, identical flow
-      card.innerHTML = `
-        <div class="verdict-skeleton inplace" aria-hidden="true">
-          <div class="sk-head">
-            <span class="sk sk-gauge"></span>
-            <div class="sk-body">
-              <span class="sk sk-badge"></span>
-              <span class="sk sk-title"></span>
-              <span class="sk sk-url"></span>
-              <span class="sk sk-suggest"></span>
-              <span class="sk sk-meta"></span>
-            </div>
-          </div>
-          <span class="sk sk-subtitle"></span>
-          <span class="sk sk-row"></span>
-          <span class="sk sk-row"></span>
-          <span class="sk sk-row"></span>
-        </div>`;
-
-      setTimeout(() => {
-        card.innerHTML = verdict;
-        ensureClose(card);
-        card.classList.add("verdict-shown");
-        card.classList.remove("pending");
-        card.classList.remove("zooming");
-        const g = card.querySelector(".gauge");
-        if (g) {
-          g.style.setProperty("--p", target);
-          const ro = card.querySelector(".readout span");
-          if (ro) ro.textContent = target;
-          const cap = card.querySelector(".readout small");
-          if (cap) cap.textContent = "risk";
-          g.style.setProperty("--tone", TONE_OF(target));
-        }
-        normaliseCard(card);
-        const line = document.getElementById("thinking");
-        if (line && line.parentElement) line.parentElement.remove();
-        // the verdict is taller than the skeleton; release the pin once it is in
-        requestAnimationFrame(() => { card.style.minHeight = ""; });
-      }, 900);
-    }, 380);
-  }
 
   /* ---------------------------------------------------------------------------
      The examination, in six seconds rather than forty.
@@ -852,7 +476,12 @@
     /* The number is the model's estimated chance that the address is a phish, not a
        tally of faults. People reasonably expect a known-good site to read zero, so the
        card says out loud what the figure is, and why a real site still scores. */
-    const scoreNote = r.risk === "high"
+    /* An established domain is held at a ceiling of fifteen, which is not the model's
+       estimate: it is a prior applied so a known site is never flagged on the shape of its
+       name. Saying "15" without saying that invites the reading "fifteen problems". */
+    const scoreNote = r.capped_by_reputation
+      ? `Scored ${pct} out of 100, which is a ceiling rather than an estimate. The name-based model put this address at ${Math.round((r.model_probability || 0) * 100)}, and an established domain holds it at ${pct} so that a known site is never flagged on the shape of its name.`
+      : r.risk === "high"
       ? `Scored ${pct} out of 100. That is the estimated chance this address is a phish, read from its name alone. Anything above 65 is treated as a concern.`
       : r.risk === "medium"
         ? `Scored ${pct} out of 100. That is the estimated chance this address is a phish, read from its name alone. Below half, but not low enough to call it safe.`

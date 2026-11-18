@@ -115,6 +115,7 @@ class Predictor:
             d = float(clf.decision_function(Xt)[0])
             prob = 1 / (1 + np.exp(-d))
 
+        model_prob = prob          # the classifier's own estimate, before any prior
         label = int(prob >= 0.5)
         if prob >= 0.65:
             risk, band = "high", "Likely phishing"
@@ -180,6 +181,8 @@ class Predictor:
             "risk": risk,
             "band": band,
             "probability": round(prob, 4),
+            "model_probability": round(model_prob, 4),
+            "capped_by_reputation": bool(reputation == "established" and model_prob > prob),
             "confidence": round(max(prob, 1 - prob) * 100, 1),
             "reputation": reputation,
             "suggested": suggestion,
