@@ -416,6 +416,66 @@ def google_start(request: Request):
     return response
 
 
+@app.get("/api/auth/google/diagnose")
+def google_diagnose(request: Request, token: str = ""):
+    """Say, without exposing a secret, why the Google round trip is failing.
+
+    Guarded by the DIAG_TOKEN environment variable. It reports the shape of the configured
+    credentials rather than the credentials, and asks Google to reject a fake code, which
+    separates "our client is wrong" (invalid_client) from "our client is fine and the code
+    was the problem" (invalid_grant).
+    """
+    expected = os.getenv("DIAG_TOKEN")
+    if not expected or token != expected:
+        raise HTTPException(status_code=404, detail="Not found.")
+
+    cid = os.getenv("GOOGLE_CLIENT_ID") or ""
+    secret = os.getenv("GOOGLE_CLIENT_SECRET") or ""
+    redirect = _oauth_redirect(request)
+
+    payload = urllib.parse.urlencode({
+        "code": "diagnostic-not-a-real-code",
+        "client_id": cid,
+        "client_secret": secret,
+        "redirect_uri": redirect,
+        "grant_type": "authorization_code",
+    }).encode()
+
+    google = {"status": None, "error": None, "description": None}
+    try:
+        with urllib.request.urlopen("https://oauth2.googleapis.com/token", data=payload, timeout=20) as r:
+            google["status"] = r.status
+    except urllib.error.HTTPError as exc:
+        google["status"] = exc.code
+        try:
+            body = json.loads(exc.read())
+            google["error"] = body.get("error")
+            google["description"] = body.get("error_description")
+        except Exception:
+            pass
+    except Exception as exc:  # noqa: BLE001
+        google["error"] = type(exc).__name__
+        google["description"] = str(exc)[:200]
+
+    return {
+        "redirect_uri": redirect,
+        "client_id": {
+            "length": len(cid),
+            "prefix": cid[:14],
+            "suffix": cid[-20:],
+            "has_whitespace": cid != cid.strip(),
+            "looks_like_google": cid.endswith(".apps.googleusercontent.com"),
+        },
+        "client_secret": {
+            "length": len(secret),
+            "has_whitespace": secret != secret.strip(),
+            "prefix": secret[:6],
+            "ends_like_google": secret.endswith(".apps.googleusercontent.com") or secret.startswith("GOCSPX-"),
+        },
+        "google_answer": google,
+    }
+
+
 @app.get("/api/auth/google/callback")
 def google_callback(request: Request, code: str = "", state: str = "", error: str = ""):
     if error or not code:
