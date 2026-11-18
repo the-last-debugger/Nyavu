@@ -3550,3 +3550,25 @@ code, kbd, samp{
 @media (max-width: 700px) {
   .verdict-head .autopsy { grid-column: 1 / -1; }
 }
+
+/* the score note reserved 79px of invisible height while the reading was under way,
+   which is the last gap in the pending card. It is part of the verdict, so it waits. */
+.result.pending .score-note { display: none !important; }
+
+/* the pending row was as tall as the dial, which left a band of nothing under the
+   address. The dial and the address start together at the top of that row now. */
+.result.pending .verdict-head {
+  align-items: start !important;
+  grid-template-columns: 118px 1fr !important;
+  gap: 20px !important;
+  padding: 20px 24px 16px !important;
+}
+
+.result.pending .gauge {
+  width: 112px !important;
+  height: 96px !important;
+  margin: 0 !important;
+}
+
+.result.pending .verdict-text { padding-top: 6px !important; }
+.result.pending .verdict-head .autopsy { margin-top: 6px !important; }
