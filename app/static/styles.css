@@ -4,7 +4,6 @@
    All three are self-hosted: no CDN, so the app still works offline.
    ========================================================================== */
 
-
 @font-face {
   font-family: "JetBrains Mono";
   src: url("/fonts/jetbrains-mono-500.woff2") format("woff2");
@@ -1541,31 +1540,15 @@ body.has-result .explain {
 .result.pending .evidence,
 .result.pending details.advanced {
   display: none;
-}
-
-/* ================================================== the fisherman's catch ===
+}/* ================================================== the fisherman's catch ===
    A seven-second performance that runs with the dial. He prepares, casts, feels
-   something, hauls, and the catch is whatever the verdict says it is. Purely
-   presentational: the result is already computed and is revealed the moment the
-   net clears the water. */
-
-.fishing { display: none; width: 100%; max-width: 360px; }
+   something, hauls{ display: none; width: 100%; max-width: 360px; }
 
 .result.pending .skeleton { display: none; }
-
-.fishing .sea { opacity: .9; }
-
-.fishing .boat { animation: bob 3.2s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
 
 @keyframes bob {
   0%, 100% { transform: translateY(0) rotate(0deg); }
   50%      { transform: translateY(-2px) rotate(-1deg); }
-}
-
-.fishing .arm {
-  transform-box: fill-box;
-  transform-origin: 0% 100%;
-  animation: cast 7s cubic-bezier(.4,0,.3,1) forwards;
 }
 
 @keyframes cast {
@@ -1579,24 +1562,12 @@ body.has-result .explain {
   100% { transform: rotate(0deg); }
 }
 
-.fishing .netg {
-  transform-box: fill-box;
-  transform-origin: 0% 50%;
-  animation: netswing 7s cubic-bezier(.4,0,.3,1) forwards;
-}
-
 @keyframes netswing {
   0%, 10%   { transform: translate(0,0) scale(1); opacity: 1; }
   26%       { transform: translate(6px, 26px) scale(.9); opacity: 1; }
   45%       { transform: translate(4px, 20px) scale(.92); opacity: .95; }
   78%       { transform: translate(-2px, 4px) scale(1.02); opacity: 1; }
   100%      { transform: translate(0,0) scale(1); }
-}
-
-.fishing .line {
-  animation: lineflex 7s ease-in-out forwards;
-  transform-box: fill-box;
-  transform-origin: top center;
 }
 
 @keyframes lineflex {
@@ -1615,21 +1586,10 @@ body.has-result .explain {
   100%     { opacity: 0; transform: scale(2.6); }
 }
 
-.fishing .catch { opacity: 0; }
-
-.fishing[data-catch="dark"]  .catch-dark,
-.fishing[data-catch="odd"]   .catch-odd,
-.fishing[data-catch="plain"] .catch-plain { animation: haul 7s cubic-bezier(.3,1.6,.5,1) forwards; }
-
 @keyframes haul {
   0%, 84%  { opacity: 0; transform: translateY(16px) scale(.7); }
   90%      { opacity: 1; transform: translateY(-4px) scale(1.06); }
   100%     { opacity: 1; transform: translateY(0) scale(1); }
-}
-
-.fishing .catch-dark, .fishing .catch-odd, .fishing .catch-plain {
-  transform-box: fill-box;
-  transform-origin: center;
 }
 
 /* narration + skip share a row */
@@ -1659,39 +1619,23 @@ body.has-result .explain {
   transition: color .2s, border-color .2s;
 }
 
-.skip:hover { color: var(--accent); border-color: var(--accent); }
-
-/* The scan performance always runs, like the dial does.
-   A still fisherman with the catch already landed tells the wrong story, and this
-   machine class of preference is common enough that the feature would be invisible
-   on many screens. Decorative motion elsewhere still honours the setting. */
-
-.fishing { max-width: 100% !important; }
-
-.fishing .ripple { fill: none; stroke: rgba(67,232,200,.55); stroke-width: 1.4; }
+.skip:hover { color: var(--accent); border-color: var(--accent); }/* The scan performance always runs, like the dial does.
+   A still fisherman with the catch already landed tells the wrong story{ max-width: 100% !important; }
 
 /* The global reduced-motion rule above collapses every animation to 0.001ms.
    The scan performance is the product's feedback, not decoration, so it is
    restored here for all users - same reasoning as the dial, which is JS-driven
    and therefore already unaffected. */
 @media (prefers-reduced-motion: reduce) {
-  .fishing .arm  { animation: cast 7s cubic-bezier(.4,0,.3,1) forwards !important; }
-  .fishing .netg { animation: netswing 7s cubic-bezier(.4,0,.3,1) forwards !important; }
-  .fishing .line { animation: lineflex 7s ease-in-out forwards !important; }
-  .fishing .boat { animation: bob 3.2s ease-in-out infinite !important; }
         .fishing[data-catch="dark"]  .catch-dark,
   .fishing[data-catch="odd"]   .catch-odd,
   .fishing[data-catch="plain"] .catch-plain {
     animation: haul 7s cubic-bezier(.3,1.6,.5,1) forwards !important;
   }
-}
-
-/* ============================== the cast net ==============================
+}/* ============================== the cast net ==============================
    He throws it, it spreads on the water, then he hauls it back and the catch
    comes up with it. The net is the only thing that travels; the man stays put
-   and works the rope, which is what actually happens on a small boat. */
-
-.fishing .net {
+   and works the rope{
   transform-box: view-box;
   transform-origin: 0 0;
   animation: netthrow 7s cubic-bezier(.34,.9,.4,1) forwards;
@@ -1708,33 +1652,23 @@ body.has-result .explain {
   100%     { transform: translate(290px, 134px) scale(.5); }
 }
 
-.fishing .net-bundle { animation: bundle 7s linear forwards; }
-
 @keyframes bundle {
   0%, 12% { opacity: 1; }
   22%     { opacity: 0; }
   100%    { opacity: 0; }
 }
 
-.fishing .net-open { opacity: 0; animation: netopen 7s linear forwards; }
-
 @keyframes netopen {
   0%, 22% { opacity: 0; }
   27%     { opacity: 1; }
   100%    { opacity: 1; }
-}
-
-/* the catch rides inside the net, so it rises with it */
-.fishing .caught { opacity: 0; animation: catchup 7s linear forwards; }
+}/* the catch rides inside the net{ opacity: 0; animation: catchup 7s linear forwards; }
 
 @keyframes catchup {
   0%, 84% { opacity: 0; }
   88%     { opacity: 1; transform: translateY(4px) scale(.9); }
   100%    { opacity: 1; transform: translateY(0) scale(1); }
-}
-
-/* the arm actually works: wind up, throw, hold, two tugs, then the haul */
-.fishing .arm {
+}/* the arm actually works: wind up, throw, hold, two tugs{
   transform-box: view-box;
   transform-origin: 256px 110px;
   animation: armwork 7s cubic-bezier(.4,0,.3,1) forwards;
@@ -1755,28 +1689,15 @@ body.has-result .explain {
   100% { transform: rotate(0deg); }
 }
 
-/* net suppresses its old rod-era rules */
-.fishing .netmesh, .fishing .netg { animation: none !important; }
-
 /* the cast-net scene is also exempt from the global collapse, same reason */
 @media (prefers-reduced-motion: reduce) {
-  .fishing .net       { animation: netthrow 7s cubic-bezier(.34,.9,.4,1) forwards !important; }
-  .fishing .net-bundle{ animation: bundle 7s linear forwards !important; }
-  .fishing .net-open  { animation: netopen 7s linear forwards !important; }
-  .fishing .caught    { animation: catchup 7s linear forwards !important; }
-  .fishing .arm       { animation: armwork 7s cubic-bezier(.4,0,.3,1) forwards !important; }
-  .fishing .boat      { animation: bob 3.2s ease-in-out infinite !important; }
-      }
-
-/* ====================== the drape: ten seconds of casting ==================
+      }/* ====================== the drape: ten seconds of casting ==================
    0-12%  winds back with the net gathered in both hands
    12-26% throws; the cloth flutters out over the water
    26-40% lands and spreads
    40-66% drifts, drawn across the water
    66-88% hauled back in, catch coming up inside it
-   88-100% aboard, verdict.                                                   */
-
-.fishing .netcloth {
+   88-100% aboard{
   transform-box: view-box;
   transform-origin: 0 0;
   animation: netcast 10s cubic-bezier(.34,.9,.4,1) forwards;
@@ -1806,24 +1727,10 @@ body.has-result .explain {
   100% { transform: rotate(0deg); }
 }
 
-.fishing .cloth { transform-box: fill-box; transform-origin: center; }
-
-.fishing .cloth.back { animation: swish 2.6s ease-in-out infinite alternate; }
-
-.fishing .cloth.front { animation: swish 2.1s ease-in-out infinite alternate-reverse; }
-
 @keyframes swish {
   from { transform: rotate(-2.4deg) scale(1); }
   to   { transform: rotate(2.4deg) scale(1.03); }
 }
-
-.fishing .caught > g { display: none; animation: none !important; opacity: 1 !important; }
-
-.fishing[data-catch="dark"]  .caught > .catch-dark  { display: block; }
-
-.fishing[data-catch="odd"]   .caught > .catch-odd   { display: block; }
-
-.fishing[data-catch="plain"] .caught > .catch-plain { display: block; }
 
 @keyframes catchup10 {
   0%, 86% { opacity: 0; }
@@ -1840,12 +1747,6 @@ body.has-result .explain {
 
 /* exempt the scene from the global animation collapse */
 @media (prefers-reduced-motion: reduce) {
-  .fishing .netcloth { animation: netcast 10s cubic-bezier(.34,.9,.4,1) forwards !important; }
-  .fishing .arms     { animation: armswork 10s cubic-bezier(.4,0,.3,1) forwards !important; }
-  .fishing .caught   { animation: catchup10 10s linear forwards !important; }
-  .fishing .cloth.back  { animation: swish 2.6s ease-in-out infinite alternate !important; }
-  .fishing .cloth.front { animation: swish 2.1s ease-in-out infinite alternate-reverse !important; }
-        .fishing .boat { animation: bob 3.2s ease-in-out infinite !important; }
 }
 
 /* ------------------------------------------------------------ liveliness */
@@ -1876,10 +1777,6 @@ body.has-result .explain {
   100%    { transform: translate(288px, 135px) scale(.58) rotate(0deg); }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .fishing .netcloth { animation-name: netcast-big !important; }
-}
-
 /* ===================== the scene, second pass =====================
    Boat to the left, fisherman on its right end, net cast into open water on
    the right. Only the keel sits below the waterline.                       */
@@ -1895,18 +1792,6 @@ body.has-result .explain {
   100%    { transform: translate(252px, 116px) scale(.5) rotate(0deg); }
 }
 
-.fishing .netcloth {
-  transform-box: view-box;
-  transform-origin: 0 0;
-  animation: netcast2 10s cubic-bezier(.34,.9,.4,1) forwards !important;
-}
-
-.fishing .arms {
-  transform-box: view-box;
-  transform-origin: 211px 118px;
-  animation: armswork 10s cubic-bezier(.4,0,.3,1) forwards !important;
-}
-
 /* the moment it lands: a short, bright disturbance, then gone */
 
 @keyframes splash {
@@ -1920,22 +1805,9 @@ body.has-result .explain {
 /* the scene must never be clipped by the card */
 .result.pending .verdict-head { overflow: visible; }
 
-.fishing svg { overflow: visible; }
-
-/* the wake breathes with the boat */
-.fishing .wake {
-  animation: wake 4.2s ease-in-out infinite;
-  transform-box: fill-box;
-  transform-origin: center;
-}
-
 @keyframes wake {
   0%, 100% { opacity: .45; transform: scaleX(1) translateX(0); }
   50%      { opacity: .8;  transform: scaleX(1.03) translateX(1px); }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .fishing .wake { animation: wake 4.2s ease-in-out infinite !important; }
 }
 
 /* ---------------------------------------------------- reveal on scroll */
@@ -1988,8 +1860,6 @@ body.has-result .explain {
 
 .result.pending .verdict-text { display: block; }
 
-.result.pending .fishing { margin: 0; max-width: none; }
-
 .result.pending .verdict-url { opacity: 0.5; margin-bottom: 2px; }
 
 .result.pending .block-title,
@@ -2005,23 +1875,9 @@ body.has-result .explain {
   height: 138px;
   z-index: 4;
   pointer-events: none;
-}
-
-/* the net is positioned by JavaScript now, so the CSS animation must stand down */
-.fishing .netcloth { animation: none !important; }
-
-.fishing .tether { stroke-linejoin: round; }
-
-/* ============ every part of the scene runs on the same clock ============
+}/* the net is positioned by JavaScript now{ animation: none !important; }/* ============ every part of the scene runs on the same clock ============
    The net lands 34% into the sweep, so the splash, ripples, arms and the catch
-   are all gated on `.go`, which is added when the sweep begins - not when the
-   card is rendered. */
-
-.fishing .arms { animation: none !important; }
-
-.fishing.go .arms { animation: armswork 6.6s cubic-bezier(.4,0,.3,1) forwards !important; }
-
-.fishing .caught { opacity: 0; animation: none !important; }
+   are all gated on `.go`{ animation: none !important; }
 
 @keyframes catchup66 {
   0%, 56% { opacity: 0; }
@@ -2040,51 +1896,22 @@ body.has-result .explain {
   12%  { opacity: 1; transform: translateY(0) scale(1); }
   45%  { opacity: .8; transform: translateY(-8px) scale(1.2); }
   100% { opacity: 0; transform: translateY(-16px) scale(1.35); }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .fishing.go .arms { animation: armswork 6.6s cubic-bezier(.4,0,.3,1) forwards !important; }
-  .fishing.go .caught { animation: catchup66 6.6s linear forwards !important; }
-        }
-
-/* ================== one scene clock (ten seconds), one dial clock ==================
+}/* ================== one scene clock (ten seconds), one dial clock ==================
    The scene starts at render. Its ten-second timeline puts the net in the water at
-   34%, so the impact is triggered from JavaScript at that frame rather than by a CSS
-   delay that cannot know when the net actually lands. The dial starts at 3.4s and
-   finishes at 10s with the scene. */
-
-.fishing.go .arms { animation: armswork 10s cubic-bezier(.4,0,.3,1) forwards !important; }
-
-.fishing.go .caught { animation: catchup10b 10s linear forwards !important; }
+   34%{ animation: armswork 10s cubic-bezier(.4,0,.3,1) forwards !important; }
 
 @keyframes catchup10b {
   0%, 56% { opacity: 0; }
   60%     { opacity: 1; transform: translateY(4px) scale(.9); }
   100%    { opacity: 1; transform: translateY(0) scale(1); }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .fishing.go .arms { animation: armswork 10s cubic-bezier(.4,0,.3,1) forwards !important; }
-  .fishing.go .caught { animation: catchup10b 10s linear forwards !important; }
-        }
-
-/* ============================== act two: the reaction ==============================
-   Ten seconds of cast and haul, then he reacts to what is in the net, then the
-   camera moves in before the verdict takes the card. */
-
-.fisher, .catch-dark, .catch-odd, .catch-plain { transform-box: fill-box; transform-origin: center; }
-
-/* pleased: rocks back, chin up */
-.fishing[data-catch="plain"].reaction .fisher { animation: cheer 1.8s ease-in-out infinite; }
+}/* ============================== act two: the reaction ==============================
+   Ten seconds of cast and haul, then he reacts to what is in the net, .catch-dark, .catch-odd, .catch-plain{ transform-box: fill-box; transform-origin: center; }/* pleased: rocks back{ animation: cheer 1.8s ease-in-out infinite; }
 
 @keyframes cheer {
   0%, 100% { transform: translateY(0) rotate(0deg); }
   35%      { transform: translateY(-3px) rotate(-3deg); }
   70%      { transform: translateY(0) rotate(2deg); }
-}
-
-/* alarmed: recoils, then trembles */
-.fishing[data-catch="dark"].reaction .fisher { animation: recoil 1.1s ease-out 3; }
+}/* alarmed: recoils{ animation: recoil 1.1s ease-out 3; }
 
 @keyframes recoil {
   0%   { transform: translateX(0) rotate(0deg); }
@@ -2094,16 +1921,11 @@ body.has-result .explain {
   100% { transform: translateX(0) rotate(0deg); }
 }
 
-.fishing[data-catch="dark"].reaction .catch-dark { animation: jitter .32s steps(2) infinite; }
-
 @keyframes jitter {
   0%   { transform: translate(0, 0) rotate(0deg); }
   50%  { transform: translate(1px, -1px) rotate(4deg); }
   100% { transform: translate(0, 0) rotate(0deg); }
-}
-
-/* puzzled: a slow head tilt, twice */
-.fishing[data-catch="odd"].reaction .fisher { animation: ponder 2.2s ease-in-out infinite; }
+}/* puzzled: a slow head tilt{ animation: ponder 2.2s ease-in-out infinite; }
 
 @keyframes ponder {
   0%, 100% { transform: rotate(0deg); }
@@ -2111,41 +1933,20 @@ body.has-result .explain {
   60%      { transform: rotate(-4deg); }
 }
 
-/* ============================== act three: the zoom ============================== */
-.fishing svg { transform-origin: 62% 78%; transition: transform 1.6s cubic-bezier(.6,0,.25,1); }
-
-.fishing.zoom .caught { filter: drop-shadow(0 0 12px rgba(255,255,255,.18)); }
-
 /* the zoom is a close-up: the dial steps back so it does not float over the shot */
 .result.zooming .gauge { opacity: .18; transition: opacity 1s ease; }
-
-/* the reaction reads better with a touch more movement in the boat */
-.fishing.reaction .boat { animation: rock 1.6s ease-in-out infinite; }
 
 @keyframes rock {
   0%, 100% { transform: rotate(0deg) translateY(0); }
   40%      { transform: rotate(-1.4deg) translateY(-1px); }
   70%      { transform: rotate(1deg) translateY(0); }
-}
-
-/* ===================== the transition: a slower, carried move =====================
-   Zoom is a push-in of 1.8s, held, and then a wash of ripples crosses the frame and
-   the card rises through it. Nothing snaps. */
-
-.fishing svg { transform-origin: 46% 58%; transition: transform 2.4s cubic-bezier(.33,0,.2,1); }
-
-.fishing.zoom svg { transform: scale(1.75); }
-
-/* the catch lifts into his hands as he starts to examine it */
-/* the catch is positioned by JavaScript now; a CSS transform would win over it */
-.fishing.examine:not(.reaction) .caught { animation: none; }
+}/* ===================== the transition: a slower, carried move =====================
+   Zoom is a push-in of 1.8s, held{ transform-origin: 46% 58%; transition: transform 2.4s cubic-bezier(.33,0,.2,1); }
 
 @keyframes examine {
   0%, 100% { transform: translateY(0) rotate(0deg); }
   50%      { transform: translateY(-2px) rotate(-4deg); }
 }
-
-.fishing.examine:not(.reaction) .fisher { animation: inspect 3s ease-in-out infinite; }
 
 @keyframes inspect {
   0%, 100% { transform: rotate(0deg) translateY(0); }
@@ -2183,54 +1984,6 @@ body.has-result .explain {
 /* the dial keeps its colour through the zoom: it is evidence, not scenery */
 .result.zooming .gauge { opacity: 1; }
 
-/* ------------------------------- drips off the hauled net ------------------------------- */
-.fishing .drip { opacity: 0; }
-
-
-/* ---------------------- the water curtain ----------------------
-   A plane of water facing the viewer. Two soft caustic fields drift at different
-   speeds over a deep gradient; the pattern is large and low in contrast so it reads
-   as water rather than as screen noise. The rim at the top is the surface. */
-
-.waterline {
-  position: absolute;
-  inset: 0;
-  z-index: 20;
-  pointer-events: none;
-  overflow: hidden;
-  border-radius: 0;
-  opacity: 0;
-  background:
-    radial-gradient(120% 70% at 50% -10%, rgba(150, 240, 235, .22), transparent 60%),
-    linear-gradient(180deg, #12495C 0%, #0A3140 38%, #061C26 72%, #04121A 100%);
-  transition: opacity 6s cubic-bezier(.4, 0, .2, 1), transform 6s cubic-bezier(.4, 0, .2, 1);
-  transform: scale(1.06);
-}
-
-.waterline .caustic {
-  position: absolute;
-  inset: -35%;
-  mix-blend-mode: screen;
-  will-change: transform, background-position;
-  filter: none;
-}
-
-.waterline .ca {
-  background-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%221600%22%20height%3D%221000%22%20viewBox%3D%220%200%201600%201000%22%3E%3Cdefs%3E%3Cfilter%20id%3D%22f%22%20x%3D%22-30%25%22%20y%3D%22-30%25%22%20width%3D%22160%25%22%20height%3D%22160%25%22%3E%3CfeTurbulence%20type%3D%22fractalNoise%22%20baseFrequency%3D%220.0055%22%20numOctaves%3D%223%22%20seed%3D%225%22%20result%3D%22n%22%2F%3E%3CfeDisplacementMap%20in%3D%22SourceGraphic%22%20in2%3D%22n%22%20scale%3D%2264%22%20xChannelSelector%3D%22R%22%20yChannelSelector%3D%22G%22%2F%3E%3CfeGaussianBlur%20stdDeviation%3D%226.5%22%2F%3E%3C%2Ffilter%3E%3C%2Fdefs%3E%3Cg%20filter%3D%22url%28%23f%29%22%3E%3Cellipse%20cx%3D%221016%22%20cy%3D%22780%22%20rx%3D%2288%22%20ry%3D%2242%22%20transform%3D%22rotate%2814.4%201016%20780%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.47%22%2F%3E%3Cellipse%20cx%3D%22-29%22%20cy%3D%22460%22%20rx%3D%2299%22%20ry%3D%2240%22%20transform%3D%22rotate%2824.1%20-29%20460%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.19%22%2F%3E%3Cellipse%20cx%3D%22746%22%20cy%3D%22206%22%20rx%3D%2268%22%20ry%3D%2226%22%20transform%3D%22rotate%28-29.2%20746%20206%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.23%22%2F%3E%3Cellipse%20cx%3D%22412%22%20cy%3D%22983%22%20rx%3D%2285%22%20ry%3D%2223%22%20transform%3D%22rotate%2817.8%20412%20983%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.20%22%2F%3E%3Cellipse%20cx%3D%221007%22%20cy%3D%2267%22%20rx%3D%2224%22%20ry%3D%2211%22%20transform%3D%22rotate%28-17.4%201007%2067%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.23%22%2F%3E%3Cellipse%20cx%3D%221649%22%20cy%3D%22932%22%20rx%3D%2247%22%20ry%3D%2223%22%20transform%3D%22rotate%282.4%201649%20932%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.39%22%2F%3E%3Cellipse%20cx%3D%22280%22%20cy%3D%221012%22%20rx%3D%2279%22%20ry%3D%2239%22%20transform%3D%22rotate%2823.6%20280%201012%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.25%22%2F%3E%3Cellipse%20cx%3D%22556%22%20cy%3D%22113%22%20rx%3D%2236%22%20ry%3D%228%22%20transform%3D%22rotate%28-11.9%20556%20113%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.36%22%2F%3E%3Cellipse%20cx%3D%22-74%22%20cy%3D%22706%22%20rx%3D%2251%22%20ry%3D%2216%22%20transform%3D%22rotate%2819.1%20-74%20706%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.32%22%2F%3E%3Cellipse%20cx%3D%22476%22%20cy%3D%22478%22%20rx%3D%2280%22%20ry%3D%2219%22%20transform%3D%22rotate%2828.5%20476%20478%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.16%22%2F%3E%3Cellipse%20cx%3D%221240%22%20cy%3D%22900%22%20rx%3D%2225%22%20ry%3D%2211%22%20transform%3D%22rotate%28-8.0%201240%20900%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.35%22%2F%3E%3Cellipse%20cx%3D%22-64%22%20cy%3D%22-26%22%20rx%3D%2238%22%20ry%3D%2219%22%20transform%3D%22rotate%28-18.2%20-64%20-26%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.41%22%2F%3E%3Cellipse%20cx%3D%221556%22%20cy%3D%221013%22%20rx%3D%2252%22%20ry%3D%2216%22%20transform%3D%22rotate%281.5%201556%201013%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.42%22%2F%3E%3Cellipse%20cx%3D%22110%22%20cy%3D%22788%22%20rx%3D%2288%22%20ry%3D%2240%22%20transform%3D%22rotate%28-27.8%20110%20788%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.48%22%2F%3E%3Cellipse%20cx%3D%2280%22%20cy%3D%22315%22%20rx%3D%2273%22%20ry%3D%2235%22%20transform%3D%22rotate%28-9.6%2080%20315%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.47%22%2F%3E%3Cellipse%20cx%3D%22879%22%20cy%3D%22282%22%20rx%3D%2249%22%20ry%3D%2213%22%20transform%3D%22rotate%28-25.3%20879%20282%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.20%22%2F%3E%3Cellipse%20cx%3D%221133%22%20cy%3D%221076%22%20rx%3D%2237%22%20ry%3D%229%22%20transform%3D%22rotate%2829.2%201133%201076%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.34%22%2F%3E%3Cellipse%20cx%3D%22634%22%20cy%3D%22195%22%20rx%3D%2272%22%20ry%3D%2232%22%20transform%3D%22rotate%28-2.7%20634%20195%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.30%22%2F%3E%3Cellipse%20cx%3D%2218%22%20cy%3D%22983%22%20rx%3D%2227%22%20ry%3D%2210%22%20transform%3D%22rotate%2820.3%2018%20983%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.20%22%2F%3E%3Cellipse%20cx%3D%221208%22%20cy%3D%221022%22%20rx%3D%2274%22%20ry%3D%2233%22%20transform%3D%22rotate%28-23.6%201208%201022%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.30%22%2F%3E%3Cellipse%20cx%3D%22183%22%20cy%3D%22900%22%20rx%3D%2248%22%20ry%3D%2217%22%20transform%3D%22rotate%2830.0%20183%20900%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.45%22%2F%3E%3Cellipse%20cx%3D%221638%22%20cy%3D%22446%22%20rx%3D%2263%22%20ry%3D%2227%22%20transform%3D%22rotate%28-1.3%201638%20446%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.25%22%2F%3E%3Cellipse%20cx%3D%22631%22%20cy%3D%2290%22%20rx%3D%2254%22%20ry%3D%2227%22%20transform%3D%22rotate%2827.6%20631%2090%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.37%22%2F%3E%3Cellipse%20cx%3D%22799%22%20cy%3D%22313%22%20rx%3D%2231%22%20ry%3D%229%22%20transform%3D%22rotate%2816.9%20799%20313%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.45%22%2F%3E%3Cellipse%20cx%3D%22556%22%20cy%3D%22832%22%20rx%3D%2286%22%20ry%3D%2236%22%20transform%3D%22rotate%289.8%20556%20832%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.42%22%2F%3E%3Cellipse%20cx%3D%22560%22%20cy%3D%22737%22%20rx%3D%2246%22%20ry%3D%2217%22%20transform%3D%22rotate%2816.2%20560%20737%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.39%22%2F%3E%3Cellipse%20cx%3D%22437%22%20cy%3D%221017%22%20rx%3D%2276%22%20ry%3D%2229%22%20transform%3D%22rotate%28-29.3%20437%201017%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.34%22%2F%3E%3Cellipse%20cx%3D%22361%22%20cy%3D%22699%22%20rx%3D%2261%22%20ry%3D%2227%22%20transform%3D%22rotate%288.8%20361%20699%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.43%22%2F%3E%3Cellipse%20cx%3D%22532%22%20cy%3D%22667%22%20rx%3D%2283%22%20ry%3D%2238%22%20transform%3D%22rotate%28-9.0%20532%20667%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.45%22%2F%3E%3Cellipse%20cx%3D%221451%22%20cy%3D%22718%22%20rx%3D%22102%22%20ry%3D%2250%22%20transform%3D%22rotate%281.1%201451%20718%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.34%22%2F%3E%3Cellipse%20cx%3D%22212%22%20cy%3D%22890%22%20rx%3D%2299%22%20ry%3D%2235%22%20transform%3D%22rotate%2811.5%20212%20890%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.40%22%2F%3E%3Cellipse%20cx%3D%221205%22%20cy%3D%22119%22%20rx%3D%2286%22%20ry%3D%2233%22%20transform%3D%22rotate%289.9%201205%20119%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.30%22%2F%3E%3Cellipse%20cx%3D%221018%22%20cy%3D%22819%22%20rx%3D%2275%22%20ry%3D%2232%22%20transform%3D%22rotate%28-28.3%201018%20819%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.21%22%2F%3E%3Cellipse%20cx%3D%22696%22%20cy%3D%22674%22%20rx%3D%2242%22%20ry%3D%2217%22%20transform%3D%22rotate%287.9%20696%20674%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.16%22%2F%3E%3Cellipse%20cx%3D%22750%22%20cy%3D%22182%22%20rx%3D%2228%22%20ry%3D%227%22%20transform%3D%22rotate%28-11.0%20750%20182%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.21%22%2F%3E%3Cellipse%20cx%3D%22260%22%20cy%3D%22-39%22%20rx%3D%2261%22%20ry%3D%2220%22%20transform%3D%22rotate%286.7%20260%20-39%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.36%22%2F%3E%3Cellipse%20cx%3D%22339%22%20cy%3D%22968%22%20rx%3D%2224%22%20ry%3D%228%22%20transform%3D%22rotate%28-13.3%20339%20968%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.29%22%2F%3E%3Cellipse%20cx%3D%22123%22%20cy%3D%22884%22%20rx%3D%2254%22%20ry%3D%2212%22%20transform%3D%22rotate%286.8%20123%20884%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.18%22%2F%3E%3Cellipse%20cx%3D%22880%22%20cy%3D%22314%22%20rx%3D%2270%22%20ry%3D%2234%22%20transform%3D%22rotate%2819.1%20880%20314%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.30%22%2F%3E%3Cellipse%20cx%3D%221351%22%20cy%3D%22665%22%20rx%3D%2254%22%20ry%3D%2214%22%20transform%3D%22rotate%285.8%201351%20665%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.35%22%2F%3E%3Cellipse%20cx%3D%221605%22%20cy%3D%221043%22%20rx%3D%2273%22%20ry%3D%2223%22%20transform%3D%22rotate%2823.6%201605%201043%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.15%22%2F%3E%3Cellipse%20cx%3D%22110%22%20cy%3D%22576%22%20rx%3D%2273%22%20ry%3D%2219%22%20transform%3D%22rotate%287.8%20110%20576%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.46%22%2F%3E%3Cellipse%20cx%3D%22581%22%20cy%3D%22421%22%20rx%3D%2242%22%20ry%3D%2213%22%20transform%3D%22rotate%2828.3%20581%20421%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.28%22%2F%3E%3Cellipse%20cx%3D%221612%22%20cy%3D%22980%22%20rx%3D%2272%22%20ry%3D%2221%22%20transform%3D%22rotate%2828.9%201612%20980%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.32%22%2F%3E%3Cellipse%20cx%3D%22651%22%20cy%3D%22290%22%20rx%3D%22103%22%20ry%3D%2237%22%20transform%3D%22rotate%28-12.8%20651%20290%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.32%22%2F%3E%3Cellipse%20cx%3D%22135%22%20cy%3D%22641%22%20rx%3D%2259%22%20ry%3D%2218%22%20transform%3D%22rotate%2816.9%20135%20641%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.44%22%2F%3E%3Cellipse%20cx%3D%22-57%22%20cy%3D%22538%22%20rx%3D%2246%22%20ry%3D%2222%22%20transform%3D%22rotate%2816.9%20-57%20538%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.24%22%2F%3E%3Cellipse%20cx%3D%22391%22%20cy%3D%22100%22%20rx%3D%22103%22%20ry%3D%2231%22%20transform%3D%22rotate%286.5%20391%20100%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.32%22%2F%3E%3Cellipse%20cx%3D%221055%22%20cy%3D%22620%22%20rx%3D%2283%22%20ry%3D%2221%22%20transform%3D%22rotate%2815.6%201055%20620%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.26%22%2F%3E%3Cellipse%20cx%3D%22859%22%20cy%3D%22310%22%20rx%3D%2248%22%20ry%3D%2218%22%20transform%3D%22rotate%28-2.1%20859%20310%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.28%22%2F%3E%3Cellipse%20cx%3D%221231%22%20cy%3D%22605%22%20rx%3D%2227%22%20ry%3D%228%22%20transform%3D%22rotate%28-2.7%201231%20605%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.47%22%2F%3E%3Cellipse%20cx%3D%221483%22%20cy%3D%22553%22%20rx%3D%2225%22%20ry%3D%2211%22%20transform%3D%22rotate%28-4.3%201483%20553%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.35%22%2F%3E%3Cellipse%20cx%3D%221166%22%20cy%3D%22653%22%20rx%3D%2263%22%20ry%3D%2230%22%20transform%3D%22rotate%28-6.9%201166%20653%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.29%22%2F%3E%3Cellipse%20cx%3D%221419%22%20cy%3D%22148%22%20rx%3D%2248%22%20ry%3D%2222%22%20transform%3D%22rotate%28-26.0%201419%20148%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.44%22%2F%3E%3Cellipse%20cx%3D%221143%22%20cy%3D%22422%22%20rx%3D%2247%22%20ry%3D%2221%22%20transform%3D%22rotate%2824.6%201143%20422%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.20%22%2F%3E%3Cellipse%20cx%3D%22762%22%20cy%3D%22557%22%20rx%3D%2264%22%20ry%3D%2220%22%20transform%3D%22rotate%28-20.8%20762%20557%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.36%22%2F%3E%3Cellipse%20cx%3D%221349%22%20cy%3D%22-1%22%20rx%3D%2242%22%20ry%3D%2219%22%20transform%3D%22rotate%2817.5%201349%20-1%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.38%22%2F%3E%3Cellipse%20cx%3D%22-35%22%20cy%3D%22758%22%20rx%3D%22102%22%20ry%3D%2251%22%20transform%3D%22rotate%2812.1%20-35%20758%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.17%22%2F%3E%3Cellipse%20cx%3D%221402%22%20cy%3D%22174%22%20rx%3D%2276%22%20ry%3D%2237%22%20transform%3D%22rotate%2812.7%201402%20174%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.20%22%2F%3E%3Cellipse%20cx%3D%22435%22%20cy%3D%22985%22%20rx%3D%2236%22%20ry%3D%2214%22%20transform%3D%22rotate%28-5.2%20435%20985%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.21%22%2F%3E%3Cellipse%20cx%3D%221015%22%20cy%3D%22-29%22%20rx%3D%2233%22%20ry%3D%2211%22%20transform%3D%22rotate%28-25.7%201015%20-29%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.17%22%2F%3E%3Cellipse%20cx%3D%22932%22%20cy%3D%22781%22%20rx%3D%2294%22%20ry%3D%2224%22%20transform%3D%22rotate%28-4.1%20932%20781%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.26%22%2F%3E%3Cellipse%20cx%3D%22976%22%20cy%3D%22488%22%20rx%3D%2299%22%20ry%3D%2232%22%20transform%3D%22rotate%28-26.7%20976%20488%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.39%22%2F%3E%3Cellipse%20cx%3D%22186%22%20cy%3D%22652%22%20rx%3D%2264%22%20ry%3D%2231%22%20transform%3D%22rotate%283.3%20186%20652%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.37%22%2F%3E%3Cellipse%20cx%3D%22383%22%20cy%3D%22560%22%20rx%3D%2244%22%20ry%3D%2219%22%20transform%3D%22rotate%281.0%20383%20560%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.20%22%2F%3E%3Cellipse%20cx%3D%22333%22%20cy%3D%22351%22%20rx%3D%2283%22%20ry%3D%2222%22%20transform%3D%22rotate%2812.8%20333%20351%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.38%22%2F%3E%3Cellipse%20cx%3D%2270%22%20cy%3D%22695%22%20rx%3D%2231%22%20ry%3D%228%22%20transform%3D%22rotate%285.6%2070%20695%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.23%22%2F%3E%3Cellipse%20cx%3D%221463%22%20cy%3D%22477%22%20rx%3D%2250%22%20ry%3D%2222%22%20transform%3D%22rotate%28-28.2%201463%20477%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.40%22%2F%3E%3Cellipse%20cx%3D%2214%22%20cy%3D%2295%22%20rx%3D%22100%22%20ry%3D%2241%22%20transform%3D%22rotate%28-16.6%2014%2095%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.19%22%2F%3E%3Cellipse%20cx%3D%221632%22%20cy%3D%22691%22%20rx%3D%2290%22%20ry%3D%2223%22%20transform%3D%22rotate%287.5%201632%20691%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.27%22%2F%3E%3Cellipse%20cx%3D%22334%22%20cy%3D%22307%22%20rx%3D%2273%22%20ry%3D%2223%22%20transform%3D%22rotate%28-6.9%20334%20307%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.20%22%2F%3E%3Cellipse%20cx%3D%221383%22%20cy%3D%22672%22%20rx%3D%2288%22%20ry%3D%2230%22%20transform%3D%22rotate%2821.1%201383%20672%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.33%22%2F%3E%3Cellipse%20cx%3D%22963%22%20cy%3D%22585%22%20rx%3D%2283%22%20ry%3D%2228%22%20transform%3D%22rotate%28-24.2%20963%20585%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.16%22%2F%3E%3Cellipse%20cx%3D%22276%22%20cy%3D%22-34%22%20rx%3D%2295%22%20ry%3D%2234%22%20transform%3D%22rotate%2815.6%20276%20-34%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.15%22%2F%3E%3Cellipse%20cx%3D%22748%22%20cy%3D%22952%22%20rx%3D%2274%22%20ry%3D%2225%22%20transform%3D%22rotate%28-2.1%20748%20952%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.18%22%2F%3E%3Cellipse%20cx%3D%22192%22%20cy%3D%22104%22%20rx%3D%2254%22%20ry%3D%2218%22%20transform%3D%22rotate%2822.8%20192%20104%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.20%22%2F%3E%3Cellipse%20cx%3D%22367%22%20cy%3D%22242%22%20rx%3D%2237%22%20ry%3D%2211%22%20transform%3D%22rotate%28-15.9%20367%20242%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.32%22%2F%3E%3Cellipse%20cx%3D%22-24%22%20cy%3D%22992%22%20rx%3D%2254%22%20ry%3D%2226%22%20transform%3D%22rotate%2811.3%20-24%20992%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.39%22%2F%3E%3Cellipse%20cx%3D%22750%22%20cy%3D%221017%22%20rx%3D%2233%22%20ry%3D%2214%22%20transform%3D%22rotate%28-12.5%20750%201017%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.39%22%2F%3E%3Cellipse%20cx%3D%221204%22%20cy%3D%22109%22%20rx%3D%2240%22%20ry%3D%229%22%20transform%3D%22rotate%28-16.2%201204%20109%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.18%22%2F%3E%3Cellipse%20cx%3D%22626%22%20cy%3D%221049%22%20rx%3D%2253%22%20ry%3D%2216%22%20transform%3D%22rotate%28-1.9%20626%201049%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.25%22%2F%3E%3Cellipse%20cx%3D%221209%22%20cy%3D%22753%22%20rx%3D%2237%22%20ry%3D%2211%22%20transform%3D%22rotate%2810.3%201209%20753%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.48%22%2F%3E%3Cellipse%20cx%3D%221057%22%20cy%3D%22420%22%20rx%3D%22102%22%20ry%3D%2223%22%20transform%3D%22rotate%28-26.3%201057%20420%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.42%22%2F%3E%3Cellipse%20cx%3D%22642%22%20cy%3D%22-28%22%20rx%3D%2268%22%20ry%3D%2234%22%20transform%3D%22rotate%281.1%20642%20-28%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.27%22%2F%3E%3Cellipse%20cx%3D%2285%22%20cy%3D%223%22%20rx%3D%2296%22%20ry%3D%2234%22%20transform%3D%22rotate%2826.1%2085%203%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.17%22%2F%3E%3Cellipse%20cx%3D%22348%22%20cy%3D%22-21%22%20rx%3D%2256%22%20ry%3D%2213%22%20transform%3D%22rotate%28-14.7%20348%20-21%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.29%22%2F%3E%3Cellipse%20cx%3D%22458%22%20cy%3D%22-20%22%20rx%3D%2227%22%20ry%3D%2213%22%20transform%3D%22rotate%28-19.2%20458%20-20%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.33%22%2F%3E%3Cellipse%20cx%3D%22628%22%20cy%3D%22536%22%20rx%3D%2231%22%20ry%3D%229%22%20transform%3D%22rotate%28-23.5%20628%20536%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.34%22%2F%3E%3Cellipse%20cx%3D%221541%22%20cy%3D%22614%22%20rx%3D%2293%22%20ry%3D%2226%22%20transform%3D%22rotate%28-29.0%201541%20614%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.34%22%2F%3E%3Cellipse%20cx%3D%22776%22%20cy%3D%22583%22%20rx%3D%2254%22%20ry%3D%2221%22%20transform%3D%22rotate%2813.5%20776%20583%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.47%22%2F%3E%3Cellipse%20cx%3D%22461%22%20cy%3D%22441%22%20rx%3D%2290%22%20ry%3D%2225%22%20transform%3D%22rotate%28-23.1%20461%20441%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.26%22%2F%3E%3Cellipse%20cx%3D%2274%22%20cy%3D%22816%22%20rx%3D%2290%22%20ry%3D%2228%22%20transform%3D%22rotate%28-22.2%2074%20816%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.18%22%2F%3E%3Cellipse%20cx%3D%22351%22%20cy%3D%2218%22%20rx%3D%2258%22%20ry%3D%2222%22%20transform%3D%22rotate%28-15.3%20351%2018%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.17%22%2F%3E%3Cellipse%20cx%3D%221153%22%20cy%3D%22-24%22%20rx%3D%2240%22%20ry%3D%2212%22%20transform%3D%22rotate%28-7.6%201153%20-24%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.18%22%2F%3E%3Cellipse%20cx%3D%22660%22%20cy%3D%22284%22%20rx%3D%2284%22%20ry%3D%2232%22%20transform%3D%22rotate%2823.8%20660%20284%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.38%22%2F%3E%3Cellipse%20cx%3D%221257%22%20cy%3D%22587%22%20rx%3D%2259%22%20ry%3D%2227%22%20transform%3D%22rotate%289.3%201257%20587%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.48%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E");
-  background-size: 100% 100%;
-  background-repeat: no-repeat;
-  opacity: .5;
-  animation: causticA 74s linear infinite;
-}
-
-.waterline .cb {
-  background-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%221600%22%20height%3D%221000%22%20viewBox%3D%220%200%201600%201000%22%3E%3Cdefs%3E%3Cfilter%20id%3D%22f%22%20x%3D%22-30%25%22%20y%3D%22-30%25%22%20width%3D%22160%25%22%20height%3D%22160%25%22%3E%3CfeTurbulence%20type%3D%22fractalNoise%22%20baseFrequency%3D%220.0085%22%20numOctaves%3D%223%22%20seed%3D%2231%22%20result%3D%22n%22%2F%3E%3CfeDisplacementMap%20in%3D%22SourceGraphic%22%20in2%3D%22n%22%20scale%3D%2296%22%20xChannelSelector%3D%22R%22%20yChannelSelector%3D%22G%22%2F%3E%3CfeGaussianBlur%20stdDeviation%3D%2213%22%2F%3E%3C%2Ffilter%3E%3C%2Fdefs%3E%3Cg%20filter%3D%22url%28%23f%29%22%3E%3Cellipse%20cx%3D%22-58%22%20cy%3D%2250%22%20rx%3D%2291%22%20ry%3D%2237%22%20transform%3D%22rotate%28-21.7%20-58%2050%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.10%22%2F%3E%3Cellipse%20cx%3D%22328%22%20cy%3D%22799%22%20rx%3D%2259%22%20ry%3D%2225%22%20transform%3D%22rotate%289.7%20328%20799%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.10%22%2F%3E%3Cellipse%20cx%3D%22863%22%20cy%3D%22439%22%20rx%3D%2294%22%20ry%3D%2247%22%20transform%3D%22rotate%28-24.4%20863%20439%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.08%22%2F%3E%3Cellipse%20cx%3D%221574%22%20cy%3D%22387%22%20rx%3D%2266%22%20ry%3D%2221%22%20transform%3D%22rotate%28-8.1%201574%20387%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.25%22%2F%3E%3Cellipse%20cx%3D%22290%22%20cy%3D%22172%22%20rx%3D%22116%22%20ry%3D%2243%22%20transform%3D%22rotate%2827.2%20290%20172%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.23%22%2F%3E%3Cellipse%20cx%3D%22546%22%20cy%3D%22156%22%20rx%3D%22149%22%20ry%3D%2274%22%20transform%3D%22rotate%28-28.2%20546%20156%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.21%22%2F%3E%3Cellipse%20cx%3D%221448%22%20cy%3D%22675%22%20rx%3D%2268%22%20ry%3D%2230%22%20transform%3D%22rotate%2813.8%201448%20675%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.11%22%2F%3E%3Cellipse%20cx%3D%221048%22%20cy%3D%22174%22%20rx%3D%2245%22%20ry%3D%2214%22%20transform%3D%22rotate%28-9.9%201048%20174%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.15%22%2F%3E%3Cellipse%20cx%3D%221058%22%20cy%3D%22890%22%20rx%3D%22165%22%20ry%3D%2281%22%20transform%3D%22rotate%2829.6%201058%20890%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.22%22%2F%3E%3Cellipse%20cx%3D%22459%22%20cy%3D%22125%22%20rx%3D%22121%22%20ry%3D%2245%22%20transform%3D%22rotate%2810.5%20459%20125%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.10%22%2F%3E%3Cellipse%20cx%3D%22259%22%20cy%3D%22988%22%20rx%3D%22118%22%20ry%3D%2249%22%20transform%3D%22rotate%28-24.3%20259%20988%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.15%22%2F%3E%3Cellipse%20cx%3D%221522%22%20cy%3D%22673%22%20rx%3D%22169%22%20ry%3D%2246%22%20transform%3D%22rotate%28-2.7%201522%20673%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.22%22%2F%3E%3Cellipse%20cx%3D%22703%22%20cy%3D%22835%22%20rx%3D%22113%22%20ry%3D%2229%22%20transform%3D%22rotate%28-24.1%20703%20835%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.26%22%2F%3E%3Cellipse%20cx%3D%22130%22%20cy%3D%22145%22%20rx%3D%2284%22%20ry%3D%2235%22%20transform%3D%22rotate%2821.2%20130%20145%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.16%22%2F%3E%3Cellipse%20cx%3D%22797%22%20cy%3D%22835%22%20rx%3D%2276%22%20ry%3D%2225%22%20transform%3D%22rotate%286.8%20797%20835%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.19%22%2F%3E%3Cellipse%20cx%3D%22-13%22%20cy%3D%2250%22%20rx%3D%2258%22%20ry%3D%2225%22%20transform%3D%22rotate%2811.6%20-13%2050%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.26%22%2F%3E%3Cellipse%20cx%3D%221271%22%20cy%3D%22216%22%20rx%3D%22140%22%20ry%3D%2269%22%20transform%3D%22rotate%28-9.1%201271%20216%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.08%22%2F%3E%3Cellipse%20cx%3D%22580%22%20cy%3D%22248%22%20rx%3D%2263%22%20ry%3D%2215%22%20transform%3D%22rotate%28-22.5%20580%20248%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.24%22%2F%3E%3Cellipse%20cx%3D%228%22%20cy%3D%22632%22%20rx%3D%2267%22%20ry%3D%2218%22%20transform%3D%22rotate%2819.2%208%20632%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.13%22%2F%3E%3Cellipse%20cx%3D%22244%22%20cy%3D%22448%22%20rx%3D%22130%22%20ry%3D%2248%22%20transform%3D%22rotate%2821.6%20244%20448%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.15%22%2F%3E%3Cellipse%20cx%3D%22842%22%20cy%3D%22752%22%20rx%3D%22100%22%20ry%3D%2242%22%20transform%3D%22rotate%28-2.0%20842%20752%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.10%22%2F%3E%3Cellipse%20cx%3D%22137%22%20cy%3D%22828%22%20rx%3D%22137%22%20ry%3D%2266%22%20transform%3D%22rotate%2811.4%20137%20828%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.18%22%2F%3E%3Cellipse%20cx%3D%22212%22%20cy%3D%22910%22%20rx%3D%2255%22%20ry%3D%2219%22%20transform%3D%22rotate%28-21.6%20212%20910%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.15%22%2F%3E%3Cellipse%20cx%3D%22461%22%20cy%3D%22414%22%20rx%3D%22132%22%20ry%3D%2249%22%20transform%3D%22rotate%28-15.4%20461%20414%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.22%22%2F%3E%3Cellipse%20cx%3D%221214%22%20cy%3D%22880%22%20rx%3D%2244%22%20ry%3D%2217%22%20transform%3D%22rotate%2823.7%201214%20880%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.13%22%2F%3E%3Cellipse%20cx%3D%22276%22%20cy%3D%22864%22%20rx%3D%2287%22%20ry%3D%2229%22%20transform%3D%22rotate%2819.1%20276%20864%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.15%22%2F%3E%3Cellipse%20cx%3D%22269%22%20cy%3D%22169%22%20rx%3D%2285%22%20ry%3D%2235%22%20transform%3D%22rotate%28-7.9%20269%20169%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.22%22%2F%3E%3Cellipse%20cx%3D%2236%22%20cy%3D%22209%22%20rx%3D%22121%22%20ry%3D%2243%22%20transform%3D%22rotate%28-0.0%2036%20209%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.25%22%2F%3E%3Cellipse%20cx%3D%22408%22%20cy%3D%22131%22%20rx%3D%2244%22%20ry%3D%2216%22%20transform%3D%22rotate%28-12.2%20408%20131%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.16%22%2F%3E%3Cellipse%20cx%3D%22-70%22%20cy%3D%22-80%22%20rx%3D%2289%22%20ry%3D%2239%22%20transform%3D%22rotate%28-12.0%20-70%20-80%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.24%22%2F%3E%3Cellipse%20cx%3D%22940%22%20cy%3D%22388%22%20rx%3D%22141%22%20ry%3D%2240%22%20transform%3D%22rotate%286.3%20940%20388%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.23%22%2F%3E%3Cellipse%20cx%3D%22872%22%20cy%3D%22291%22%20rx%3D%2252%22%20ry%3D%2220%22%20transform%3D%22rotate%28-18.7%20872%20291%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.15%22%2F%3E%3Cellipse%20cx%3D%22875%22%20cy%3D%221012%22%20rx%3D%22128%22%20ry%3D%2247%22%20transform%3D%22rotate%2821.5%20875%201012%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.13%22%2F%3E%3Cellipse%20cx%3D%22602%22%20cy%3D%22706%22%20rx%3D%22112%22%20ry%3D%2232%22%20transform%3D%22rotate%28-5.4%20602%20706%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.23%22%2F%3E%3Cellipse%20cx%3D%22346%22%20cy%3D%22739%22%20rx%3D%2246%22%20ry%3D%2223%22%20transform%3D%22rotate%2811.0%20346%20739%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.14%22%2F%3E%3Cellipse%20cx%3D%221650%22%20cy%3D%22844%22%20rx%3D%2248%22%20ry%3D%2214%22%20transform%3D%22rotate%28-0.5%201650%20844%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.26%22%2F%3E%3Cellipse%20cx%3D%22168%22%20cy%3D%22-25%22%20rx%3D%2281%22%20ry%3D%2219%22%20transform%3D%22rotate%28-5.5%20168%20-25%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.18%22%2F%3E%3Cellipse%20cx%3D%22695%22%20cy%3D%2284%22%20rx%3D%2243%22%20ry%3D%2219%22%20transform%3D%22rotate%28-3.6%20695%2084%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.17%22%2F%3E%3Cellipse%20cx%3D%22761%22%20cy%3D%22715%22%20rx%3D%22157%22%20ry%3D%2271%22%20transform%3D%22rotate%2813.6%20761%20715%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.14%22%2F%3E%3Cellipse%20cx%3D%22217%22%20cy%3D%2224%22%20rx%3D%22152%22%20ry%3D%2236%22%20transform%3D%22rotate%284.2%20217%2024%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.24%22%2F%3E%3Cellipse%20cx%3D%22487%22%20cy%3D%22371%22%20rx%3D%2294%22%20ry%3D%2246%22%20transform%3D%22rotate%2811.0%20487%20371%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.23%22%2F%3E%3Cellipse%20cx%3D%22-12%22%20cy%3D%22767%22%20rx%3D%2299%22%20ry%3D%2233%22%20transform%3D%22rotate%2819.0%20-12%20767%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.21%22%2F%3E%3Cellipse%20cx%3D%221522%22%20cy%3D%22777%22%20rx%3D%22158%22%20ry%3D%2254%22%20transform%3D%22rotate%283.4%201522%20777%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.22%22%2F%3E%3Cellipse%20cx%3D%22718%22%20cy%3D%2279%22%20rx%3D%22116%22%20ry%3D%2254%22%20transform%3D%22rotate%2822.2%20718%2079%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.10%22%2F%3E%3Cellipse%20cx%3D%22591%22%20cy%3D%22185%22%20rx%3D%2284%22%20ry%3D%2241%22%20transform%3D%22rotate%28-4.7%20591%20185%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.14%22%2F%3E%3Cellipse%20cx%3D%22400%22%20cy%3D%22431%22%20rx%3D%22127%22%20ry%3D%2240%22%20transform%3D%22rotate%28-18.8%20400%20431%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.12%22%2F%3E%3Cellipse%20cx%3D%22377%22%20cy%3D%22971%22%20rx%3D%2262%22%20ry%3D%2227%22%20transform%3D%22rotate%28-23.5%20377%20971%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.22%22%2F%3E%3Cellipse%20cx%3D%22388%22%20cy%3D%22824%22%20rx%3D%2296%22%20ry%3D%2223%22%20transform%3D%22rotate%28-24.3%20388%20824%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.22%22%2F%3E%3Cellipse%20cx%3D%22874%22%20cy%3D%22484%22%20rx%3D%2286%22%20ry%3D%2235%22%20transform%3D%22rotate%28-1.1%20874%20484%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.09%22%2F%3E%3Cellipse%20cx%3D%22978%22%20cy%3D%22284%22%20rx%3D%22150%22%20ry%3D%2256%22%20transform%3D%22rotate%2816.4%20978%20284%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.10%22%2F%3E%3Cellipse%20cx%3D%221164%22%20cy%3D%22628%22%20rx%3D%22151%22%20ry%3D%2270%22%20transform%3D%22rotate%283.1%201164%20628%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.19%22%2F%3E%3Cellipse%20cx%3D%221270%22%20cy%3D%22226%22%20rx%3D%22111%22%20ry%3D%2249%22%20transform%3D%22rotate%285.7%201270%20226%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.18%22%2F%3E%3Cellipse%20cx%3D%221426%22%20cy%3D%221051%22%20rx%3D%2274%22%20ry%3D%2218%22%20transform%3D%22rotate%286.8%201426%201051%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.11%22%2F%3E%3Cellipse%20cx%3D%221627%22%20cy%3D%22471%22%20rx%3D%22109%22%20ry%3D%2249%22%20transform%3D%22rotate%2822.2%201627%20471%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.10%22%2F%3E%3Cellipse%20cx%3D%22718%22%20cy%3D%22129%22%20rx%3D%22100%22%20ry%3D%2226%22%20transform%3D%22rotate%2822.6%20718%20129%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.14%22%2F%3E%3Cellipse%20cx%3D%22605%22%20cy%3D%22961%22%20rx%3D%22147%22%20ry%3D%2246%22%20transform%3D%22rotate%28-0.0%20605%20961%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.20%22%2F%3E%3Cellipse%20cx%3D%22251%22%20cy%3D%2278%22%20rx%3D%22151%22%20ry%3D%2240%22%20transform%3D%22rotate%2812.5%20251%2078%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.21%22%2F%3E%3Cellipse%20cx%3D%22961%22%20cy%3D%22321%22%20rx%3D%22152%22%20ry%3D%2267%22%20transform%3D%22rotate%28-25.7%20961%20321%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.24%22%2F%3E%3Cellipse%20cx%3D%221040%22%20cy%3D%22256%22%20rx%3D%2262%22%20ry%3D%2215%22%20transform%3D%22rotate%2818.7%201040%20256%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.23%22%2F%3E%3Cellipse%20cx%3D%22532%22%20cy%3D%22129%22%20rx%3D%2250%22%20ry%3D%2217%22%20transform%3D%22rotate%28-12.1%20532%20129%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.09%22%2F%3E%3Cellipse%20cx%3D%22444%22%20cy%3D%22873%22%20rx%3D%2248%22%20ry%3D%2216%22%20transform%3D%22rotate%280.9%20444%20873%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.11%22%2F%3E%3Cellipse%20cx%3D%22-16%22%20cy%3D%226%22%20rx%3D%2259%22%20ry%3D%2229%22%20transform%3D%22rotate%2821.7%20-16%206%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.21%22%2F%3E%3Cellipse%20cx%3D%221503%22%20cy%3D%22297%22%20rx%3D%2272%22%20ry%3D%2234%22%20transform%3D%22rotate%286.4%201503%20297%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.25%22%2F%3E%3Cellipse%20cx%3D%22552%22%20cy%3D%22399%22%20rx%3D%22133%22%20ry%3D%2262%22%20transform%3D%22rotate%28-20.1%20552%20399%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.13%22%2F%3E%3Cellipse%20cx%3D%22-56%22%20cy%3D%22569%22%20rx%3D%22160%22%20ry%3D%2261%22%20transform%3D%22rotate%28-21.1%20-56%20569%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.20%22%2F%3E%3Cellipse%20cx%3D%221064%22%20cy%3D%2242%22%20rx%3D%22159%22%20ry%3D%2264%22%20transform%3D%22rotate%28-0.6%201064%2042%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.14%22%2F%3E%3Cellipse%20cx%3D%22202%22%20cy%3D%22463%22%20rx%3D%2288%22%20ry%3D%2225%22%20transform%3D%22rotate%288.8%20202%20463%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.20%22%2F%3E%3Cellipse%20cx%3D%221600%22%20cy%3D%221043%22%20rx%3D%22101%22%20ry%3D%2242%22%20transform%3D%22rotate%28-7.5%201600%201043%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.16%22%2F%3E%3Cellipse%20cx%3D%22918%22%20cy%3D%221058%22%20rx%3D%2245%22%20ry%3D%2216%22%20transform%3D%22rotate%28-9.8%20918%201058%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.22%22%2F%3E%3Cellipse%20cx%3D%221593%22%20cy%3D%22468%22%20rx%3D%2250%22%20ry%3D%2219%22%20transform%3D%22rotate%285.3%201593%20468%29%22%20fill%3D%22rgb%28196%2C253%2C248%29%22%20opacity%3D%220.20%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E");
-  background-size: 100% 100%;
-  background-repeat: no-repeat;
-  opacity: .38;
-  animation: causticB 103s linear infinite reverse;
-}
-
 @keyframes causticA {
   from { transform: translate3d(0, 0, 0) scale(1); }
   to   { transform: translate3d(-46px, 18px, 0) scale(1.05); }
@@ -2239,24 +1992,7 @@ body.has-result .explain {
 @keyframes causticB {
   from { transform: translate3d(0, 0, 0) scale(1.04); }
   to   { transform: translate3d(38px, -22px, 0) scale(1); }
-}
-
-/* a film of light where the surface meets the air */
-.waterline .sheen {
-  position: absolute;
-  inset: 0;
-  background:
-    linear-gradient(180deg, rgba(190, 255, 250, .16) 0%, transparent 18%),
-    radial-gradient(80% 60% at 50% 110%, rgba(0, 0, 0, .5), transparent 70%);
-  pointer-events: none;
-}
-
-.waterline.rise { opacity: 1; transform: scale(1); }
-.waterline.fall { opacity: 0; transition: opacity 3.6s cubic-bezier(.4,0,.2,1); }
-
-/* the scene is clipped to its own frame, so a zoomed shot cannot spill past the
-   curtain and leave the fisherman visible outside the water */
-.fishing { overflow: hidden; }
+}/* the scene is clipped to its own frame{ overflow: hidden; }
 
   to   { background-position: 0 0; }
 }
@@ -2272,34 +2008,14 @@ body.has-result .explain {
 .result.pending .evidence,
 .result.pending details.advanced {
   display: none;
-}
-
-/* ================================================== the fisherman's catch ===
+}/* ================================================== the fisherman's catch ===
    A seven-second performance that runs with the dial. He prepares, casts, feels
-   something, hauls, and the catch is whatever the verdict says it is. Purely
-   presentational: the result is already computed and is revealed the moment the
-   net clears the water. */
-
-.fishing { display: none; width: 100%; max-width: 360px; }
-
-.result.pending .fishing { display: block; margin: 4px 0 0; }
+   something, hauls{ display: none; width: 100%; max-width: 360px; }
 .result.pending .skeleton { display: none; }
-
-.fishing svg { width: 100%; height: auto; overflow: visible; }
-
-.fishing .sea { opacity: .9; }
-
-.fishing .boat { animation: bob 3.2s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
 
 @keyframes bob {
   0%, 100% { transform: translateY(0) rotate(0deg); }
   50%      { transform: translateY(-2px) rotate(-1deg); }
-}
-
-.fishing .arm {
-  transform-box: fill-box;
-  transform-origin: 0% 100%;
-  animation: cast 7s cubic-bezier(.4,0,.3,1) forwards;
 }
 
 @keyframes cast {
@@ -2313,24 +2029,12 @@ body.has-result .explain {
   100% { transform: rotate(0deg); }
 }
 
-.fishing .netg {
-  transform-box: fill-box;
-  transform-origin: 0% 50%;
-  animation: netswing 7s cubic-bezier(.4,0,.3,1) forwards;
-}
-
 @keyframes netswing {
   0%, 10%   { transform: translate(0,0) scale(1); opacity: 1; }
   26%       { transform: translate(6px, 26px) scale(.9); opacity: 1; }
   45%       { transform: translate(4px, 20px) scale(.92); opacity: .95; }
   78%       { transform: translate(-2px, 4px) scale(1.02); opacity: 1; }
   100%      { transform: translate(0,0) scale(1); }
-}
-
-.fishing .line {
-  animation: lineflex 7s ease-in-out forwards;
-  transform-box: fill-box;
-  transform-origin: top center;
 }
 
 @keyframes lineflex {
@@ -2342,16 +2046,6 @@ body.has-result .explain {
   100%     { opacity: .1; }
 }
 
-.fishing .ripple {
-  fill: none;
-  stroke: rgba(67, 232, 200, .5);
-  stroke-width: 1.2;
-  opacity: 0;
-  transform-box: fill-box;
-  transform-origin: center;
-}
-
-
 @keyframes ripple {
   0%       { opacity: 0; transform: scale(.3); }
   8%       { opacity: .7; }
@@ -2359,21 +2053,10 @@ body.has-result .explain {
   100%     { opacity: 0; transform: scale(2.6); }
 }
 
-.fishing .catch { opacity: 0; }
-
-.fishing[data-catch="dark"]  .catch-dark,
-.fishing[data-catch="odd"]   .catch-odd,
-.fishing[data-catch="plain"] .catch-plain { animation: haul 7s cubic-bezier(.3,1.6,.5,1) forwards; }
-
 @keyframes haul {
   0%, 84%  { opacity: 0; transform: translateY(16px) scale(.7); }
   90%      { opacity: 1; transform: translateY(-4px) scale(1.06); }
   100%     { opacity: 1; transform: translateY(0) scale(1); }
-}
-
-.fishing .catch-dark, .fishing .catch-odd, .fishing .catch-plain {
-  transform-box: fill-box;
-  transform-origin: center;
 }
 
 /* narration + skip share a row */
@@ -2402,39 +2085,23 @@ body.has-result .explain {
   transition: color .2s, border-color .2s;
 }
 
-.skip:hover { color: var(--accent); border-color: var(--accent); }
-
-/* The scan performance always runs, like the dial does.
-   A still fisherman with the catch already landed tells the wrong story, and this
-   machine class of preference is common enough that the feature would be invisible
-   on many screens. Decorative motion elsewhere still honours the setting. */
-
-.fishing { max-width: 100% !important; }
-.fishing svg { width: 100%; height: auto; }
-.fishing .ripple { fill: none; stroke: rgba(67,232,200,.55); stroke-width: 1.4; }
+.skip:hover { color: var(--accent); border-color: var(--accent); }/* The scan performance always runs, like the dial does.
+   A still fisherman with the catch already landed tells the wrong story{ max-width: 100% !important; }
 
 /* The global reduced-motion rule above collapses every animation to 0.001ms.
    The scan performance is the product's feedback, not decoration, so it is
    restored here for all users - same reasoning as the dial, which is JS-driven
    and therefore already unaffected. */
 @media (prefers-reduced-motion: reduce) {
-  .fishing .arm  { animation: cast 7s cubic-bezier(.4,0,.3,1) forwards !important; }
-  .fishing .netg { animation: netswing 7s cubic-bezier(.4,0,.3,1) forwards !important; }
-  .fishing .line { animation: lineflex 7s ease-in-out forwards !important; }
-  .fishing .boat { animation: bob 3.2s ease-in-out infinite !important; }
         .fishing[data-catch="dark"]  .catch-dark,
   .fishing[data-catch="odd"]   .catch-odd,
   .fishing[data-catch="plain"] .catch-plain {
     animation: haul 7s cubic-bezier(.3,1.6,.5,1) forwards !important;
   }
-}
-
-/* ============================== the cast net ==============================
+}/* ============================== the cast net ==============================
    He throws it, it spreads on the water, then he hauls it back and the catch
    comes up with it. The net is the only thing that travels; the man stays put
-   and works the rope, which is what actually happens on a small boat. */
-
-.fishing .net {
+   and works the rope{
   transform-box: view-box;
   transform-origin: 0 0;
   animation: netthrow 7s cubic-bezier(.34,.9,.4,1) forwards;
@@ -2451,40 +2118,23 @@ body.has-result .explain {
   100%     { transform: translate(290px, 134px) scale(.5); }
 }
 
-.fishing .net-bundle { animation: bundle 7s linear forwards; }
-
 @keyframes bundle {
   0%, 12% { opacity: 1; }
   22%     { opacity: 0; }
   100%    { opacity: 0; }
 }
 
-.fishing .net-open { opacity: 0; animation: netopen 7s linear forwards; }
-
 @keyframes netopen {
   0%, 22% { opacity: 0; }
   27%     { opacity: 1; }
   100%    { opacity: 1; }
-}
-
-/* the catch rides inside the net, so it rises with it */
-.fishing .caught { opacity: 0; animation: catchup 7s linear forwards; }
-.fishing .caught > g { display: none; animation: none !important; opacity: 1 !important; }
-
-.fishing[data-catch="dark"]  .caught > .catch-dark  { display: block; }
-.fishing[data-catch="odd"]   .caught > .catch-odd   { display: block; }
-.fishing[data-catch="plain"] .caught > .catch-plain { display: block; }
+}/* the catch rides inside the net{ opacity: 0; animation: catchup 7s linear forwards; }
 
 @keyframes catchup {
   0%, 84% { opacity: 0; }
   88%     { opacity: 1; transform: translateY(4px) scale(.9); }
   100%    { opacity: 1; transform: translateY(0) scale(1); }
-}
-
-.fishing .caught { transform-box: fill-box; transform-origin: center; }
-
-/* the arm actually works: wind up, throw, hold, two tugs, then the haul */
-.fishing .arm {
+}/* the arm actually works: wind up, throw, hold, two tugs{
   transform-box: view-box;
   transform-origin: 256px 110px;
   animation: armwork 7s cubic-bezier(.4,0,.3,1) forwards;
@@ -2505,28 +2155,15 @@ body.has-result .explain {
   100% { transform: rotate(0deg); }
 }
 
-/* net suppresses its old rod-era rules */
-.fishing .netmesh, .fishing .netg { animation: none !important; }
-
 /* the cast-net scene is also exempt from the global collapse, same reason */
 @media (prefers-reduced-motion: reduce) {
-  .fishing .net       { animation: netthrow 7s cubic-bezier(.34,.9,.4,1) forwards !important; }
-  .fishing .net-bundle{ animation: bundle 7s linear forwards !important; }
-  .fishing .net-open  { animation: netopen 7s linear forwards !important; }
-  .fishing .caught    { animation: catchup 7s linear forwards !important; }
-  .fishing .arm       { animation: armwork 7s cubic-bezier(.4,0,.3,1) forwards !important; }
-  .fishing .boat      { animation: bob 3.2s ease-in-out infinite !important; }
-      }
-
-/* ====================== the drape: ten seconds of casting ==================
+      }/* ====================== the drape: ten seconds of casting ==================
    0-12%  winds back with the net gathered in both hands
    12-26% throws; the cloth flutters out over the water
    26-40% lands and spreads
    40-66% drifts, drawn across the water
    66-88% hauled back in, catch coming up inside it
-   88-100% aboard, verdict.                                                   */
-
-.fishing .netcloth {
+   88-100% aboard{
   transform-box: view-box;
   transform-origin: 0 0;
   animation: netcast 10s cubic-bezier(.34,.9,.4,1) forwards;
@@ -2543,12 +2180,6 @@ body.has-result .explain {
   100%    { transform: translate(288px, 135px) scale(.56) rotate(0deg); }
 }
 
-.fishing .arms {
-  transform-box: view-box;
-  transform-origin: 252px 116px;
-  animation: armswork 10s cubic-bezier(.4,0,.3,1) forwards;
-}
-
 @keyframes armswork {
   0%   { transform: rotate(-6deg); }
   12%  { transform: rotate(-30deg); }
@@ -2562,28 +2193,16 @@ body.has-result .explain {
   100% { transform: rotate(0deg); }
 }
 
-.fishing .cloth { transform-box: fill-box; transform-origin: center; }
-.fishing .cloth.back { animation: swish 2.6s ease-in-out infinite alternate; }
-.fishing .cloth.front { animation: swish 2.1s ease-in-out infinite alternate-reverse; }
-
 @keyframes swish {
   from { transform: rotate(-2.4deg) scale(1); }
   to   { transform: rotate(2.4deg) scale(1.03); }
 }
-
-.fishing .caught { opacity: 0; animation: catchup10 10s linear forwards; transform-box: fill-box; transform-origin: center; }
-.fishing .caught > g { display: none; animation: none !important; opacity: 1 !important; }
-
-.fishing[data-catch="dark"]  .caught > .catch-dark  { display: block; }
-.fishing[data-catch="odd"]   .caught > .catch-odd   { display: block; }
-.fishing[data-catch="plain"] .caught > .catch-plain { display: block; }
 
 @keyframes catchup10 {
   0%, 86% { opacity: 0; }
   90%     { opacity: 1; transform: translateY(4px) scale(.9); }
   100%    { opacity: 1; transform: translateY(0) scale(1); }
 }
-
 
 @keyframes ripple10 {
   0%   { opacity: 0; transform: scale(.3); }
@@ -2594,12 +2213,6 @@ body.has-result .explain {
 
 /* exempt the scene from the global animation collapse */
 @media (prefers-reduced-motion: reduce) {
-  .fishing .netcloth { animation: netcast 10s cubic-bezier(.34,.9,.4,1) forwards !important; }
-  .fishing .arms     { animation: armswork 10s cubic-bezier(.4,0,.3,1) forwards !important; }
-  .fishing .caught   { animation: catchup10 10s linear forwards !important; }
-  .fishing .cloth.back  { animation: swish 2.6s ease-in-out infinite alternate !important; }
-  .fishing .cloth.front { animation: swish 2.1s ease-in-out infinite alternate-reverse !important; }
-        .fishing .boat { animation: bob 3.2s ease-in-out infinite !important; }
 }
 
 /* ------------------------------------------------------------ liveliness */
@@ -2630,12 +2243,6 @@ body.has-result .explain {
   100%    { transform: translate(288px, 135px) scale(.58) rotate(0deg); }
 }
 
-.fishing .netcloth { animation-name: netcast-big !important; }
-
-@media (prefers-reduced-motion: reduce) {
-  .fishing .netcloth { animation-name: netcast-big !important; }
-}
-
 /* ===================== the scene, second pass =====================
    Boat to the left, fisherman on its right end, net cast into open water on
    the right. Only the keel sits below the waterline.                       */
@@ -2651,19 +2258,6 @@ body.has-result .explain {
   100%    { transform: translate(252px, 116px) scale(.5) rotate(0deg); }
 }
 
-.fishing .netcloth {
-  transform-box: view-box;
-  transform-origin: 0 0;
-  animation: netcast2 10s cubic-bezier(.34,.9,.4,1) forwards !important;
-}
-
-.fishing .arms {
-  transform-box: view-box;
-  transform-origin: 211px 118px;
-  animation: armswork 10s cubic-bezier(.4,0,.3,1) forwards !important;
-}
-
-
 /* the moment it lands: a short, bright disturbance, then gone */
 
 @keyframes splash {
@@ -2676,22 +2270,10 @@ body.has-result .explain {
 
 /* the scene must never be clipped by the card */
 .result.pending .verdict-head { overflow: visible; }
-.fishing svg { overflow: visible; }
-
-/* the wake breathes with the boat */
-.fishing .wake {
-  animation: wake 4.2s ease-in-out infinite;
-  transform-box: fill-box;
-  transform-origin: center;
-}
 
 @keyframes wake {
   0%, 100% { opacity: .45; transform: scaleX(1) translateX(0); }
   50%      { opacity: .8;  transform: scaleX(1.03) translateX(1px); }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .fishing .wake { animation: wake 4.2s ease-in-out infinite !important; }
 }
 
 /* ---------------------------------------------------- reveal on scroll */
@@ -2754,8 +2336,6 @@ body.has-result .explain {
   z-index: 4;
   pointer-events: none;
 }
-
-.result.pending .fishing { margin: 0; max-width: none; }
 .result.pending .verdict-url { opacity: 0.5; margin-bottom: 2px; }
 .result.pending .block-title,
 .result.pending .thinking-row { margin-top: 14px; }
@@ -2770,22 +2350,9 @@ body.has-result .explain {
   height: 138px;
   z-index: 4;
   pointer-events: none;
-}
-
-/* the net is positioned by JavaScript now, so the CSS animation must stand down */
-.fishing .netcloth { animation: none !important; }
-.fishing .tether { stroke-linejoin: round; }
-
-/* ============ every part of the scene runs on the same clock ============
+}/* the net is positioned by JavaScript now{ animation: none !important; }/* ============ every part of the scene runs on the same clock ============
    The net lands 34% into the sweep, so the splash, ripples, arms and the catch
-   are all gated on `.go`, which is added when the sweep begins - not when the
-   card is rendered. */
-
-.fishing .arms { animation: none !important; }
-.fishing.go .arms { animation: armswork 6.6s cubic-bezier(.4,0,.3,1) forwards !important; }
-
-.fishing .caught { opacity: 0; animation: none !important; }
-.fishing.go .caught { animation: catchup66 6.6s linear forwards !important; }
+   are all gated on `.go`{ animation: none !important; }
 
 @keyframes catchup66 {
   0%, 56% { opacity: 0; }
@@ -2793,63 +2360,32 @@ body.has-result .explain {
   100%    { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-
 @keyframes ripple66 {
   0%   { opacity: 0; transform: scale(.3); }
   10%  { opacity: .8; }
   100% { opacity: 0; transform: scale(2.8); }
 }
 
-
 @keyframes splash66 {
   0%   { opacity: 0; transform: translateY(6px) scale(.6); }
   12%  { opacity: 1; transform: translateY(0) scale(1); }
   45%  { opacity: .8; transform: translateY(-8px) scale(1.2); }
   100% { opacity: 0; transform: translateY(-16px) scale(1.35); }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .fishing.go .arms { animation: armswork 6.6s cubic-bezier(.4,0,.3,1) forwards !important; }
-  .fishing.go .caught { animation: catchup66 6.6s linear forwards !important; }
-        }
-
-/* ================== one scene clock (ten seconds), one dial clock ==================
+}/* ================== one scene clock (ten seconds), one dial clock ==================
    The scene starts at render. Its ten-second timeline puts the net in the water at
-   34%, so the impact is triggered from JavaScript at that frame rather than by a CSS
-   delay that cannot know when the net actually lands. The dial starts at 3.4s and
-   finishes at 10s with the scene. */
-
-.fishing.go .arms { animation: armswork 10s cubic-bezier(.4,0,.3,1) forwards !important; }
-.fishing.go .caught { animation: catchup10b 10s linear forwards !important; }
+   34%{ animation: armswork 10s cubic-bezier(.4,0,.3,1) forwards !important; }
 
 @keyframes catchup10b {
   0%, 56% { opacity: 0; }
   60%     { opacity: 1; transform: translateY(4px) scale(.9); }
   100%    { opacity: 1; transform: translateY(0) scale(1); }
-}
-
-
-@media (prefers-reduced-motion: reduce) {
-  .fishing.go .arms { animation: armswork 10s cubic-bezier(.4,0,.3,1) forwards !important; }
-  .fishing.go .caught { animation: catchup10b 10s linear forwards !important; }
-        }
-
-/* ============================== act two: the reaction ==============================
-   Ten seconds of cast and haul, then he reacts to what is in the net, then the
-   camera moves in before the verdict takes the card. */
-
-.fisher, .catch-dark, .catch-odd, .catch-plain { transform-box: fill-box; transform-origin: center; }
-
-/* pleased: rocks back, chin up */
-.fishing[data-catch="plain"].reaction .fisher { animation: cheer 1.8s ease-in-out infinite; }
+}/* ============================== act two: the reaction ==============================
+   Ten seconds of cast and haul, then he reacts to what is in the net, .catch-dark, .catch-odd, .catch-plain{ transform-box: fill-box; transform-origin: center; }/* pleased: rocks back{ animation: cheer 1.8s ease-in-out infinite; }
 @keyframes cheer {
   0%, 100% { transform: translateY(0) rotate(0deg); }
   35%      { transform: translateY(-3px) rotate(-3deg); }
   70%      { transform: translateY(0) rotate(2deg); }
-}
-
-/* alarmed: recoils, then trembles */
-.fishing[data-catch="dark"].reaction .fisher { animation: recoil 1.1s ease-out 3; }
+}/* alarmed: recoils{ animation: recoil 1.1s ease-out 3; }
 @keyframes recoil {
   0%   { transform: translateX(0) rotate(0deg); }
   20%  { transform: translateX(-6px) rotate(-6deg); }
@@ -2857,55 +2393,29 @@ body.has-result .explain {
   70%  { transform: translateX(-5px) rotate(-5deg); }
   100% { transform: translateX(0) rotate(0deg); }
 }
-.fishing[data-catch="dark"].reaction .catch-dark { animation: jitter .32s steps(2) infinite; }
 @keyframes jitter {
   0%   { transform: translate(0, 0) rotate(0deg); }
   50%  { transform: translate(1px, -1px) rotate(4deg); }
   100% { transform: translate(0, 0) rotate(0deg); }
-}
-
-/* puzzled: a slow head tilt, twice */
-.fishing[data-catch="odd"].reaction .fisher { animation: ponder 2.2s ease-in-out infinite; }
+}/* puzzled: a slow head tilt{ animation: ponder 2.2s ease-in-out infinite; }
 @keyframes ponder {
   0%, 100% { transform: rotate(0deg); }
   40%      { transform: rotate(7deg); }
   60%      { transform: rotate(-4deg); }
 }
 
-/* ============================== act three: the zoom ============================== */
-.fishing svg { transform-origin: 62% 78%; transition: transform 1.6s cubic-bezier(.6,0,.25,1); }
-.fishing.zoom svg { transform: scale(1.9); }
-.fishing.zoom .caught { filter: drop-shadow(0 0 12px rgba(255,255,255,.18)); }
-
 /* the zoom is a close-up: the dial steps back so it does not float over the shot */
 .result.zooming .gauge { opacity: .18; transition: opacity 1s ease; }
-.fishing.zoom svg { transform: scale(1.6); }
-
-/* the reaction reads better with a touch more movement in the boat */
-.fishing.reaction .boat { animation: rock 1.6s ease-in-out infinite; }
 @keyframes rock {
   0%, 100% { transform: rotate(0deg) translateY(0); }
   40%      { transform: rotate(-1.4deg) translateY(-1px); }
   70%      { transform: rotate(1deg) translateY(0); }
-}
-
-/* ===================== the transition: a slower, carried move =====================
-   Zoom is a push-in of 1.8s, held, and then a wash of ripples crosses the frame and
-   the card rises through it. Nothing snaps. */
-
-.fishing svg { transform-origin: 46% 58%; transition: transform 2.4s cubic-bezier(.33,0,.2,1); }
-.fishing.zoom svg { transform: scale(1.75); }
-
-
-/* the catch lifts into his hands as he starts to examine it */
-/* the catch is positioned by JavaScript now; a CSS transform would win over it */
-.fishing.examine:not(.reaction) .caught { animation: none; }
+}/* ===================== the transition: a slower, carried move =====================
+   Zoom is a push-in of 1.8s, held{ transform-origin: 46% 58%; transition: transform 2.4s cubic-bezier(.33,0,.2,1); }
 @keyframes examine {
   0%, 100% { transform: translateY(0) rotate(0deg); }
   50%      { transform: translateY(-2px) rotate(-4deg); }
 }
-
-.fishing.examine:not(.reaction) .fisher { animation: inspect 3s ease-in-out infinite; }
 @keyframes inspect {
   0%, 100% { transform: rotate(0deg) translateY(0); }
   50%      { transform: rotate(2.5deg) translateY(-1px); }
@@ -2940,10 +2450,6 @@ body.has-result .explain {
 
 /* the dial keeps its colour through the zoom: it is evidence, not scenery */
 .result.zooming .gauge { opacity: 1; }
-
-/* ------------------------------- drips off the hauled net ------------------------------- */
-.fishing .drip { opacity: 0; }
-
 
 /* the dial is not there until the camera brings it into view */
 .result.pending:not(.dialcoming) .gauge,
@@ -2989,23 +2495,8 @@ body.has-result .explain {
   .result.pending .gauge { transition-duration: 2.4s !important; }
 
   /* the scene: arms, boat, wake, cloth, catch, reaction, examine */
-  .fishing .boat { animation: bob 3.2s ease-in-out infinite !important; }
-  .fishing .wake { animation: wake 4.2s ease-in-out infinite !important; }
-  .fishing .cloth.back { animation: swish 2.6s ease-in-out infinite alternate !important; }
-  .fishing .cloth.front { animation: swish 2.1s ease-in-out infinite alternate-reverse !important; }
-  .fishing.go .arms { animation: armswork 10s cubic-bezier(.4,0,.3,1) forwards !important; }
-  .fishing.go .caught { animation: catchup10b 10s linear forwards !important; }
-  .fishing.examine:not(.reaction) .fisher { animation: inspect 3s ease-in-out infinite !important; }
-  .fishing.examine:not(.reaction) .caught { animation: none !important; }
-  .fishing.reaction .fisher { animation-duration: 2.4s !important; animation-iteration-count: infinite !important; }
-  .fishing.reaction .boat { animation: rock 1.6s ease-in-out infinite !important; }
-  .fishing.zoom svg { transition: transform 2.4s cubic-bezier(.33,0,.2,1) !important; }
 
   /* the water */
-  .waterline { transition-duration: 6s !important; }
-  .waterline.fall { transition-duration: 3.6s !important; }
-  .waterline .ca { animation: causticA 74s linear infinite !important; }
-  .waterline .cb { animation: causticB 103s linear infinite reverse !important; }
 }
 
 /* the entrance is part of the performance, so it is exempt too */
@@ -3013,10 +2504,6 @@ body.has-result .explain {
   .hero { transition-duration: .62s !important; }
   .result:not(.hidden) { animation: cardIn .72s cubic-bezier(.22,1,.36,1) both !important; }
 }
-
-/* the water keeps pace with the shorter cut */
-.waterline { transition: opacity 6s cubic-bezier(.4, 0, .2, 1); }
-.waterline.fall { transition: opacity 3.6s cubic-bezier(.4, 0, .2, 1); }
 
 /* ================== moving between views ==================
    Switching tabs used to swap display and land the whole page at once. The incoming
@@ -3063,50 +2550,6 @@ body.has-result .explain {
   to   { opacity: 1; transform: none; }
 }
 
-/* ---------------------------------- the fisherman talks ---------------------------------- */
-.fishing .bubble {
-  position: absolute;
-  left: 9%;
-  top: 14%;
-  max-width: 232px;
-  padding: 10px 13px;
-  border-radius: 14px 14px 14px 4px;
-  background: rgba(8, 16, 22, 0.92);
-  border: 1px solid var(--line-hi);
-  color: var(--ink);
-  font-size: 0.82rem;
-  line-height: 1.4;
-  letter-spacing: 0.01em;
-  opacity: 0;
-  transform: translateY(6px) scale(.97);
-  transition: opacity .3s ease, transform .34s cubic-bezier(.22,1,.36,1);
-  pointer-events: none;
-  z-index: 6;
-  box-shadow: 0 12px 30px rgba(0, 0, 0, .45);
-}
-
-.fishing .bubble.on { opacity: 1; transform: none; }
-
-.fishing .bubble::after {
-  content: "";
-  position: absolute;
-  left: 22px;
-  bottom: -7px;
-  width: 12px;
-  height: 12px;
-  background: rgba(8, 16, 22, 0.92);
-  border-right: 1px solid var(--line-hi);
-  border-bottom: 1px solid var(--line-hi);
-  transform: rotate(45deg);
-  border-radius: 0 0 3px 0;
-}
-
-.fishing { position: relative; }
-
-/* the lighthouse lamp breathes */
-.fishing .lamp { animation: lamp 4.2s ease-in-out infinite; }
-.fishing .beam { animation: beam 8.4s ease-in-out infinite; }
-
 @keyframes lamp {
   0%, 100% { opacity: .45; }
   45%      { opacity: 1; }
@@ -3115,20 +2558,7 @@ body.has-result .explain {
 @keyframes beam {
   0%, 100% { opacity: .05; }
   50%      { opacity: .16; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .fishing .lamp { animation: lamp 4.2s ease-in-out infinite !important; }
-  .fishing .beam { animation: beam 8.4s ease-in-out infinite !important; }
-  .fishing .bubble { transition-duration: .3s !important; }
-}
-
-/* the line changes while the bubble stays put */
-.fishing .bubble.swap { opacity: 0; transform: translateY(-4px); transition: opacity .2s ease, transform .2s ease; }
-
-/* a gentler push-in, so the shore and the sky stay in the shot */
-.fishing.zoom svg { transform: scale(1.32); }
-.fishing svg { transform-origin: 47% 56%; }
+}/* a gentler push-in{ transform: scale(1.32); }
 
 /* ======================== the landing: how the verdict presents ========================
    After the water clears, the card is not just revealed - it is stamped. Each outcome
@@ -3198,10 +2628,7 @@ body.has-result .explain {
   background: radial-gradient(120% 90% at 12% 0%, var(--tone-soft, transparent), transparent 60%);
 }
 
-@keyframes toneWash { to { opacity: 1; } }
-
-/* the bubble sits beside his mouth, not behind him */
-.fishing .bubble { left: 31%; top: 17%; }
+@keyframes toneWash { to { opacity: 1; } }/* the bubble sits beside his mouth{ left: 31%; top: 17%; }
 
 @media (prefers-reduced-motion: reduce) {
   .result:not(.pending) .stamp { animation: stampIn .62s cubic-bezier(.2,1.5,.4,1) .15s both !important; }
@@ -3445,15 +2872,10 @@ body.verdict-open { overflow: hidden; }
 
 @media (prefers-reduced-motion: reduce) {
   .modal-shell { transition-duration: .5s !important; }
-}
-
-/* ============ the water owns the viewport, not the page ============
+}/* ============ the water owns the viewport, not the page ============
    It used to be sized by the view, so the moment the card left the flow for the
    modal the curtain shrank and the seam jumped. Fixed positioning decouples it from
-   layout entirely, and it sits above the modal so the verdict is revealed by the
-   water clearing rather than popping in over it. */
-
-.waterline {
+   layout entirely{
   position: fixed;
   inset: 0;
   z-index: 70;
@@ -3579,22 +3001,7 @@ body.verdict-open { overflow: hidden; }
 @media (max-width: 900px) {
   .hero h1 { font-size: clamp(2rem, 7vw, 2.6rem); }
   .preview-card, .preview-caption { max-width: none; }
-}
-
-/* the push-in frames the catch, which is all that is left on screen by then */
-.fishing svg { transform-origin: 44% 44%; }
-.fishing.zoom svg { transform: scale(1.85); }
-
-/* the catch is placed by its transform attribute: pin the reference frame so CSS
-   cannot re-origin or re-box it */
-.fishing .caught { transform-box: view-box; transform-origin: 0 0; }
-
-/* the camera move is done on the viewBox; the CSS scale must stand down or the two
-   would compound and throw the subject out of frame */
-.fishing.zoom svg { transform: none; }
-
-/* the catch, held up: an HTML element, so nothing in the SVG can hide it */
-.fishing .held {
+}/* the push-in frames the catch{ transform-origin: 44% 44%; }/* the catch, held up: an HTML element{
   position: absolute;
   left: 43%;
   top: 41%;
@@ -3610,16 +3017,6 @@ body.verdict-open { overflow: hidden; }
   filter: drop-shadow(0 6px 18px rgba(0, 0, 0, .55));
 }
 
-.fishing .held svg { width: 100%; height: 100%; overflow: visible; }
-
-.fishing.delivered .held {
-  opacity: 1;
-  transform: translate(-50%, -50%) scale(1) rotate(-4deg);
-  animation: heldTwitch 2.6s ease-in-out infinite;
-}
-
-.fishing.delivered .held.dark { animation: heldFight 1.1s ease-in-out infinite; }
-
 @keyframes heldTwitch {
   0%, 100% { rotate: 0deg; }
   50%      { rotate: -5deg; }
@@ -3632,14 +3029,6 @@ body.verdict-open { overflow: hidden; }
   75%  { rotate: 6deg;  translate: 2px 2px; }
   100% { rotate: -6deg; translate: 0 0; }
 }
-
-@media (prefers-reduced-motion: reduce) {
-  .fishing.delivered .held,
-  .fishing.delivered .held.dark { animation-duration: 2.6s !important; }
-}
-
-/* sitting in his hands rather than floating beside them */
-.fishing .held { left: 40%; top: 43%; }
 
 /* ============ the verdict takes over the water's space ============
    The shell is full-bleed and shares the curtain's tone, so when the water clears there
@@ -3746,61 +3135,10 @@ body.verdict-open { overflow: hidden; }
   float: none;
   margin: 0;
   z-index: 5;
-}
-
-/* =====================================================================
+}/* =====================================================================
    THE SCENE, DEFINITIVE
    Everything below is the final word on the scene's states. Earlier rules that
-   disagree are overridden here rather than hunted down, because the scene's CSS grew
-   by accretion and a rewrite risks losing behaviour that already works.
-   ===================================================================== */
-
-/* the catch is always present and never animated by CSS: JavaScript places it */
-.fishing .caught { opacity: 1 !important; animation: none !important; }
-
-.fishing .caught > g { display: none !important; }
-.fishing[data-catch="dark"]  .caught > .catch-dark  { display: block !important; }
-.fishing[data-catch="odd"]   .caught > .catch-odd   { display: block !important; }
-.fishing[data-catch="plain"] .caught > .catch-plain { display: block !important; }
-
-/* it looks like an ordinary fish until it is in his hands - then it shows its teeth */
-.fishing[data-catch="dark"]:not(.revealed) .caught > .catch-dark  { display: none !important; }
-.fishing[data-catch="dark"]:not(.revealed) .caught > .catch-plain { display: block !important; }
-
-.fishing .caught { transition: none; }
-
-/* the net does not exist until he is ready to cast */
-.fishing .netlive, .fishing .rope, .fishing .rope-hi {
-  transition: opacity .55s cubic-bezier(.4, 0, .2, 1);
-}
-
-.fishing:not(.castable) .netlive,
-.fishing:not(.castable) .rope,
-.fishing:not(.castable) .rope-hi { opacity: 0 !important; }
-
-/* the HTML stand-in is gone for good */
-.fishing .held { display: none !important; }
-
-/* the weave should suggest the net, not become the net */
-.fishing .net-mesh { stroke-opacity: .55 !important; stroke-width: .85 !important; }
-.fishing .net-fill { fill-opacity: .82 !important; }
-
-/* the catch is placed with a CSS transform in user units; nothing else may claim it */
-.fishing .caught {
-  transform-box: view-box !important;
-  transform-origin: 0 0 !important;
-  animation: none !important;
-  opacity: 1 !important;
-}
-
-
-
-/* the catch: position composed from the variables JavaScript writes */
-.fishing .caught {
-  opacity: 1 !important;
-  animation: none !important;
-  transform-box: view-box;
-}
+   disagree are overridden here rather than hunted down{ opacity: 1 !important; animation: none !important; }/* the weave should suggest the net{ stroke-opacity: .55 !important; stroke-width: .85 !important; }
 
 /* ---- the skeleton now mirrors the verdict's own layout ---- */
 .verdict-skeleton { display: grid; gap: 12px; }
@@ -3922,7 +3260,6 @@ body.verdict-open { overflow: hidden; }
 /* while the skeleton is up, the card's own content should not fight it */
 .result.swapping > *:not(.verdict-skeleton) { opacity: 0; }
 
-
 /* ======================= THE VERDICT LAYOUT, FINAL =======================
    The result was being laid out as a two-column grid, which split the title from the
    reasons and put the skeleton in the left column. It is one column, always. */
@@ -3957,7 +3294,6 @@ body.verdict-open { overflow: hidden; }
 .result .reasons { width: 100% !important; }
 .result .evidence { width: 100% !important; }
 
-
 /* labels sit above their content, full width, never beside it */
 .result .block-title {
   float: none !important;
@@ -3965,11 +3301,7 @@ body.verdict-open { overflow: hidden; }
   width: 100% !important;
   max-width: none !important;
   text-align: left !important;
-}
-
-/* the window keeps its size; the artwork inside it is drawn at three quarters, which
-   is done in the viewBox so everything scales together */
-.fishing { width: 100%; }
+}/* the window keeps its size; the artwork inside it is drawn at three quarters{ width: 100%; }
 
 /* the skeleton is now the card's content, so it needs no positioning at all */
 .verdict-skeleton.inplace {
@@ -3997,13 +3329,6 @@ body.verdict-open { overflow: hidden; }
   padding: 14px 18px 10px 18px !important;
 }
 
-.result.pending .fishing {
-  display: block !important;
-  width: 100% !important;
-  max-width: none !important;
-  margin: 0 !important;
-}
-
 .result.pending .gauge {
   position: absolute !important;
   left: 18px !important;
@@ -4025,30 +3350,14 @@ body.verdict-open { overflow: hidden; }
 }
 
 .result.pending .thinking { white-space: normal !important; }
-.result.pending .skip { width: auto !important; white-space: nowrap !important; flex: 0 0 auto !important; }
-
-/* ================= the scene frame, corrected =================
+.result.pending .skip { width: auto !important; white-space: nowrap !important; flex: 0 0 auto !important; }/* ================= the scene frame, corrected =================
    The SVG was being letterboxed by an old max-width, which drew the artwork at 75%
    inside a wider box and left dark bands on either side. The frame fills the card; the
-   three-quarter size lives in the viewBox, where it belongs. */
-.result.pending .fishing,
-.fishing {
+   three-quarter size lives in the viewBox{
   width: 100% !important;
   max-width: none !important;
   margin: 0 !important;
 }
-
-.fishing svg {
-  display: block;
-  width: 100% !important;
-  height: auto !important;
-  max-height: none !important;
-  overflow: visible;
-}
-
-/* the catch must never appear at its fallback position before it is placed */
-.fishing .caught { opacity: 0; }
-.fishing.castable .caught { opacity: 1; }
 
 /* ===================== the verdict is one column of prose =====================
    The card was flowing its content through CSS multi-columns, which put each heading
@@ -4091,42 +3400,15 @@ body.verdict-open { overflow: hidden; }
   margin-left: 0 !important;
 }
 
-.result .verdict-head > .block-title { margin-top: 26px !important; }
-
-/* ===================== the bubble sits above him, never behind =====================
-   The scene is isolated so the bubble's stacking is decided inside it, and the bubble is
-   anchored above his hat with its tail pointing down at him. */
-.fishing { isolation: isolate; }
-
-.fishing .bubble,
-.fishing .bubble.on {
-  left: 33%;
-  top: 19%;
-  max-width: 260px;
-  z-index: 30;
-}
-
-.fishing svg { z-index: 1; }
-
-/* three gentle swells on the surface, drifting rather than shivering */
-.fishing .wave { animation: swell 26s linear infinite; }
-.fishing .w2 { animation-duration: 34s; animation-direction: reverse; }
-.fishing .w3 { animation-duration: 44s; }
+.result .verdict-head > .block-title { margin-top: 26px !important; }/* ===================== the bubble sits above him, never behind =====================
+   The scene is isolated so the bubble's stacking is decided inside it{ isolation: isolate; }/* three gentle swells on the surface{ animation: swell 26s linear infinite; }
 
 @keyframes swell {
   from { transform: translateX(0); }
   to   { transform: translateX(-150px); }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .fishing .wave { animation: swell 26s linear infinite !important; }
-}
-
-/* ============================== the drowning ==============================
+}/* ============================== the drowning ==============================
    He slips under after the examination, and the boat tips with the weight of it.
-   Pure CSS on groups the JavaScript never touches, so nothing fights. */
-
-.fishing.drowning .fisher {
+   Pure CSS on groups the JavaScript never touches{
   animation: drown 2.8s cubic-bezier(.45, 0, .7, 1) forwards !important;
 }
 
@@ -4137,51 +3419,22 @@ body.verdict-open { overflow: hidden; }
   100% { transform: translateY(78px) rotate(-14deg); opacity: 0; }
 }
 
-.fishing.drowning .boat {
-  animation: tip 3s ease-in forwards !important;
-}
-
 @keyframes tip {
   0%   { transform: rotate(0deg) translateY(0); }
   60%  { transform: rotate(-3deg) translateY(4px); }
   100% { transform: rotate(-6deg) translateY(9px); }
-}
-
-/* the water closes over him */
-.fishing.drowning .wave { animation-duration: 9s !important; opacity: .9; }
-
-/* the bubble leaves with him */
-.fishing.drowning .bubble { opacity: 0 !important; transition: opacity .8s ease !important; }
-
-@media (prefers-reduced-motion: reduce) {
-  .fishing.drowning .fisher { animation: drown 2.8s cubic-bezier(.45,0,.7,1) forwards !important; }
-  .fishing.drowning .boat { animation: tip 3s ease-in forwards !important; }
-}
-
-/* the moon is a plain crescent now: no halo, just light and dust */
-.fishing .moon { filter: drop-shadow(0 0 6px rgba(190, 240, 255, .25)); }
-
-/* ===================== the water, done properly =====================
+}/* the moon is a plain crescent now: no halo{ filter: drop-shadow(0 0 6px rgba(190, 240, 255, .25)); }/* ===================== the water, done properly =====================
    Each layer is a tile containing a whole number of wave periods, with a second copy
-   offset by exactly one tile. Translating by the tile width loops seamlessly, so the
-   surface rolls instead of sliding. */
-.fishing .wavelayer {
+   offset by exactly one tile. Translating by the tile width loops seamlessly{
   animation: roll 1s linear infinite;
   animation-duration: var(--dur, 12s);
   will-change: transform;
 }
 
-.fishing .wl1 { --dur: 11s; }
-.fishing .wl2 { --dur: 15s; animation-direction: reverse; }
-.fishing .wl3 { --dur: 21s; }
-
 @keyframes roll {
   from { transform: translateX(0); }
   to   { transform: translateX(calc(-1 * var(--tile))); }
-}
-
-/* he goes over the stern, not through the hull: out, down, and under the water plane */
-.fishing.drowning .fisher {
+}/* he goes over the stern, not through the hull: out, down{
   animation: drown 2.4s cubic-bezier(.5, 0, .75, 1) forwards !important;
 }
 
@@ -4193,20 +3446,10 @@ body.verdict-open { overflow: hidden; }
   100% { transform: translate(84px, 62px) rotate(66deg); opacity: 0; }
 }
 
-.fishing.drowning .boat {
-  animation: lurch 2.4s ease-in-out forwards !important;
-}
-
 @keyframes lurch {
   0%   { transform: rotate(0deg) translateY(0); }
   40%  { transform: rotate(3deg) translateY(2px); }
   100% { transform: rotate(6deg) translateY(6px); }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .fishing .wavelayer { animation: roll 1s linear infinite !important; animation-duration: var(--dur, 12s) !important; }
-  .fishing.drowning .fisher { animation: drown 2.4s cubic-bezier(.5,0,.75,1) forwards !important; }
-  .fishing.drowning .boat { animation: lurch 2.4s ease-in-out forwards !important; }
 }
 
 /* ===================== no dead space while a scan runs =====================
@@ -4324,13 +3567,6 @@ body.verdict-open { overflow: hidden; }
 .dropzone.has-file .drop-file { color: var(--mint); }
 .dropzone.has-file { border-style: solid; }
 
-/* the rope fades rather than snapping when it leaves his hands */
-.ropeline { transition: opacity .4s cubic-bezier(.4, 0, .2, 1); }
-
-@media (prefers-reduced-motion: reduce) {
-  .ropeline { transition-duration: .4s !important; }
-}
-
 /* ===================== phones =====================
    At 390px the scene was a letterboxed strip with a speech bubble larger than the
    picture. The scene now keeps a usable height by cropping the sides, the bubble sizes
@@ -4352,8 +3588,6 @@ body.verdict-open { overflow: hidden; }
     line-height: 1.35;
     border-radius: 12px 12px 12px 4px;
   }
-
-  .fishing .bubble::after { left: 18px; }
 
   .result.pending .thinking-row {
     flex-direction: column !important;
@@ -4424,7 +3658,6 @@ body.verdict-open { overflow: hidden; }
   .result .meta-row { gap: 10px !important; font-size: 0.7rem !important; flex-wrap: wrap !important; }
   .result .suggest { font-size: 0.82rem !important; }
 }
-
 
 /* ===================== keyboard =====================
    Focus was invisible everywhere: the input set outline:none and nothing replaced it, so
@@ -4894,7 +4127,6 @@ h1, .hero h1 {
 .btn.primary::after { display: none !important; }
 .topbar::after { display: none !important; }
 .eyebrow-dot { box-shadow: none !important; }
-.fishing .moon { filter: none !important; }
 
 /* the verdict surface is a panel, not a light source */
 .verdict-head {
@@ -5649,10 +4881,7 @@ code, kbd, samp {
   transition: opacity .6s ease;
 }
 
-.autopsy.live .autopsy-caption { opacity: 1; }
-
-/* the old scene's container, kept from breaking layout if anything still looks for it */
-.fishing { display: none !important; }
+.autopsy.live .autopsy-caption { opacity: 1; }/* the old scene's container{ display: none !important; }
 
 @media (max-width: 700px) {
   .autopsy { padding: 18px 16px 16px; }
@@ -5917,7 +5146,6 @@ code, kbd, samp {
   .result.verdict-shown .suggest { animation: none; }
 }
 
-
 /* =====================================================================
    Suggestions under the field
    ===================================================================== */
@@ -6177,4 +5405,37 @@ code, kbd, samp {
 
   .hero-plated::before { opacity: .28; }
   .hero .lede { max-width: none; }
+}
+
+/* =====================================================================
+   The verdict opens
+
+   A transition needs a starting value the browser can read, and for these blocks it never
+   had one: the pending state set display, opacity and its own transition list, several of
+   them with !important, so the change was applied discretely. An animation does not need a
+   previous value. It plays when the class lands, which is exactly when the verdict arrives.
+   ===================================================================== */
+@keyframes verdictOpen {
+  from { max-height: 0; opacity: 0; transform: translateY(6px); }
+  to   { max-height: 2400px; opacity: 1; transform: none; }
+}
+
+.result.verdict-shown .block-title,
+.result.verdict-shown .reasons,
+.result.verdict-shown .evidence,
+.result.verdict-shown .suggest,
+.result.verdict-shown .meta-row {
+  animation: verdictOpen .7s cubic-bezier(.22, 1, .36, 1) both;
+  overflow: hidden;
+}
+
+.result.verdict-shown .reasons { animation-delay: .06s; }
+.result.verdict-shown .evidence { animation-delay: .12s; }
+
+@media (prefers-reduced-motion: reduce) {
+  .result.verdict-shown .block-title,
+  .result.verdict-shown .reasons,
+  .result.verdict-shown .evidence,
+  .result.verdict-shown .suggest,
+  .result.verdict-shown .meta-row { animation: none; }
 }

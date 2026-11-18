@@ -1,3 +1,7 @@
+      /* The verdict opens: the reasons expand from nothing in a keyframe animation, so the
+         card grows by their height over about two thirds of a second instead of snapping.
+         A transition could not do it, because these blocks had no previous computed value
+         to interpolate from while they were hidden. */
 /* Nyavu front-end. Vanilla JS, no build step, no external dependencies. */
 (() => {
   "use strict";
