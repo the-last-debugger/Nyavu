@@ -8212,3 +8212,63 @@ dialog.verdict-dialog[open] {
 .sign-out[hidden] {
   display: none !important;
 }
+
+/* After the writing is done the pieces are allowed to wrap.
+
+   The typing needs a single line so the caret can ride measured character offsets, but a
+   sixty-character host cannot fit a phone line, and keeping it on one clipped line hid the
+   part of the address the verdict is actually about. Once the class arrives, the text lays
+   out normally and the caret has finished its work. */
+.autopsy.written .seg-text {
+  white-space: normal !important;
+  overflow: visible !important;
+  overflow-wrap: anywhere !important;
+  word-break: break-word !important;
+  text-overflow: clip !important;
+  max-width: 100%;
+}
+
+@media print {
+  /* flex items size to their content by default, which made a long host overflow the page */
+  .autopsy-line .seg {
+    min-width: 0 !important;
+    max-width: 100% !important;
+    flex: 1 1 auto !important;
+  }
+}
+
+@media print {
+  .autopsy.written .seg-text,
+  .autopsy .seg-text {
+    white-space: normal !important;
+    overflow: visible !important;
+    overflow-wrap: anywhere !important;
+    word-break: break-word !important;
+  }
+}
+
+/* Print, last word: the segments must wrap on paper.
+
+   Everything above this file was fighting: the typing rules hold the pieces on one line so
+   the caret can ride measured character offsets, and print inherited that. These rules are
+   at the end of the stylesheet and carry four classes, so they cannot be outranked. */
+@media print {
+  .verdict-dialog .result .autopsy-line .seg-text,
+  body .autopsy-line .seg-text,
+  body .autopsy-line .seg-ink {
+    white-space: normal !important;
+    overflow: visible !important;
+    overflow-wrap: anywhere !important;
+    word-break: break-word !important;
+    width: auto !important;
+    max-width: 100% !important;
+    text-overflow: clip !important;
+  }
+
+  .verdict-dialog .result .autopsy-line .seg,
+  body .autopsy-line .seg {
+    min-width: 0 !important;
+    max-width: 100% !important;
+    flex: 1 1 auto !important;
+  }
+}

@@ -536,6 +536,17 @@
       });
     }
 
+    /* The typing set each piece's width to the last glyph it reached. That width is a
+       clipping box, so a long host stayed truncated once the writing finished, and printed
+       or copied text was cut mid-word. The width goes back to the layout once the writing is
+       over; the reveal already happened, so nothing is lost on screen. */
+    pieces.forEach((piece) => {
+      delay(clock, () => { piece.text.style.width = ""; });
+    });
+    // once written, the pieces may wrap: a sixty-character host cannot fit one phone line,
+    // and clipping it would hide the very part the verdict is about
+    if (autopsy) delay(clock, () => autopsy.classList.add("written"));
+
     /* the resolve: notes arrive from the ending backwards */
     const resolveStart = clock + 200;
     delay(resolveStart, () => {
