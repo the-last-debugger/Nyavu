@@ -1289,9 +1289,20 @@
       backdrop.className = "verdict-backdrop";
       backdrop.addEventListener("click", () => closeVerdict());
     }
+    card.classList.add("overlay");
+
+    // If the stylesheet is an older deploy and has no overlay rule, the card is not
+    // actually lifted. Painting the backdrop anyway is what produced a dark screen with no
+    // verdict: a dimmer over a page whose card had never left the flow. So the lift is
+    // checked rather than assumed, and without it the verdict simply stays inline.
+    const lifted = getComputedStyle(card).position === "fixed";
+    if (!lifted) {
+      card.classList.remove("overlay");
+      return;
+    }
+
     document.body.appendChild(backdrop);
     document.body.classList.add("verdict-open");
-    card.classList.add("overlay");
     // a dialog that lets Tab walk into the page behind it is not a dialog
     card.setAttribute("role", "dialog");
     card.setAttribute("aria-modal", "true");
