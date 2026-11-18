@@ -1,14 +1,9 @@
 /* ==========================================================================
    Nyavu, visual system
-   Space Grotesk for display, Inter for reading, JetBrains Mono for addresses.
+   A serif for what is written, the interface face for reading, and the mono for figures.
    All three are self-hosted: no CDN, so the app still works offline.
    ========================================================================== */
 
-@font-face {
-  font-family: "Space Grotesk";
-  src: url("/fonts/space-grotesk-500.woff2") format("woff2");
-  font-weight: 500; font-style: normal; font-display: swap;
-}
 
 @font-face {
   font-family: "JetBrains Mono";
@@ -37,8 +32,8 @@
   --radius-lg: 22px;
   --shadow:    0 30px 80px rgba(0, 0, 0, 0.65);
 
-  --font-display: "Space Grotesk", "Segoe UI", system-ui, sans-serif;
-  --font-body:    "Inter", "Segoe UI", system-ui, sans-serif;
+  --font-display: Georgia, "Iowan Old Style", "Palatino Linotype", serif;
+  --font-body:    system-ui, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --font-mono:    "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
 }
 
@@ -4805,7 +4800,7 @@ body::before {
 /* =====================================================================
    The typography stops advertising itself
 
-   Space Grotesk at -0.04em tracking over Inter is the house style of every generated
+   The old display face at -0.04em tracking over a neutral body face is the house style of every generated
    landing page. A book serif for the things that are written, the sans for the things
    that are operated, and the mono reserved for numbers and marginalia.
    ===================================================================== */
@@ -5972,3 +5967,71 @@ code, kbd, samp {
 
 .result.pending .score-note { opacity: 0; }
 .result.verdict-shown .score-note { opacity: 1; transition: opacity .5s ease .2s; }
+
+/* =====================================================================
+   A plate behind the prose
+
+   The "what it cannot do" block is the only stretch of running text on the page, so it is
+   the one place a picture belongs. It is a contour field, generated rather than photographed,
+   set at about a tenth of its own opacity and masked so it fades before it reaches the
+   words. It says "terrain, edges, things that need reading" without a single stock image.
+   ===================================================================== */
+.limits-plate {
+  position: relative;
+  padding: 4px 0 26px;
+}
+
+.limits-plate::before {
+  content: "";
+  position: absolute;
+  left: -8%;
+  right: -8%;
+  top: -14px;
+  height: 260px;
+  z-index: -1;
+  background: url("/contours.png") center / cover no-repeat;
+  opacity: .5;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 22%, #000 78%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 22%, #000 78%, transparent);
+  pointer-events: none;
+}
+
+.limits-plate .limits,
+.limits-plate .block-title,
+.limits-plate .limits-more {
+  position: relative;
+}
+
+/* stacking: the plate must sit above the page background and below the words */
+.limits-plate {
+  position: relative;
+  isolation: isolate;
+}
+
+.limits-plate::before {
+  z-index: 0 !important;
+  opacity: .55;
+}
+
+.limits-plate > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* fine engraving, not smoke: radial fade so it never touches the words */
+.limits-plate::before {
+  opacity: .42 !important;
+  height: 220px !important;
+  left: -4% !important;
+  right: -4% !important;
+  top: -10px !important;
+  background-size: 100% auto !important;
+  -webkit-mask-image: radial-gradient(ellipse 62% 78% at 28% 45%, #000 12%, transparent 72%) !important;
+  mask-image: radial-gradient(ellipse 62% 78% at 28% 45%, #000 12%, transparent 72%) !important;
+}
+
+.limits-plate::before {
+  opacity: .62 !important;
+  -webkit-mask-image: radial-gradient(ellipse 78% 96% at 30% 45%, #000 18%, transparent 82%) !important;
+  mask-image: radial-gradient(ellipse 78% 96% at 30% 45%, #000 18%, transparent 82%) !important;
+}

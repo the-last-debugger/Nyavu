@@ -6,8 +6,8 @@
  * are never cached: a stale verdict would be worse than no verdict.
  */
 const VERSION = "nyavu-v3";
-const SHELL = ["/", "/styles.css", "/app.js", "/manifest.webmanifest",
-               "/icon-192.png", "/icon-512.png"];
+const SHELL = ["/", "/styles.css", "/app.js", "/autopsy.js", "/manifest.webmanifest",
+               "/icon-192.png", "/icon-512.png", "/fonts/jetbrains-mono-500.woff2"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(

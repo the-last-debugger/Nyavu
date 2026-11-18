@@ -781,12 +781,12 @@
     delay(5600, () => say("Reaching a verdict"));
 
     delay(6800, () => {
-      /* The verdict arrives with the reasons rising into place. The card grows by the
-         height of the reasons at this instant, which is honest: it is a new region, not
-         a re-flow of the old one. Animating that height was attempted and abandoned -
-         a dozen older rules own display, opacity and transition for these same blocks,
-         and the winning declaration changed with the order of the file. Consolidating
-         those rules is the real fix and is written down as such. */
+      /* The card grows by the height of the reasons at this instant. Animating that
+         height has been attempted four ways, including animating the container itself,
+         and the browser applies the new height without interpolating it: legacy rules in
+         the stylesheet own display, opacity and transition for the inner verdict blocks
+         with !important and with delays, so the reveal is a discrete change. The honest
+         fix is to consolidate those rules, which is recorded in the backlog. */
       card.classList.add("verdict-shown");
       card.classList.remove("pending");
       const row = card.querySelector(".thinking-row");
