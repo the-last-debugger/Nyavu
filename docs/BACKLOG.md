@@ -1,97 +1,41 @@
 # Backlog
 
-Written at the end of the 17 November session. Live build: `d4c7379`.
+Written on 17 November, rewritten on the evening of 18 November after the work below.
+Live build: see the last commit.
 
-## 1. Real-device pass  OPEN, the highest value item left
+## Open
 
-The one thing no probe can do. The scene at true phone size, the smooth-scroll hand-off
-after a scan, and whether the thirty-second runway feels right in the hand rather than in
-a screenshot.
+### 1. Real device pass
+The only item nobody has done, and the only one I cannot do. The seven second examination,
+the smooth scroll after a scan, the phone layout and the verdict card at true size. Every
+check so far has been headless Edge with scripted input.
 
-## 2. Search visibility. Google and Bing
+### 2. Sign-in keys
+Google is free: create an OAuth client, set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET.
+SMS is not free: a Kenyan message is roughly one shilling on Africa's Talking and several
+times that on Twilio. Until one is configured the phone method reports itself unavailable,
+so the interface offers email only. See docs/AUTH.md.
 
-The pages carry titles, descriptions and `application/ld+json`, but nothing tells a
-crawler what exists or that it may index it.
+### 3. Measurement
+There is no analytics. The honest next step is aggregate counts only, no URLs: how many
+scans a day, how deep people get, where they stop. That needs a privacy stance that
+matches the product's promise, which is why it has not been bolted on.
 
-- `robots.txt` allowing everything, with the sitemap referenced
-- `sitemap.xml` generated from the real routes: `/`, `/learn/is-this-link-safe`,
-  `/learn/how-phishing-works`, `/about`, and the three app views if they deserve their own
-  URLs rather than hash fragments
-- canonical URLs on every page, so `?u=` deep links do not compete with `/`
-- `og:` and `twitter:` tags with a real preview image, since a shared link is how most
-  people will first see this
-- verification: `GOOGLE_SITE_VERIFICATION` and `BING_SITE_VERIFICATION` as meta tags,
-  fed from env so the keys are not committed
-- IndexNow for Bing, which accepts a key file and a ping rather than needing a console
-- check that the hash-router views (`#model`, `#history`) either get real paths or are
-  excluded, because they cannot be indexed as fragments
+## Done since the last rewrite
 
-## 3. Suggestions while typing a link  DONE
-
-Typing a URL by hand is the slowest way into the product. A suggestion list would meet
-people halfway.
-
-- `GET /api/suggest?q=` returning completions ranked by what people actually scan
-- three sources, in order: hosts this deployment has seen, known-good Kenyan domains
-  from the brand list (safaricom.co.ke, kra.go.ke, kabarak.ac.ke), and plain domain
-  completion for whatever is typed
-- keyboard navigation: arrows to move, Enter to accept, Escape to dismiss
-- never invent a host that does not exist, and never suggest a domain that scored
-  phishing, suggesting a phishing link as a convenience would be a bug, not a feature
-
-## 4. Stale fonts  OPEN
-
-The service worker still caches `space-grotesk-500.woff2` and `jetbrains-mono-500.woff2`.
-After the type change to a serif display face they are barely used. Drop the unused
-weights and the matching `@font-face` rules.
-
-## 5. `styles.css` tidy-up  MOSTLY DONE: 760 dead rules removed, one mechanism for the reveal
-
-About five thousand lines, most of them appended overrides from successive passes. It
-works, and it is the least readable file in the project. Fold the overrides into the
-original rules, delete what nothing matches, and keep one section per concern.
-
-## 6. Sign-in credentials  WAITING ON KEYS (docs/AUTH.md)
-
-Google and phone sign-in are built and tested but invisible until configured. See
-`docs/AUTH.md`: `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, and either Africa's Talking
-or Twilio.
-
-
----
-
-## What was finished on 18 November
-
-- robots.txt and sitemap.xml are generated, and the stale static copies were deleted
-- Google and Bing verification tokens are spliced from the environment, never committed
-- an IndexNow key file is served when INDEXNOW_KEY is set
-- suggestions while typing, drawn from hosts seen and a seed list, never offering a host
-  that was scored as phishing
-- every em and en dash removed from the source
-
-## The one thing still worth doing first
-
-The real device pass. Everything is verified through headless Edge and scripted probes,
-which catch layout and behaviour but not feel.
-
-
----
-
-## What was finished on 18 November, evening
-
-- 760 dead rules deleted from styles.css, 6180 lines down to 5420: the fishing theatre, the
-  net, the boat, the water, the moon, and the reduced-motion block that existed only to
-  disable them
-- the verdict reveal is a keyframe animation now and the card grows smoothly. The reason
-  four earlier attempts "failed" was the harness: headless Edge reports
-  prefers-reduced-motion: reduce by default, so every probe was testing the accessibility
-  fallback. Every tool now declares motion explicitly
-- eleven selector lines from multi-selector scene rules are still in the file; they match
-  nothing and are harmless, but they are the last of the scene
-
-## The lesson worth keeping
-
-Every measurement needs to prove it is measuring the thing you think it is. Cached CSS,
-a stale service worker, a reduced-motion default, a cached home page: four separate ways
-the same afternoon's work looked broken when it was not, and four ways a change could have
-been reported as fixed when it was not.
+- styles.css: 6180 lines to 3448. The fishing theatre's rules are gone, the dead selectors
+  are gone, and the verdict reveal is a keyframe animation that actually plays
+- app.js: 1550 lines to 1174. Thirteen unreachable functions and three constant tables
+  removed, brace matched, syntax checked after each
+- fonts: Space Grotesk retired, four unused faces deleted, 45 KB of downloads saved
+- imagery: contour plates, generated rather than photographed, now WebP at 65 KB instead
+  of a 217 KB PNG
+- the neon: replaced by sage, contrast measured at 7.95:1 rather than assumed
+- public numbers: two figures at the door instead of four, the rest moved behind a sign-in
+- copy: scoped claims, no absolutes, no fear framing
+- score: the "15" was a reputation ceiling, not a probability, and the card says so
+- input handling: bare words, private addresses, oversized input and credentials in the
+  link are all handled and tested
+- caching and 404: assets cached, the shell revalidates, a wrong address gets a page
+- the harness: probes clear storage, unregister the service worker, declare motion, and
+  the scratch files no longer shadow Python's standard library

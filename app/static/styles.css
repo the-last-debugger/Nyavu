@@ -3304,7 +3304,7 @@ code, kbd, samp{
   top: -14px;
   height: 260px;
   z-index: -1;
-  background: url("/contours.png") center / cover no-repeat;
+  background: url("/contours.webp") center / cover no-repeat;
   opacity: .5;
   -webkit-mask-image: linear-gradient(90deg, transparent, #000 22%, #000 78%, transparent);
   mask-image: linear-gradient(90deg, transparent, #000 22%, #000 78%, transparent);
@@ -3398,7 +3398,7 @@ code, kbd, samp{
   position: absolute;
   inset: -40px -6% 0 -6%;
   z-index: -1;
-  background: url("/contours.png") center / cover no-repeat;
+  background: url("/contours.webp") center / cover no-repeat;
   opacity: .34;
   -webkit-mask-image: radial-gradient(ellipse 70% 80% at 24% 40%, #000 10%, transparent 78%);
   mask-image: radial-gradient(ellipse 70% 80% at 24% 40%, #000 10%, transparent 78%);

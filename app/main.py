@@ -14,6 +14,7 @@ import re
 import time
 
 from fastapi import FastAPI, HTTPException, Request, Response, UploadFile, File
+from starlette.exceptions import HTTPException as StarletteHTTPException
 from fastapi.responses import RedirectResponse, FileResponse, HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
@@ -85,6 +86,18 @@ async def protect(request: Request, call_next):
     response.headers.setdefault("Permissions-Policy", "camera=(self), microphone=(), geolocation=()")
     response.headers.setdefault("Cross-Origin-Opener-Policy", "same-origin")
     response.headers.setdefault("X-Permitted-Cross-Domain-Policies", "none")
+
+    # Nothing was setting a caching policy, so browsers fell back to guessing. Images and
+    # fonts are content addressed by their own content and never change under the same
+    # name, so they can be held; the shell and the worker must revalidate, or a deploy
+    # takes an unpredictable time to arrive.
+    path = request.url.path
+    if path == "/sw.js" or path == "/" or path.endswith(".html") or path.startswith("/learn"):
+        response.headers.setdefault("Cache-Control", "no-cache")
+    elif path.endswith((".webp", ".png", ".ico", ".woff2")):
+        response.headers.setdefault("Cache-Control", "public, max-age=604800")
+    elif path.endswith((".css", ".js")):
+        response.headers.setdefault("Cache-Control", "public, max-age=300, must-revalidate")
     return response
 
 
@@ -596,6 +609,28 @@ def suggest(request: Request, q: str = "", limit: int = 6):
     pool = seen + [d for d in SEED_DOMAINS if d not in seen]
     matches = [d for d in pool if term in d or d.startswith(term)][:limit]
     return {"query": q, "suggestions": matches}
+
+
+@app.exception_handler(StarletteHTTPException)
+async def not_found(request: Request, exc: StarletteHTTPException):
+    """A wrong address gets a page, not a JSON body, when a browser asked for one."""
+    wants_html = "text/html" in request.headers.get("accept", "")
+    if exc.status_code == 404 and wants_html:
+        page = """<!doctype html><html lang="en"><head><meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Nothing at this address | Nyavu</title>
+        <link rel="stylesheet" href="/styles.css"></head>
+        <body><main style="max-width:640px;margin:18vh auto 0;padding:0 24px">
+        <p style="font-family:Georgia,serif;font-style:italic;color:#8D97AB;margin:0 0 14px">404</p>
+        <h1 style="font-family:Georgia,serif;font-weight:400;font-size:2.2rem;line-height:1.1;margin:0 0 16px;color:#E4E8EE">
+        There is nothing at this address</h1>
+        <p style="color:#9BA5B2;line-height:1.6;margin:0 0 24px">
+        The page you asked for does not exist. If you followed a link from somewhere,
+        that link is wrong, which is worth knowing in itself.</p>
+        <p><a href="/" style="color:#8FA98F">Check a link instead</a></p>
+        </main></body></html>"""
+        return HTMLResponse(page, status_code=404)
+    return JSONResponse({"detail": exc.detail}, status_code=exc.status_code)
 
 
 @app.get("/robots.txt", include_in_schema=False)
