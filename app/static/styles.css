@@ -8110,3 +8110,35 @@ dialog.verdict-dialog[open] {
   border-bottom-color: #DFA0AC !important;
   border-bottom-width: 2px;
 }
+
+/* =====================================================================
+   The phone has to show the writing, not the finished line
+
+   The typewriter works by animating each piece's width. On a phone the pieces were styled
+   with overflow visible and normal wrapping, so nothing was ever clipped: every word of the
+   address was painted at once and the cursor looked like it was sliding over a finished
+   line. The ink is clipped again, one row per piece, so the reveal is visible.
+   ===================================================================== */
+.autopsy-line .seg-text {
+  overflow: hidden !important;
+  text-overflow: clip !important;
+  max-width: 100%;
+}
+
+@media (max-width: 700px) {
+  .autopsy-line {
+    grid-template-columns: 1fr !important;
+    grid-auto-flow: row !important;
+    gap: 16px !important;
+  }
+
+  .autopsy-line .seg-text {
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: clip !important;
+    overflow-wrap: normal !important;
+    word-break: keep-all !important;
+  }
+
+  .seg { min-width: 0; }
+}

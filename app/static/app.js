@@ -475,6 +475,7 @@
     let clock = WRITE_START;
 
     pieces.forEach((piece) => {
+      piece.text.style.transition = "none";           // the steps are the animation
       piece.text.style.width = "0px";                 // hidden until written
       const width = piece.ink ? piece.ink.offsetWidth : 0;
       const dur = Math.max(90, width * PER_MS / 10);
@@ -483,14 +484,18 @@
         if (tag) tag.textContent = piece.role;
         piece.el.classList.add("on");
         piece.el.classList.add("writing");
-        piece.text.style.transition = `width ${dur}ms steps(12, end)`;
-        piece.text.style.width = width + "px";
+        piece.text.style.width = "0px";
       });
 
-      // the cursor rides the writing edge
+      /* The reveal is stepped in JavaScript rather than handed to a CSS transition. A
+         transition is the first thing an operating system switches off when a person asks
+         for less motion, and when that happened every word of the address was painted at
+         once while the cursor slid across it. Stepping the width means the writing is
+         visible whatever the device prefers: fewer frames, same story. */
       const steps = 14;
       for (let k = 1; k <= steps; k++) {
         delay(clock + (dur * k) / steps, () => {
+          piece.text.style.width = Math.round((width * k) / steps) + "px";
           if (!cursor) return;
           const box = textBottom(piece.el);
           const host = hostNow();
