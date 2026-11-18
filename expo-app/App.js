@@ -74,7 +74,7 @@ export default function App() {
             <Text style={s.host}>{result.host}</Text>
 
             {result.reputation === "established" ? (
-              <Text style={s.rep}>Established domain — name evidence not enough to flag it</Text>
+              <Text style={s.rep}>Established domain, name evidence not enough to flag it</Text>
             ) : null}
 
             {result.suggested ? (

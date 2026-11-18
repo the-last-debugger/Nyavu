@@ -1,5 +1,5 @@
 /* ==========================================================================
-   Nyavu — visual system
+   Nyavu, visual system
    Space Grotesk for display, Inter for reading, JetBrains Mono for addresses.
    All three are self-hosted: no CDN, so the app still works offline.
    ========================================================================== */
@@ -5922,3 +5922,38 @@ code, kbd, samp {
   .result.verdict-shown .suggest { animation: none; }
 }
 
+
+/* =====================================================================
+   Suggestions under the field
+   ===================================================================== */
+.input-row { position: relative; }
+
+.suggest-list {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(100% + 6px);
+  z-index: 30;
+  margin: 0;
+  padding: 6px;
+  list-style: none;
+  background: #0C1219;
+  border: 1px solid rgba(255, 255, 255, .1);
+  border-radius: 12px;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, .55);
+}
+
+.suggest-list li {
+  padding: 9px 12px;
+  border-radius: 8px;
+  font-family: var(--font-body);
+  font-size: 0.88rem;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.suggest-list li:hover,
+.suggest-list li.active {
+  background: rgba(233, 227, 214, .08);
+  color: var(--text);
+}

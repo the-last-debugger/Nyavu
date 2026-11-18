@@ -198,7 +198,7 @@
       <div>
         <h1>This address looks like phishing</h1>
         <p class="host" id="host">unknown host</p>
-        <p class="score-line" id="score">risk score —</p>
+        <p class="score-line" id="score">risk score, </p>
       </div>
     </div>
 
@@ -211,7 +211,7 @@
 
     <p class="note">
       <b>Why you saw this:</b> the address matched patterns the model associates with
-      impersonation. It judged the address only — it did not open the page.
+      impersonation. It judged the address only, it did not open the page.
       <br />
       A verdict is an assessment from a statistical model, not a guarantee. If you are
       certain the site is genuine, continue, then use the Nyavu toolbar button to trust it.
@@ -227,7 +227,7 @@
   const pct = Number.isFinite(raw) ? Math.max(0, Math.min(100, raw)) : 0;
   document.getElementById("score").textContent = Number.isFinite(raw)
     ? `risk score ${pct}`
-    : "risk score —";
+    : "risk score, ";
 
   // Same idea as the web dial: settle into the value rather than snapping to it.
   const dial = document.getElementById("dial");

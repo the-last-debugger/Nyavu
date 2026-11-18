@@ -96,7 +96,7 @@ def actor(ax, x, y, label, scale=1.0):
 # --------------------------------------------------------------------------- #
 def context_diagram():
     fig, ax = canvas(11.6, 7.2, (0, 11.6), (0, 7.2))
-    ax.text(5.8, 6.95, "Nyavu — Context Diagram (Level 0)",
+    ax.text(5.8, 6.95, "Nyavu. Context Diagram (Level 0)",
             ha="center", fontsize=11.5, color=INK, fontweight="bold", family=FONT)
 
     box(ax, 5.8, 3.6, 3.9, 1.55, ["0", "Nyavu", "URL Detection System"],
@@ -120,7 +120,7 @@ def context_diagram():
 
 def level1_dfd():
     fig, ax = canvas(12.2, 7.6, (0, 12.2), (0, 7.6))
-    ax.text(6.1, 7.32, "Nyavu — Level 1 Data Flow Diagram",
+    ax.text(6.1, 7.32, "Nyavu. Level 1 Data Flow Diagram",
             ha="center", fontsize=11.5, color=INK, fontweight="bold", family=FONT)
 
     box(ax, 1.20, 5.60, 2.05, 0.95, ["Internet User"], ENT, ENT_E, fs=9.4)
@@ -151,7 +151,7 @@ def level1_dfd():
 
 def use_case():
     fig, ax = canvas(11.8, 7.6, (0, 11.8), (0, 7.6))
-    ax.text(5.9, 7.32, "Nyavu — Use Case Diagram",
+    ax.text(5.9, 7.32, "Nyavu. Use Case Diagram",
             ha="center", fontsize=11.5, color=INK, fontweight="bold", family=FONT)
 
     ax.add_patch(Rectangle((2.45, 0.60), 6.95, 6.20, fill=False, ec=GREY, lw=1.2, ls="--"))
@@ -209,7 +209,7 @@ def use_case():
 
 def erd():
     fig, ax = canvas(11.8, 7.8, (0, 11.8), (0, 7.8))
-    ax.text(5.9, 7.50, "Nyavu — Entity Relationship Diagram",
+    ax.text(5.9, 7.50, "Nyavu. Entity Relationship Diagram",
             ha="center", fontsize=11.5, color=INK, fontweight="bold", family=FONT)
 
     def entity(x, y_top, w, name, attrs):
@@ -286,7 +286,7 @@ def erd():
 
 def wireframe():
     fig, ax = canvas(10.6, 7.4, (0, 10.6), (0, 7.4))
-    ax.text(5.3, 7.15, "Nyavu — Low-fidelity wireframe (detector screen)",
+    ax.text(5.3, 7.15, "Nyavu. Low-fidelity wireframe (detector screen)",
             ha="center", fontsize=11.0, color=INK, fontweight="bold", family=FONT)
 
     def rect(x, y, w, h, fc="#ffffff", ec="#9aa7b8", lw=1.0, ls="-", r=0.03):
@@ -317,7 +317,7 @@ def wireframe():
     ax.text(8.15, 4.03, "Analyse", fontsize=8.2, color="#1c4a7a", ha="center",
             fontweight="bold", family=FONT, va="center")
     rect(9.02, 3.78, 0.50, 0.50)
-    ax.text(9.27, 4.03, "â–£", fontsize=8.6, color=GREY, ha="center", family=FONT, va="center")
+    ax.text(9.27, 4.03, "â, £", fontsize=8.6, color=GREY, ha="center", family=FONT, va="center")
 
     for x, w in ((0.72, 1.35), (2.20, 1.95), (4.28, 1.70)):
         rect(x, 3.24, w, 0.32, fc="#f2f5f9")
@@ -343,7 +343,7 @@ def wireframe():
 
 def concept_map():
     fig, ax = canvas(12.2, 7.4, (0, 12.2), (0, 7.4))
-    ax.text(6.1, 7.15, "Nyavu — Concept map",
+    ax.text(6.1, 7.15, "Nyavu. Concept map",
             ha="center", fontsize=11.5, color=INK, fontweight="bold", family=FONT)
 
     for x, label in ((2.05, "INDEPENDENT VARIABLES"),

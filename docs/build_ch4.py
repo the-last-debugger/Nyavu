@@ -257,7 +257,7 @@ order = np.argsort(contrib)[::-1][:5]       # the fragments that raised the scor
         "end-to-end run then exercised the deployed system and wrote its results to file, so the "
         "table below is a record of an actual run rather than a description of one.")
     rows = [[t["id"], t["case"], t["expected"], t["actual"], t["status"]] for t in tests] or \
-           [["—", "Results not generated", "—", "—", "—"]]
+           [[", ", "Results not generated", ", ", ", ", ", "]]
     p.caption("End-to-end test results")
     p.table(["ID", "Test case", "Expected", "Actual", "Status"], rows,
             widths=[1.2, 4.4, 3.6, 5.2, 1.3], font_size=8.2, align_center=False)

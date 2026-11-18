@@ -1,4 +1,4 @@
-/* Shusha Nyavu — popup controller. */
+/* Shusha Nyavu, popup controller. */
 const $ = (id) => document.getElementById(id);
 
 async function currentHost() {

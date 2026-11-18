@@ -1164,7 +1164,7 @@
             </div>`;
           }).join("")}
         </div>
-        <h3 class="block-title">Full comparison — domain-disjoint hold-out set</h3>
+        <h3 class="block-title">Full comparison, domain-disjoint hold-out set</h3>
         <div class="table-scroll"><table class="table">
           <thead><tr><th>Model</th><th>Accuracy</th><th>Precision</th><th>Recall</th>
             <th>F1</th><th>ROC-AUC</th><th>False positive rate</th><th>ms / URL</th></tr></thead>
@@ -1200,7 +1200,7 @@
           <tbody>${r.results.map(x => `
             <tr><td title="${escapeHtml(x.url)}">${escapeHtml(x.host || x.url)}</td>
             <td><span class="pill ${x.risk}">${escapeHtml(x.verdict)}</span></td>
-            <td>${x.probability === null ? "—" : (x.probability * 100).toFixed(1) + "%"}</td></tr>`).join("")}
+            <td>${x.probability === null ? ", " : (x.probability * 100).toFixed(1) + "%"}</td></tr>`).join("")}
           </tbody></table></div>`;
       loadStats();
     } catch (err) {
@@ -1301,6 +1301,93 @@
       $("#authError").textContent = err.message;
     }
   });
+
+  /* --------------------------------------------------------------- suggestions
+     Typing a long address by hand is the slowest way into the product. The list is
+     offered, never insisted on: arrows move, Enter takes one, Escape dismisses, and
+     nothing is filled in unless it is chosen. */
+  (function initSuggest() {
+    const input = $("#urlInput");
+    const row = input && input.closest(".input-row");
+    if (!input || !row) return;
+
+    const list = document.createElement("ul");
+    list.className = "suggest-list hidden";
+    list.setAttribute("role", "listbox");
+    row.appendChild(list);
+
+    let items = [];
+    let active = -1;
+    let timer = 0;
+    let lastQuery = "";
+
+    const close = () => {
+      list.classList.add("hidden");
+      list.innerHTML = "";
+      items = [];
+      active = -1;
+    };
+
+    const paint = () => {
+      list.innerHTML = items
+        .map((text, i) => `<li role="option" class="${i === active ? "active" : ""}" data-value="${text}">${text}</li>`)
+        .join("");
+    };
+
+    const choose = (value) => {
+      input.value = value.startsWith("http") ? value : "https://" + value;
+      close();
+      input.focus();
+    };
+
+    input.addEventListener("input", () => {
+      clearTimeout(timer);
+      const q = input.value.trim();
+      if (q.length < 2) { close(); return; }
+      timer = setTimeout(async () => {
+        try {
+          const data = await fetch(`/api/suggest?q=${encodeURIComponent(q)}`).then((r) => r.json());
+          if (input.value.trim() !== q) return;           // the field moved on
+          lastQuery = q;
+          items = (data.suggestions || []).slice(0, 6);
+          active = -1;
+          if (!items.length) { close(); return; }
+          paint();
+          list.classList.remove("hidden");
+        } catch { close(); }
+      }, 140);
+    });
+
+    input.addEventListener("keydown", (event) => {
+      if (list.classList.contains("hidden")) return;
+      if (event.key === "ArrowDown") {
+        event.preventDefault();
+        active = (active + 1) % items.length;
+        paint();
+      } else if (event.key === "ArrowUp") {
+        event.preventDefault();
+        active = (active - 1 + items.length) % items.length;
+        paint();
+      } else if (event.key === "Enter" && active >= 0) {
+        event.preventDefault();
+        choose(items[active]);
+      } else if (event.key === "Escape") {
+        close();
+      }
+    });
+
+    list.addEventListener("mousedown", (event) => {
+      const li = event.target.closest("li[data-value]");
+      if (!li) return;
+      event.preventDefault();
+      choose(li.dataset.value);
+    });
+
+    input.addEventListener("blur", () => setTimeout(close, 120));
+    row.addEventListener("focusout", (event) => {
+      if (!row.contains(event.relatedTarget)) setTimeout(close, 120);
+    });
+  })();
 
   /* ---------------------------------------------------------- alternative sign in */
   (async function initAltAuth() {

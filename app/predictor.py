@@ -123,7 +123,7 @@ class Predictor:
         else:
             risk, band = "low", "Likely legitimate"
 
-        # "Did you mean ...?" — a near miss on a watched brand, or a brand embedded in a
+        # "Did you mean ...?", a near miss on a watched brand, or a brand embedded in a
         # longer label ("equitybankk"), which is the common typosquat shape.
         suggestion = None
         if domain:

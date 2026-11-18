@@ -54,7 +54,7 @@ def title_page(p: Paper):
            align="center", size=11, space_after=20)
     p.para("by", align="center", size=11, space_after=8)
     for name, reg in TEAM:
-        p.para(f"{name}  —  {reg}", align="center", size=11, space_after=2)
+        p.para(f"{name}, {reg}", align="center", size=11, space_after=2)
     p.para("", space_after=20)
     p.para("Supervisor: ______________________________________", align="center", size=11,
            space_after=18)
@@ -271,7 +271,7 @@ def appendices(p: Paper, page_break: bool = True):
     p.h2("Appendix V: Project Schedule")
     p.table(["Week", "Activity", "Deliverable"],
             [["1", "Concept, problem definition, objectives", "Concept paper"],
-             ["2–6", "Requirements, wireframes, dataset search", "Wireframe sketch"],
+             ["2 to 6", "Requirements, wireframes, dataset search", "Wireframe sketch"],
              ["7", "Data acquisition and curation", "Labelled corpus"],
              ["8", "Feature engineering and baseline model", "Metrics table"],
              ["9", "Model comparison and selection", "Selected model"],

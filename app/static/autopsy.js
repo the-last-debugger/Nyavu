@@ -1,8 +1,8 @@
 /**
  * The address autopsy.
  *
- * Takes the URL apart the way the checker actually reads it — scheme, labels, the
- * registrable domain, the ending, the path — and hangs a plain-English note under each
+ * Takes the URL apart the way the checker actually reads it, scheme, labels, the
+ * registrable domain, the ending, the path, and hangs a plain-English note under each
  * piece, in the manner of explainshell.com.
  *
  * The notes argue whichever case the model made. A clean address is annotated with the
@@ -70,8 +70,8 @@ function autopsySegments(r) {
     segs.push({
       text: scheme + "://",
       note: https
-        ? (clean ? "encrypted — a tampered page cannot pass for this one" : "encrypted")
-        : "no HTTPS — sent in the clear",
+        ? (clean ? "encrypted, a tampered page cannot pass for this one" : "encrypted")
+        : "no HTTPS: sent in the clear",
       flag: !https,
       tight: true,
     });
@@ -80,7 +80,7 @@ function autopsySegments(r) {
   if (isIp) {
     segs.push({
       text: hostOnly,
-      note: "a bare address, not a name — nothing to check against",
+      note: "a bare address, not a name: nothing to check against",
       flag: true,
     });
   } else {
@@ -91,7 +91,7 @@ function autopsySegments(r) {
         text: label + ".",
         note: brand
           ? `"${brand}" in a label the owner can invent`
-          : (clean ? "a label the owner can invent — harmless on its own" : "free to invent"),
+          : (clean ? "a label the owner can invent, harmless on its own" : "free to invent"),
         flag: Boolean(brand) || hyphens >= 2,
         soft: true,
       });
@@ -105,10 +105,10 @@ function autopsySegments(r) {
     } else if (brandInName && trustedSuffix) {
       nameNote = `"${brandInName}" on its own registry domain`;
     } else if (nameHyphens >= 2) {
-      nameNote = `${nameHyphens} hyphens — a compound built to look official`;
+      nameNote = `${nameHyphens} hyphens, a compound built to look official`;
       nameFlag = true;
     } else if (nameHyphens === 1) {
-      nameNote = "one hyphen — often a sign, sometimes just a name";
+      nameNote = "one hyphen: often a sign, sometimes just a name";
     } else {
       nameNote = clean ? "no hyphens to hide behind" : "the name somebody bought";
     }
@@ -118,14 +118,14 @@ function autopsySegments(r) {
       let tldNote;
       let tldFlag = false;
       if (RISKY_TLDS.includes(tld)) {
-        tldNote = `".${tld}" — cheap and abused`;
+        tldNote = `".${tld}": cheap and abused`;
         tldFlag = true;
       } else if (trustedSuffix) {
-        tldNote = `".${tld}" — a Kenyan registry ending, not free to buy`;
+        tldNote = `".${tld}", a Kenyan registry ending, not free to buy`;
       } else if (tld === "ke") {
-        tldNote = `".ke" — Kenya's country ending`;
+        tldNote = `".ke", Kenya's country ending`;
       } else {
-        tldNote = clean ? `".${tld}" — an ordinary ending` : "the ending";
+        tldNote = clean ? `".${tld}", an ordinary ending` : "the ending";
       }
       segs.push({ text: "." + tld, note: tldNote, flag: tldFlag, tight: true });
     }
@@ -134,7 +134,7 @@ function autopsySegments(r) {
   if (path && path !== "/") {
     segs.push({
       text: path,
-      note: clean ? "the path — cosmetic, but read it anyway" : "the path — cosmetic",
+      note: clean ? "the path: cosmetic, but read it anyway" : "the path, cosmetic",
       flag: false,
       soft: true,
     });

@@ -1,9 +1,9 @@
-﻿# Shusha Nyavu — Android agent
+﻿# Shusha Nyavu. Android agent
 
 Filters known phishing and advertising domains at the DNS level and reads incoming
 notifications for suspicious links.
 
-## Status — read this first
+## Status, read this first
 
 | Component | State |
 |---|---|
@@ -33,7 +33,7 @@ The APK lands in `app\build\outputs\apk\debug\`. Sideload it; no store fee.
 
 ## How the two features work
 
-**Notification access.** The user grants it in system settings — the app cannot read
+**Notification access.** The user grants it in system settings, the app cannot read
 notifications without it. The service receives each posted notification, looks for a
 URL or for spam language, sends only the URL to Nyavu, and dismisses the notification
 if the score exceeds 0.65.
@@ -42,14 +42,14 @@ if the score exceeds 0.65.
 (`10.111.222.1/32`) into the tunnel. Queries for blocked names are answered with
 NXDOMAIN on the device; everything else is forwarded to an upstream resolver. Because
 only the resolver route goes through the tunnel, the rest of the phone's traffic is
-untouched — no data leaves the device and no remote VPN server exists.
+untouched, no data leaves the device and no remote VPN server exists.
 
 ## Known gaps
 
 - TCP DNS, DNS-over-TLS and IPv6 are not handled; a resolver using them bypasses the filter.
 - The blocklist is loaded once at start-up; regenerating it needs a service restart.
 - No UI for the counters yet; `Counters` records them.
-- `10.0.2.2` is the emulator's alias for the host machine — a physical phone needs the
+- `10.0.2.2` is the emulator's alias for the host machine, a physical phone needs the
   laptop's LAN address, set as `apiBase` in the `nyavu` preferences.
 
 ## Before the demonstration

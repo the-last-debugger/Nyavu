@@ -99,7 +99,7 @@ def body(p: Paper, *, page_break=False, include_references=True):
         for t in tests:
             rows.append([t["id"], t["case"], t["expected"], t["actual"], t["status"]])
     else:
-        rows = [["—", "Test results not generated", "—", "—", "—"]]
+        rows = [[", ", "Test results not generated", ", ", ", ", ", "]]
     p.caption("End-to-end test regime and results")
     p.table(["ID", "Test case", "Expected result", "Actual result", "Status"], rows,
             widths=[1.1, 4.6, 4.2, 4.2, 1.3], font_size=8.4, align_center=False)

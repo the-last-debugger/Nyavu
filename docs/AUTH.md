@@ -2,7 +2,7 @@
 
 Nyavu supports three ways in. Email and password always work. The other two are opt-in
 and controlled entirely by environment variables, so the interface only offers what is
-actually configured — `/api/auth/methods` reports the truth and the browser hides the
+actually configured, `/api/auth/methods` reports the truth and the browser hides the
 rest.
 
 ## Google
@@ -39,7 +39,7 @@ expiry and a five-attempt ceiling, and sent by SMS.
 
 With neither configured the code is written to the server log and the API reports
 `channel: "log"`. That keeps the flow testable locally, and it is never returned to the
-client — an unconfigured deployment cannot be signed into by guessing, only by reading
+client, an unconfigured deployment cannot be signed into by guessing, only by reading
 the logs, which only the operator can do.
 
 Phone accounts are keyed on a synthetic address of the form

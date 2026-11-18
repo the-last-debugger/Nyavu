@@ -1,4 +1,4 @@
-/* Shusha Nyavu — settings page. */
+/* Shusha Nyavu, settings page. */
 const DEFAULTS = { apiBase: "https://nyavu.onrender.com", mode: "warn", enabled: true, allow: [] };
 const $ = (id) => document.getElementById(id);
 
@@ -23,7 +23,7 @@ async function boot() {
       out.textContent = j.status === "ok" ? "connected" : "unexpected response";
       out.style.color = j.status === "ok" ? "#34d399" : "#f2545b";
     } catch (e) {
-      out.textContent = "unreachable — is the service running?";
+      out.textContent = "unreachable, is the service running?";
       out.style.color = "#f2545b";
     }
   };

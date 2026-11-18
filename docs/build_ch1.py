@@ -61,7 +61,7 @@ def cover(p: Paper):
            align="center", size=11, space_after=26)
     p.para("PROJECT TEAM", bold=True, align="center", size=11, space_after=8)
     for name, reg, role in TEAM:
-        p.para(f"{name}  —  {reg}  ({role})", align="center", size=11, space_after=2)
+        p.para(f"{name}, {reg}  ({role})", align="center", size=11, space_after=2)
     p.para("", space_after=34)
     p.para("NOVEMBER 2026", bold=True, align="center", size=12, space_after=0)
 

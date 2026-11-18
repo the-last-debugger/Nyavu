@@ -8,7 +8,7 @@ The one thing no probe can do. The scene at true phone size, the smooth-scroll h
 after a scan, and whether the thirty-second runway feels right in the hand rather than in
 a screenshot.
 
-## 2. Search visibility — Google and Bing
+## 2. Search visibility. Google and Bing
 
 The pages carry titles, descriptions and `application/ld+json`, but nothing tells a
 crawler what exists or that it may index it.
@@ -37,7 +37,7 @@ people halfway.
   completion for whatever is typed
 - keyboard navigation: arrows to move, Enter to accept, Escape to dismiss
 - never invent a host that does not exist, and never suggest a domain that scored
-  phishing — suggesting a phishing link as a convenience would be a bug, not a feature
+  phishing, suggesting a phishing link as a convenience would be a bug, not a feature
 
 ## 4. Stale fonts
 

@@ -1,4 +1,4 @@
-﻿# Shusha Nyavu — browser extension
+﻿# Shusha Nyavu, browser extension
 
 Warns before a phishing page loads. Every top-level navigation has its host scored by
 the Nyavu API; a flagged host raises a banner, or is blocked if you choose that mode.
@@ -9,7 +9,7 @@ the Nyavu API; a flagged host raises a banner, or is blocked if you choose that 
 2. Edge: `edge://extensions` → Developer mode → **Load unpacked** → select this folder.
    Chrome: `chrome://extensions` → Developer mode → **Load unpacked**.
 3. Open the toolbar popup → **Settings** → confirm the API address → **Test connection**.
-4. Visit `http://mpesa.co.ke.verify-account.top/` — a red banner should appear.
+4. Visit `http://mpesa.co.ke.verify-account.top/`, a red banner should appear.
 
 ## What it sends
 

@@ -2,8 +2,8 @@
 
 **A machine-learning phishing URL detector that explains its verdicts.**
 
-Nyavu (Swahili for *fishing net*) assesses a web address from its text alone — no page is
-fetched, no third-party lookup is made — and returns a risk band, a score, and the specific
+Nyavu (Swahili for *fishing net*) assesses a web address from its text alone, no page is
+fetched, no third-party lookup is made, and returns a risk band, a score, and the specific
 characteristics that produced it.
 
 A COMP324 team project at Kabarak University, built to be reproducible, honest about its
@@ -18,8 +18,8 @@ accuracy, and cheap enough to run for nothing.
 
 Blocklists are the standard defence against phishing, and they are structurally reactive: an
 address appears on a list only after someone has reported and verified it. In that window the
-page is live and unrecognised. Nyavu asks a different question — *is this address, which nobody
-has reported yet, safe to open?* — and answers it from the address itself in tens of milliseconds.
+page is live and unrecognised. Nyavu asks a different question, *is this address, which nobody
+has reported yet, safe to open?*, and answers it from the address itself in tens of milliseconds.
 
 ## How it works
 
@@ -32,7 +32,7 @@ URL ──► registrable domain ──► 17 numeric features ──► logisti
 1. **Reduce** the address to its registrable domain (`mpesa.co.ke.verify-account.top` → `verify-account.top`).
 2. **Extract** 17 interpretable features (length, digit and hyphen counts, entropy, TLD, brand proximity, typosquat distance) plus character n-grams of the domain.
 3. **Classify** with a calibrated linear model, so the reported percentage means what it says.
-4. **Explain** using the model's own coefficients — the reasons shown are the features that actually moved the score.
+4. **Explain** using the model's own coefficients, the reasons shown are the features that actually moved the score.
 5. **Record** the scan for the signed-in user's private history.
 
 ## Model card
@@ -40,7 +40,7 @@ URL ──► registrable domain ──► 17 numeric features ──► logisti
 | | |
 |---|---|
 | Corpus | 17,730 addresses, balanced 8,865 / 8,865 |
-| Removed as undetectable | 4,236 phishing URLs (32%) hosted on domains in the Tranco top 200,000 — compromised legitimate sites that no name-based model can detect |
+| Removed as undetectable | 4,236 phishing URLs (32%) hosted on domains in the Tranco top 200,000, compromised legitimate sites that no name-based model can detect |
 | Split | Grouped by registrable domain; no domain appears in both train and test |
 | Accuracy | **75.4%** |
 | F1 / ROC-AUC | 0.740 / 0.829 |
@@ -56,7 +56,7 @@ number above is what remains after the data was curated honestly.
 
 **Because 19.8% is unusable in front of a person**, the deployed system adds a reputation prior:
 a domain inside the Tranco top 100,000 is never flagged on name evidence alone. The trade-off is
-stated rather than hidden — phishing hosted on a popular domain is missed.
+stated rather than hidden, phishing hosted on a popular domain is missed.
 
 ## What it looks like
 
@@ -65,7 +65,7 @@ stated rather than hidden — phishing hosted on a popular domain is missed.
 | ![Web](docs/screen-final.png) | ![Verdict](docs/screen-verdict.png) |
 | ![Extension](docs/screen-extension.png) | ![Android](docs/android-mock.png) |
 
-The dial sweeps for seven seconds — slow, then accelerating, then frantic — before it settles on
+The dial sweeps for seven seconds, slow, then accelerating, then frantic, before it settles on
 the score. That is longer than a UI should take and it is deliberate: the number is the product's
 only claim, and it should look measured rather than assigned.
 
@@ -97,7 +97,7 @@ Rate limited in-process: 30 predictions/min per IP, 10 auth attempts/min, 5 bulk
 
 | | |
 |---|---|
-| Hosting | Render, free tier, Frankfurt — no Docker, builds from `requirements.txt` |
+| Hosting | Render, free tier, Frankfurt, no Docker, builds from `requirements.txt` |
 | Storage | Neon Postgres (pooled). Survives redeploys; verified by forcing one |
 | Fallback | SQLite at `NYAVU_DB_PATH` when `DATABASE_URL` is unset, for local work |
 | Keep-alive | UptimeRobot every 5 minutes; a GitHub Action as backstop |
@@ -141,4 +141,4 @@ device. The code compiles and installs; nobody has watched it work.
 
 ## Licence
 
-MIT — see [LICENSE](LICENSE).
+MIT, see [LICENSE](LICENSE).

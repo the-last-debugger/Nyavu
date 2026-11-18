@@ -1,5 +1,5 @@
 /**
- * Shusha Nyavu — background service worker.
+ * Shusha Nyavu, background service worker.
  *
  * Two interception points, because one is not enough:
  *
@@ -11,7 +11,7 @@
  *   onCommitted       fires once a page starts loading. It warms the cache for hosts
  *                     that were not known yet and injects the in-page banner.
  *
- * The extension never sends page content, cookies or history — only the host part of
+ * The extension never sends page content, cookies or history, only the host part of
  * the address the user is already navigating to.
  */
 const DEFAULTS = {

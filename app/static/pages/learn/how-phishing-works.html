@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>How phishing links work — and how to spot one | Nyavu</title>
+<title>How phishing links work, and how to spot one | Nyavu</title>
 <meta name="description" content="The five tricks phishing addresses rely on: lookalike spellings, brand names buried in subdomains, homoglyphs, cheap top-level domains and raw IP addresses. With examples and how to check." />
 <link rel="canonical" href="https://nyavu.onrender.com/learn/how-phishing-works" />
 <meta property="og:type" content="article" />
-<meta property="og:title" content="How phishing links work — and how to spot one" />
+<meta property="og:title" content="How phishing links work, and how to spot one" />
 <meta property="og:description" content="Five tricks phishing addresses rely on, with real examples and how to check a link safely." />
 <meta property="og:url" content="https://nyavu.onrender.com/learn/how-phishing-works" />
 <meta property="og:image" content="https://nyavu.onrender.com/og.png" />
@@ -33,19 +33,19 @@
 <main>
   <article class="article">
     <p class="eyebrow">Guide</p>
-    <h1>How phishing links work — and how to spot one</h1>
+    <h1>How phishing links work, and how to spot one</h1>
     <p class="lede">A phishing link rarely looks obviously wrong. It usually looks almost right,
       which is exactly why it works. These are the five tricks the addresses depend on.</p>
 
     <h2>1. A spelling that survives a glance</h2>
     <p>Swap one letter and most people read the word they expect. <code>safaricom.co.ke</code>
-      becomes <code>safaricorn.co.ke</code> — an <em>m</em> replaced by <em>rn</em>. The eye resolves
+      becomes <code>safaricorn.co.ke</code>, an <em>m</em> replaced by <em>rn</em>. The eye resolves
       the shape, the hand clicks, and the page is an exact copy of the real login screen.</p>
 
     <h2>2. The brand buried in a subdomain</h2>
     <p>Read this carefully: <code>safaricom.co.ke.verify-account.top</code>. It contains the bank's
       name, so it looks legitimate at a glance. But a domain is read from the right, not the left.
-      Everything before <code>verify-account.top</code> is invented — the attacker owns only the end.</p>
+      Everything before <code>verify-account.top</code> is invented, the attacker owns only the end.</p>
     <p>This is the single most common trick, and it defeats people who have been told to "check the
       domain" without being told which part of it counts.</p>
 
@@ -53,17 +53,17 @@
     <p>Some alphabets contain letters that render almost exactly like Latin ones. A Cyrillic
       <code>а</code> is not an <code>a</code>. To a reader they are the same glyph; to a browser they
       are different addresses. This is a homoglyph attack, and no amount of careful reading catches it
-      — only inspecting the underlying address does.</p>
+, only inspecting the underlying address does.</p>
 
     <h2>4. A cheap ending</h2>
     <p>Registration in some top-level domains costs almost nothing and requires no identity checks.
       When a bank's name appears on a <code>.tk</code>, <code>.top</code> or <code>.xyz</code>
-      address, that combination is worth treating as suspicious on its own — the organisation almost
+      address, that combination is worth treating as suspicious on its own, the organisation almost
       certainly owns a country-code or <code>.com</code> domain instead.</p>
 
     <h2>5. No name at all, just a number</h2>
     <p><code>http://197.248.11.9/equity/login.php</code> is a real pattern. There is no domain to
-      check because there is no domain — just a server address. Legitimate organisations publish
+      check because there is no domain, just a server address. Legitimate organisations publish
       names, not numbers.</p>
 
     <h2>What does <em>not</em> prove a link is safe</h2>
@@ -77,12 +77,12 @@
 
     <h2>How to check one</h2>
     <ol>
-      <li>Find the <strong>registered domain</strong> — the last two labels, or the last three for
+      <li>Find the <strong>registered domain</strong>, the last two labels, or the last three for
         things like <code>.co.ke</code>. That is the part someone had to buy.</li>
       <li>Compare that domain to the one you expect, character by character, not by shape.</li>
       <li>If the message is urgent, slow down deliberately. Urgency is a technique, not a fact.</li>
-      <li>Reach the organisation the way you normally would — their app, your bookmark, the number on
-        your card — rather than through the link you were sent.</li>
+      <li>Reach the organisation the way you normally would, their app, your bookmark, the number on
+        your card, rather than through the link you were sent.</li>
     </ol>
 
     <p class="limits" style="margin-top:2em">
@@ -90,7 +90,7 @@
     </p>
 
     <p class="limits">Nyavu reads addresses, not pages. It will catch the five patterns above, and it
-      will not catch a phishing page on a genuinely correct domain — for example a hacked small
+      will not catch a phishing page on a genuinely correct domain, for example a hacked small
       business site. Use it as one signal among several.</p>
   </article>
 </main>

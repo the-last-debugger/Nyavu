@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import csv
+from datetime import datetime, timezone
 import json
 import urllib.request
 import urllib.parse
@@ -493,7 +494,7 @@ DEMO_PHISH = """<!doctype html>
   <input placeholder="PIN" type="password">
   <button>Continue</button>
 </div>
-<div class="warn">SIMULATED PHISHING PAGE — a test artefact for the Nyavu demonstration.
+<div class="warn">SIMULATED PHISHING PAGE, a test artefact for the Nyavu demonstration.
 This form does nothing and sends nothing.</div>
 </body></html>"""
 
@@ -537,9 +538,125 @@ def learn(slug: str):
     return FileResponse(path)
 
 
+# --------------------------------------------------------------------------- #
+# Search engines
+#
+# robots.txt and sitemap.xml are generated rather than stored, so they always agree with
+# the routes that exist and always name the host the visitor actually used. The hash
+# routes (#model, #history) are deliberately absent: a fragment cannot be indexed as a
+# page, and listing it would only produce duplicates of the home page.
+# --------------------------------------------------------------------------- #
+PUBLIC_PAGES = ["/", "/learn/is-this-link-safe", "/learn/how-phishing-works", "/about"]
+
+
+def _origin(request: Request) -> str:
+    base = os.getenv("PUBLIC_ORIGIN")
+    if base:
+        return base.rstrip("/")
+    return str(request.base_url).rstrip("/")
+
+
+# --------------------------------------------------------------------------- #
+# Suggestions while typing
+#
+# Two sources: hosts this deployment has actually seen, and a small seed of domains
+# people here type often. A host that was ever scored as phishing is never suggested:
+# offering one as a convenience would be a delivery mechanism, not a feature.
+# --------------------------------------------------------------------------- #
+SEED_DOMAINS = [
+    "safaricom.co.ke", "www.safaricom.co.ke", "mpesa.co.ke", "kra.go.ke",
+    "www.kra.go.ke", "kabarak.ac.ke", "students.kabarak.ac.ke", "equitybank.co.ke",
+    "kcbgroup.com", "ecitizen.go.ke", "helb.co.ke", "nhif.or.ke", "google.com",
+    "accounts.google.com", "facebook.com", "whatsapp.com", "netflix.com", "paypal.com",
+]
+
+
+@app.get("/api/suggest")
+def suggest(request: Request, q: str = "", limit: int = 6):
+    term = (q or "").strip().lower()
+    term = term.replace("https://", "").replace("http://", "").split("/")[0]
+    if len(term) < 2:
+        return {"query": q, "suggestions": []}
+
+    seen: list[str] = []
+    try:
+        for row in db.recent_scans(60):
+            record = dict(row)
+            if (record.get("verdict") or "").lower() == "phishing":
+                continue
+            host = (record.get("host") or "").strip().lower()
+            if host and host not in seen:
+                seen.append(host)
+    except Exception:
+        pass
+
+    pool = seen + [d for d in SEED_DOMAINS if d not in seen]
+    matches = [d for d in pool if term in d or d.startswith(term)][:limit]
+    return {"query": q, "suggestions": matches}
+
+
+@app.get("/robots.txt", include_in_schema=False)
+def robots(request: Request):
+    origin = _origin(request)
+    body = f"""User-agent: *
+Allow: /
+Disallow: /api/
+
+Sitemap: {origin}/sitemap.xml
+"""
+    return Response(content=body, media_type="text/plain")
+
+
+@app.get("/sitemap.xml", include_in_schema=False)
+def sitemap(request: Request):
+    origin = _origin(request)
+    today = datetime.now(timezone.utc).date().isoformat()
+    urls = "".join(
+        f"  <url><loc>{origin}{path}</loc><lastmod>{today}</lastmod>"
+        f"<changefreq>{'weekly' if path == '/' else 'monthly'}</changefreq>"
+        f"<priority>{'1.0' if path == '/' else '0.7'}</priority></url>\n"
+        for path in PUBLIC_PAGES
+    )
+    body = ('<?xml version="1.0" encoding="UTF-8"?>\n'
+            '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+            f"{urls}</urlset>\n")
+    return Response(content=body, media_type="application/xml")
+
+
+@app.get("/{key_name}.txt", include_in_schema=False)
+def indexnow_key(key_name: str):
+    """Bing verifies an IndexNow key by fetching it from the root of the site."""
+    expected = os.getenv("INDEXNOW_KEY", "")
+    if expected and key_name == expected:
+        return Response(content=expected, media_type="text/plain")
+    raise HTTPException(status_code=404, detail="Not found")
+
+
+_INDEX_CACHE: dict[str, str] = {}
+
+
 @app.get("/")
-def index():
-    return FileResponse(os.path.join(STATIC, "index.html"))
+def index(request: Request):
+    """Serve the shell with the search-console tokens spliced in.
+
+    The tokens come from the environment so they are never committed, and the page is
+    cached per origin rather than read from disk on every request.
+    """
+    origin = _origin(request)
+    if origin not in _INDEX_CACHE:
+        with open(os.path.join(STATIC, "index.html"), encoding="utf-8") as fh:
+            html = fh.read()
+        tags = []
+        google = os.getenv("GOOGLE_SITE_VERIFICATION")
+        bing = os.getenv("BING_SITE_VERIFICATION")
+        if google:
+            tags.append(f'<meta name="google-site-verification" content="{google}" />')
+        if bing:
+            tags.append(f'<meta name="msvalidate.01" content="{bing}" />')
+        html = html.replace("<!--verification-->", "\n".join(tags).strip())
+        html = html.replace("https://nyavu.onrender.com/", origin + "/")
+        _INDEX_CACHE[origin] = html
+    return HTMLResponse(_INDEX_CACHE[origin])
 
 
 app.mount("/", StaticFiles(directory=STATIC, html=True), name="static")

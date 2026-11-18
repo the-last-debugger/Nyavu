@@ -1,4 +1,4 @@
-"""Persistence layer — Postgres when DATABASE_URL is set, SQLite otherwise.
+"""Persistence layer. Postgres when DATABASE_URL is set, SQLite otherwise.
 
 One SQL dialect is written: statements use ``?`` placeholders and the adapter
 translates them for Postgres. The schema is generated per backend because the two
