@@ -3663,3 +3663,17 @@ code, kbd, samp{
 }
 
 .seg .seg-note { transition: opacity .4s ease, transform .4s ease; }
+
+/* the bulk table used a pill and a percentage; the rest of the product uses a colour and
+   a number out of one hundred, so it says the same thing the same way */
+.bulk-verdict {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 0.95rem;
+  color: var(--muted);
+}
+
+.bulk-verdict.high { color: #F09AA8; }
+.bulk-verdict.medium { color: #E8BE7C; }
+.bulk-verdict.low { color: #8FD9BE; }
+.bulk-verdict.error { color: var(--faint); }

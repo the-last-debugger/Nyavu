@@ -935,11 +935,11 @@
         <p class="lede"><strong>${r.flagged}</strong> of <strong>${r.count}</strong>
         URLs were flagged as phishing.</p>
         <div class="table-scroll"><table class="table">
-          <thead><tr><th>Host</th><th>Verdict</th><th>Score</th></tr></thead>
+          <thead><tr><th>Host</th><th>Verdict</th><th>Risk out of 100</th></tr></thead>
           <tbody>${r.results.map(x => `
             <tr><td title="${escapeHtml(x.url)}">${escapeHtml(x.host || x.url)}</td>
-            <td><span class="pill ${x.risk}">${escapeHtml(x.verdict)}</span></td>
-            <td>${x.probability === null ? ", " : (x.probability * 100).toFixed(1) + "%"}</td></tr>`).join("")}
+            <td><span class="bulk-verdict ${x.risk}">${escapeHtml(x.verdict)}</span></td>
+            <td>${x.probability === null || x.probability === undefined ? "not scored" : Math.round(x.probability * 100)}</td></tr>`).join("")}
           </tbody></table></div>`;
       loadStats();
     } catch (err) {
