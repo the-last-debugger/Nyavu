@@ -7863,3 +7863,119 @@ html.modal-lock, body.verdict-open { overflow: hidden; }
   transform: none;
   transition-delay: 0s !important;
 }
+
+/* =====================================================================
+   The verdict is a native dialog in the top layer
+
+   Nothing can cover it and no ancestor transform can trap it, which the hand-built overlay
+   could not promise. The scrim is a solid tint rather than a full-viewport blur: the blur
+   was smearing on some Windows compositors, and a flat dim reads more like a document than
+   a frosted pane.
+   ===================================================================== */
+.verdict-dialog {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  max-width: none;
+  max-height: none;
+  width: auto;
+  height: auto;
+  overflow: visible;
+  color: inherit;
+}
+
+.verdict-dialog::backdrop {
+  background: rgba(3, 7, 11, .94);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+.verdict-dialog .result,
+.verdict-dialog .result.in-dialog {
+  position: static !important;
+  inset: auto !important;
+  transform: none !important;
+  width: min(860px, calc(100vw - 56px)) !important;
+  max-height: 82vh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  margin: 0 !important;
+  padding: 6px 8px 12px;
+  background: #0A0F15;
+  border: 1px solid rgba(255, 255, 255, .16);
+  border-radius: 18px;
+  box-shadow: 0 18px 48px rgba(0, 0, 0, .55);
+  animation: overlayIn .38s cubic-bezier(.22, 1, .36, 1) both;
+}
+
+/* the element itself is centred by the dialog's own box model */
+dialog.verdict-dialog[open] {
+  margin: auto;
+  display: block;
+}
+
+@media (max-width: 700px) {
+  .verdict-dialog {
+    width: 100%;
+    height: 100%;
+    max-width: 100%;
+    max-height: 100%;
+    margin: 0;
+  }
+  .verdict-dialog .result,
+  .verdict-dialog .result.in-dialog {
+    width: auto !important;
+    height: auto;
+    max-height: none;
+    margin: 0 !important;
+    border: 0;
+    border-radius: 0;
+    padding: 14px 14px 30px;
+    box-sizing: border-box;
+    animation: none;
+    box-shadow: none;
+  }
+}
+
+@media print {
+  .verdict-dialog, .verdict-dialog[open] {
+    position: static !important;
+    display: block !important;
+    width: auto !important;
+    height: auto !important;
+    max-height: none !important;
+    margin: 0 !important;
+  }
+  .verdict-dialog::backdrop { background: none !important; }
+}
+
+/* a dialog is laid out by the UA at inset 0 with margin auto; say it plainly and let the
+   card inside supply the size */
+dialog.verdict-dialog[open] {
+  position: fixed;
+  inset: 0;
+  margin: auto;
+  width: fit-content;
+  height: fit-content;
+  max-width: calc(100vw - 32px);
+  max-height: 92vh;
+  display: block;
+  overflow: visible;
+}
+
+@media (max-width: 700px) {
+  dialog.verdict-dialog[open] {
+    width: 100%;
+    height: 100%;
+    max-width: 100%;
+    max-height: 100%;
+    margin: 0;
+    overflow: hidden;
+  }
+  .verdict-dialog .result,
+  .verdict-dialog .result.in-dialog {
+    max-height: 100vh;
+    height: 100%;
+    overflow-y: auto;
+  }
+}

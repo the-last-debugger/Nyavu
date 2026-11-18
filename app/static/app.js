@@ -316,8 +316,8 @@
   */
 
   /* The verdict is the product's answer, so it gets the stage rather than sitting in
-     the page flow. A blurred backdrop, the card lifted above it, and a way out that
-     returns everything to normal. */
+     the page flow: a native modal dialog in the top layer, a scrim behind it, and a way
+     out that returns everything to normal. */
 
   /* The card keeps its own layout; the modal is a shell around it. Wrapping rather
      than restyling means the verdict looks exactly as designed, at any size. */
@@ -1280,87 +1280,71 @@
   /* The verdict is a moment rather than a page, so it is lifted above a blurred backdrop
      when it lands, and closing it returns the visitor to a clean sheet: state cleared,
      address emptied, document reloaded so nothing stale survives. */
-  let backdrop = null;
+  /* The verdict is a native modal dialog, not a fixed div.
 
-  function openVerdict(card) {
-    if (!card || card.classList.contains("overlay")) return;
-    if (!backdrop) {
-      backdrop = document.createElement("div");
-      backdrop.className = "verdict-backdrop";
-      backdrop.addEventListener("click", () => closeVerdict());
-    }
-    card.classList.add("overlay");
+     A fixed div is only above the page as long as its z-index wins inside whatever stacking
+     context it happens to sit in. A transform on any ancestor, and a view transition has
+     one, is enough to trap it under the backdrop, which is the dark screen with no card.
+     showModal() places the element in the browser's top layer, above everything, and gives
+     focus containment and Escape for free. The blur is gone with it: a full-viewport
+     backdrop-filter is known to smear on some Windows compositors, and a solid scrim reads
+     better anyway. */
+  let verdictHome = null;
+  let verdictNext = null;
 
-    // If the stylesheet is an older deploy and has no overlay rule, the card is not
-    // actually lifted. Painting the backdrop anyway is what produced a dark screen with no
-    // verdict: a dimmer over a page whose card had never left the flow. So the lift is
-    // checked rather than assumed, and without it the verdict simply stays inline.
-    const lifted = getComputedStyle(card).position === "fixed";
-    if (!lifted) {
-      card.classList.remove("overlay");
-      return;
-    }
-
-    document.body.appendChild(backdrop);
-    document.body.classList.add("verdict-open");
-    // a dialog that lets Tab walk into the page behind it is not a dialog
-    card.setAttribute("role", "dialog");
-    card.setAttribute("aria-modal", "true");
-    card.setAttribute("aria-label", "Verdict");
-    trapFocus(card);
-    document.documentElement.classList.add("modal-lock");
-    // keep the overlay scrollable from the top
-    card.scrollTop = 0;
+  function verdictDialog() {
+    return document.getElementById("verdictDialog");
   }
 
-  let releaseFocus = null;
+  function openVerdict(card) {
+    const dialog = verdictDialog();
+    if (!dialog || typeof dialog.showModal !== "function" || dialog.open) return;
 
-  function trapFocus(container) {
-    if (releaseFocus) releaseFocus();
-    const selector = 'a[href], button:not([disabled]), summary, input, select, textarea, [tabindex]:not([tabindex="-1"])';
-    const focusables = () => Array.from(container.querySelectorAll(selector))
-      .filter((el) => el.offsetParent !== null || el === document.activeElement);
+    verdictHome = card.parentNode;
+    verdictNext = card.nextSibling;
+    dialog.appendChild(card);
+    card.classList.add("in-dialog");
+    card.classList.remove("overlay");
+    document.body.classList.add("verdict-open");
 
-    const target = container.querySelector(".verdict-close") || container;
-    if (target === container) container.setAttribute("tabindex", "-1");
-    setTimeout(() => target.focus({ preventScroll: true }), 30);
-
-    const onKey = (event) => {
-      if (event.key !== "Tab") return;
-      const items = focusables();
-      // with a single control there is nothing to cycle; let Tab leave for the browser
-      if (items.length < 2) return;
-      const first = items[0];
-      const last = items[items.length - 1];
-      if (event.shiftKey && document.activeElement === first) {
-        event.preventDefault();
-        last.focus();
-      } else if (!event.shiftKey && document.activeElement === last) {
-        event.preventDefault();
-        first.focus();
-      } else if (!container.contains(document.activeElement)) {
-        event.preventDefault();
-        first.focus();
-      }
-    };
-    document.addEventListener("keydown", onKey, true);
-    releaseFocus = () => {
-      document.removeEventListener("keydown", onKey, true);
-      releaseFocus = null;
-    };
+    try {
+      dialog.showModal();
+    } catch {
+      // no top layer available: leave the verdict where it was, readable
+      if (verdictHome) verdictHome.insertBefore(card, verdictNext);
+      card.classList.remove("in-dialog");
+      document.body.classList.remove("verdict-open");
+    }
   }
 
   function closeVerdict() {
-    if (releaseFocus) releaseFocus();
-    const card = $("#result");
-    if (backdrop) { backdrop.remove(); backdrop = null; }
+    const dialog = verdictDialog();
+    const card = document.getElementById("result");
+    if (dialog && dialog.open) dialog.close();
+    if (card && verdictHome) {
+      card.classList.remove("in-dialog");
+      verdictHome.insertBefore(card, verdictNext);
+    }
     document.body.classList.remove("verdict-open");
-    document.documentElement.classList.remove("modal-lock");
-    if (card) card.classList.remove("overlay");
     dismissResult();
-    // a real refresh, which is what "closed" should mean
     window.location.assign("/");
   }
+
+  /* Escape is the dialog's own behaviour; this only cleans up after it. Attached now rather
+     than on DOMContentLoaded, which may already have fired by the time this file runs. */
+  (function watchDialogEscape() {
+    const attach = () => {
+      const dialog = verdictDialog();
+      if (!dialog || dialog.dataset.escapeWatched) return;
+      dialog.dataset.escapeWatched = "1";
+      dialog.addEventListener("cancel", (event) => {
+        event.preventDefault();
+        closeVerdict();
+      });
+    };
+    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", attach);
+    else attach();
+  })();
 
   function dismissResult() {
     const card = $("#result");

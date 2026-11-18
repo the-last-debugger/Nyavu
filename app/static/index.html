@@ -302,5 +302,9 @@
 </svg>
 <script src="/autopsy.js"></script>
 <script src="/app.js"></script>
+<!-- The verdict is a native modal dialog. The browser's top layer cannot be covered by
+     z-index, and no ancestor transform can trap it, which is what kept happening to a
+     hand-positioned overlay. -->
+  <dialog id="verdictDialog" class="verdict-dialog" aria-label="Verdict"></dialog>
 </body>
 </html>
