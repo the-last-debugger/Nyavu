@@ -446,7 +446,11 @@
     const line = autopsy ? autopsy.querySelector(".autopsy-line") : null;
     const lineLeft = line ? line.getBoundingClientRect().left : 0;
 
-    const hostBox = cursorHost ? cursorHost.getBoundingClientRect() : { left: 0, top: 0 };
+    /* Measured at the moment of use, never once up front: the card is still growing and the
+       page scrolls to it as the examination starts, so a rect taken earlier is stale by
+       hundreds of pixels and the cursor appears far above the address. */
+    const hostNow = () => (cursor && cursor.offsetParent ? cursor.offsetParent : autopsy)
+      .getBoundingClientRect();
 
     const textBottom = (el) => {
       const words = el.querySelector(".seg-text") || el;
@@ -457,8 +461,11 @@
       cursor.classList.add("on");
       if (pieces.length) {
         const box = textBottom(pieces[0].el);
-        cursor.style.left = (box.left - hostBox.left) + "px";
-        cursor.style.top = (box.bottom - hostBox.top - 2) + "px";
+        const host = hostNow();
+        cursor.style.left = (box.left - host.left) + "px";
+        // the writing cursor spans the words, so it is placed at their top with their height
+        cursor.style.top = (box.top - host.top) + "px";
+        cursor.style.height = Math.round(box.height) + "px";
       } else {
         cursor.style.left = "0px";
         cursor.style.top = "0px";
@@ -486,8 +493,10 @@
         delay(clock + (dur * k) / steps, () => {
           if (!cursor) return;
           const box = textBottom(piece.el);
-          cursor.style.left = (box.left - hostBox.left + (width * k) / steps) + "px";
-          cursor.style.top = (box.bottom - hostBox.top - 2) + "px";
+          const host = hostNow();
+          cursor.style.left = (box.left - host.left + (width * k) / steps) + "px";
+          cursor.style.top = (box.top - host.top) + "px";
+          cursor.style.height = Math.round(box.height) + "px";
         });
       }
 
