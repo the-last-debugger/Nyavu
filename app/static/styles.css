@@ -1771,7 +1771,7 @@ details.advanced{
   transform: translate(-50%, -48%) scale(.97);
   z-index: 60;
   width: min(940px, calc(100vw - 32px));
-  max-height: 88vh;
+  max-height: 82vh;
   overflow-y: auto;
   padding: 30px 30px 24px;
   border-radius: 24px;
@@ -3727,11 +3727,11 @@ html.modal-lock, body.verdict-open { overflow: hidden; }
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
-  width: min(960px, calc(100vw - 32px));
-  max-height: 88vh;
+  width: min(860px, calc(100vw - 56px));
+  max-height: 78vh;
   overflow-y: auto;
   overscroll-behavior: contain;
-  padding: 8px 10px 14px;
+  padding: 6px 8px 12px;
   background: #0A0F15;
   border: 1px solid rgba(255, 255, 255, .1);
   border-radius: 18px;
@@ -3746,21 +3746,28 @@ html.modal-lock, body.verdict-open { overflow: hidden; }
 
 .result.overlay .verdict-head { padding: 22px 24px 10px !important; }
 
-/* a phone gets the whole screen, which is what it has room for */
+/* A phone gets the screen, edge to edge, positioned with inset rather than a transform:
+   the transform approach left the card taller than the viewport and pushed its top off
+   the visible area, which is why it looked like nothing had opened. */
 @media (max-width: 700px) {
   .result.overlay {
-    width: 100%;
-    max-height: 100%;
-    height: 100%;
-    top: 0;
-    left: 0;
-    transform: none;
-    border-radius: 0;
-    border: 0;
-    padding: 10px 12px 24px;
-    animation: none;
+    position: fixed !important;
+    inset: 0 !important;
+    top: 0 !important;
+    left: 0 !important;
+    transform: none !important;
+    width: auto !important;
+    height: auto !important;
+    max-height: none !important;
+    margin: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    padding: 14px 14px 30px !important;
+    overflow-y: auto;
+    box-sizing: border-box;
+    animation: none !important;
+    box-shadow: none !important;
   }
-  @keyframes overlayIn { from { opacity: 0 } to { opacity: 1 } }
 }
 
 @media (prefers-reduced-motion: reduce) {
