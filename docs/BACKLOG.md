@@ -2,7 +2,7 @@
 
 Written at the end of the 17 November session. Live build: `d4c7379`.
 
-## 1. Real-device pass
+## 1. Real-device pass  OPEN, the highest value item left
 
 The one thing no probe can do. The scene at true phone size, the smooth-scroll hand-off
 after a scan, and whether the thirty-second runway feels right in the hand rather than in
@@ -45,13 +45,13 @@ The service worker still caches `space-grotesk-500.woff2` and `jetbrains-mono-50
 After the type change to a serif display face they are barely used. Drop the unused
 weights and the matching `@font-face` rules.
 
-## 5. `styles.css` tidy-up  OPEN, and it is the cause of the growing-card problem
+## 5. `styles.css` tidy-up  MOSTLY DONE: 760 dead rules removed, one mechanism for the reveal
 
 About five thousand lines, most of them appended overrides from successive passes. It
 works, and it is the least readable file in the project. Fold the overrides into the
 original rules, delete what nothing matches, and keep one section per concern.
 
-## 6. Sign-in credentials  WAITING ON KEYS
+## 6. Sign-in credentials  WAITING ON KEYS (docs/AUTH.md)
 
 Google and phone sign-in are built and tested but invisible until configured. See
 `docs/AUTH.md`: `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, and either Africa's Talking
@@ -73,3 +73,25 @@ or Twilio.
 
 The real device pass. Everything is verified through headless Edge and scripted probes,
 which catch layout and behaviour but not feel.
+
+
+---
+
+## What was finished on 18 November, evening
+
+- 760 dead rules deleted from styles.css, 6180 lines down to 5420: the fishing theatre, the
+  net, the boat, the water, the moon, and the reduced-motion block that existed only to
+  disable them
+- the verdict reveal is a keyframe animation now and the card grows smoothly. The reason
+  four earlier attempts "failed" was the harness: headless Edge reports
+  prefers-reduced-motion: reduce by default, so every probe was testing the accessibility
+  fallback. Every tool now declares motion explicitly
+- eleven selector lines from multi-selector scene rules are still in the file; they match
+  nothing and are harmless, but they are the last of the scene
+
+## The lesson worth keeping
+
+Every measurement needs to prove it is measuring the thing you think it is. Cached CSS,
+a stale service worker, a reduced-motion default, a cached home page: four separate ways
+the same afternoon's work looked broken when it was not, and four ways a change could have
+been reported as fixed when it was not.

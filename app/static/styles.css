@@ -1629,9 +1629,7 @@ body.has-result .explain {
 @media (prefers-reduced-motion: reduce) {
         .fishing[data-catch="dark"]  .catch-dark,
   .fishing[data-catch="odd"]   .catch-odd,
-  .fishing[data-catch="plain"] .catch-plain {
-    animation: haul 7s cubic-bezier(.3,1.6,.5,1) forwards !important;
-  }
+
 }/* ============================== the cast net ==============================
    He throws it, it spreads on the water, then he hauls it back and the catch
    comes up with it. The net is the only thing that travels; the man stays put
@@ -2095,9 +2093,7 @@ body.has-result .explain {
 @media (prefers-reduced-motion: reduce) {
         .fishing[data-catch="dark"]  .catch-dark,
   .fishing[data-catch="odd"]   .catch-odd,
-  .fishing[data-catch="plain"] .catch-plain {
-    animation: haul 7s cubic-bezier(.3,1.6,.5,1) forwards !important;
-  }
+
 }/* ============================== the cast net ==============================
    He throws it, it spreads on the water, then he hauls it back and the catch
    comes up with it. The net is the only thing that travels; the man stays put
@@ -2472,10 +2468,7 @@ body.has-result .explain {
   .fishing.reaction .boat,
   .fishing.reaction .catch-dark,
   .fishing.reaction .catch-odd,
-  .fishing.reaction .catch-plain {
-    animation-duration: 2.4s !important;
-    animation-iteration-count: infinite !important;
-  }
+
 }
 
 /* ============================================================================
@@ -3572,22 +3565,8 @@ body.verdict-open { overflow: hidden; }
    picture. The scene now keeps a usable height by cropping the sides, the bubble sizes
    itself to the frame, and the status row stacks instead of fighting for space. */
 @media (max-width: 700px) {
-  .fishing svg {
-    min-height: 200px;
-  }
 
   .fishing .bubble,
-  .fishing .bubble.on {
-    left: 14% !important;
-    right: 4% !important;
-    top: 5% !important;
-    width: auto !important;
-    max-width: none !important;
-    padding: 8px 11px;
-    font-size: 0.74rem;
-    line-height: 1.35;
-    border-radius: 12px 12px 12px 4px;
-  }
 
   .result.pending .thinking-row {
     flex-direction: column !important;
