@@ -745,6 +745,7 @@
           <details class="score-more">
             <summary>How that was worked out</summary>
             <p>${noteTail(scoreNote)}</p>
+            <dl class="feat-grid">${featRows}</dl>
           </details>
           <div class="stamp ${r.risk}" aria-hidden="true">${r.risk === "high" ? "phishing" : r.risk === "medium" ? "unsure" : "clear"}</div>
         </div>
@@ -758,11 +759,7 @@
         ? "What stood out, in a good way"
         : r.risk === "medium" ? "What gave Nyavu pause" : "What Nyavu noticed"}</h3>
       <ul class="reasons">${reasons}</ul>
-      ${evidence}
-      <details class="advanced">
-        <summary>What the model measured</summary>
-        <dl class="feat-grid">${featRows}</dl>
-      </details>`;
+      ${evidence}`;
     result._verdictHTML = result.innerHTML;
     result._target = pct;
     result.dataset.target = String(pct);
@@ -1451,6 +1448,19 @@
     const main = document.querySelector("main");
     if (main) main.parentNode.insertBefore(bar, main);
   }
+
+  /* ------------------------------------------------------------ the app build
+     The download link served an old release for three versions because nothing on the page
+     knew what had been built. The number is printed beside the link now. */
+  (async function showAppVersion() {
+    try {
+      const { version } = await api("/api/app/version");
+      if (!version) return;
+      document.querySelectorAll("#footAppVersion, #appVersion").forEach((el) => {
+        el.textContent = " " + version;
+      });
+    } catch { /* the link still works without the label */ }
+  })();
 
   /* ------------------------------------------------------------------- PWA */
   if ("serviceWorker" in navigator) {

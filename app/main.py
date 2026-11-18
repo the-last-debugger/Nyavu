@@ -403,6 +403,14 @@ def google_start(request: Request):
     if not (cid and os.getenv("GOOGLE_CLIENT_SECRET")):
         raise HTTPException(status_code=400, detail="Google sign-in is not configured.")
     state = secrets.token_urlsafe(24)
+
+    # PKCE. A web client does not need it, an installed client requires it, and Google's
+    # answer to a missing verifier is exactly the invalid_grant this flow kept receiving.
+    # Sending it is correct for every client type, so it is unconditional.
+    verifier = secrets.token_urlsafe(64)[:96]
+    challenge = base64.urlsafe_b64encode(
+        hashlib.sha256(verifier.encode()).digest()).decode().rstrip("=")
+
     params = urllib.parse.urlencode({
         "client_id": cid,
         "redirect_uri": _oauth_redirect(request),
@@ -410,9 +418,13 @@ def google_start(request: Request):
         "scope": "openid email profile",
         "state": state,
         "prompt": "select_account",
+        "code_challenge": challenge,
+        "code_challenge_method": "S256",
     })
     response = RedirectResponse(f"https://accounts.google.com/o/oauth2/v2/auth?{params}")
     response.set_cookie("pg_oauth_state", state, httponly=True, samesite="lax",
+                        secure=cookie_secure(), max_age=600)
+    response.set_cookie("pg_oauth_verifier", verifier, httponly=True, samesite="lax",
                         secure=cookie_secure(), max_age=600)
     return response
 
@@ -486,13 +498,17 @@ def google_callback(request: Request, code: str = "", state: str = "", error: st
     cid, secret = os.getenv("GOOGLE_CLIENT_ID"), os.getenv("GOOGLE_CLIENT_SECRET")
     if not (cid and secret):
         return RedirectResponse("/?auth=unconfigured")
-    data = urllib.parse.urlencode({
+    fields = {
         "code": code,
         "client_id": cid,
         "client_secret": secret,
         "redirect_uri": _oauth_redirect(request),
         "grant_type": "authorization_code",
-    }).encode()
+    }
+    verifier = request.cookies.get("pg_oauth_verifier")
+    if verifier:
+        fields["code_verifier"] = verifier
+    data = urllib.parse.urlencode(fields).encode()
     tokens, info = None, None
     for stage, call in (
         ("token", lambda: urllib.request.urlopen("https://oauth2.googleapis.com/token",
@@ -617,17 +633,48 @@ def demo_phish():
 
 
 
+def _latest_apk() -> str | None:
+    """The newest app build in dist, or None.
+
+    The download used to redirect to a published release, and the release could drift: the
+    link was serving 0.8.0 while the repository held 0.9.1. Serving the newest build from the
+    repository means the link cannot disagree with the artefact beside it.
+    """
+    folder = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "dist")
+    if not os.path.isdir(folder):
+        return None
+    builds = [os.path.join(folder, f) for f in os.listdir(folder)
+              if f.startswith("Nyavu-") and f.endswith(".apk")]
+    if not builds:
+        return None
+    return max(builds, key=os.path.getmtime)
+
+
 @app.get("/download/nyavu.apk")
 def download_apk():
-    """Send the phone to the published release rather than a file inside the repo.
-
-    The binary used to sit in dist/ and be served from disk, which meant every build
-    changed the repository and the download could drift from the released version.
-    """
-    return RedirectResponse(
-        "https://github.com/the-last-debugger/Nyavu/releases/latest/download/Nyavu.apk",
-        status_code=307,
+    path = _latest_apk()
+    if not path:
+        raise HTTPException(status_code=404, detail="No build available.")
+    version = os.path.basename(path).replace("Nyavu-", "").replace("-debug.apk", "")
+    return FileResponse(
+        path,
+        media_type="application/vnd.android.package-archive",
+        filename=f"Nyavu-{version}.apk",
+        headers={"X-Nyavu-Version": version},
     )
+
+
+@app.get("/api/app/version")
+def app_version() -> dict:
+    path = _latest_apk()
+    if not path:
+        return {"version": None, "bytes": 0}
+    name = os.path.basename(path)
+    return {
+        "version": name.replace("Nyavu-", "").replace("-debug.apk", ""),
+        "bytes": os.path.getsize(path),
+        "file": name,
+    }
 
 
 # --------------------------------------------------------------------------- #

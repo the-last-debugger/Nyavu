@@ -6,7 +6,8 @@
     <application
         android:allowBackup="false"
         android:usesCleartextTraffic="true"
-        android:label="Shusha Nyavu"
+        android:label="Nyavu"
+        android:icon="@mipmap/ic_launcher"
         android:theme="@android:style/Theme.Material.NoActionBar">
 
         <activity android:name=".WelcomeActivity" android:exported="true"

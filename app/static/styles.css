@@ -8162,3 +8162,20 @@ dialog.verdict-dialog[open] {
 @media (prefers-reduced-motion: reduce) {
   .scan-cursor, .autopsy-caret { transition: opacity .1s linear !important; }
 }
+
+/* the feature grid now lives inside the explanation fold, so it needs its own spacing */
+.score-more .feat-grid {
+  margin: 14px 0 0;
+  padding: 12px 14px;
+  border: 1px solid rgba(255, 255, 255, .07);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, .014);
+}
+
+/* the build number beside the download link */
+#footAppVersion, #appVersion {
+  font-family: var(--font-mono, monospace);
+  font-size: 0.85em;
+  letter-spacing: .02em;
+  color: var(--faint);
+}
