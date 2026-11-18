@@ -3446,3 +3446,107 @@ code, kbd, samp{
   font-size: clamp(2.2rem, 3.2vw, 3.15rem) !important;
   line-height: 1.08 !important;
 }
+
+/* =====================================================================
+   Read from the right
+
+   The pieces are annotated in reading order, which for an address means the last one
+   first. A cursor steps along with the annotation so the order is demonstrated: it moves
+   leftwards from the ending to the scheme, and each note lands as it arrives.
+   ===================================================================== */
+.autopsy-line { position: relative; }
+
+.autopsy-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 12px;
+  min-height: 14px;
+}
+
+.autopsy-mode {
+  font-family: var(--font-body);
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--faint);
+  opacity: 0;
+  transform: translateX(4px);
+  transition: opacity .5s ease, transform .5s ease;
+}
+
+.autopsy.live .autopsy-mode { opacity: 1; transform: none; }
+
+.autopsy-mode::after {
+  content: "";
+  display: inline-block;
+  width: 1px;
+  height: 11px;
+  margin-left: 7px;
+  background: var(--accent);
+  vertical-align: -2px;
+  animation: caretBlink 1s steps(1) infinite;
+}
+
+@keyframes caretBlink { 50% { opacity: 0; } }
+
+/* the cursor that steps from the ending to the scheme */
+.autopsy-caret {
+  position: absolute;
+  bottom: 26px;
+  left: 100%;
+  width: 0;
+  height: 2px;
+  background: var(--accent);
+  box-shadow: 0 0 10px rgba(143, 169, 143, .55);
+  opacity: 0;
+  transition: left .34s cubic-bezier(.22, 1, .36, 1),
+              width .28s ease,
+              opacity .2s ease;
+  pointer-events: none;
+}
+
+.autopsy-caret.on { opacity: 1; }
+
+/* the note lands a touch after the cursor arrives */
+.seg.on .seg-note { transition-delay: .08s; }
+
+@media (prefers-reduced-motion: reduce) {
+  .autopsy-caret { display: none; }
+  .autopsy-mode::after { animation: none; }
+}
+
+/* the reserved space is no longer needed: the reveal animates, so the card can be
+   compact while it works and open when the verdict lands */
+.result.pending .verdict-text h2,
+.result.pending .verdict-text .badge {
+  display: none !important;
+  visibility: visible !important;
+}
+
+.result.pending .verdict-text { padding-top: 0 !important; }
+
+/* the cursor should be unmistakable, and the closing line waits for the sweep */
+.autopsy-caret {
+  height: 3px !important;
+  background: #B9CBB9 !important;
+  box-shadow: 0 0 14px rgba(185, 203, 185, .75) !important;
+}
+
+.autopsy-caption { opacity: 0 !important; transition: opacity .6s ease; }
+.autopsy.swept .autopsy-caption { opacity: 1 !important; }
+
+.autopsy-head { margin-bottom: 16px; }
+
+/* the dissection spans the card rather than sitting in the narrow text column, in both
+   the pending and the finished state, so nothing jumps when the verdict lands */
+.verdict-head .autopsy {
+  grid-column: 1 / -1;
+  margin-top: 18px;
+}
+
+.result.pending .verdict-head .autopsy { margin-top: 14px; }
+
+@media (max-width: 700px) {
+  .verdict-head .autopsy { grid-column: 1 / -1; }
+}

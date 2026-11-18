@@ -170,7 +170,10 @@ function autopsyMarkup(r) {
   }
 
   return `<div class="autopsy ${flagged === 0 ? "clean" : "risky"}" data-flags="${flagged}">
-      <div class="autopsy-line">${items.join("")}</div>
+      <div class="autopsy-head">
+        <span class="autopsy-mode">reading from the right</span>
+      </div>
+      <div class="autopsy-line"><span class="autopsy-caret" aria-hidden="true"></span>${items.join("")}</div>
       <p class="autopsy-caption">${caption}</p>
     </div>`;
 }

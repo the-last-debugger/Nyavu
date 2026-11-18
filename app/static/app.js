@@ -403,8 +403,28 @@
       say("Reading the address");
     });
 
-    segs.forEach((seg, i) => {
-      delay(900 + i * 150, () => seg.classList.add("on"));
+    /* Read it from the right: the pieces are annotated in that order, and a cursor
+       steps along with them, so the order is shown rather than described. */
+    const caret = autopsy ? autopsy.querySelector(".autopsy-caret") : null;
+    const stepTo = (seg) => {
+      if (!caret) return;
+      caret.style.left = seg.offsetLeft + "px";
+      caret.style.width = Math.max(12, seg.offsetWidth) + "px";
+      caret.classList.add("on");
+    };
+
+    const order = [...segs].reverse();
+    order.forEach((seg, i) => {
+      delay(800 + i * 210, () => {
+        stepTo(seg);
+        seg.classList.add("on");
+      });
+    });
+
+    delay(800 + order.length * 210 + 140, () => {
+      if (caret) caret.classList.remove("on");
+      // the closing line lands after the sweep, not before it
+      if (autopsy) autopsy.classList.add("swept");
     });
 
     const flagged = segs.filter((el) => el.classList.contains("flag"));
@@ -558,9 +578,8 @@
           <p class="verdict-url">${escapeHtml(r.url)}</p>
           <p class="score-note">${scoreNote}</p>
           <div class="stamp ${r.risk}" aria-hidden="true">${r.risk === "high" ? "phishing" : r.risk === "medium" ? "unsure" : "clear"}</div>
-
-        ${autopsyMarkup(r)}
         </div>
+        ${autopsyMarkup(r)}
       </div>
       <div class="thinking-row">
         <p class="thinking" id="thinking"><span class="dot"></span><span class="phase">Reading the address</span></p>
