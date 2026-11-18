@@ -9,6 +9,7 @@ import urllib.parse
 import secrets
 import base64
 import io
+import hashlib
 import os
 import re
 import time
@@ -97,7 +98,10 @@ async def protect(request: Request, call_next):
     elif path.endswith((".webp", ".png", ".ico", ".woff2")):
         response.headers.setdefault("Cache-Control", "public, max-age=604800")
     elif path.endswith((".css", ".js")):
-        response.headers.setdefault("Cache-Control", "public, max-age=300, must-revalidate")
+        if request.query_params.get("v"):
+            response.headers["Cache-Control"] = "public, max-age=31536000, immutable"
+        else:
+            response.headers.setdefault("Cache-Control", "public, max-age=300, must-revalidate")
     return response
 
 
@@ -670,6 +674,27 @@ def indexnow_key(key_name: str):
     raise HTTPException(status_code=404, detail="Not found")
 
 
+_ASSET_FILES = ("styles.css", "app.js", "autopsy.js", "sw.js")
+
+
+def _asset_version() -> str:
+    """A stamp that changes only when one of the shell files changes.
+
+    Assets were referenced by fixed URLs, so a slow or failed fetch could leave the CSS from
+    one deploy next to the JavaScript from another. That mixture is what produced a blurred
+    page with no verdict card: the new script opened an overlay whose styles the old
+    stylesheet did not contain. A version in the URL makes the two impossible to mix.
+    """
+    digest = hashlib.sha256()
+    for name in _ASSET_FILES:
+        try:
+            with open(os.path.join(STATIC, name), "rb") as fh:
+                digest.update(fh.read())
+        except OSError:
+            digest.update(name.encode())
+    return digest.hexdigest()[:10]
+
+
 _INDEX_CACHE: dict[str, str] = {}
 
 
@@ -693,6 +718,9 @@ def index(request: Request):
             tags.append(f'<meta name="msvalidate.01" content="{bing}" />')
         html = html.replace("<!--verification-->", "\n".join(tags).strip())
         html = html.replace("https://nyavu.onrender.com/", origin + "/")
+        version = _asset_version()
+        for name in ("styles.css", "app.js", "autopsy.js"):
+            html = html.replace(f'"/{name}"', f'"/{name}?v={version}"')
         _INDEX_CACHE[origin] = html
     return HTMLResponse(_INDEX_CACHE[origin])
 

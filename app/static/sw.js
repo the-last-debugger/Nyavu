@@ -5,7 +5,7 @@
  * than being pinned by a cache, with the cache as an offline fallback only. API calls
  * are never cached: a stale verdict would be worse than no verdict.
  */
-const VERSION = "nyavu-v3";
+const VERSION = "nyavu-v4";
 const SHELL = ["/", "/styles.css", "/app.js", "/autopsy.js", "/manifest.webmanifest",
                "/icon-192.png", "/icon-512.png", "/fonts/jetbrains-mono-500.woff2"];
 
@@ -38,6 +38,10 @@ self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
   if (url.origin !== self.location.origin) return;
   if (url.pathname.startsWith("/api/") || url.pathname.startsWith("/download/")) return;
+
+  // A versioned shell asset is immutable and its URL changes when its content does, so the
+  // worker stays out of the way: a timed-out fetch here would leave the page unstyled.
+  if (url.searchParams.has("v")) return;
 
   const isNavigation = event.request.mode === "navigate";
 
