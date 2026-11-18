@@ -8142,3 +8142,23 @@ dialog.verdict-dialog[open] {
 
   .seg { min-width: 0; }
 }
+
+/* =====================================================================
+   The cursor stops easing
+
+   A caret on screen that glides between positions reads as animation, not as typing. The
+   reveal now lands one character at a time and the cursor is placed on the same tick, so
+   the only motion is the glyphs appearing. Opacity is still allowed to fade: that is a
+   state change, not travel.
+   ===================================================================== */
+.scan-cursor {
+  transition: opacity .2s ease !important;
+}
+
+.autopsy-caret {
+  transition: opacity .2s ease !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scan-cursor, .autopsy-caret { transition: opacity .1s linear !important; }
+}

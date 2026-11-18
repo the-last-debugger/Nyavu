@@ -457,6 +457,30 @@
       return words.getBoundingClientRect();
     };
 
+    /* Character by character, measured rather than assumed.
+
+       A typewriter does not ease: each keypress puts one glyph down and the carriage jumps.
+       Approximating that with a fixed number of width steps and a transition on the cursor
+       reads as sliding, because the eye follows the smooth motion and not the glyphs. So
+       every character's right edge is measured once by handing a Range to the browser,
+       which is the only way to know where a proportional font put it, and then the reveal
+       and the cursor both jump to those exact positions on a fixed tick. */
+    const charOffsets = (el) => {
+      const node = el.firstChild;
+      if (!node || node.nodeType !== Node.TEXT_NODE) return [];
+      const base = el.getBoundingClientRect().left;
+      const range = document.createRange();
+      const offsets = [];
+      for (let i = 1; i <= node.textContent.length; i++) {
+        range.setStart(node, 0);
+        range.setEnd(node, i);
+        const box = range.getBoundingClientRect();
+        offsets.push(Math.max(0, box.right - base));
+      }
+      range.detach && range.detach();
+      return offsets;
+    };
+
     if (cursor) {
       cursor.classList.add("on");
       if (pieces.length) {
@@ -475,37 +499,34 @@
     let clock = WRITE_START;
 
     pieces.forEach((piece) => {
-      piece.text.style.transition = "none";           // the steps are the animation
-      piece.text.style.width = "0px";                 // hidden until written
-      const width = piece.ink ? piece.ink.offsetWidth : 0;
-      const dur = Math.max(90, width * PER_MS / 10);
+      const offsets = charOffsets(piece.ink);
+      const chars = Math.max(offsets.length, 1);
+      // 42 to 70 milliseconds per character: the range research puts typing in, and the
+      // shorter the piece the brisker it can be without losing the sense of writing
+      const per = Math.max(38, Math.min(62, 1400 / chars));
+      const dur = chars * per;
+      piece.text.style.width = "0px";
 
       delay(clock, () => {
         if (tag) tag.textContent = piece.role;
         piece.el.classList.add("on");
         piece.el.classList.add("writing");
-        piece.text.style.width = "0px";
       });
 
-      /* The reveal is stepped in JavaScript rather than handed to a CSS transition. A
-         transition is the first thing an operating system switches off when a person asks
-         for less motion, and when that happened every word of the address was painted at
-         once while the cursor slid across it. Stepping the width means the writing is
-         visible whatever the device prefers: fewer frames, same story. */
-      const steps = 14;
-      for (let k = 1; k <= steps; k++) {
-        delay(clock + (dur * k) / steps, () => {
-          piece.text.style.width = Math.round((width * k) / steps) + "px";
+      for (let k = 1; k <= chars; k++) {
+        delay(clock + per * k, () => {
+          const offset = offsets[k - 1] || piece.ink.offsetWidth;
+          piece.text.style.width = Math.round(offset) + "px";
           if (!cursor) return;
           const box = textBottom(piece.el);
           const host = hostNow();
-          cursor.style.left = (box.left - host.left + (width * k) / steps) + "px";
+          cursor.style.left = (box.left - host.left + offset) + "px";
           cursor.style.top = (box.top - host.top) + "px";
           cursor.style.height = Math.round(box.height) + "px";
         });
       }
 
-      clock += dur + 40;
+      clock += dur + 90;
     });
 
     if (cursor) {
