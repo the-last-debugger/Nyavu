@@ -26,7 +26,7 @@ crawler what exists or that it may index it.
 - check that the hash-router views (`#model`, `#history`) either get real paths or are
   excluded, because they cannot be indexed as fragments
 
-## 3. Suggestions while typing a link
+## 3. Suggestions while typing a link  DONE
 
 Typing a URL by hand is the slowest way into the product. A suggestion list would meet
 people halfway.
@@ -39,20 +39,37 @@ people halfway.
 - never invent a host that does not exist, and never suggest a domain that scored
   phishing, suggesting a phishing link as a convenience would be a bug, not a feature
 
-## 4. Stale fonts
+## 4. Stale fonts  OPEN
 
 The service worker still caches `space-grotesk-500.woff2` and `jetbrains-mono-500.woff2`.
 After the type change to a serif display face they are barely used. Drop the unused
 weights and the matching `@font-face` rules.
 
-## 5. `styles.css` tidy-up
+## 5. `styles.css` tidy-up  OPEN, and it is the cause of the growing-card problem
 
 About five thousand lines, most of them appended overrides from successive passes. It
 works, and it is the least readable file in the project. Fold the overrides into the
 original rules, delete what nothing matches, and keep one section per concern.
 
-## 6. Sign-in credentials
+## 6. Sign-in credentials  WAITING ON KEYS
 
 Google and phone sign-in are built and tested but invisible until configured. See
 `docs/AUTH.md`: `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, and either Africa's Talking
 or Twilio.
+
+
+---
+
+## What was finished on 18 November
+
+- robots.txt and sitemap.xml are generated, and the stale static copies were deleted
+- Google and Bing verification tokens are spliced from the environment, never committed
+- an IndexNow key file is served when INDEXNOW_KEY is set
+- suggestions while typing, drawn from hosts seen and a seed list, never offering a host
+  that was scored as phishing
+- every em and en dash removed from the source
+
+## The one thing still worth doing first
+
+The real device pass. Everything is verified through headless Edge and scripted probes,
+which catch layout and behaviour but not feel.
