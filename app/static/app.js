@@ -24,7 +24,13 @@
   }
 
   const api = async (path, opts = {}) => {
-    const res = await fetch(path, { credentials: "same-origin", ...opts });
+    let res;
+    try {
+      res = await fetch(path, { credentials: "same-origin", ...opts });
+    } catch {
+      // the browser says "Failed to fetch"; a person reads that as nothing at all
+      throw new Error("Nyavu could not be reached. Check your connection and try again.");
+    }
     const data = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(readError(data, res.status));
     return data;
@@ -471,18 +477,26 @@
       if (mode) { mode.textContent = "reading from the right"; mode.dataset.state = "reading"; }
     });
 
+    /* The cursor goes first, then the note arrives under it, the way a typist's words
+       follow the caret rather than appearing beside it. Two beats per piece: move, then
+       write. The gap is the caret's own travel time, so the note never overtakes it. */
+    const STEP = 640;
+    const WRITE_GAP = 330;
+
     [...segs].reverse().forEach((seg, i) => {
-      delay(resolveStart + i * 220, () => {
-        if (caret) {
-          caret.style.left = seg.offsetLeft + "px";
-          caret.style.width = Math.max(12, seg.offsetWidth) + "px";
-          caret.classList.add("on");
-        }
-        seg.classList.add("noted");
+      const at = resolveStart + i * STEP;
+
+      delay(at, () => {
+        if (!caret) return;
+        caret.style.left = seg.offsetLeft + "px";
+        caret.style.width = Math.max(12, seg.offsetWidth) + "px";
+        caret.classList.add("on");
       });
+
+      delay(at + WRITE_GAP, () => seg.classList.add("noted"));
     });
 
-    delay(resolveStart + segs.length * 220 + 160, () => {
+    delay(resolveStart + segs.length * STEP + WRITE_GAP + 220, () => {
       if (caret) caret.classList.remove("on");
       if (autopsy) autopsy.classList.add("swept");
       if (mode) mode.dataset.state = "done";

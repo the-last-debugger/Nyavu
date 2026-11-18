@@ -7822,3 +7822,44 @@ html.modal-lock, body.verdict-open { overflow: hidden; }
   /* the swatch before the word is a screen device */
   .result .verdict-text .badge::before { display: none !important; }
 }
+
+/* =====================================================================
+   The blocker: cascade order, not the rule itself
+
+   The mobile layout is positioned with inset and explicitly drops the centring transform.
+   A later patch that isolated the card into its own compositing layer re-applied
+   "transform: translate(-50%, -50%)" with !important at the same specificity, so it won at
+   every width and the phone card was pushed to -195, -422: half its own size off screen.
+   This sits last in the file, so the transform applies only where the centring is wanted.
+   ===================================================================== */
+@media (max-width: 700px) {
+  .result.overlay {
+    transform: none !important;
+    top: 0 !important;
+    left: 0 !important;
+    inset: 0 !important;
+  }
+}
+
+@media (min-width: 701px) {
+  .result.overlay {
+    /* inset first, then the two edges, or the shorthand clears what it was meant to reset */
+    inset: auto !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+  }
+}
+
+/* the note is written after the cursor arrives, not alongside it */
+.seg .seg-note {
+  opacity: 0;
+  transform: translateY(-2px);
+  transition: opacity .26s ease, transform .26s ease;
+}
+
+.seg.noted .seg-note {
+  opacity: 1;
+  transform: none;
+  transition-delay: 0s !important;
+}
