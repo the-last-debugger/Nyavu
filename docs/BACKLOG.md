@@ -49,3 +49,35 @@ matches the product's promise, which is why it has not been bolted on.
 - caching and 404: assets cached, the shell revalidates, a wrong address gets a page
 - the harness: probes clear storage, unregister the service worker, declare motion, and
   the scratch files no longer shadow Python's standard library
+
+---
+
+## Detection depth: what was measured, and what it says
+
+The question was whether detection can go beyond reading the name. To answer it without
+guessing, two corpora were gathered and one rule was built and measured.
+
+**Real phishing, 41,811 unique URLs** from OpenPhish and PhishTank, saved at
+`ml/eval/phishing_feed_urls.txt`. Prevalence of the structural patterns in that set:
+
+| pattern | appears in | share |
+| --- | --- | --- |
+| long base64-looking parameter | 2,197 | 5.25% |
+| another address inside a parameter | 861 | 2.06% |
+| more than four labels before the name | 218 | 0.52% |
+| downloadable payload extension | 2 | 0.005% |
+
+**Legitimate wrappers, 35 real shapes** at `ml/eval/benign_wrappers.txt`: Google, Outlook
+SafeLinks, Facebook, LinkedIn, DoubleClick, Bing, DuckDuckGo, WhatsApp, GitHub releases,
+MPESA statements, a Moodle deep link, an S3 object, a CDN path. These exist because a naive
+rule would flag them, and flagging them would be worse than missing the phish.
+
+**The rule.** Nested address or long encoded parameter, skipping known wrappers, then
+lifting to medium only when the model already scored above 0.25. Result: **0 false
+positives on the 35 wrappers**, and it moved **2 of 1,500** sampled phishing URLs, because
+the model had already decided the rest.
+
+**Conclusion.** The patterns are real and common, but as a conjunction they change almost
+nothing, and alone they would put legitimate redirects at risk. So they are reported as
+reasons and do not score. To overturn that, the missing corpus is legitimate redirects at
+scale, not more ideas.
