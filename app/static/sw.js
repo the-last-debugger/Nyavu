@@ -46,7 +46,7 @@ self.addEventListener("fetch", (event) => {
   const isNavigation = event.request.mode === "navigate";
 
   event.respondWith(
-    withTimeout(event.request, isNavigation ? 4000 : 8000)
+    withTimeout(event.request, isNavigation ? 12000 : 8000)
       .then((response) => {
         if (response && response.status === 200 && response.type === "basic") {
           const copy = response.clone();

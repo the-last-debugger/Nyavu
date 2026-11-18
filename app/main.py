@@ -698,6 +698,12 @@ def _asset_version() -> str:
 _INDEX_CACHE: dict[str, str] = {}
 
 
+@app.get("/api/version")
+def version() -> dict:
+    """The build the server is serving, so a stale page can notice it is stale."""
+    return {"build": _asset_version()}
+
+
 @app.get("/")
 def index(request: Request):
     """Serve the shell with the search-console tokens spliced in.
@@ -721,6 +727,7 @@ def index(request: Request):
         version = _asset_version()
         for name in ("styles.css", "app.js", "autopsy.js"):
             html = html.replace(f'"/{name}"', f'"/{name}?v={version}"')
+        html = html.replace("<!--build-->", f'<meta name="nyavu-build" content="{version}" />')
         _INDEX_CACHE[origin] = html
     return HTMLResponse(_INDEX_CACHE[origin])
 

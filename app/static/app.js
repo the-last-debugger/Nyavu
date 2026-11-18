@@ -1392,6 +1392,47 @@
     });
   });
 
+  /* ------------------------------------------------------- is this page current?
+     A service worker can serve yesterday's shell when a cold start outlasts its network
+     timeout, and yesterday's shell asks for yesterday's stylesheet. That mixture is how a
+     verdict card ended up invisible behind its own backdrop. The page now knows which build
+     it is, compares against the server, and gets out of the way instead of pretending. */
+  (function checkBuild() {
+    const meta = document.querySelector('meta[name="nyavu-build"]');
+    const mine = meta && meta.content;
+    if (!mine) return;
+
+    fetch("/api/version", { cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (!data || !data.build || data.build === mine) return;
+        const key = "nyavu-reloaded-for-" + data.build;
+        if (sessionStorage.getItem(key)) {
+          // already tried once for this build: say so rather than reload forever
+          showStaleNotice();
+          return;
+        }
+        sessionStorage.setItem(key, "1");
+        location.reload();
+      })
+      .catch(() => { /* offline: the cached page is the right page */ });
+  })();
+
+  function showStaleNotice() {
+    if (document.querySelector(".stale-notice")) return;
+    const bar = document.createElement("div");
+    bar.className = "auth-notice stale-notice";
+    bar.innerHTML = '<strong>A newer version is available.</strong>' +
+      '<span>This page was kept offline by the browser.</span>' +
+      '<button type="button">Reload</button>';
+    bar.querySelector("button").addEventListener("click", () => {
+      sessionStorage.clear();
+      location.reload();
+    });
+    const main = document.querySelector("main");
+    if (main) main.parentNode.insertBefore(bar, main);
+  }
+
   /* ------------------------------------------------------------------- PWA */
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
