@@ -71,7 +71,7 @@
       </aside>
     </div>
 
-    <form class="scanner" id="scanForm" autocomplete="off">
+    <form class="scanner" id="scanForm" autocomplete="off" action="/" method="get">
       <div class="input-row">
         <span class="input-icon" aria-hidden="true">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round">
@@ -79,7 +79,7 @@
             <path d="M14 11a5 5 0 0 0-7 0l-2 2a5 5 0 0 0 7 7l1-1"/>
           </svg>
         </span>
-        <input id="urlInput" name="url" type="text" inputmode="url"
+        <input id="urlInput" name="u" type="text" inputmode="url"
                placeholder="https://example.com/login" spellcheck="false" required />
         <button class="btn primary" type="submit" id="scanBtn">Analyse</button>
         <button class="btn icon" type="button" id="qrBtn" title="Scan a QR code with your camera" aria-label="Scan a QR code with your camera">
