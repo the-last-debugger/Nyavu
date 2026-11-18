@@ -995,6 +995,8 @@
       const btn = $("#authBtn");
       if (me.authenticated) {
         btn.textContent = me.full_name || me.email;
+        btn.title = "Signed in. Click to sign out.";
+        btn.setAttribute("aria-label", `Signed in as ${me.email}. Sign out.`);
         btn.onclick = async () => {
           await api("/api/auth/logout", { method: "POST" });
           refreshAccount(); loadStats(); loadHistory();
@@ -1127,6 +1129,42 @@
     row.addEventListener("focusout", (event) => {
       if (!row.contains(event.relatedTarget)) setTimeout(close, 120);
     });
+  })();
+
+  /* ---------------------------------------------------- the way back from Google
+     The callback returns to /?auth=ok or /?auth=failed and nothing read it, so a
+     successful sign-in and a broken one looked identical: a page that simply loaded.
+     This says which happened, in a line that disappears, and strips the parameter. */
+  (function handleAuthReturn() {
+    const params = new URLSearchParams(location.search);
+    const result = params.get("auth");
+    if (!result) return;
+
+    const messages = {
+      ok: ["Signed in.", "Your checks are now recorded against your account."],
+      cancelled: ["Sign-in cancelled.", "Nothing changed."],
+      failed: ["That sign-in did not complete.", "Google returned an error. Try again."],
+      state: ["That sign-in could not be verified.", "The request may have timed out. Try again."],
+      unconfigured: ["Google sign-in is not configured.", "Use email instead."],
+      noemail: ["Google did not share an address.", "Sign-in needs an email address."],
+    };
+    const [title, detail] = messages[result] || ["Sign-in could not complete.", "Try again."];
+
+    const bar = document.createElement("div");
+    bar.className = "auth-notice" + (result === "ok" ? " good" : "");
+    bar.innerHTML = `<strong>${title}</strong><span>${detail}</span>
+      <button type="button" aria-label="Dismiss">\u00d7</button>`;
+    bar.querySelector("button").addEventListener("click", () => bar.remove());
+    const main = document.querySelector("main");
+    if (main) main.parentNode.insertBefore(bar, main);
+    setTimeout(() => bar.classList.add("fade"), 6000);
+
+    // the URL should not keep saying what happened
+    const clean = new URL(location.href);
+    clean.searchParams.delete("auth");
+    history.replaceState({}, "", clean.pathname + (clean.hash || ""));
+
+    if (result === "ok") refreshAccount();
   })();
 
   /* ---------------------------------------------------------- alternative sign in */
