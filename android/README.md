@@ -56,3 +56,36 @@ untouched, no data leaves the device and no remote VPN server exists.
 
 Run it on a real phone with a real blocklist for a week first. A VPN that misroutes
 traffic leaves the phone without internet, which is a worse demo than not showing it.
+
+---
+
+## 0.9.0, the first pass at matching the site
+
+The app was still wearing the mint the website retired, and its verdict screen was four
+lines of default Android text. This pass brings the two closer, without pretending the app
+is a webview: it is a native screen, rebuilt with Android widgets.
+
+What changed:
+
+- **one palette**, in `NyavuTheme.kt`: sage for the accent, bone for anything you press, a
+  serif for written matter, monospace for figures and addresses. A screen cannot drift back
+  to the old mint because the colours are declared once
+- **the verdict says what the site says**: "This one is worth avoiding", "Worth a second
+  look", "This reads as ordinary", with the risk out of a hundred as a figure and a quiet bar
+  rather than the old glowing dial
+- **the reasons are rows**, numbered and explained, under the heading the verdict earned
+- **the explanation folds** behind a plus, exactly as it does on the site
+- **buttons are bone**, dark text on light, the way the site's primary action is written
+
+What was removed, as asked:
+
+- **the DNS filter**: its card, its tile, its VPN service declaration and its two foreground
+  service permissions. The built APK now asks for INTERNET and nothing else. `Shusha.kt` still
+  contains the service class, unused and unreferenced, so the decision is easy to reverse
+
+What is not done yet:
+
+- the address is shown as one string, not dissected into pieces with notes the way the site
+  does it. That is the next piece of work, and it needs a layout that survives a narrow phone
+- nothing here has been run on a device. It compiles, the APK installs nothing unusual, and
+  the screen order is right, but only a hand on a phone can confirm how it feels

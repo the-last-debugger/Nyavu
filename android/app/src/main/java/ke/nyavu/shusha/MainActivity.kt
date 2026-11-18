@@ -5,7 +5,6 @@ import android.app.AlertDialog
 import android.content.Intent
 import android.graphics.Typeface
 import android.graphics.drawable.GradientDrawable
-import android.net.VpnService
 import android.os.Bundle
 import android.text.InputType
 import android.view.Gravity
@@ -27,17 +26,15 @@ class MainActivity : Activity() {
     private lateinit var ring: RingView
     private lateinit var ringLabel: TextView
     private lateinit var ringSub: TextView
-    private lateinit var dnsState: TextView
-    private lateinit var dnsBar: View
-    private lateinit var dnsAction: TextView
     private lateinit var urlField: EditText
     private lateinit var status: TextView
 
-    private val ink = 0xFFEEF2FA.toInt()
-    private val muted = 0xFF939FB5.toInt()
-    private val faint = 0xFF5B667D.toInt()
-    private val accent = 0xFF43E8C8.toInt()
-    private val safe = 0xFF35E0A0.toInt()
+    // the palette lives in NyavuTheme, so a screen cannot drift back to the old mint
+    private val ink get() = NyavuTheme.ink
+    private val muted get() = NyavuTheme.muted
+    private val faint get() = NyavuTheme.faint
+    private val accent = NyavuTheme.ACCENT
+    private val safe = NyavuTheme.SAFE
 
     private fun dp(v: Int) = (v * resources.displayMetrics.density).toInt()
 
@@ -59,10 +56,10 @@ class MainActivity : Activity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        window.statusBarColor = 0xFF04060B.toInt()
-        window.navigationBarColor = 0xFF04060B.toInt()
+        window.statusBarColor = NyavuTheme.BG
+        window.navigationBarColor = NyavuTheme.BG
 
-        val scroll = ScrollView(this).apply { setBackgroundColor(0xFF04060B.toInt()) }
+        val scroll = ScrollView(this).apply { setBackgroundColor(NyavuTheme.BG) }
         val page = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             setPadding(dp(22), dp(30), dp(22), dp(36))
@@ -179,8 +176,6 @@ class MainActivity : Activity() {
         tiles.addView(tile("\uD83D\uDD0D", "Inspect\nlink") {
             urlField.requestFocus()
         }, LinearLayout.LayoutParams(0, dp(88), 1f).apply { rightMargin = dp(8) })
-        tiles.addView(tile("\uD83D\uDCF6", "DNS\nfilter") { toggleFilter() },
-            LinearLayout.LayoutParams(0, dp(88), 1f).apply { rightMargin = dp(8) })
         tiles.addView(tile("\u2139", "About\nNyavu") { showAbout() },
             LinearLayout.LayoutParams(0, dp(88), 1f))
         page.addView(tiles)
@@ -193,53 +188,6 @@ class MainActivity : Activity() {
             LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT
             ).apply { bottomMargin = dp(10) })
-
-        val dns = LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
-            background = panel()
-            setPadding(dp(16), dp(15), dp(16), dp(14))
-        }
-        val dnsHead = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
-        dnsHead.addView(TextView(this).apply {
-            text = "DNS filter"
-            textSize = 13.5f
-            setTextColor(ink)
-            typeface = Typeface.DEFAULT_BOLD
-            layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
-        })
-        dnsState = TextView(this).apply {
-            textSize = 9.5f
-            letterSpacing = 0.12f
-            typeface = Typeface.DEFAULT_BOLD
-            setPadding(dp(9), dp(4), dp(9), dp(4))
-        }
-        dnsHead.addView(dnsState)
-        dns.addView(dnsHead)
-
-        dnsBar = View(this)
-        dns.addView(dnsBar, LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.MATCH_PARENT, dp(3)
-        ).apply { topMargin = dp(9) })
-
-        dns.addView(TextView(this).apply {
-            text = "Blocks known phishing and advertising domains for every app. It checks " +
-                   "names, not pages, so it cannot catch a site that is not already listed."
-            textSize = 11.5f
-            setTextColor(faint)
-            setPadding(0, dp(9), 0, dp(4))
-        })
-
-        dnsAction = TextView(this).apply {
-            textSize = 12f
-            setTextColor(muted)
-            setPadding(0, dp(8), 0, 0)
-            setOnClickListener { toggleFilter() }
-        }
-        dns.addView(dnsAction)
-
-        page.addView(dns, LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT
-        ).apply { bottomMargin = dp(10) })
 
         page.addView(card("Share to Nyavu", "Available", true,
             "Open the share sheet on any link and choose Nyavu. No notification access " +
@@ -365,15 +313,6 @@ class MainActivity : Activity() {
         })
     }
 
-    private fun toggleFilter() {
-        if (NyavuVpnService.running) {
-            stopService(Intent(this, NyavuVpnService::class.java))
-            status.postDelayed({ refresh() }, 400)
-        } else {
-            requestVpn()
-        }
-    }
-
     private fun showAbout() {
         AlertDialog.Builder(this)
             .setTitle("Nyavu")
@@ -390,51 +329,14 @@ class MainActivity : Activity() {
 
     /** The ring counts what is actually on, not how safe the device is. */
     private fun refresh() {
-        val dnsOn = NyavuVpnService.running
-        val active = 2 + if (dnsOn) 1 else 0          // inspection + share target, plus DNS
+        val active = 2                              // link inspection and the share target
 
         ring.accent = accent
-        ring.captionText = "of 3"
-        ring.setProgress(active / 3f, active.toString())
+        ring.captionText = "of 2"
+        ring.setProgress(active / 2f, active.toString())
 
-        ringLabel.text = when (active) {
-            3 -> "All three protections are on"
-            2 -> "Two of three protections active"
-            else -> "One protection active"
-        }
-        ringSub.text = if (dnsOn) {
-            "Link inspection on - DNS filter on"
-        } else {
-            "Link inspection on - DNS filter off"
-        }
-
-        dnsState.text = if (dnsOn) "ON" else "OFF"
-        dnsState.setTextColor(if (dnsOn) safe else muted)
-        dnsState.background = GradientDrawable().apply {
-            cornerRadius = dp(20).toFloat()
-            setColor(if (dnsOn) 0x1A35E0A0 else 0x0DFFFFFF)
-            setStroke(dp(1), if (dnsOn) 0x7335E0A0.toInt() else 0xFF232E3D.toInt())
-        }
-        dnsBar.setBackgroundColor(if (dnsOn) safe else 0xFF141C27.toInt())
-        dnsAction.text = if (dnsOn) "Stop filtering" else "Start filtering"
-    }
-
-    private fun requestVpn() {
-        val intent = VpnService.prepare(this)
-        if (intent != null) {
-            startActivityForResult(intent, REQ_VPN)
-        } else {
-            startService(Intent(this, NyavuVpnService::class.java))
-            status.postDelayed({ refresh() }, 700)
-        }
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == REQ_VPN && resultCode == RESULT_OK) {
-            startService(Intent(this, NyavuVpnService::class.java))
-            status.postDelayed({ refresh() }, 700)
-        }
+        ringLabel.text = "Link inspection is on"
+        ringSub.text = "Send a link here, or share one to Nyavu from any app"
     }
 
     override fun onResume() {
@@ -442,7 +344,4 @@ class MainActivity : Activity() {
         if (::ring.isInitialized) refresh()
     }
 
-    companion object {
-        private const val REQ_VPN = 41
-    }
 }
