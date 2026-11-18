@@ -8007,3 +8007,46 @@ dialog.verdict-dialog[open] {
 }
 
 .auth-notice-link:hover { border-bottom-color: var(--accent-strong, #B9CBB9); }
+
+/* the number explains itself in one line; the rest waits behind the plus */
+.score-more {
+  margin: 8px 0 0;
+  border: 0;
+}
+
+.score-more > summary {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 0;
+  cursor: pointer;
+  list-style: none;
+  color: var(--faint);
+  font-size: 0.8rem;
+  letter-spacing: .02em;
+  border-bottom: 1px dotted rgba(255, 255, 255, .18);
+  width: fit-content;
+}
+
+.score-more > summary::-webkit-details-marker { display: none; }
+
+.score-more > summary::before {
+  content: "+";
+  font-family: var(--font-mono, monospace);
+  font-size: 0.9rem;
+  line-height: 1;
+  color: var(--faint);
+  transition: transform .25s ease;
+}
+
+.score-more[open] > summary::before { content: "\2212"; }
+
+.score-more > summary:hover { color: var(--muted); border-bottom-color: rgba(255, 255, 255, .34); }
+
+.score-more > p {
+  margin: 9px 0 0;
+  max-width: 54ch;
+  color: var(--muted);
+  font-size: 0.86rem;
+  line-height: 1.6;
+}

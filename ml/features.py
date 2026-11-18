@@ -248,5 +248,9 @@ def extract(url: str):
         reasons.append("The domain has high character entropy, consistent with "
                        "machine-generated names.")
     if scheme != "https":
-        reasons.append("The URL does not use HTTPS.")
+        # HTTP is a weakness, not a verdict. Plenty of old and institutional sites still
+        # serve plain HTTP, so the wording says what is true and stops there.
+        reasons.append("The address uses HTTP rather than HTTPS, so anything typed into the "
+                       "page would travel unencrypted. Older and institutional sites often "
+                       "work this way.")
     return features, reasons

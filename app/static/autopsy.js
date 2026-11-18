@@ -72,8 +72,11 @@ function autopsySegments(r) {
       role: "scheme",
       note: https
         ? (clean ? "encrypted, a tampered page cannot pass for this one" : "encrypted")
-        : "no HTTPS: sent in the clear",
-      flag: !https,
+        : "no HTTPS: nothing here is encrypted",
+      // HTTP is marked, not condemned: old and institutional sites still use it, and a
+      // flagged red segment would say "phishing" where the evidence says "unencrypted"
+      flag: false,
+      soft: !https,
       tight: true,
     });
   }

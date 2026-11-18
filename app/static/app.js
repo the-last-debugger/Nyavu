@@ -581,6 +581,24 @@
   const escapeHtml = s => String(s).replace(/[&<>"']/g, c =>
     ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 
+  /* The score note says what the number is and how it was reached. The first two sentences
+     stay on the card; the rest folds behind the plus. */
+  function noteParts(note) {
+    const parts = String(note).split(". ").map((x) => x.trim()).filter(Boolean);
+    const withStop = (x) => (/[.!?]$/.test(x) ? x : x + ".");
+    return {
+      lead: parts.slice(0, 2).map(withStop).join(" "),
+      tail: parts.slice(2).map(withStop).join(" "),
+    };
+  }
+
+  function noteLead(note) { return noteParts(note).lead; }
+
+  function noteTail(note) {
+    const { tail, lead } = noteParts(note);
+    return tail || lead;
+  }
+
   function render(r) {
     const pct = Math.round(r.probability * 100);
 
@@ -648,11 +666,15 @@
         <div class="verdict-text">
           <span class="badge ${r.risk}">${r.band}</span>${r.reputation === "established"
             ? '<span class="badge rep">Established domain</span>' : ""}
-          <h2>${r.risk === "high" ? "Something doesn't look right"
-            : r.risk === "medium" ? "This one is hard to call"
-            : "Nothing suspicious in the name"}</h2>
+          <h2>${r.risk === "high" ? "This one is worth avoiding"
+            : r.risk === "medium" ? "Worth a second look"
+            : "This reads as ordinary"}</h2>
           <p class="verdict-url">${escapeHtml(r.url)}</p>
-          <p class="score-note">${scoreNote}</p>
+          <p class="score-note">${noteLead(scoreNote)}</p>
+          <details class="score-more">
+            <summary>How that was worked out</summary>
+            <p>${noteTail(scoreNote)}</p>
+          </details>
           <div class="stamp ${r.risk}" aria-hidden="true">${r.risk === "high" ? "phishing" : r.risk === "medium" ? "unsure" : "clear"}</div>
         </div>
         ${autopsyMarkup(r)}
@@ -662,8 +684,8 @@
         <button type="button" class="skip" id="skipBtn">Skip the theatre</button>
       </div>
       <h3 class="block-title">${r.risk === "low"
-        ? "Why this looks fine"
-        : r.risk === "medium" ? "What gave Nyavu pause" : "Why Nyavu raised a concern"}</h3>
+        ? "What stood out, in a good way"
+        : r.risk === "medium" ? "What gave Nyavu pause" : "What Nyavu noticed"}</h3>
       <ul class="reasons">${reasons}</ul>
       ${evidence}
       <details class="advanced">
