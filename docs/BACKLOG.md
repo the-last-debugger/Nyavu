@@ -3,6 +3,26 @@
 Written on 17 November, rewritten on the evening of 18 November after the work below.
 Live build: see the last commit.
 
+## What the evening of 18 November settled
+
+- **the verdict is a native dialog.** A fixed div is only above the page while its z-index
+  wins inside its stacking context, and one transform on an ancestor buried it under its own
+  backdrop. `showModal()` puts it in the browser's top layer, which cannot be covered.
+  Verified with a transformed ancestor wrapped around the detector, which is the case that
+  previously hid the card
+- **assets carry a content hash.** Two deploys can no longer meet on one page. That mismatch
+  is what produced a black screen with a blurred backdrop: a new script opening an overlay
+  whose styles the old stylesheet did not contain
+- **the page can tell it is stale** and says so, because a service worker answering a cold
+  start from cache is how the mismatch reached a real browser
+- **the backdrop is a scrim, not a blur.** Full-viewport `backdrop-filter` smears on some
+  Windows compositors, and the smearing was reported twice as "blur everywhere"
+- **the cursor types the notes.** Reading from the right, the caret arrives, then the note is
+  written where it stopped
+- **a verdict can be printed.** Nothing styled the page for paper before; the print rules
+  produce a document with the verdict colours kept and a credit line
+- **dialogs answer to Escape** and the verdict traps focus, which neither did before
+
 ## Open
 
 ### 1. Real device pass
