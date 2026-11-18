@@ -134,3 +134,34 @@ Two ways out, and the first is the better one:
 
 Nothing in this queue needs a code change. It needs an afternoon, a printed form and people
 who are not on the team.
+
+---
+
+## The emulator, and why the app still has no screenshots
+
+An Android emulator was installed to close the last verification gap: the app has never been
+seen running. It does not start in this environment, and the evidence is unambiguous.
+
+- **WHPX path**: the emulator initialises, prints `Windows Hypervisor Platform accelerator is
+  operational`, then exits with no error, no crash log and an empty exit code. Reproduced with
+  hardware and software rendering. This is the signature of the sandbox blocking the named
+  pipes QEMU needs, the same restriction that stopped ADB writing its log into the temp folder
+  until the folder was redirected.
+- **Software path** (`-accel off`): the process stays alive and ADB sees `emulator-5554`, but
+  the device never leaves `offline`, and after twelve minutes the process has used 0.17
+  seconds of CPU. It is not booting slowly; it is not executing.
+
+What is installed and ready, for a terminal outside this session:
+
+```
+$env:ANDROID_EMULATOR_HOME="C:\dev\_tools\android\emu-home"
+$env:ANDROID_AVD_HOME="C:\dev\_tools\android\avd"
+C:\Users\tuyaa\AppData\Local\Android\Sdk\emulator\emulator.exe -avd nyavu
+```
+
+The AVD is a Pixel 5 profile on Android 11 with the light ATD image, and the screenshot
+harness is at `C:\dev\_tools\android\run-apk.ps1`.
+
+Until then, the app's verification stops at: it compiles, `aapt` confirms the label, icon and
+permissions, and the interface is reviewed by reading it. Everything about how it feels is
+still a judgement only a running device can make.

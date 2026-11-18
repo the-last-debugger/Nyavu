@@ -26,6 +26,10 @@ import org.json.JSONObject
  */
 class MainActivity : Activity() {
 
+    private companion object {
+        const val REQ_CSV = 41
+    }
+
     private lateinit var body: FrameLayout
     private lateinit var navBar: LinearLayout
     private lateinit var accountLabel: TextView
@@ -263,6 +267,15 @@ class MainActivity : Activity() {
         column.addView(field, LinearLayout.LayoutParams(
             LinearLayout.LayoutParams.MATCH_PARENT, dp(170)).apply { topMargin = dp(12) })
 
+        val pick = TextView(this).apply {
+            text = "or choose a CSV from this device"
+            textSize = 12f
+            setTextColor(NyavuTheme.muted)
+            setPadding(0, dp(10), 0, dp(2))
+            setOnClickListener { pickCsv(field) }
+        }
+        column.addView(pick)
+
         val run = Button(this).apply {
             text = "Screen the list"
             isAllCaps = false
@@ -354,6 +367,44 @@ class MainActivity : Activity() {
     }
 
     // ----------------------------------------------------------------- history
+
+    /** Choose a CSV and put its lines into the field, so the same button screens it. */
+    private fun pickCsv(field: EditText) {
+        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+            addCategory(Intent.CATEGORY_OPENABLE)
+            type = "*/*"
+            putExtra(Intent.EXTRA_MIME_TYPES, arrayOf("text/*", "text/csv", "application/csv",
+                "application/vnd.ms-excel", "text/comma-separated-values"))
+        }
+        fileResult = field
+        startActivityForResult(intent, REQ_CSV)
+    }
+
+    private var fileResult: EditText? = null
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode != REQ_CSV || resultCode != RESULT_OK) return
+        val uri = data?.data ?: return
+        val target = fileResult ?: return
+        Thread {
+            val text = runCatching {
+                contentResolver.openInputStream(uri)?.bufferedReader()?.use { it.readText() }
+            }.getOrNull()
+            runOnUiThread {
+                if (text == null) {
+                    target.error = "Could not read that file."
+                    return@runOnUiThread
+                }
+                val lines = text.split("\n").map { it.trim() }.filter { it.isNotEmpty() }
+                // a header row is not an address
+                val cleaned = lines.filterIndexed { i, line ->
+                    !(i == 0 && line.lowercase().trim('"') == "url")
+                }
+                target.setText(cleaned.joinToString("\n"))
+            }
+        }.start()
+    }
 
     private fun historyScreen(): View {
         val (scroll, column) = page()
