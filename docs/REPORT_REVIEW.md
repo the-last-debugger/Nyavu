@@ -90,8 +90,16 @@ stated once.
 
 ## Order of work
 
-1. Merge Chapter Five into Chapter Four and renumber (queued)
-2. Correct the four contradictions in the table above
-3. Add the calibration evidence to 4.9
-4. Run the explanation-clarity test, or state the limitation plainly
+1. ~~Merge Chapter Five into Chapter Four and renumber~~ **done** in
+   `docs/Team_Project_Chapters_1-4_v2.docx`: 5.2 became 4.2.1, 5.3 became 4.6.1, 5.4 became
+   4.9.1, and 5.5/5.6 became 4.13.1 and 4.13.2 under the existing conclusion. The Chapter
+   Five shell and its introduction were removed, and the document now ends at Chapter Four
+2. ~~Correct the contradictions~~ **partly done**: the dataset figure now reads 17,730 and the
+   conclusions no longer claim all objectives were met. Still to change: section 1.7, which
+   says the study does not implement browser or operating-system integration, and 5.6's
+   listing of an extension as future work, which now exist
+3. Add the calibration evidence to 4.9: Brier 0.1674, unchanged by Platt scaling and by
+   isotonic regression, which is why no calibrator ships
+4. Run the explanation-clarity test, or state the limitation plainly. The merged conclusions
+   currently state it plainly
 5. Confirm the corrected changes list at the next supervision meeting
