@@ -403,28 +403,89 @@
       say("Reading the address");
     });
 
-    /* Read it from the right: the pieces are annotated in that order, and a cursor
-       steps along with them, so the order is shown rather than described. */
+    /* The address is written out by a cursor, left to right, one piece at a time. Then the
+       notes resolve from the ending backwards, which is the lesson. Writing it is the
+       clearest way to show something being worked on, and it needs no illustration. */
+    const cursor = autopsy ? autopsy.querySelector(".scan-cursor") : null;
+    const tag = autopsy ? autopsy.querySelector(".scan-tag") : null;
     const caret = autopsy ? autopsy.querySelector(".autopsy-caret") : null;
-    const stepTo = (seg) => {
-      if (!caret) return;
-      caret.style.left = seg.offsetLeft + "px";
-      caret.style.width = Math.max(12, seg.offsetWidth) + "px";
-      caret.classList.add("on");
-    };
+    const mode = autopsy ? autopsy.querySelector(".autopsy-mode") : null;
 
-    const order = [...segs].reverse();
-    order.forEach((seg, i) => {
-      delay(800 + i * 210, () => {
-        stepTo(seg);
-        seg.classList.add("on");
+    const pieces = segs
+      .map((el) => ({
+        el,
+        ink: el.querySelector(".seg-ink"),
+        text: el.querySelector(".seg-text"),
+        role: el.dataset.role || "",
+      }))
+      .sort((a, b) => a.el.offsetLeft - b.el.offsetLeft);
+
+    const WRITE_START = 380;
+    const PER_MS = 62;           // per piece, slow enough to watch being written
+
+    const line = autopsy ? autopsy.querySelector(".autopsy-line") : null;
+    const lineLeft = line ? line.getBoundingClientRect().left : 0;
+
+    if (cursor) {
+      cursor.classList.add("on");
+      cursor.style.left = pieces.length ? pieces[0].el.offsetLeft + "px" : "0px";
+    }
+
+    let clock = WRITE_START;
+
+    pieces.forEach((piece) => {
+      piece.text.style.width = "0px";                 // hidden until written
+      const width = piece.ink ? piece.ink.offsetWidth : 0;
+      const dur = Math.max(90, width * PER_MS / 10);
+
+      delay(clock, () => {
+        if (tag) tag.textContent = piece.role;
+        piece.el.classList.add("on");
+        piece.el.classList.add("writing");
+        piece.text.style.transition = `width ${dur}ms steps(12, end)`;
+        piece.text.style.width = width + "px";
+      });
+
+      // the cursor rides the writing edge
+      const steps = 14;
+      for (let k = 1; k <= steps; k++) {
+        delay(clock + (dur * k) / steps, () => {
+          if (!cursor) return;
+          cursor.style.left = (piece.el.offsetLeft + (width * k) / steps) + "px";
+        });
+      }
+
+      clock += dur + 40;
+    });
+
+    if (cursor) {
+      delay(clock + 60, () => {
+        cursor.classList.remove("on");
+        if (tag) tag.textContent = "";
+      });
+    }
+
+    /* the resolve: notes arrive from the ending backwards */
+    const resolveStart = clock + 200;
+    delay(resolveStart, () => {
+      if (mode) { mode.textContent = "reading from the right"; mode.dataset.state = "reading"; }
+    });
+
+    [...segs].reverse().forEach((seg, i) => {
+      delay(resolveStart + i * 220, () => {
+        if (caret) {
+          caret.style.left = seg.offsetLeft + "px";
+          caret.style.width = Math.max(12, seg.offsetWidth) + "px";
+          caret.classList.add("on");
+        }
+        seg.classList.add("noted");
       });
     });
 
-    delay(800 + order.length * 210 + 140, () => {
+    delay(resolveStart + segs.length * 220 + 160, () => {
       if (caret) caret.classList.remove("on");
-      // the closing line lands after the sweep, not before it
       if (autopsy) autopsy.classList.add("swept");
+      if (mode) mode.dataset.state = "done";
     });
 
     const flagged = segs.filter((el) => el.classList.contains("flag"));

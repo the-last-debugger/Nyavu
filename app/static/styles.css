@@ -3077,7 +3077,7 @@ code, kbd, samp{
   opacity: 0;
   transform: translateY(-3px);
   transition: opacity .45s ease, transform .45s ease, color .35s ease;
-}.seg.on .seg-note{ opacity: 1; transform: none; }/* the pieces that raised the score */
+}.seg.noted .seg-note{ opacity: 1; transform: none; }/* the pieces that raised the score */
 .seg.flag.on{ border-bottom-color: rgba(255, 120, 140, .55); }.seg.flag.on .seg-text{ color: #F3B4C0; }.seg.flag.called .seg-text{
   color: #FF8FA2;
   font-weight: 600;
@@ -3572,3 +3572,94 @@ code, kbd, samp{
 
 .result.pending .verdict-text { padding-top: 6px !important; }
 .result.pending .verdict-head .autopsy { margin-top: 6px !important; }
+
+/* =====================================================================
+   The review, then the reading
+
+   A cursor sweeps the address left to right and names each part as it passes: scheme,
+   label, name, ending, path. Then the notes resolve from the ending backwards, which is
+   the point being taught. The playhead is a real element the script moves, so the motion
+   is the same mechanism as any other work happening on the page.
+   ===================================================================== */
+.autopsy-line { position: relative; }
+
+.scan-cursor {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 2px;
+  height: 46px;
+  margin-left: -1px;
+  background: linear-gradient(180deg, rgba(185, 203, 185, 0), #B9CBB9 22%, #B9CBB9 78%, rgba(185, 203, 185, 0));
+  box-shadow: 0 0 12px rgba(185, 203, 185, .55);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 3;
+  transition: opacity .25s ease;
+}
+
+.scan-cursor.on { opacity: 1; }
+
+.scan-tag {
+  position: absolute;
+  bottom: -18px;
+  left: 6px;
+  white-space: nowrap;
+  font-family: var(--font-body);
+  font-size: 0.64rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent);
+  opacity: 0;
+  transition: opacity .2s ease;
+}
+
+.scan-cursor.on .scan-tag { opacity: 1; }
+
+/* each piece brightens as the review passes over it */
+.seg { opacity: 0; }
+.seg.scanned { opacity: 1; }
+.seg.on { opacity: 1; }
+
+/* the mode label retires when the reading is done */
+.autopsy-mode[data-state="done"] { opacity: 0 !important; transition: opacity .6s ease .2s; }
+
+@media (prefers-reduced-motion: reduce) {
+  .scan-cursor { display: none; }
+  .seg { opacity: 1; }
+}
+
+/* =====================================================================
+   The address is written out
+
+   Each piece is clipped to a width the script grows, so the string appears the way it
+   would if someone typed it, and the playhead rides the edge of what has been written.
+   Then the notes resolve from the ending back to the scheme.
+   ===================================================================== */
+.seg-text {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: bottom;
+}
+
+.seg-ink {
+  display: inline-block;
+  white-space: nowrap;
+}
+
+.seg { opacity: 1; }
+.seg .seg-note { opacity: 0; transform: translateY(-3px); }
+.seg.noted .seg-note { opacity: 1; transform: none; }
+
+.verdict-head .autopsy { position: relative; }
+
+
+/* the tag names the piece being written, above the playhead */
+.scan-tag {
+  bottom: 100% !important;
+  left: 4px !important;
+  margin-bottom: 7px;
+  color: var(--accent) !important;
+}
+
+.seg .seg-note { transition: opacity .4s ease, transform .4s ease; }

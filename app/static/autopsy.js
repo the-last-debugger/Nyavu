@@ -69,6 +69,7 @@ function autopsySegments(r) {
     const https = scheme === "https";
     segs.push({
       text: scheme + "://",
+      role: "scheme",
       note: https
         ? (clean ? "encrypted, a tampered page cannot pass for this one" : "encrypted")
         : "no HTTPS: sent in the clear",
@@ -80,6 +81,7 @@ function autopsySegments(r) {
   if (isIp) {
     segs.push({
       text: hostOnly,
+      role: "address",
       note: "a bare address, not a name: nothing to check against",
       flag: true,
     });
@@ -89,6 +91,7 @@ function autopsySegments(r) {
       const hyphens = (label.match(/-/g) || []).length;
       segs.push({
         text: label + ".",
+        role: "a label",
         note: brand
           ? `"${brand}" in a label the owner can invent`
           : (clean ? "a label the owner can invent, harmless on its own" : "free to invent"),
@@ -112,7 +115,7 @@ function autopsySegments(r) {
     } else {
       nameNote = clean ? "no hyphens to hide behind" : "the name somebody bought";
     }
-    segs.push({ text: name, note: nameNote, flag: nameFlag, strong: true });
+    segs.push({ text: name, role: "the name", note: nameNote, flag: nameFlag, strong: true });
 
     if (tld) {
       let tldNote;
@@ -127,13 +130,14 @@ function autopsySegments(r) {
       } else {
         tldNote = clean ? `".${tld}", an ordinary ending` : "the ending";
       }
-      segs.push({ text: "." + tld, note: tldNote, flag: tldFlag, tight: true });
+      segs.push({ text: "." + tld, role: "the ending", note: tldNote, flag: tldFlag, tight: true });
     }
   }
 
   if (path && path !== "/") {
     segs.push({
       text: path,
+      role: "the path",
       note: clean ? "the path: cosmetic, but read it anyway" : "the path, cosmetic",
       flag: false,
       soft: true,
@@ -154,8 +158,8 @@ function autopsyMarkup(r) {
     if (s.soft) cls.push("soft");
     if (s.strong) cls.push("strong");
     if (s.tight) cls.push("tight");
-    return `<span class="${cls.join(" ")}" style="--i:${i}">
-        <span class="seg-text">${escapeHtml(s.text)}</span>
+    return `<span class="${cls.join(" ")}" style="--i:${i}" data-role="${escapeHtml(s.role)}">
+        <span class="seg-text"><span class="seg-ink">${escapeHtml(s.text)}</span></span>
         <span class="seg-note">${escapeHtml(s.note)}</span>
       </span>`;
   });
@@ -171,9 +175,13 @@ function autopsyMarkup(r) {
 
   return `<div class="autopsy ${flagged === 0 ? "clean" : "risky"}" data-flags="${flagged}">
       <div class="autopsy-head">
-        <span class="autopsy-mode">reading from the right</span>
+        <span class="autopsy-mode" data-state="idle">reviewing the address</span>
       </div>
-      <div class="autopsy-line"><span class="autopsy-caret" aria-hidden="true"></span>${items.join("")}</div>
+      <div class="autopsy-line">
+        <span class="scan-cursor" aria-hidden="true"><span class="scan-tag"></span></span>
+        <span class="autopsy-caret" aria-hidden="true"></span>
+        ${items.join("")}
+      </div>
       <p class="autopsy-caption">${caption}</p>
     </div>`;
 }
