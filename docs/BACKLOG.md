@@ -101,3 +101,36 @@ the model had already decided the rest.
 nothing, and alone they would put legitimate redirects at risk. So they are reported as
 reasons and do not score. To overturn that, the missing corpus is legitimate redirects at
 scale, not more ideas.
+
+---
+
+## Queued: the report, against Chapter One
+
+A full comparison is written at `docs/REPORT_REVIEW.md`. The short version:
+
+**Queue first: merge Chapter Five into Chapter Four.** That is the supervisor's instruction
+and it is also a de-duplication, because 4.9 already reports the tests that 5.4 describes and
+4.13 already carries the conclusions that 5.5 repeats.
+
+**Then correct four contradictions**, each of which a marker would find before anything else:
+
+| claim | what the artefact says |
+| --- | --- |
+| 5.5: "26,202 addresses" | 17,730 (14,157 train, 3,573 hold-out) |
+| 5.5: "all four specific objectives" | there are three |
+| 1.7: "does not implement browser or OS integration" | an extension and a native app exist |
+| 5.6: extension listed as future work | already built |
+
+**The one objective not yet met is III's second half**: "the clarity of the explanations it
+presents to non-expert users". Accuracy is measured; clarity is not. 5.6 admits the feedback
+was informal and 5.5 claims the objective was met anyway.
+
+Two ways out, and the first is the better one:
+
+1. run the test: eight to ten non-experts, five addresses across the three bands, three
+   questions each (verdict, reason, action), and report comprehension as a proportion
+2. if no participants can be found, say plainly that clarity was reviewed by design and
+   informal feedback, not measured with representative users, and mark III partially met
+
+Nothing in this queue needs a code change. It needs an afternoon, a printed form and people
+who are not on the team.
