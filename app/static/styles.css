@@ -6035,3 +6035,146 @@ code, kbd, samp {
   -webkit-mask-image: radial-gradient(ellipse 78% 96% at 30% 45%, #000 18%, transparent 82%) !important;
   mask-image: radial-gradient(ellipse 78% 96% at 30% 45%, #000 18%, transparent 82%) !important;
 }
+
+/* =====================================================================
+   One shade, one mark
+
+   The card read as two halves because two decorative washes from the scene era were still
+   painted on it: a mint radial bleeding from the top left, and a tone wash timed to the
+   old verdict. Both are gone. The card is a single panel now.
+
+   The verdict badges were capsules of capitals, which is the house style of a dashboard.
+   A verdict is a statement, so it is set as one: a printed colour swatch, the word in the
+   serif, and the qualifier as quiet text beside it.
+   ===================================================================== */
+.verdict-head::before,
+.result:not(.pending) .verdict-head::after,
+.verdict-head::after,
+.step::after,
+.panel::after,
+.stats-strip::after {
+  display: none !important;
+  animation: none !important;
+}
+
+.result .verdict-text .badge,
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: none !important;
+  box-shadow: none !important;
+  font-family: var(--font-serif) !important;
+  font-size: 1.02rem !important;
+  font-style: italic;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+  color: var(--text) !important;
+}
+
+.badge::before {
+  content: "";
+  width: 9px;
+  height: 9px;
+  flex: 0 0 9px;
+  background: currentColor;
+  border-radius: 1px;
+  transform: translateY(-1px);
+}
+
+.badge.high { color: #F09AA8 !important; }
+.badge.medium { color: #E8BE7C !important; }
+.badge.low, .badge.safe { color: #8FD9BE !important; }
+
+.badge.rep {
+  color: var(--faint) !important;
+  font-size: 0.92rem !important;
+}
+
+.badge.rep::before {
+  width: 0;
+  flex: 0 0 auto;
+  content: "·";
+  background: none;
+  font-size: 1rem;
+  transform: none;
+}
+
+/* =====================================================================
+   More page, fewer words
+
+   The first screen was three paragraphs of explanation before anything could be looked
+   at. The lede is one sentence now, the plate carries the emptiness, and a hairline under
+   the copy gives the block a floor.
+   ===================================================================== */
+.hero-plated {
+  position: relative;
+  isolation: isolate;
+  padding-bottom: 8px;
+}
+
+.hero-plated::before {
+  content: "";
+  position: absolute;
+  inset: -40px -6% 0 -6%;
+  z-index: -1;
+  background: url("/contours.png") center / cover no-repeat;
+  opacity: .34;
+  -webkit-mask-image: radial-gradient(ellipse 70% 80% at 24% 40%, #000 10%, transparent 78%);
+  mask-image: radial-gradient(ellipse 70% 80% at 24% 40%, #000 10%, transparent 78%);
+  pointer-events: none;
+}
+
+.hero-copy { border-bottom: 1px solid rgba(255, 255, 255, .07); padding-bottom: 22px; }
+
+.hero .lede { max-width: 30ch; }
+
+/* ---------------- phones: the verdict card ---------------- */
+@media (max-width: 700px) {
+  .result .verdict-head {
+    padding: 16px 16px 10px !important;
+    gap: 10px !important;
+  }
+
+  .result .gauge {
+    width: 116px !important;
+    height: 104px !important;
+    margin: 0 !important;
+  }
+
+  .gauge .readout { bottom: 6px !important; }
+  .gauge .readout span { font-size: 1.5rem !important; }
+  .gauge .readout small { font-size: .56rem !important; letter-spacing: .12em !important; }
+
+  .result .verdict-text .badge,
+  .result .stamp,
+  .result .score-note,
+  .result .verdict-url { margin-left: 0 !important; }
+
+  .result .score-note { font-size: .78rem !important; }
+
+  /* one column, each piece as label then note, no dead column */
+  .autopsy-line {
+    grid-template-columns: 1fr !important;
+    gap: 0 !important;
+  }
+
+  .seg {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 2px;
+    padding: 8px 0 9px !important;
+  }
+
+  .seg-text { font-size: .92rem !important; }
+  .seg-note { max-width: none !important; font-size: .7rem !important; }
+
+  .autopsy { padding: 14px !important; }
+  .autopsy-caption { font-size: .78rem !important; }
+
+  .hero-plated::before { opacity: .28; }
+  .hero .lede { max-width: none; }
+}
