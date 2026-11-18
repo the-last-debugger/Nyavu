@@ -1098,17 +1098,33 @@
       const me = await api("/api/auth/me");
       const btn = $("#authBtn");
       if (me.authenticated) {
-        btn.textContent = me.full_name || me.email;
-        btn.title = "Signed in. Click to sign out.";
-        btn.setAttribute("aria-label", `Signed in as ${me.email}. Sign out.`);
-        btn.onclick = async () => {
-          await api("/api/auth/logout", { method: "POST" });
-          refreshAccount(); loadStats(); loadHistory();
+        // The name is a label, not a button. Clicking it used to sign the person out,
+        // which is the one action nobody expects from their own name.
+        const name = $("#accountName");
+        const out = $("#signOutBtn");
+        btn.hidden = true;
+        name.hidden = false;
+        name.textContent = me.full_name || me.email;
+        name.title = me.email;
+        out.hidden = false;
+        out.onclick = async () => {
+          out.disabled = true;
+          try {
+            await api("/api/auth/logout", { method: "POST" });
+          } finally {
+            out.disabled = false;
+            refreshAccount(); loadStats(); loadHistory();
+          }
         };
         $("#historyNote").textContent = "Scans recorded against your account.";
       } else {
+        btn.hidden = false;
         btn.textContent = "Sign in";
         btn.onclick = () => openAuth("login");
+        const name = $("#accountName");
+        const out = $("#signOutBtn");
+        if (name) name.hidden = true;
+        if (out) out.hidden = true;
         $("#historyNote").textContent = "Your most recent URL checks (anonymous session).";
       }
     } catch { /* ignore */ }

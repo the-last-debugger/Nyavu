@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- The product's own palette, applied to the widgets Android draws for us.
+
+         Without this the app inherits the platform's Material theme, which tints cursors,
+         ripples and the text selection handle teal: the colour the website retired. The
+         screens set their own colours, but the things the framework draws need telling too. -->
+    <style name="NyavuTheme" parent="@android:style/Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@color/nyavu_bg</item>
+        <item name="android:colorAccent">@color/nyavu_accent</item>
+        <item name="android:colorPrimary">@color/nyavu_panel</item>
+        <item name="android:colorPrimaryDark">@color/nyavu_bg</item>
+        <item name="android:colorControlNormal">@color/nyavu_faint</item>
+        <item name="android:colorControlActivated">@color/nyavu_accent</item>
+        <item name="android:colorControlHighlight">#1F8FA98F</item>
+        <item name="android:textColorPrimary">@color/nyavu_ink</item>
+        <item name="android:textColorSecondary">@color/nyavu_muted</item>
+        <item name="android:textColorHint">@color/nyavu_faint</item>
+        <item name="android:statusBarColor">@color/nyavu_bg</item>
+        <item name="android:navigationBarColor">@color/nyavu_bg</item>
+        <item name="android:windowLightStatusBar">false</item>
+    </style>
+</resources>

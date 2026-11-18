@@ -2,116 +2,113 @@ package ke.nyavu.shusha
 
 import android.app.Activity
 import android.content.Intent
-import android.graphics.Typeface
-import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.view.Gravity
-import android.view.View
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 
 /**
- * First screen: the name arrives one letter at a time.
+ * First screen: the name, written.
  *
- * Deliberately short. It exists to say what the product is before the controls
- * appear, not to hold anyone up - there is no login, no permission prompt, and it
- * moves on by itself after the word is complete.
+ * The icon is the app's own launcher mark rather than an emoji, the wordmark is the serif the
+ * product uses everywhere else, and the caret is bone instead of the mint this screen shipped
+ * with. It still types the name and moves on by itself, because that is the product's idea:
+ * an address is something you watch being read.
  */
 class WelcomeActivity : Activity() {
 
     private val handler = Handler(Looper.getMainLooper())
-    private val word = "Welcome"
+    private val word = "Nyavu"
 
     private lateinit var title: TextView
-    private lateinit var caret: View
+    private lateinit var caret: TextView
     private lateinit var tagline: TextView
     private var index = 0
 
-    private fun dp(v: Int) = (v * resources.displayMetrics.density).toInt()
+    private fun dp(v: Int) = NyavuTheme.dp(this, v)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        window.statusBarColor = 0xFF04060B.toInt()
-        window.navigationBarColor = 0xFF04060B.toInt()
+        window.statusBarColor = NyavuTheme.BG
+        window.navigationBarColor = NyavuTheme.BG
 
         val page = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             gravity = Gravity.CENTER
-            setBackgroundColor(0xFF04060B.toInt())
-            setPadding(dp(28), 0, dp(28), 0)
+            setBackgroundColor(NyavuTheme.BG)
+            setPadding(dp(30), 0, dp(30), 0)
         }
 
-        val mark = TextView(this).apply {
-            text = "\uD83D\uDEE1"
-            textSize = 30f
-            gravity = Gravity.CENTER
-            background = GradientDrawable().apply {
-                shape = GradientDrawable.OVAL
-                setColor(0xFF0C1A1A.toInt())
-                setStroke(dp(2), 0xFF2E7D6B.toInt())
-            }
+        val mark = ImageView(this).apply {
+            setImageResource(R.mipmap.ic_launcher)
+            scaleType = ImageView.ScaleType.FIT_CENTER
         }
-        page.addView(mark, LinearLayout.LayoutParams(dp(84), dp(84)).apply { bottomMargin = dp(30) })
+        page.addView(mark, LinearLayout.LayoutParams(dp(96), dp(96)).apply { bottomMargin = dp(26) })
 
-        // The word is left-aligned and grows to the right as letters arrive.
         val line = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
-            gravity = Gravity.CENTER_VERTICAL or Gravity.START
+            gravity = Gravity.CENTER_VERTICAL
         }
-
         title = TextView(this).apply {
             text = ""
             textSize = 44f
-            setTextColor(0xFFEEF2FA.toInt())
-            typeface = Typeface.DEFAULT_BOLD
-            letterSpacing = -0.03f
-            gravity = Gravity.START
+            setTextColor(NyavuTheme.ink)
+            typeface = NyavuTheme.serif(bold = true)
+            letterSpacing = -0.02f
         }
         line.addView(title)
 
-        caret = View(this).apply { setBackgroundColor(0xFF43E8C8.toInt()) }
-        line.addView(caret, LinearLayout.LayoutParams(dp(3), dp(38)).apply { leftMargin = dp(4) })
+        caret = TextView(this).apply {
+            text = "|"
+            textSize = 34f
+            setTextColor(NyavuTheme.BONE)
+            typeface = NyavuTheme.mono()
+        }
+        line.addView(caret, LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT
+        ).apply { leftMargin = dp(4) })
 
         page.addView(line)
 
         tagline = TextView(this).apply {
-            text = "Your personal link inspector"
-            textSize = 13f
-            setTextColor(0xFF6E7A90.toInt())
+            text = "Read the address before you trust it."
+            textSize = 14f
+            setTextColor(NyavuTheme.muted)
+            typeface = NyavuTheme.serif()
             alpha = 0f
-            setPadding(0, dp(14), 0, 0)
+            setPadding(0, dp(16), 0, 0)
         }
         page.addView(tagline)
 
         setContentView(page)
-        blink()
         type()
+        blink()
     }
 
-    /** One letter every 300 ms, then the caret stops. */
+    /** One letter every 130 ms: quick enough not to be a wait, slow enough to read as writing. */
     private fun type() {
         if (index <= word.length) {
             title.text = word.substring(0, index)
             index++
-            handler.postDelayed({ type() }, 300)
+            handler.postDelayed({ type() }, 130)
         } else {
-            handler.postDelayed({ caret.animate().alpha(0f).setDuration(250).start() }, 300)
-            handler.postDelayed({
-                tagline.animate().alpha(1f).setDuration(550).start()
-            }, 400)
+            handler.postDelayed({ caret.animate().alpha(0f).setDuration(200).start() }, 260)
+            handler.postDelayed({ tagline.animate().alpha(1f).setDuration(420).start() }, 320)
             handler.postDelayed({
                 startActivity(Intent(this, MainActivity::class.java))
                 overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
                 finish()
-            }, 1500)
+            }, 1100)
         }
     }
 
     private fun blink() {
-        val on = caret.alpha > 0.5f
-        caret.animate().alpha(if (on) 0.15f else 1f).setDuration(380).withEndAction { blink() }.start()
+        caret.animate().alpha(0.25f).setDuration(320)
+            .withEndAction { caret.animate().alpha(1f).setDuration(320).withEndAction { blink() }.start() }
+            .start()
     }
 
     override fun onDestroy() {

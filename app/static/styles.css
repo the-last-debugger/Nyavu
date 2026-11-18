@@ -8179,3 +8179,28 @@ dialog.verdict-dialog[open] {
   letter-spacing: .02em;
   color: var(--faint);
 }
+
+/* the account name is a label; signing out is a separate, deliberate action */
+.account { display: flex; align-items: center; gap: 10px; }
+
+.account-name {
+  font-size: 0.86rem;
+  color: var(--muted);
+  max-width: 18ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sign-out {
+  border: 0;
+  background: none;
+  padding: 0;
+  color: var(--faint);
+  font-size: 0.8rem;
+  text-decoration: none;
+  border-bottom: 1px solid rgba(255, 255, 255, .18);
+  cursor: pointer;
+}
+
+.sign-out:hover { color: var(--muted); border-bottom-color: rgba(255, 255, 255, .38); }

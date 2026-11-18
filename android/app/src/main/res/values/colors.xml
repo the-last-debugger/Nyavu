@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="nyavu_bg">#04060B</color>
+    <color name="nyavu_panel">#0A0F15</color>
+    <color name="nyavu_ink">#E9E6DE</color>
+    <color name="nyavu_muted">#A7ADA1</color>
+    <color name="nyavu_faint">#6E7468</color>
+    <color name="nyavu_accent">#8FA98F</color>
+</resources>

@@ -85,6 +85,7 @@ class VerdictDialog(
 
         // the pieces of the address, with the note under each
         val parts = UrlParts.dissect(url)
+        val examinationRows = mutableListOf<Pair<TextView, TextView>>()
         if (parts.isNotEmpty()) {
             val box = LinearLayout(host).apply {
                 orientation = LinearLayout.VERTICAL
@@ -96,25 +97,28 @@ class VerdictDialog(
                     orientation = LinearLayout.VERTICAL
                     setPadding(0, dp(5), 0, dp(5))
                 }
-                row.addView(TextView(host).apply {
+                val words = TextView(host).apply {
                     text = part.text
                     textSize = 15f
                     typeface = NyavuTheme.mono()
                     setTextColor(
                         when {
                             established -> NyavuTheme.ink
-                            part.wrong && parts.any { it.wrong } -> colour
+                            part.wrong -> colour
                             else -> NyavuTheme.ink
                         }
                     )
-                })
-                row.addView(TextView(host).apply {
+                }
+                val note = TextView(host).apply {
                     text = part.note
                     textSize = 11f
                     setTextColor(NyavuTheme.faint)
                     setPadding(0, dp(3), 0, 0)
-                })
+                }
+                row.addView(words)
+                row.addView(note)
                 box.addView(row)
+                examinationRows += words to note
             }
             box.addView(TextView(host).apply {
                 text = UrlParts.readingNote(parts)
@@ -214,6 +218,11 @@ class VerdictDialog(
 
         dialog.setContentView(scroll)
         dialog.show()
+
+        // the examination plays on open: written, then read from the ending backwards
+        val examination = Examination(host, parts, examinationRows) { }
+        examination.start()
+        dialog.setOnDismissListener { examination.cancel() }
     }
 
     private fun reasonRow(number: String, text: String): LinearLayout {
