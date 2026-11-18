@@ -643,11 +643,18 @@ def _latest_apk() -> str | None:
     folder = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "dist")
     if not os.path.isdir(folder):
         return None
-    builds = [os.path.join(folder, f) for f in os.listdir(folder)
-              if f.startswith("Nyavu-") and f.endswith(".apk")]
+
+    # Pick by version number, not by modification time: a checkout rewrites mtimes, and a
+    # loose prefix match once served a year-old "Nyavu-Shusha" build from the same folder.
+    pattern = re.compile(r"^Nyavu-(\d+)\.(\d+)\.(\d+)-debug\.apk$")
+    builds = []
+    for name in os.listdir(folder):
+        match = pattern.match(name)
+        if match:
+            builds.append((tuple(int(x) for x in match.groups()), os.path.join(folder, name)))
     if not builds:
         return None
-    return max(builds, key=os.path.getmtime)
+    return max(builds, key=lambda pair: pair[0])[1]
 
 
 @app.get("/download/nyavu.apk")
