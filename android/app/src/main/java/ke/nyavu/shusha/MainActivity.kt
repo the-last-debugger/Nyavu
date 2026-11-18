@@ -111,14 +111,19 @@ class MainActivity : Activity() {
                 android.graphics.Typeface.DEFAULT_BOLD else android.graphics.Typeface.DEFAULT
         }
         body.removeAllViews()
-        body.addView(
-            when (index) {
-                0 -> detectorScreen()
-                1 -> bulkScreen()
-                2 -> historyScreen()
-                else -> modelScreen()
-            }
-        )
+        val incoming = when (index) {
+            0 -> detectorScreen()
+            1 -> bulkScreen()
+            2 -> historyScreen()
+            else -> modelScreen()
+        }
+        incoming.alpha = 0f
+        incoming.translationY = dp(10).toFloat()
+        body.addView(incoming)
+        incoming.animate().alpha(1f).translationY(0f)
+            .setDuration(230)
+            .setInterpolator(android.view.animation.DecelerateInterpolator())
+            .start()
     }
 
     private fun page(): Pair<ScrollView, LinearLayout> {
@@ -192,17 +197,31 @@ class MainActivity : Activity() {
             setLineSpacing(dp(3).toFloat(), 1.1f)
         })
 
+        pressable(analyse)
         analyse.setOnClickListener {
             val link = field.text.toString().trim()
             if (link.isEmpty()) {
                 field.error = "Paste a link first"
                 return@setOnClickListener
             }
-            status.text = "Reading the address"
             analyse.isEnabled = false
+            val frames = listOf("Reading the address", "Reading the address.", "Reading the address..",
+                "Reading the address...")
+            var frame = 0
+            val ticker = object : Runnable {
+                override fun run() {
+                    status.text = frames[frame % frames.size]
+                    frame++
+                    status.postDelayed(this, 320)
+                }
+            }
+            status.post(ticker)
+            status.tag = ticker
             Thread {
                 val res = runCatching { Api.predict(this, link) }.getOrNull()
                 runOnUiThread {
+                    (status.tag as? Runnable)?.let { status.removeCallbacks(it) }
+                    status.tag = null
                     analyse.isEnabled = true
                     when {
                         res == null -> status.text = "Nyavu could not be reached. Check your connection."
@@ -258,6 +277,7 @@ class MainActivity : Activity() {
         val results = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
         column.addView(results)
 
+        pressable(run)
         run.setOnClickListener {
             val urls = field.text.toString().split("\n").map { it.trim() }.filter { it.isNotEmpty() }
             if (urls.isEmpty()) {
@@ -482,6 +502,20 @@ class MainActivity : Activity() {
     }
 
     // ------------------------------------------------------------------ shared
+
+    /** A small dip under the finger, so a button feels pressed rather than merely tapped. */
+    private fun pressable(view: View) {
+        view.setOnTouchListener { v, event ->
+            when (event.action) {
+                android.view.MotionEvent.ACTION_DOWN ->
+                    v.animate().scaleX(0.97f).scaleY(0.97f).setDuration(90).start()
+                android.view.MotionEvent.ACTION_UP,
+                android.view.MotionEvent.ACTION_CANCEL ->
+                    v.animate().scaleX(1f).scaleY(1f).setDuration(120).start()
+            }
+            false
+        }
+    }
 
     private fun refreshAccount() {
         Thread {

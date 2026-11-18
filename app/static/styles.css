@@ -8204,3 +8204,11 @@ dialog.verdict-dialog[open] {
 }
 
 .sign-out:hover { color: var(--muted); border-bottom-color: rgba(255, 255, 255, .38); }
+
+/* `hidden` loses to the .btn display rule, so the sign-in button stayed visible between the
+   name and sign out. Attribute selectors are the fix; the property alone is not enough. */
+.account .btn[hidden],
+.account-name[hidden],
+.sign-out[hidden] {
+  display: none !important;
+}

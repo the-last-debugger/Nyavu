@@ -153,9 +153,24 @@ class VerdictDialog(
         val bar = LinearLayout(host)
         val fill = View(host).apply { setBackgroundColor(colour) }
         val track = View(host).apply { setBackgroundColor(0x14FFFFFF) }
-        bar.addView(fill, LinearLayout.LayoutParams(0, dp(3), pct.coerceAtLeast(1).toFloat()))
-        bar.addView(track, LinearLayout.LayoutParams(0, dp(3), (100 - pct).coerceAtLeast(1).toFloat()))
+        bar.addView(fill, LinearLayout.LayoutParams(0, dp(3), 0.001f))
+        bar.addView(track, LinearLayout.LayoutParams(0, dp(3), 100f))
         page.addView(bar)
+
+        // the bar fills as the dialog settles, the way the site's dial does
+        android.animation.ValueAnimator.ofFloat(0f, pct.coerceAtLeast(1).toFloat()).apply {
+            duration = 720
+            interpolator = android.view.animation.DecelerateInterpolator()
+            addUpdateListener { anim ->
+                val value = anim.animatedValue as Float
+                fill.layoutParams = (fill.layoutParams as LinearLayout.LayoutParams).apply { weight = value }
+                track.layoutParams = (track.layoutParams as LinearLayout.LayoutParams).apply {
+                    weight = (100f - value).coerceAtLeast(0.001f)
+                }
+                bar.requestLayout()
+            }
+            start()
+        }
 
         // what the number is, and the working behind the plus
         val noteLead = if (established) {
@@ -198,11 +213,27 @@ class VerdictDialog(
         // the reasons
         val reasons = payload.optJSONArray("reasons")
         val count = minOf(reasons?.length() ?: 0, 4)
-        page.addView(NyavuTheme.label(host, NyavuTheme.reasonTitleFor(risk)))
+        val reasonsTitle = NyavuTheme.label(host, NyavuTheme.reasonTitleFor(risk))
+        page.addView(reasonsTitle)
+        val rows = mutableListOf<View>()
         if (count == 0) {
-            page.addView(reasonRow("1", "Nothing in the name raised a pattern Nyavu knows."))
+            rows += reasonRow("1", "Nothing in the name raised a pattern Nyavu knows.")
         } else {
-            for (i in 0 until count) page.addView(reasonRow((i + 1).toString(), reasons!!.getString(i)))
+            for (i in 0 until count) rows += reasonRow((i + 1).toString(), reasons!!.getString(i))
+        }
+        rows.forEach { page.addView(it) }
+
+        // they rise into place in order, after the examination has had its moment
+        reasonsTitle.alpha = 0f
+        rows.forEach { row ->
+            row.alpha = 0f
+            row.translationY = dp(8).toFloat()
+        }
+        val settle = 900L
+        reasonsTitle.animate().alpha(1f).setDuration(220).setStartDelay(settle).start()
+        rows.forEachIndexed { index, row ->
+            row.animate().alpha(1f).translationY(0f).setDuration(280)
+                .setStartDelay(settle + 90L * (index + 1)).start()
         }
 
         // actions
@@ -218,6 +249,14 @@ class VerdictDialog(
 
         dialog.setContentView(scroll)
         dialog.show()
+
+        scroll.alpha = 0f
+        scroll.scaleX = 0.97f
+        scroll.scaleY = 0.97f
+        scroll.animate().alpha(1f).scaleX(1f).scaleY(1f)
+            .setDuration(260)
+            .setInterpolator(android.view.animation.DecelerateInterpolator())
+            .start()
 
         // the examination plays on open: written, then read from the ending backwards
         val examination = Examination(host, parts, examinationRows) { }

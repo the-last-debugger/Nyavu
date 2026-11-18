@@ -143,3 +143,22 @@ a session survives between screens.
 Known gaps, stated rather than hidden: the examination is shown as a finished dissection
 rather than performed with a cursor, and sign-in opens the website rather than a native
 Google flow.
+
+
+---
+
+## 1.1.0: the shared mark, and motion
+
+**One icon.** `tools/make_icon.py` draws it once and writes every size: five Android
+densities, the two manifest icons, the favicon and the Apple touch icon. A net rather than a
+grid: warps and wefts that sag, stretched about a tenth vertically, with a knot at every
+crossing and larger knots at the corners so the vertices read as bullets.
+
+**Motion, which the app had none of:**
+
+- the tab screens cross-fade and rise by ten pixels when you switch
+- buttons dip under the finger
+- the working line breathes while a check is in flight, instead of standing still
+- the verdict opens at 97 per cent and settles, its risk bar fills over 720 ms, and the
+  reasons rise in sequence rather than appearing all at once
+- the examination types each piece of the address, then reads the notes from the ending back
