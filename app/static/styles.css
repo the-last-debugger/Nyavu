@@ -1428,7 +1428,8 @@ body.has-result .explain {
   opacity: 0;
   transform: translateY(6px);
   filter: blur(3px);
-  transition: opacity .5s ease, transform .5s ease, filter .5s ease;
+  transition: opacity .5s ease, transform .5s ease, filter .5s ease,
+              max-height .7s cubic-bezier(.22, 1, .36, 1);
 }
 
 .result:not(.pending) .verdict-text .badge { transition-delay: .05s; }
@@ -1455,7 +1456,7 @@ body.has-result .explain {
 .result .reasons,
 .result .evidence,
 .result details.advanced {
-  transition: opacity .5s ease, transform .5s ease, filter .5s ease;
+  transition: opacity .5s ease, transform .5s ease, filter .5s ease, max-height .7s cubic-bezier(.22, 1, .36, 1);
 }
 
 /* the narration line that stands in for the answer */
@@ -5741,3 +5742,183 @@ code, kbd, samp {
   }
   .seg { min-width: 0; }
 }
+
+/* =====================================================================
+   Paper, not glass
+
+   A faint grain in the dissection card and the data band. It is the texture of a
+   printed page rather than of a screen: it gives the flat panels something to sit on
+   without asking for attention. Opacity is deliberately low enough to read as material
+   rather than as decoration.
+   ===================================================================== */
+.autopsy,
+.data-band {
+  position: relative;
+  isolation: isolate;
+}
+
+.autopsy::before,
+.data-band::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  opacity: .5;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.045'/%3E%3C/svg%3E");
+}
+
+/* the clean reading: fine pieces sit in the warm neutral, not in grey */
+.seg.fine.on { border-bottom-color: rgba(233, 227, 214, .34); }
+.seg.fine.called .seg-text { color: #E9E3D6; }
+
+.autopsy.clean .seg-note { color: #9AA3AE; }
+.autopsy.clean .autopsy-caption { color: #A9B2BD; }
+
+/* the flagged reading keeps its red, but only on the pieces that earned it */
+.autopsy.risky .seg.flag.on { border-bottom-color: rgba(255, 120, 140, .55); }
+
+/* =====================================================================
+   One geometry, from the first frame to the verdict
+
+   The pending state used to lay itself out as a block with the dial pinned to the right,
+   then the finished state snapped to a two-column grid. That snap was the jump in the
+   middle of the reading. Both states now share the finished geometry: the head is a grid,
+   the dial sits in its column and is visible from the start, and the only thing that
+   changes at the end is what is allowed to be read.
+   ===================================================================== */
+.result.pending .verdict-head {
+  display: grid !important;
+  grid-template-columns: 140px 1fr !important;
+  gap: 34px !important;
+  align-items: center !important;
+  padding: 30px 34px 26px !important;
+}
+
+.result.pending .verdict-text {
+  display: block !important;
+  width: auto !important;
+}
+
+.result.pending .gauge {
+  position: relative !important;
+  left: auto !important;
+  right: auto !important;
+  top: auto !important;
+  transform: none !important;
+  opacity: 1 !important;
+  width: 140px !important;
+  height: 120px !important;
+  margin: 0 !important;
+  z-index: 1 !important;
+}
+
+/* the head is readable while it is being measured, just quieter */
+.result.pending .verdict-text .badge,
+.result.pending .verdict-text h2,
+.result.pending .verdict-text .verdict-url {
+  opacity: .38;
+  transition: opacity .7s ease;
+}
+
+.result.verdict-shown .verdict-text .badge,
+.result.verdict-shown .verdict-text h2,
+.result.verdict-shown .verdict-text .verdict-url {
+  opacity: 1;
+}
+
+.result.pending .autopsy { margin-top: 18px !important; }
+
+@media (max-width: 700px) {
+  .result.pending .verdict-head {
+    grid-template-columns: 1fr !important;
+    justify-items: start !important;
+    padding: 20px !important;
+  }
+  .result.pending .gauge { margin: 0 auto !important; }
+}
+
+/* reserve the space the heading will occupy, so the reveal adds no height */
+.result.pending .verdict-text h2,
+.result.pending .verdict-text .badge {
+  display: block !important;
+  visibility: hidden !important;
+  opacity: 1 !important;
+}
+
+.result.verdict-shown .verdict-text h2,
+.result.verdict-shown .verdict-text .badge {
+  visibility: visible !important;
+}
+
+.result.pending .verdict-text .verdict-url { opacity: .5; }
+
+/* the reasons are the verdict, so they cannot be present early - but they can arrive by
+   opening rather than by teleporting. A max-height transition keeps the page still. */
+.result.pending .block-title,
+.result.pending .reasons,
+.result.pending .evidence,
+.result.pending .suggest,
+.result.pending .meta-row {
+  display: block !important;
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  border-width: 0 !important;
+}
+
+.result.verdict-shown .block-title,
+.result.verdict-shown .reasons,
+.result.verdict-shown .evidence,
+.result.verdict-shown .suggest,
+.result.verdict-shown .meta-row {
+  max-height: 2400px;
+  opacity: 1;
+  transition: max-height .75s cubic-bezier(.22, 1, .36, 1), opacity .55s ease .1s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .result.verdict-shown .block-title,
+  .result.verdict-shown .reasons,
+  .result.verdict-shown .evidence,
+  .result.verdict-shown .suggest,
+  .result.verdict-shown .meta-row {
+    transition: none;
+  }
+}
+
+/* declare the transition on both states, or the browser has nothing to animate from */
+.result .block-title,
+.result .reasons,
+.result .evidence,
+.result .suggest,
+.result .meta-row {
+  transition: max-height .75s cubic-bezier(.22, 1, .36, 1), opacity .55s ease;
+}
+
+/* the reasons arrive with a short rise, so the reveal reads as a movement even though
+   the card still grows by their height at this instant */
+.result.verdict-shown .block-title,
+.result.verdict-shown .reasons,
+.result.verdict-shown .evidence,
+.result.verdict-shown .suggest {
+  animation: verdictIn .55s cubic-bezier(.22, 1, .36, 1) both;
+}
+
+@keyframes verdictIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .result.verdict-shown .block-title,
+  .result.verdict-shown .reasons,
+  .result.verdict-shown .evidence,
+  .result.verdict-shown .suggest { animation: none; }
+}
+

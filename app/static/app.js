@@ -735,8 +735,16 @@
      score are marked, the dial settles, and the verdict is delivered. Type and rules
      only, so there is nothing here that can be got "almost" right.
      --------------------------------------------------------------------------- */
+  /* ---------------------------------------------------------------------------
+     The examination: seven seconds, five movements.
+
+     0.35 the address is on the table      3.4  the dial begins its rise
+     from 0.9 each piece is annotated      5.6  the needle settles
+     2.6  the flagged pieces are called    6.4  the verdict lands
+     --------------------------------------------------------------------------- */
   function runScene(root) {
-    const card = root.querySelector(".result");
+    // may be handed the document or the card itself
+    const card = root && root.matches && root.matches(".result") ? root : root.querySelector(".result");
     if (!card) return;
 
     const autopsy = card.querySelector(".autopsy");
@@ -747,40 +755,42 @@
     const say = (text) => { if (phase) phase.textContent = text; };
     const delay = (ms, fn) => setTimeout(fn, ms);
 
-    delay(400, () => {
+    delay(350, () => {
       if (autopsy) autopsy.classList.add("live");
       say("Reading the address");
     });
 
     segs.forEach((seg, i) => {
-      delay(900 + i * 170, () => seg.classList.add("on"));
+      delay(900 + i * 150, () => seg.classList.add("on"));
     });
 
-    const afterNotes = 900 + segs.length * 170;
     const flagged = segs.filter((el) => el.classList.contains("flag"));
-
     flagged.forEach((seg, i) => {
-      delay(afterNotes + 250 + i * 320, () => {
+      delay(2600 + i * 280, () => {
         seg.classList.add("called");
         say("Comparing against known brands");
       });
     });
 
-    const dialAt = afterNotes + 250 + flagged.length * 320 + 250;
-    delay(dialAt, () => {
-      say("Scoring what it measured");
+    delay(3400, () => {
+      say("Weighing the evidence");
       card.classList.add("dialcoming");
-      sweepNeedle(card, card._target || 0);
+      sweepNeedle(card, 2200);
     });
 
-    delay(dialAt + 1500, () => {
+    delay(5600, () => say("Reaching a verdict"));
+
+    delay(6800, () => {
+      /* The verdict arrives with the reasons rising into place. The card grows by the
+         height of the reasons at this instant, which is honest: it is a new region, not
+         a re-flow of the old one. Animating that height was attempted and abandoned -
+         a dozen older rules own display, opacity and transition for these same blocks,
+         and the winning declaration changed with the order of the file. Consolidating
+         those rules is the real fix and is written down as such. */
       card.classList.add("verdict-shown");
       card.classList.remove("pending");
-      say("Reached a verdict");
       const row = card.querySelector(".thinking-row");
       if (row) row.remove();
-      const g = card.querySelector(".gauge");
-      if (g) g.style.setProperty("--p", String(card._target || 0));
       normaliseCard(card);
       ensureClose(card);
     });
@@ -788,85 +798,42 @@
 
   const TONE_OF = (v) => (v < 35 ? "#35e0a0" : v < 65 ? "#ffb020" : "#ff4d6d");
 
-  function sweepNeedle(root) {
+  /* The needle makes one gesture: it rises, overshoots by a few points, and settles.
+     No vibration, no dithering, and it stops dead when it arrives. */
+  function sweepNeedle(root, duration = 2200) {
     const g = root.querySelector(".gauge");
     if (!g) return;
     const target = Number(g.dataset.target || 0);
     const readout = g.querySelector(".readout span");
     const caption = g.querySelector(".readout small");
-
     const token = ++sweepToken;
-    const pause = 0;      // there is no film to wait for any more
-    const duration = 1400;   // a short, decisive sweep
 
     if (caption) caption.textContent = "examining";
-    const scene = document.querySelector(".fishing");
-    if (scene) scene.classList.add("go");
-    updateNet(document, 0);
-    runScene(document);
+    const started = performance.now();
+    const easeOut = (x) => 1 - Math.pow(1 - Math.min(1, Math.max(0, x)), 3);
 
-    const ease = (x) => {
-      const k = Math.min(1, Math.max(0, x));
-      return k * k * (3 - 2 * k);
-    };
-
-    function valueAt(t) {
-      // the score is only approached in the final tenth
-      const rise = target * ease(t / 0.7) * 0.55;
-      const centre = rise + (target - rise) * ease((t - 0.9) / 0.1);
-      // amplitude grows slowly, then collapses into the answer
-      const amp = 52 * ease(t / 0.9) * (1 - ease((t - 0.92) / 0.08));
-      // frequency climbs, so the swings crowd together before they stop
-      const phase = 2 * Math.PI * (0.3 * t + 13 * t * t * t);
-      return Math.max(0, Math.min(100, centre + amp * Math.sin(phase)));
-    }
-
-    setTimeout(() => {
-      const started = performance.now();
-
-      const PHASES = [
-        [0.00, "Reading the address"],
-        [0.18, "Finding the registered domain"],
-        [0.34, "Comparing against known brands"],
-        [0.52, "Measuring the character patterns"],
-        [0.70, "Weighing the evidence"],
-        [0.86, "Reaching a verdict"],
-      ];
-      let phaseIndex = -1;
-      const phaseTimer = setInterval(() => {
-        if (token !== sweepToken) { clearInterval(phaseTimer); return; }
-        const elapsed = (performance.now() - started) / duration;
-        let next = 0;
-        PHASES.forEach((p, i) => { if (elapsed >= p[0]) next = i; });
-        if (next !== phaseIndex) {
-          phaseIndex = next;
-          const node = document.querySelector("#thinking .phase");
-          if (node) node.textContent = PHASES[next][1];
-        }
-        if (elapsed >= 1) clearInterval(phaseTimer);
-      }, 120);
-
-      function frame(now) {
-        const t = Math.min(1, (now - started) / duration);
-        const value = t === 1 ? target : valueAt(t);
-
-        if (token !== sweepToken) return;   // a newer scan took over
-        g.style.setProperty("--p", value.toFixed(2));
-        g.style.setProperty("--tone", TONE_OF(value));
-        if (readout) readout.textContent = Math.round(value);
-
-        if (t < 1) {
-          requestAnimationFrame(frame);
-        } else {
-          g.style.setProperty("--p", target);
-          g.style.setProperty("--tone", TONE_OF(target));
-          if (readout) readout.textContent = target;
-          if (caption) caption.textContent = "risk";
-          // the card stays open: the scene has a hold and a transition still to play
-        }
+    function frame(now) {
+      if (token !== sweepToken) return;
+      const t = Math.min(1, (now - started) / duration);
+      let value;
+      if (t >= 1) {
+        value = target;
+      } else {
+        const base = target * easeOut(t);
+        const swing = t > 0.6 && t < 1 ? Math.sin(Math.PI * ((t - 0.6) / 0.4)) * 3.5 : 0;
+        value = Math.max(0, Math.min(100, base + swing));
+      }
+      g.style.setProperty("--p", t >= 1 ? String(target) : value.toFixed(2));
+      g.style.setProperty("--tone", TONE_OF(target));
+      if (readout) readout.textContent = String(Math.round(value));
+      if (t >= 1) {
+        if (readout) readout.textContent = String(target);
+        if (caption) caption.textContent = "risk";
+        return;
       }
       requestAnimationFrame(frame);
-    }, pause);
+    }
+    requestAnimationFrame(frame);
   }
 
 
@@ -952,7 +919,10 @@
       </details>`;
     result._verdictHTML = result.innerHTML;
     result._target = pct;
-    sweepNeedle(result);
+    result.dataset.target = String(pct);
+    const gauge = result.querySelector(".gauge");
+    if (gauge) gauge.dataset.target = String(pct);
+    runScene(result);          // the examination owns the clock; it starts the dial itself
     revealResult(result);
   }
 
