@@ -2,8 +2,11 @@
 from __future__ import annotations
 
 import json
+from urllib.parse import urlsplit
 import os
 import time
+
+import re
 
 import joblib
 import numpy as np
@@ -15,8 +18,8 @@ _ML = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 
 if _ML not in _sys.path:
     _sys.path.insert(0, _ML)
 
-from features import (BRANDS, BRAND_DOMAINS, FEATURE_ORDER, extract,  # noqa: E402
-                      hostname_of, levenshtein, registrable_domain)
+from features import (BRANDS, BRAND_DOMAINS, FEATURE_ORDER, IPV4_RE,  # noqa: E402
+                      extract, hostname_of, levenshtein, registrable_domain)
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ART = os.path.join(ROOT, "ml", "artifacts")
@@ -25,7 +28,55 @@ ART = os.path.join(ROOT, "ml", "artifacts")
 # be bought by the public - the registry allocates them to accredited institutions -
 # so a name-based model should not be flagging them on string evidence. This is the
 # same reasoning as the reputation prior, applied to a namespace instead of a rank.
-TRUSTED_SUFFIXES = (".ac.ke", ".go.ke", ".or.ke", ".sc.ke", ".ne.ke", ".ac.ug", ".go.ug")
+TRUSTED_SUFFIXES = (".co.ke", ".ac.ke", ".go.ke", ".or.ke", ".sc.ke", ".ne.ke",
+                    ".me.ke", ".info.ke", ".mobi.ke", ".co.ug", ".ac.ug", ".go.ug", ".or.ug")
+
+
+def _address_problem(url: str) -> str:
+    """Reject what is not a web address, with a reason a person can act on.
+
+    A name with no ending cannot be resolved by anybody, so scoring it produces a
+    confident verdict about nothing. The same is true of a bare integer, of a private
+    address, and of a string long enough to be an attack rather than a link.
+    """
+    raw = (url or "").strip()
+    if not raw:
+        return "Type or paste a link first."
+    if len(raw) > 2048:
+        return "That address is too long to be a real link."
+    if " " in raw or "\n" in raw:
+        return "A link cannot contain spaces."
+
+    probe = raw if re.match(r"^[a-zA-Z][\w+.-]*://", raw) else "http://" + raw.lstrip("/")
+    try:
+        parts = urlsplit(probe)
+        host = (parts.hostname or "").lower().rstrip(".")
+    except ValueError:
+        return "That does not look like a web address."
+
+    if not host:
+        return "That does not look like a web address."
+
+    if IPV4_RE.match(host):
+        first, second = (int(x) for x in host.split(".")[:2])
+        private = (first in (10, 127) or (first == 192 and second == 168)
+                   or (first == 172 and 16 <= second <= 31))
+        if private:
+            return "That is a private address on a local network, not a public one."
+        if first == 0 or first >= 224:
+            return "That is not a routable address."
+        return ""
+
+    if "." not in host:
+        return ("That is a name without an ending. A web address needs one, such as "
+                "example.com or example.co.ke.")
+
+    labels = [x for x in host.split(".") if x]
+    if len(labels[-1]) < 2:
+        return "That address ends in a single character, which no registry issues."
+    if not re.fullmatch(r"[a-z0-9-]+", labels[-1]):
+        return "That address has an ending that is not valid."
+    return ""
 
 
 class Predictor:
@@ -92,6 +143,12 @@ class Predictor:
 
     def predict(self, url: str) -> dict:
         t0 = time.perf_counter()
+        # protocol-relative links are common in paste buffers and are web addresses
+        if (url or "").strip().startswith("//"):
+            url = "https:" + url.strip()
+        problem = _address_problem(url)
+        if problem:
+            raise ValueError(problem)
         feats, reasons = extract(url)
         if not feats:
             raise ValueError(reasons[0] if reasons else "Unparseable URL")
@@ -156,6 +213,14 @@ class Predictor:
                 "This is an established domain, among the 100,000 most visited on the "
                 "internet. Name-level evidence is not enough to flag it."
             ]
+
+        if "@" in (url or "").split("//")[-1].split("/")[0]:
+            reputation = reputation or "credentials"
+            reasons.insert(0, "This link carries a username before the host, which can be "
+                              "used to make a different domain appear in front of the real one.")
+            if risk == "low":
+                risk, band = "medium", "Suspicious"
+                prob = max(prob, 0.5)
 
         evidence = []
         contribs = self._contributions(Xt)

@@ -70,6 +70,41 @@
     "status": "Pass"
   },
   {
+    "id": "T12",
+    "case": "Bare word with no domain ending",
+    "expected": "422 with a readable reason",
+    "actual": "status 422, That is a name without an ending. A web address needs one, s",
+    "status": "Pass"
+  },
+  {
+    "id": "T13",
+    "case": "Private network address",
+    "expected": "422 private address",
+    "actual": "status 422, That is a private address on a local network, not a public o",
+    "status": "Pass"
+  },
+  {
+    "id": "T14",
+    "case": "Ordinary .co.ke domain",
+    "expected": "legitimate, reputation established",
+    "actual": "verdict = legitimate, reputation = established",
+    "status": "Pass"
+  },
+  {
+    "id": "T15",
+    "case": "Username in the link",
+    "expected": "not treated as harmless",
+    "actual": "verdict = legitimate, reason mentions username: yes",
+    "status": "Pass"
+  },
+  {
+    "id": "T16",
+    "case": "Established domain score",
+    "expected": "capped, and the model estimate exposed",
+    "actual": "capped = True, model = 0.2154",
+    "status": "Pass"
+  },
+  {
     "id": "T10",
     "case": "Three URLs are classified and stored",
     "expected": "count == 3",

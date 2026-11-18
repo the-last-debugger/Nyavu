@@ -8,10 +8,25 @@
 
   const $ = (s, r = document) => r.querySelector(s);
   const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+  /* FastAPI returns a string for the errors we raise and an array for the ones
+     pydantic raises. Neither should reach the reader as a JSON blob. */
+  function readError(data, status) {
+    const detail = data && data.detail;
+    if (typeof detail === "string" && detail.trim()) return detail;
+    if (Array.isArray(detail) && detail.length) {
+      const first = detail[0] || {};
+      const type = first.type || "";
+      if (type === "string_too_long") return "That address is too long to be a real link.";
+      if (type === "string_too_short") return "Type or paste a link first.";
+      return first.msg ? String(first.msg) : "That input was not accepted.";
+    }
+    return `Request failed (${status})`;
+  }
+
   const api = async (path, opts = {}) => {
     const res = await fetch(path, { credentials: "same-origin", ...opts });
     const data = await res.json().catch(() => ({}));
-    if (!res.ok) throw new Error(data.detail || `Request failed (${res.status})`);
+    if (!res.ok) throw new Error(readError(data, res.status));
     return data;
   };
 

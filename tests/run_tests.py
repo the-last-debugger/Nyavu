@@ -137,6 +137,38 @@ def main() -> None:
     else:
         record("T11", "Signed-in user sees own history", "items >= 1", f"register returned {status}", False)
 
+    # T12: a bare word is not a web address
+    status, r = call("/api/predict", {"url": "allan"})
+    record("T12", "Bare word with no domain ending", "422 with a readable reason",
+           f"status {status}, {str(r.get('detail'))[:60]}",
+           status == 422 and "ending" in str(r.get("detail", "")))
+
+    # T13: a private address is refused, not scored
+    status, r = call("/api/predict", {"url": "192.168.1.1"})
+    record("T13", "Private network address", "422 private address",
+           f"status {status}, {str(r.get('detail'))[:60]}",
+           status == 422 and "private" in str(r.get("detail", "")))
+
+    # T14: the second-level registry ending is trusted
+    _, r = call("/api/predict", {"url": "https://example.co.ke/"})
+    record("T14", "Ordinary .co.ke domain", "legitimate, reputation established",
+           f"verdict = {r.get('verdict')}, reputation = {r.get('reputation')}",
+           r.get("verdict") == "legitimate" and r.get("reputation") == "established")
+
+    # T15: credentials in front of the host are called out
+    _, r = call("/api/predict", {"url": "https://user:pass@example.com/login"})
+    reasons = " ".join(r.get("reasons", []))
+    record("T15", "Username in the link", "not treated as harmless",
+           f"verdict = {r.get('verdict')}, reason mentions username: "
+           f"{'yes' if 'username' in reasons else 'no'}",
+           "username" in reasons)
+
+    # T16: the score is reported as a cap when reputation held it down
+    _, r = call("/api/predict", {"url": "https://www.safaricom.co.ke/"})
+    record("T16", "Established domain score", "capped, and the model estimate exposed",
+           f"capped = {r.get('capped_by_reputation')}, model = {r.get('model_probability')}",
+           bool(r.get("capped_by_reputation")) and r.get("model_probability") is not None)
+
     # T10 - bulk via multipart is awkward in stdlib, so exercise the predictor
     # through three single calls and confirm each is stored.
     count = 0
