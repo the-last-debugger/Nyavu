@@ -363,7 +363,10 @@ def auth_methods():
     return {
         "password": True,
         "google": bool(os.getenv("GOOGLE_CLIENT_ID") and os.getenv("GOOGLE_CLIENT_SECRET")),
-        "phone": True,
+        # The phone button is only offered when a code can actually reach the person.
+        # Offering it with no SMS provider is a dead end: the code would go to the server
+        # log, which the visitor cannot read. ALLOW_LOG_OTP keeps the flow testable.
+        "phone": _sms_configured() or os.getenv("ALLOW_LOG_OTP") == "1",
         "sms": _sms_configured(),
     }
 
