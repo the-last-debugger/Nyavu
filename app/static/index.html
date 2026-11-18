@@ -61,8 +61,8 @@
     <div class="hero hero-plated">
       <div class="hero-copy">
 
-        <h1>Check a link before you click it.</h1>
-        <p class="lede">Paste a link. Nyavu reads the name and tells you what it sees.</p>
+        <h1>Read the address before you trust it.</h1>
+        <p class="lede">Paste a link. Nyavu reads the name the way you should: from the right, where it counts.</p>
       </div>
       <aside class="hero-note">
         <span class="note-label">A note</span>
@@ -102,21 +102,19 @@
 
     <div class="data-band">
       <div class="stats-strip" id="statsStrip">
-        <div><strong id="statTotal">, </strong><span>Links checked</span></div>
-        <div><strong id="statPhish">, </strong><span>Flagged as phishing</span></div>
-        <div><strong id="statUsers">, </strong><span>People signed up</span></div>
-        <div><strong id="statTrain">, </strong><span>Links in training</span></div>
+        <div><strong id="statTotal">, </strong><span>Links checked here</span></div>
+        <div><strong id="statTrain">, </strong><span>In the training corpus</span></div>
       </div>
       <div class="spark-card" id="spark" aria-hidden="true"></div>
     </div>
 
     <!-- ------------------------------------------------ public content -->
     <section class="explain" aria-labelledby="how-heading">
-      <h2 class="block-title" id="how-heading">How Nyavu reads a link</h2>
+      <h2 class="block-title" id="how-heading">How it reads an address</h2>
       <div class="steps">
         <article class="step">
           <span class="step-no">01</span>
-          <h3>It reduces the address</h3>
+          <h3>It cuts to the registered name</h3>
           <p>Only the registered domain is judged, the part somebody actually buys and owns.
              Everything before it is free to invent, so <code>login.bank.co.ke.evil.top</code>
              is read as <code>evil.top</code>.</p>
@@ -129,7 +127,7 @@
         </article>
         <article class="step">
           <span class="step-no">03</span>
-          <h3>It scores and explains</h3>
+          <h3>It says why, not just what</h3>
           <p>A logistic regression turns those measurements into a risk score, and the same
              coefficients produce the reasons you read. Nothing is fetched from the destination.</p>
         </article>
@@ -190,9 +188,9 @@
       </table>
       <div class="empty-state" id="historyEmpty">
         <svg class="empty-fish" viewBox="-24 -18 48 36" aria-hidden="true">
-          <path d="M-16 2 q11 -9 23 0 q-12 9 -23 0 z" fill="#0C2C24" stroke="#35e0a0" stroke-width="1.8"/>
-          <path d="M7 2 l9 -6 v12 z" fill="#0C2C24" stroke="#35e0a0" stroke-width="1.6"/>
-          <circle cx="-9" cy="0" r="1.4" fill="#35e0a0"/>
+          <path d="M-16 2 q11 -9 23 0 q-12 9 -23 0 z" fill="#0C2C24" stroke="#7FA98F" stroke-width="1.8"/>
+          <path d="M7 2 l9 -6 v12 z" fill="#0C2C24" stroke="#7FA98F" stroke-width="1.6"/>
+          <circle cx="-9" cy="0" r="1.4" fill="#7FA98F"/>
         </svg>
         <p class="empty-title">Nothing caught yet</p>
         <p class="empty-copy">Your last twenty-five checks will appear here, each with the verdict

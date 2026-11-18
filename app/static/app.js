@@ -439,7 +439,7 @@
     });
   }
 
-  const TONE_OF = (v) => (v < 35 ? "#35e0a0" : v < 65 ? "#ffb020" : "#ff4d6d");
+  const TONE_OF = (v) => (v < 35 ? "#7FA98F" : v < 65 ? "#ffb020" : "#ff4d6d");
 
   /* The needle makes one gesture: it rises, overshoots by a few points, and settles.
      No vibration, no dithering, and it stops dead when it arrives. */
@@ -554,7 +554,7 @@
             ? '<span class="badge rep">Established domain</span>' : ""}
           <h2>${r.risk === "high" ? "Something doesn't look right"
             : r.risk === "medium" ? "This one is hard to call"
-            : "No warning signs found"}</h2>
+            : "Nothing suspicious in the name"}</h2>
           <p class="verdict-url">${escapeHtml(r.url)}</p>
           <p class="score-note">${scoreNote}</p>
           <div class="stamp ${r.risk}" aria-hidden="true">${r.risk === "high" ? "phishing" : r.risk === "medium" ? "unsure" : "clear"}</div>
@@ -714,9 +714,10 @@
   async function loadStats() {
     try {
       const s = await api("/api/stats");
+      // the public page carries two figures: how much has been checked here, and how much
+      // the model learned on. Accusation counts and account counts are operational, and
+      // they belong to the signed-in view rather than the front door.
       countUp($("#statTotal"), s.total_scans);
-      countUp($("#statPhish"), s.phishing);
-      countUp($("#statUsers"), s.users);
     } catch { /* non-critical */ }
   }
 
