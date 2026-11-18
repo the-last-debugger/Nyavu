@@ -808,7 +808,7 @@
     const caption = g.querySelector(".readout small");
     const token = ++sweepToken;
 
-    if (caption) caption.textContent = "examining";
+    if (caption) caption.textContent = "estimating";
     const started = performance.now();
     const easeOut = (x) => 1 - Math.pow(1 - Math.min(1, Math.max(0, x)), 3);
 
@@ -828,7 +828,7 @@
       if (readout) readout.textContent = String(Math.round(value));
       if (t >= 1) {
         if (readout) readout.textContent = String(target);
-        if (caption) caption.textContent = "risk";
+        if (caption) caption.textContent = "% risk";
         return;
       }
       requestAnimationFrame(frame);
@@ -844,6 +844,15 @@
 
   function render(r) {
     const pct = Math.round(r.probability * 100);
+
+    /* The number is the model's estimated chance that the address is a phish, not a
+       tally of faults. People reasonably expect a known-good site to read zero, so the
+       card says out loud what the figure is, and why a real site still scores. */
+    const scoreNote = r.risk === "high"
+      ? `Scored ${pct} out of 100. That is the estimated chance this address is a phish, read from its name alone. Anything above 65 is treated as a concern.`
+      : r.risk === "medium"
+        ? `Scored ${pct} out of 100. That is the estimated chance this address is a phish, read from its name alone. Below half, but not low enough to call it safe.`
+        : `Scored ${pct} out of 100. That is the estimated chance this address is a phish, not a count of things wrong with it. A real site rarely reads zero, because the figure is a probability.`;
     const reasons = r.reasons.length
       ? r.reasons.map(t => `<li>${escapeHtml(t)}</li>`).join("")
       : `<li class="safe">No strong phishing indicators were found in the URL text.</li>`;
@@ -899,6 +908,7 @@
             : r.risk === "medium" ? "This one is hard to call"
             : "No warning signs found"}</h2>
           <p class="verdict-url">${escapeHtml(r.url)}</p>
+          <p class="score-note">${scoreNote}</p>
           <div class="stamp ${r.risk}" aria-hidden="true">${r.risk === "high" ? "phishing" : r.risk === "medium" ? "unsure" : "clear"}</div>
 
         ${autopsyMarkup(r)}

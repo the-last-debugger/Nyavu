@@ -208,6 +208,20 @@
         compared on a domain-disjoint hold-out set.</p>
     </div>
     <div id="modelBody" class="panel"></div>
+    <h2 class="block-title">What the score means</h2>
+    <p class="limits">
+      The score is the model's estimated probability that an address is a phish, multiplied
+      by 100. It is a probability, not a count of faults: an established domain usually lands
+      somewhere between 1 and 20, because a classifier's estimate is rarely exactly zero, and
+      an address with three clear warning signs usually lands above 80. The bands are drawn
+      at 35 and 65, which is where the classifier's own error rates made the trade worth
+      making.
+    </p>
+    <p class="limits-more">
+      <a href="/learn/how-phishing-works">What the measurements are</a>
+      <span class="sep">·</span>
+      <a href="/about">How the corpus was built</a>
+    </p>
   </section>
 
 </main>

@@ -5957,3 +5957,18 @@ code, kbd, samp {
   background: rgba(233, 227, 214, .08);
   color: var(--text);
 }
+
+/* =====================================================================
+   What the number means
+   ===================================================================== */
+.score-note {
+  margin: 10px 0 0;
+  max-width: 52ch;
+  font-family: var(--font-body);
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: var(--faint);
+}
+
+.result.pending .score-note { opacity: 0; }
+.result.verdict-shown .score-note { opacity: 1; transition: opacity .5s ease .2s; }
