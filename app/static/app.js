@@ -1278,12 +1278,55 @@
     document.body.appendChild(backdrop);
     document.body.classList.add("verdict-open");
     card.classList.add("overlay");
+    // a dialog that lets Tab walk into the page behind it is not a dialog
+    card.setAttribute("role", "dialog");
+    card.setAttribute("aria-modal", "true");
+    card.setAttribute("aria-label", "Verdict");
+    trapFocus(card);
     document.documentElement.classList.add("modal-lock");
     // keep the overlay scrollable from the top
     card.scrollTop = 0;
   }
 
+  let releaseFocus = null;
+
+  function trapFocus(container) {
+    if (releaseFocus) releaseFocus();
+    const selector = 'a[href], button:not([disabled]), summary, input, select, textarea, [tabindex]:not([tabindex="-1"])';
+    const focusables = () => Array.from(container.querySelectorAll(selector))
+      .filter((el) => el.offsetParent !== null || el === document.activeElement);
+
+    const target = container.querySelector(".verdict-close") || container;
+    if (target === container) container.setAttribute("tabindex", "-1");
+    setTimeout(() => target.focus({ preventScroll: true }), 30);
+
+    const onKey = (event) => {
+      if (event.key !== "Tab") return;
+      const items = focusables();
+      // with a single control there is nothing to cycle; let Tab leave for the browser
+      if (items.length < 2) return;
+      const first = items[0];
+      const last = items[items.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      } else if (!container.contains(document.activeElement)) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+    document.addEventListener("keydown", onKey, true);
+    releaseFocus = () => {
+      document.removeEventListener("keydown", onKey, true);
+      releaseFocus = null;
+    };
+  }
+
   function closeVerdict() {
+    if (releaseFocus) releaseFocus();
     const card = $("#result");
     if (backdrop) { backdrop.remove(); backdrop = null; }
     document.body.classList.remove("verdict-open");
@@ -1308,11 +1351,24 @@
   }
 
   document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape" && document.body.classList.contains("verdict-open")) {
-      closeVerdict();
-    } else if (e.key === "Escape" && document.body.classList.contains("has-result")) {
-      dismissResult();
+    if (e.key !== "Escape") return;
+    // any open dialog answers to Escape, in the order they stack
+    const qr = document.getElementById("qrModal");
+    if (qr && !qr.classList.contains("hidden")) {
+      const close = document.getElementById("qrClose");
+      if (close) close.click();
+      else qr.classList.add("hidden");
+      return;
     }
+    const auth = document.getElementById("authModal");
+    if (auth && !auth.classList.contains("hidden")) {
+      auth.classList.add("hidden");
+      const btn = document.getElementById("authBtn");
+      if (btn) btn.focus();
+      return;
+    }
+    if (document.body.classList.contains("verdict-open")) closeVerdict();
+    else if (document.body.classList.contains("has-result")) dismissResult();
   });
 
   document.querySelectorAll('.nav a[href="#detector"], .brand').forEach((el) => {
