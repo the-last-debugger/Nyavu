@@ -66,3 +66,35 @@ guards matter more than the feature:
 3. measure: hit rate and direction on the feed and on the benign set
 4. if the signals separate the classes, wire the score; if not, keep the reasons and say so
 5. copy updated in the same commit that turns the flag on, never before
+
+
+---
+
+## What happened when it was measured
+
+The probe was built and run. `app/network.py` resolves a host, refuses private, loopback,
+link-local and reserved addresses before connecting, completes a TLS handshake against the
+address it checked, and caches the result for an hour. It never asks for a page.
+
+Then it was pointed at both classes:
+
+| signal | live phishing (108 hosts) | legitimate wrappers (33 hosts) |
+| --- | --- | --- |
+| does not resolve | 11.1% | 9.1% |
+| resolves to a private address | 0 | 0 |
+| certificate under 30 days | 25.0% | 18.2% |
+| TLS completed | 45.4% | 45.5% |
+
+**The signals do not separate the classes.** A dead name is as common among legitimate
+links in this sample as among phishing, and a young certificate is barely more common. The
+identical TLS completion rates also suggest the measurement environment is blocking a share
+of real connections, which makes the numbers weaker still rather than stronger.
+
+So the promise stays, and not out of caution: the evidence does not support trading it.
+`app/network.py` remains in the repository as the tool that proved it, unwired, with its
+guards tested. If a future corpus shows a signal that separates, the module is ready; the
+copy would change in the same commit that turns it on.
+
+What would change the answer is not DNS or a certificate. It is the page itself: where it
+redirects, whether it asks for a password, and where that password would go. That is a
+different size of decision, and it deserves to be made against its own measurement.
