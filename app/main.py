@@ -5,6 +5,7 @@ import csv
 from datetime import datetime, timezone
 import json
 import urllib.request
+import urllib.error
 import urllib.parse
 import secrets
 import base64
@@ -492,16 +493,38 @@ def google_callback(request: Request, code: str = "", state: str = "", error: st
         "redirect_uri": _oauth_redirect(request),
         "grant_type": "authorization_code",
     }).encode()
-    try:
-        with urllib.request.urlopen("https://oauth2.googleapis.com/token", data=data, timeout=20) as r:
-            tokens = json.loads(r.read())
-        with urllib.request.urlopen("https://openidconnect.googleapis.com/v1/userinfo",
-                                    headers={"Authorization": f"Bearer {tokens['access_token']}"},
-                                    timeout=20) as r:
-            info = json.loads(r.read())
-    except Exception as exc:
-        print("Google sign-in failed:", exc)
-        return RedirectResponse("/?auth=failed")
+    tokens, info = None, None
+    for stage, call in (
+        ("token", lambda: urllib.request.urlopen("https://oauth2.googleapis.com/token",
+                                                 data=data, timeout=20)),
+        ("userinfo", lambda: urllib.request.urlopen(
+            "https://openidconnect.googleapis.com/v1/userinfo",
+            headers={"Authorization": f"Bearer {tokens['access_token']}"}, timeout=20)),
+    ):
+        try:
+            with call() as r:
+                body = json.loads(r.read())
+        except urllib.error.HTTPError as exc:
+            # Google explains itself in the body; carry the reason back to the page so a
+            # failure names its stage instead of saying "an error" and leaving it there
+            why = ""
+            try:
+                payload = json.loads(exc.read())
+                why = str(payload.get("error_description") or payload.get("error") or "")
+            except Exception:
+                pass
+            print(f"Google sign-in failed at {stage}: {exc.code} {why}")
+            query = urllib.parse.urlencode({"auth": "failed", "stage": stage, "why": why[:120]})
+            return RedirectResponse(f"/?{query}")
+        except Exception as exc:  # noqa: BLE001
+            print(f"Google sign-in failed at {stage}: {type(exc).__name__} {exc}")
+            query = urllib.parse.urlencode({"auth": "failed", "stage": stage,
+                                            "why": type(exc).__name__})
+            return RedirectResponse(f"/?{query}")
+        if stage == "token":
+            tokens = body
+        else:
+            info = body
 
     email = (info.get("email") or "").lower()
     if not email:

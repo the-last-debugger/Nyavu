@@ -1198,7 +1198,13 @@
       unconfigured: ["Google sign-in is not configured.", "Use email instead."],
       noemail: ["Google did not share an address.", "Sign-in needs an email address."],
     };
-    const [title, detail] = messages[result] || ["Sign-in could not complete.", "Try again."];
+    // when Google says why, say why: "an error" is not a diagnosis
+    const why = params.get("why") || "";
+    const stage = params.get("stage") || "";
+    const [title, detail] = result === "failed" && why
+      ? ["That sign-in did not complete.",
+         `Google said: ${why}${stage ? " (at " + stage + ")" : ""}.`]
+      : messages[result] || ["Sign-in could not complete.", "Try again."];
     const goTo = result === "ok"
       ? '<a class="auth-notice-link" href="#history">See your checks</a>'
       : "";
@@ -1215,6 +1221,8 @@
     // the URL should not keep saying what happened
     const clean = new URL(location.href);
     clean.searchParams.delete("auth");
+    clean.searchParams.delete("why");
+    clean.searchParams.delete("stage");
     history.replaceState({}, "", clean.pathname + (clean.hash || ""));
 
     if (result === "ok") refreshAccount();
