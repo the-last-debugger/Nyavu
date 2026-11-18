@@ -448,12 +448,17 @@
 
     const hostBox = cursorHost ? cursorHost.getBoundingClientRect() : { left: 0, top: 0 };
 
+    const textBottom = (el) => {
+      const words = el.querySelector(".seg-text") || el;
+      return words.getBoundingClientRect();
+    };
+
     if (cursor) {
       cursor.classList.add("on");
       if (pieces.length) {
-        const at = place(pieces[0].el, hostBox.left, hostBox.top);
-        cursor.style.left = at.left + "px";
-        cursor.style.top = at.top + "px";
+        const box = textBottom(pieces[0].el);
+        cursor.style.left = (box.left - hostBox.left) + "px";
+        cursor.style.top = (box.bottom - hostBox.top - 2) + "px";
       } else {
         cursor.style.left = "0px";
         cursor.style.top = "0px";
@@ -480,9 +485,9 @@
       for (let k = 1; k <= steps; k++) {
         delay(clock + (dur * k) / steps, () => {
           if (!cursor) return;
-          const at = place(piece.el, hostBox.left, hostBox.top);
-          cursor.style.left = (at.left + (width * k) / steps) + "px";
-          cursor.style.top = at.top + "px";
+          const box = textBottom(piece.el);
+          cursor.style.left = (box.left - hostBox.left + (width * k) / steps) + "px";
+          cursor.style.top = (box.bottom - hostBox.top - 2) + "px";
         });
       }
 
@@ -515,10 +520,12 @@
         if (!caret) return;
         const caretHost = caret.offsetParent || autopsy;
         const caretBox = caretHost.getBoundingClientRect();
-        const at = place(seg, caretBox.left, caretBox.top);
-        caret.style.left = at.left + "px";
-        caret.style.width = Math.max(12, at.width) + "px";
-        caret.style.top = (at.top - 2) + "px";
+        // underline the words, not the note underneath them
+        const words = seg.querySelector(".seg-text") || seg;
+        const wb = words.getBoundingClientRect();
+        caret.style.left = (wb.left - caretBox.left) + "px";
+        caret.style.width = Math.max(12, wb.width) + "px";
+        caret.style.top = (wb.bottom - caretBox.top - 2) + "px";
         caret.classList.add("on");
       });
 
