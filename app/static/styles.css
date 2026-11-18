@@ -8073,3 +8073,40 @@ dialog.verdict-dialog[open] {
 @media (prefers-reduced-motion: reduce) {
   .scan-cursor, .autopsy-caret { transition: none !important; }
 }
+
+/* =====================================================================
+   No neon on the cursors
+
+   Both cursors carried a coloured box-shadow, which reads as a glowing tube rather than a
+   caret, and it lit the pieces around it as it moved. A cursor should be a line: flat,
+   slightly warm, and quiet enough that the words are the bright thing.
+   ===================================================================== */
+.autopsy-caret,
+.scan-cursor {
+  box-shadow: none !important;
+  text-shadow: none !important;
+  filter: none !important;
+}
+
+.autopsy-caret {
+  height: 2px !important;
+  background: #CBD7CB !important;
+}
+
+.scan-cursor {
+  width: 2px !important;
+  background: #CBD7CB !important;
+}
+
+@media (max-width: 700px) {
+  .autopsy-caret { height: 2px !important; }
+}
+
+/* The flagged underline was a saturated pink that read as a light source next to the flat
+   caret. It is an underline, so it should sit at the weight of an underline: a muted rose
+   that marks the piece without glowing. */
+.seg.flag.on { border-bottom-color: rgba(226, 148, 160, .5) !important; }
+.seg.flag.called {
+  border-bottom-color: #DFA0AC !important;
+  border-bottom-width: 2px;
+}
