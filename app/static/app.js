@@ -728,86 +728,63 @@
     }, 380);
   }
 
+  /* ---------------------------------------------------------------------------
+     The examination, in six seconds rather than forty.
+
+     The address is taken apart, each piece gets its note, the pieces that raised the
+     score are marked, the dial settles, and the verdict is delivered. Type and rules
+     only, so there is nothing here that can be got "almost" right.
+     --------------------------------------------------------------------------- */
   function runScene(root) {
-    const scene = root.querySelector(".fishing");
-    if (!scene) return;
-    resetArtifacts(scene);
-
     const card = root.querySelector(".result");
-    const started = performance.now();
-    // exposed so the verification tools can report the page's own clock rather than
-    // their own, which drifts by a second per screenshot
-    window.__sceneStart = started;
-    window.__beatOf = (ms) => Math.round(ms);
-    const done = {};
+    if (!card) return;
 
-    /* two lines for the work, two for the examination, each on a beat */
-    const kind = scene.dataset.catch || "odd";
-    const intro = shuffled(OPENERS, 2);
-    const exam = shuffled(LINES[kind] || LINES.odd, 2);
+    const autopsy = card.querySelector(".autopsy");
+    const segs = autopsy ? Array.from(autopsy.querySelectorAll(".seg")) : [];
+    window.__sceneStart = performance.now();
 
-    const bubble = scene.querySelector(".bubble");
-    if (bubble) {
-      const span = bubble.querySelector("span");
-      if (span) span.textContent = intro[0];
-      bubble.classList.add("on");
-    }
+    const phase = card.querySelector(".thinking .phase");
+    const say = (text) => { if (phase) phase.textContent = text; };
+    const delay = (ms, fn) => setTimeout(fn, ms);
 
-    function frame(now) {
-      const elapsed = now - started;
-      // the net works on its own ten seconds inside the longer scene
-      const netT = Math.min(1, Math.max(0, (elapsed - BEAT.throw + 1200) / 10000));
-      if (scene) scene.classList.toggle("castable", elapsed >= BEAT.ready);
-      updateNet(root, elapsed >= BEAT.ready ? netT : 0);
+    delay(400, () => {
+      if (autopsy) autopsy.classList.add("live");
+      say("Reading the address");
+    });
 
-      if (!done.impact && elapsed >= BEAT.impact) {
-        done.impact = true;
-        burst(root);
-        say(root, intro[1]);            // the second line, as the net settles
-      }
-      if (!done.fish && elapsed >= BEAT.fish) {
-        done.fish = true;
-        scene.classList.add("examine");
-        drip(root);
-        say(root, exam[0]);              // the catch is in his hands; now he speaks to it
-      }
-      if (!done.react && elapsed >= BEAT.react) {
-        done.react = true;
-        scene.classList.add("reaction");
-      }
-      if (!done.zoom && elapsed >= BEAT.zoom) {
-        done.zoom = true;
-        // a phone sees a narrower slice of the same viewBox, so the push is gentler
-        // there and wide enough to hold both the fisherman and the crescent
-        const target = window.innerWidth < 700
-          ? [52, 6, 630, 250]
-          : [78, 20, 542, 210];
-        cameraPush(root, target, 2400);
-        if (card) card.classList.add("dialcoming");
-        say(root, exam[1]);               // his second thought, as the camera moves in
-      }
-      if (!done.drown && elapsed >= BEAT.drown) {
-        done.drown = true;
-        if (scene.dataset.catch === "dark") {
-          // only the phish frightens him; on a clean or unsure catch he keeps talking
-          const b = root.querySelector(".bubble");
-          if (b) b.classList.remove("on");
-          scene.classList.add("drowning");
-          setTimeout(() => fishEscapes(root), 700);
-        }
-      }
-      if (!done.outro && elapsed >= BEAT.outro) {
-        done.outro = true;
-        if (typeof done.stopTalk === "function") done.stopTalk();
-        handOver(root);
-        return;
-      }
+    segs.forEach((seg, i) => {
+      delay(900 + i * 170, () => seg.classList.add("on"));
+    });
 
-      requestAnimationFrame(frame);
-    }
-    requestAnimationFrame(frame);
+    const afterNotes = 900 + segs.length * 170;
+    const flagged = segs.filter((el) => el.classList.contains("flag"));
+
+    flagged.forEach((seg, i) => {
+      delay(afterNotes + 250 + i * 320, () => {
+        seg.classList.add("called");
+        say("Comparing against known brands");
+      });
+    });
+
+    const dialAt = afterNotes + 250 + flagged.length * 320 + 250;
+    delay(dialAt, () => {
+      say("Scoring what it measured");
+      card.classList.add("dialcoming");
+      sweepNeedle(card, card._target || 0);
+    });
+
+    delay(dialAt + 1500, () => {
+      card.classList.add("verdict-shown");
+      card.classList.remove("pending");
+      say("Reached a verdict");
+      const row = card.querySelector(".thinking-row");
+      if (row) row.remove();
+      const g = card.querySelector(".gauge");
+      if (g) g.style.setProperty("--p", String(card._target || 0));
+      normaliseCard(card);
+      ensureClose(card);
+    });
   }
-
 
   const TONE_OF = (v) => (v < 35 ? "#35e0a0" : v < 65 ? "#ffb020" : "#ff4d6d");
 
@@ -819,8 +796,8 @@
     const caption = g.querySelector(".readout small");
 
     const token = ++sweepToken;
-    const pause = 18500;   // the dial wakes once the camera is on him   // the catch is in his hands here; the dial starts
-    const duration = 9000;   // nine seconds of calibrating, settling as the water comes
+    const pause = 0;      // there is no film to wait for any more
+    const duration = 1400;   // a short, decisive sweep
 
     if (caption) caption.textContent = "examining";
     const scene = document.querySelector(".fishing");
@@ -957,186 +934,7 @@
           <p class="verdict-url">${escapeHtml(r.url)}</p>
           <div class="stamp ${r.risk}" aria-hidden="true">${r.risk === "high" ? "phishing" : r.risk === "medium" ? "unsure" : "clear"}</div>
 
-        <div class="fishing" data-catch="${r.risk === "high" ? "dark" : r.risk === "medium" ? "odd" : "plain"}" aria-hidden="true">
-          <svg viewBox="-102 -28 813 315" preserveAspectRatio="xMidYMid slice">
-            <defs>
-              <linearGradient id="seaG" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stop-color="#0B3546"/>
-                <stop offset="100%" stop-color="#04121A"/>
-              </linearGradient>
-              <radialGradient id="moonG" cx="50%" cy="50%" r="50%">
-                <stop offset="0%" stop-color="#1B3A44"/>
-                <stop offset="100%" stop-color="#0A1A22"/>
-              </radialGradient>
-              <pattern id="mesh" width="9" height="9" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
-                <rect width="9" height="9" fill="#162B36"/>
-                <path d="M0 0 V9 M0 0 H9" stroke="#4E7B8C" stroke-width="1.15" fill="none" opacity="1"/>
-              </pattern>
-              <clipPath id="waterBand" clipPathUnits="userSpaceOnUse">
-                <rect x="-110" y="172" width="840" height="130"/>
-              </clipPath>
-              <filter id="flutter" x="-30%" y="-30%" width="160%" height="160%">
-                <feTurbulence type="fractalNoise" baseFrequency="0.014 0.022" numOctaves="2" seed="7" result="noise">
-                  <animate attributeName="baseFrequency" dur="10s" repeatCount="indefinite"
-                           values="0.012 0.022;0.022 0.012;0.012 0.022"/>
-                </feTurbulence>
-                <feDisplacementMap in="SourceGraphic" in2="noise" scale="7"
-                                   xChannelSelector="R" yChannelSelector="G"/>
-              </filter>
-            </defs>
-
-            <rect x="-110" y="-40" width="840" height="212" fill="#070E15"/>
-            <rect x="-110" y="-40" width="840" height="330" fill="url(#moonlight)"/>
-
-            <mask id="crescent">
-              <circle cx="602" cy="30" r="17" fill="#ffffff"/>
-              <circle cx="595" cy="25" r="14.6" fill="#000000"/>
-            </mask>
-            <!-- dust: a few specks caught in the light -->
-            <g fill="#EAF8FF" opacity="0.55">
-              <circle cx="626" cy="18" r="1.1"/><circle cx="634" cy="30" r="0.8"/>
-              <circle cx="618" cy="44" r="1"/><circle cx="640" cy="14" r="0.7"/>
-              <circle cx="612" cy="8" r="0.9"/><circle cx="646" cy="38" r="0.6"/>
-            </g>
-            <circle cx="602" cy="30" r="17" fill="#F2FBFF" mask="url(#crescent)"/>
-
-            <!-- far shore: a church and a lighthouse, held back by tone, not by blur -->
-            <g class="far-shore" fill="#070E14" stroke="#1B2C38" stroke-width="1.6" stroke-linejoin="round">
-              <!-- church: nave, pitched roof, tower, spire -->
-              <path d="M74 172 v-24 l26 -13 l26 13 v24 z"/>
-              <path d="M128 172 v-34 h13 v34 z"/>
-              <path d="M134.5 138 v-14 l6 -8 l6 8 v14 z"/>
-              <path d="M140.5 108 v-8"/>
-              <path d="M137 112 h7"/>
-              <!-- a lit window, the only warmth on the shore -->
-              <rect x="132" y="158" width="4" height="6" fill="#C9A45A" stroke="none" opacity="0.55"/>
-            </g>
-
-            <!-- The lighthouse sits far left, clear of the dial on the right. Attention
-                 in the scene runs boat (left) -> net (centre) -> dial (right), so the
-                 landmarks fill the emptier left half and never compete with the needle. -->
-            <g class="far-shore" fill="#070E14" stroke="#1B2C38" stroke-width="1.6"
-               stroke-linejoin="round" transform="translate(-430 0)">
-              <!-- lighthouse: tapered tower, gallery, lantern, and its beam -->
-              <path d="M458 172 l3 -46 h12 l3 46 z"/>
-              <path d="M459 126 h19"/>
-              <path d="M463 126 v-8 h11 v8 z"/>
-              <path d="M464 118 h9"/>
-              <path class="lamp" d="M468.5 122 m-1.6 0 a1.6 1.6 0 1 1 3.2 0 a1.6 1.6 0 1 1 -3.2 0"
-                    fill="#B8F2E6" stroke="none"/>
-              <path class="beam" d="M476 122 l30 -12 v24 z" fill="#8FF3E2" stroke="none" opacity="0.10"/>
-            </g>
-
-            <g class="boat">
-              <!-- freeboard: gunwale at 140, keel at 182, waterline at 172 -->
-              <path d="M28 140 q10 30 52 38 q60 10 128 0 q34 -6 46 -38 z"
-                    fill="#080F16" stroke="#33505F" stroke-width="2.4"/>
-              <path d="M22 138 h258" stroke="#41616F" stroke-width="4" stroke-linecap="round"/>
-              <path d="M40 146 q10 18 44 24 q54 8 112 0 q26 -4 40 -24"
-                    fill="none" stroke="#27414E" stroke-width="1.4"/>
-              <!-- her registration, painted along the strake -->
-              <defs>
-                <path id="hullMarkLine" d="M96 150 q54 9 142 -1" fill="none"/>
-              </defs>
-              <text class="hull-mark" font-family="ui-monospace, SFMono-Regular, Menlo, monospace"
-                    font-size="9" letter-spacing="2.2" fill="#6E9FB2" opacity="0.85">
-                <textPath href="#hullMarkLine" startOffset="0">NYAVU APD</textPath>
-              </text>
-
-              <!-- stern post and a thwart to sit on -->
-              <path d="M264 138 l6 22" stroke="#41616F" stroke-width="3.5" stroke-linecap="round"/>
-              <rect x="168" y="147" width="92" height="5" rx="2.5"
-                    fill="#182833" stroke="#3A5666" stroke-width="1.4"/>
-            </g>
-
-            <g class="fisher">
-              <!-- trousers: thigh along the thwart, shin dropping to the boards -->
-              <path class="trouser" d="M196 140 q22 -4 40 2 l2 12 q-22 6 -42 0 z"
-                    fill="#0B141A" stroke="#3A5666" stroke-width="2"/>
-              <path class="trouser" d="M232 152 q8 2 8 12 l-2 12 h-12 l2 -22 z"
-                    fill="#0B141A" stroke="#3A5666" stroke-width="2"/>
-              <path class="shirt" d="M198 112 q14 -16 26 0 l4 30 h-34 z"
-                    fill="#0A1218" stroke="#3A5666" stroke-width="2.2"/>
-              <circle class="head" cx="211" cy="100" r="10.5" fill="#0A1218" stroke="#3A5666" stroke-width="2.2"/>
-              <circle class="eye" cx="213" cy="98" r="1.3" fill="#42596B"/>
-              <path class="nose" d="M219 100 l5 2 l-5 1.4 z" fill="#42596B"/>
-              <path class="mouth" d="M218 105 q4 1 6 -1" fill="none" stroke="#42596B" stroke-width="1.4" stroke-linecap="round"/>
-              <path class="hat" d="M194 94 q17 -19 34 0 l9 5 h-52 z" fill="#0A1218" stroke="#3A5666" stroke-width="2.2"/>
-
-              <!-- arms: upper, elbow, forearm; no filled hands -->
-              <g class="arms">
-                <!-- far arm: only the forearm clears the body, so the bicep is hidden -->
-                <path d="M223 117 L240 110" stroke="#3A5666" stroke-width="5" fill="none" stroke-linecap="round"/>
-                <path d="M212 126 L224 125" stroke="#3A5666" stroke-width="6" fill="none" stroke-linecap="round"/>
-                <circle cx="224" cy="125" r="3.4" fill="#263947"/>
-                <path d="M224 125 L238 120" stroke="#3A5666" stroke-width="5" fill="none" stroke-linecap="round"/>
-              </g>
-            </g>
-
-            <!-- the sea is drawn after the boat, so only the keel sits under it -->
-            <rect x="-110" y="172" width="840" height="130" fill="url(#seaG)"/>
-            <rect x="-110" y="172" width="840" height="26" fill="url(#moonwater)"/>
-            <path d="M-110 172 h840" stroke="#12303A" stroke-width="1.2"/>
-            <g class="wavelayer wl1" style="--tile:780px">
-              <path d="M0 173.5 L11 175.2 L22 176.4 L32 176.9 L43 176.4 L54 175.2 L65 173.5 L76 171.8 L87 170.6 L97 170.1 L108 170.6 L119 171.8 L130 173.5 L141 175.2 L152 176.4 L162 176.9 L173 176.4 L184 175.2 L195 173.5 L206 171.8 L217 170.6 L228 170.1 L238 170.6 L249 171.8 L260 173.5 L271 175.2 L282 176.4 L292 176.9 L303 176.4 L314 175.2 L325 173.5 L336 171.8 L347 170.6 L357 170.1 L368 170.6 L379 171.8 L390 173.5 L401 175.2 L412 176.4 L422 176.9 L433 176.4 L444 175.2 L455 173.5 L466 171.8 L477 170.6 L487 170.1 L498 170.6 L509 171.8 L520 173.5 L531 175.2 L542 176.4 L552 176.9 L563 176.4 L574 175.2 L585 173.5 L596 171.8 L607 170.6 L618 170.1 L628 170.6 L639 171.8 L650 173.5 L661 175.2 L672 176.4 L683 176.9 L693 176.4 L704 175.2 L715 173.5 L726 171.8 L737 170.6 L748 170.1 L758 170.6 L769 171.8 L780 173.5" fill="none" stroke="#2F7186" stroke-width="1.50" opacity="0.55"/>
-              <path d="M0 173.5 L11 175.2 L22 176.4 L32 176.9 L43 176.4 L54 175.2 L65 173.5 L76 171.8 L87 170.6 L97 170.1 L108 170.6 L119 171.8 L130 173.5 L141 175.2 L152 176.4 L162 176.9 L173 176.4 L184 175.2 L195 173.5 L206 171.8 L217 170.6 L228 170.1 L238 170.6 L249 171.8 L260 173.5 L271 175.2 L282 176.4 L292 176.9 L303 176.4 L314 175.2 L325 173.5 L336 171.8 L347 170.6 L357 170.1 L368 170.6 L379 171.8 L390 173.5 L401 175.2 L412 176.4 L422 176.9 L433 176.4 L444 175.2 L455 173.5 L466 171.8 L477 170.6 L487 170.1 L498 170.6 L509 171.8 L520 173.5 L531 175.2 L542 176.4 L552 176.9 L563 176.4 L574 175.2 L585 173.5 L596 171.8 L607 170.6 L618 170.1 L628 170.6 L639 171.8 L650 173.5 L661 175.2 L672 176.4 L683 176.9 L693 176.4 L704 175.2 L715 173.5 L726 171.8 L737 170.6 L748 170.1 L758 170.6 L769 171.8 L780 173.5" transform="translate(780 0)" fill="none" stroke="#2F7186" stroke-width="1.50" opacity="0.55"/>
-            </g>
-            <g class="wavelayer wl2" style="--tile:1020px">
-              <path d="M0 179.0 L14 178.2 L28 177.0 L42 175.7 L57 174.5 L71 173.9 L85 174.0 L99 174.8 L113 176.0 L128 177.3 L142 178.5 L156 179.1 L170 179.0 L184 178.2 L198 177.0 L212 175.7 L227 174.5 L241 173.9 L255 174.0 L269 174.8 L283 176.0 L298 177.3 L312 178.5 L326 179.1 L340 179.0 L354 178.2 L368 177.0 L383 175.7 L397 174.5 L411 173.9 L425 174.0 L439 174.8 L453 176.0 L468 177.3 L482 178.5 L496 179.1 L510 179.0 L524 178.2 L538 177.0 L553 175.7 L567 174.5 L581 173.9 L595 174.0 L609 174.8 L623 176.0 L638 177.3 L652 178.5 L666 179.1 L680 179.0 L694 178.2 L708 177.0 L722 175.7 L737 174.5 L751 173.9 L765 174.0 L779 174.8 L793 176.0 L807 177.3 L822 178.5 L836 179.1 L850 179.0 L864 178.2 L878 177.0 L892 175.7 L907 174.5 L921 173.9 L935 174.0 L949 174.8 L963 176.0 L977 177.3 L992 178.5 L1006 179.1 L1020 179.0" fill="none" stroke="#2F7186" stroke-width="1.20" opacity="0.4"/>
-              <path d="M0 179.0 L14 178.2 L28 177.0 L42 175.7 L57 174.5 L71 173.9 L85 174.0 L99 174.8 L113 176.0 L128 177.3 L142 178.5 L156 179.1 L170 179.0 L184 178.2 L198 177.0 L212 175.7 L227 174.5 L241 173.9 L255 174.0 L269 174.8 L283 176.0 L298 177.3 L312 178.5 L326 179.1 L340 179.0 L354 178.2 L368 177.0 L383 175.7 L397 174.5 L411 173.9 L425 174.0 L439 174.8 L453 176.0 L468 177.3 L482 178.5 L496 179.1 L510 179.0 L524 178.2 L538 177.0 L553 175.7 L567 174.5 L581 173.9 L595 174.0 L609 174.8 L623 176.0 L638 177.3 L652 178.5 L666 179.1 L680 179.0 L694 178.2 L708 177.0 L722 175.7 L737 174.5 L751 173.9 L765 174.0 L779 174.8 L793 176.0 L807 177.3 L822 178.5 L836 179.1 L850 179.0 L864 178.2 L878 177.0 L892 175.7 L907 174.5 L921 173.9 L935 174.0 L949 174.8 L963 176.0 L977 177.3 L992 178.5 L1006 179.1 L1020 179.0" transform="translate(1020 0)" fill="none" stroke="#2F7186" stroke-width="1.20" opacity="0.4"/>
-            </g>
-            <g class="wavelayer wl3" style="--tile:1320px">
-              <path d="M0 179.3 L18 178.7 L37 178.6 L55 179.0 L73 179.8 L92 180.8 L110 181.7 L128 182.3 L147 182.4 L165 182.0 L183 181.2 L202 180.2 L220 179.3 L238 178.7 L257 178.6 L275 179.0 L293 179.8 L312 180.8 L330 181.7 L348 182.3 L367 182.4 L385 182.0 L403 181.2 L422 180.2 L440 179.3 L458 178.7 L477 178.6 L495 179.0 L513 179.8 L532 180.8 L550 181.7 L568 182.3 L587 182.4 L605 182.0 L623 181.2 L642 180.2 L660 179.3 L678 178.7 L697 178.6 L715 179.0 L733 179.8 L752 180.8 L770 181.7 L788 182.3 L807 182.4 L825 182.0 L843 181.2 L862 180.2 L880 179.3 L898 178.7 L917 178.6 L935 179.0 L953 179.8 L972 180.8 L990 181.7 L1008 182.3 L1027 182.4 L1045 182.0 L1063 181.2 L1082 180.2 L1100 179.3 L1118 178.7 L1137 178.6 L1155 179.0 L1173 179.8 L1192 180.8 L1210 181.7 L1228 182.3 L1247 182.4 L1265 182.0 L1283 181.2 L1302 180.2 L1320 179.3" fill="none" stroke="#2F7186" stroke-width="0.90" opacity="0.28"/>
-              <path d="M0 179.3 L18 178.7 L37 178.6 L55 179.0 L73 179.8 L92 180.8 L110 181.7 L128 182.3 L147 182.4 L165 182.0 L183 181.2 L202 180.2 L220 179.3 L238 178.7 L257 178.6 L275 179.0 L293 179.8 L312 180.8 L330 181.7 L348 182.3 L367 182.4 L385 182.0 L403 181.2 L422 180.2 L440 179.3 L458 178.7 L477 178.6 L495 179.0 L513 179.8 L532 180.8 L550 181.7 L568 182.3 L587 182.4 L605 182.0 L623 181.2 L642 180.2 L660 179.3 L678 178.7 L697 178.6 L715 179.0 L733 179.8 L752 180.8 L770 181.7 L788 182.3 L807 182.4 L825 182.0 L843 181.2 L862 180.2 L880 179.3 L898 178.7 L917 178.6 L935 179.0 L953 179.8 L972 180.8 L990 181.7 L1008 182.3 L1027 182.4 L1045 182.0 L1063 181.2 L1082 180.2 L1100 179.3 L1118 178.7 L1137 178.6 L1155 179.0 L1173 179.8 L1192 180.8 L1210 181.7 L1228 182.3 L1247 182.4 L1265 182.0 L1283 181.2 L1302 180.2 L1320 179.3" transform="translate(1320 0)" fill="none" stroke="#2F7186" stroke-width="0.90" opacity="0.28"/>
-            </g>
-
-            <circle class="ripple r1" cx="352" cy="196" r="10"/>
-            <circle class="ripple r2" cx="352" cy="196" r="10"/>
-            <circle class="ripple r3" cx="352" cy="196" r="10"/>
-
-            <g class="ropeline">
-              <path class="rope" fill="none" stroke="#16232B" stroke-width="3" stroke-linecap="round" d=""/>
-              <path class="rope-hi" fill="none" stroke="#5C8A9C" stroke-width="1" stroke-linecap="round" opacity="0.55" d=""/>
-            </g>
-
-            <g class="netlive">
-              <path class="net-fill" fill="url(#mesh)" fill-opacity="0.96" stroke="none" d=""/>
-              <path class="net-mesh" fill="none" stroke="#4E7B8C" stroke-width="0.9" stroke-opacity="0.85" d=""/>
-              <g class="drip-group" fill="#8FF3E2" stroke="none">
-                <circle class="drip" cx="300" cy="150" r="1.6"/>
-                <circle class="drip" cx="314" cy="156" r="1.3"/>
-                <circle class="drip" cx="328" cy="150" r="1.5"/>
-              </g>
-            </g>
-
-            <g class="caught">
-              <circle class="catch-halo" r="17" fill="rgba(3, 9, 13, .55)"/>
-              <g class="catch-dark">
-                <path d="M-13 2 q9 -11 19 -1 q-4 8 -12 8 z" fill="#200910" stroke="#ff4d6d" stroke-width="2"/>
-                <path d="M-6 -5 l1 -7 M0 -6 l2 -7 M6 -4 l3 -6" stroke="#ff4d6d" stroke-width="2" stroke-linecap="round"/>
-              </g>
-              <g class="catch-odd">
-                <circle cx="0" cy="2" r="8.5" fill="#1C1608" stroke="#ffb020" stroke-width="2"/>
-                <path d="M-4 -3 q6 -6 6 5" stroke="#ffb020" stroke-width="2" fill="none" stroke-linecap="round"/>
-              </g>
-              <g class="catch-plain">
-                <path d="M-15 2 q10 -8 21 0 q-11 8 -21 0 z" fill="#0C2C24" stroke="#35e0a0" stroke-width="2"/>
-                <path d="M6 2 l8 -5 v10 z" fill="#0C2C24" stroke="#35e0a0" stroke-width="1.8"/>
-              </g>
-            </g>
-
-            <g clip-path="url(#waterBand)" style="pointer-events:none">
-              <path class="wetnet" fill="#12495C" fill-opacity="0.85" stroke="none"/>
-            </g>
-
-            <g class="splash">
-              <path class="spike" d="M352 196 l-9 -20 M358 194 l-2 -24 M364 196 l9 -19" stroke="#B9F7EC" stroke-width="2.6" stroke-linecap="round" fill="none"/>
-              <circle class="drop" cx="342" cy="172" r="2.9" fill="#B9F7EC"/>
-              <circle class="drop" cx="356" cy="163" r="3.4" fill="#B9F7EC"/>
-              <circle class="drop" cx="368" cy="174" r="2.6" fill="#B9F7EC"/>
-            </g>
-          </svg>
-          <div class="bubble" aria-live="polite"><span></span></div>
+        ${autopsyMarkup(r)}
         </div>
       </div>
       <div class="thinking-row">

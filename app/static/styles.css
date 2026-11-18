@@ -5557,3 +5557,187 @@ code, kbd, samp {
     gap: 16px 20px !important;
   }
 }
+
+/* =====================================================================
+   The address autopsy
+
+   The theatre is gone. What replaces it is the thing the product actually does: the URL
+   is taken apart, and each piece is annotated in place. Read left to right and you see
+   the anatomy; the pieces that raised the score are marked as they are called.
+   ===================================================================== */
+.autopsy {
+  margin: 6px 0 2px;
+  padding: 26px 26px 22px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, .018);
+  border: 1px solid rgba(255, 255, 255, .05);
+}
+
+.autopsy-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 0 2px;
+  font-family: var(--font-mono);
+  font-size: 0.98rem;
+  line-height: 1.5;
+}
+
+.seg {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 0 1px 10px;
+  border-bottom: 1px solid transparent;
+  opacity: 0;
+  transform: translateY(-5px);
+  transition: opacity .5s ease, transform .5s ease, border-color .5s ease, color .4s ease;
+}
+
+.seg.on {
+  opacity: 1;
+  transform: none;
+  border-bottom-color: rgba(255, 255, 255, .22);
+}
+
+.seg-text { white-space: nowrap; color: var(--text); }
+.seg.tight .seg-text { color: var(--muted); }
+.seg.soft .seg-text { color: #A9B4C2; }
+
+.seg-note {
+  margin-top: 12px;
+  max-width: 26ch;
+  font-family: var(--font-body);
+  font-size: 0.7rem;
+  line-height: 1.35;
+  letter-spacing: 0.01em;
+  color: var(--faint);
+  opacity: 0;
+  transform: translateY(-3px);
+  transition: opacity .45s ease, transform .45s ease, color .35s ease;
+}
+
+.seg.on .seg-note { opacity: 1; transform: none; }
+
+/* the pieces that raised the score */
+.seg.flag.on { border-bottom-color: rgba(255, 120, 140, .55); }
+.seg.flag.on .seg-text { color: #F3B4C0; }
+
+.seg.flag.called .seg-text {
+  color: #FF8FA2;
+  font-weight: 600;
+}
+
+.seg.flag.called .seg-note {
+  color: #F3A7B6;
+}
+
+.seg.flag.called {
+  border-bottom-color: #FF7F95;
+  border-bottom-width: 2px;
+}
+
+.seg.flag.called::after {
+  content: "";
+  position: absolute;
+  margin-top: -2px;
+}
+
+.autopsy-caption {
+  margin: 20px 0 0;
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 0.84rem;
+  color: var(--faint);
+  opacity: 0;
+  transition: opacity .6s ease;
+}
+
+.autopsy.live .autopsy-caption { opacity: 1; }
+
+/* the old scene's container, kept from breaking layout if anything still looks for it */
+.fishing { display: none !important; }
+
+@media (max-width: 700px) {
+  .autopsy { padding: 18px 16px 16px; }
+  .autopsy-line { font-size: 0.82rem; gap: 0; }
+  .seg { padding-bottom: 8px; }
+  .seg-note { font-size: 0.66rem; margin-top: 9px; max-width: 20ch; }
+}
+
+/* the dissection needed columns, not inline boxes: notes were wider than the pieces
+   that owned them and ran into the next one */
+.autopsy-line {
+  display: grid !important;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  align-items: start;
+  gap: 0 18px;
+}
+
+.seg {
+  display: flex !important;
+  flex-direction: column;
+  min-width: 0;
+  padding-bottom: 9px;
+}
+
+.seg-text { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.seg-note { max-width: none !important; width: 100%; }
+
+@media (max-width: 700px) {
+  .autopsy-line {
+    grid-auto-flow: row !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px 16px;
+  }
+  .seg-text { white-space: normal; overflow: visible; }
+}
+
+/* the address has to still read as an address: no gap between the pieces, so the
+   string is continuous and the underline carries the segmentation */
+.autopsy-line { gap: 0 !important; }
+
+.seg { padding-right: 0; }
+
+/* the note needs its own breathing room even though the text does not */
+.seg-note { padding-right: 16px; }
+
+.seg:last-child .seg-note { padding-right: 0; }
+
+/* a hairline between pieces, drawn by the border, so the joins are still legible */
+.seg.on { border-bottom-color: rgba(255, 255, 255, .22); }
+
+/* columns sized to the piece, so the address stays continuous left to right */
+.autopsy-line {
+  grid-auto-columns: minmax(max-content, auto) !important;
+  justify-content: start;
+}
+
+.seg-text { white-space: nowrap !important; }
+.seg-note { max-width: 17ch !important; padding-right: 18px; }
+
+.seg:last-child .seg-note { padding-right: 0; }
+
+@media (max-width: 700px) {
+  .seg-note { max-width: none !important; }
+}
+
+/* notes: two lines is plenty, three is a paragraph */
+.seg-note {
+  max-width: 20ch !important;
+  font-size: 0.68rem !important;
+  line-height: 1.3 !important;
+}
+
+/* on a phone a long label must be allowed to wrap rather than run off the card */
+@media (max-width: 700px) {
+  .seg-text {
+    white-space: normal !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+    overflow-wrap: anywhere;
+    font-size: 0.9rem;
+  }
+  .seg { min-width: 0; }
+}
