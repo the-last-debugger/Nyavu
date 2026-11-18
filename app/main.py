@@ -377,13 +377,21 @@ def send_otp(phone: str, code: str) -> str:
 
 @app.get("/api/auth/methods")
 def auth_methods():
+    """What the sign-in panel may offer.
+
+    Google is the only method in service. Email and password, and the phone code, still
+    exist in the code and still work if called directly, but nothing advertises them until
+    the Google round trip has been proven on a real device. AUTH_GOOGLE_ONLY=0 brings them
+    back without a code change.
+    """
+    google_only = os.getenv("AUTH_GOOGLE_ONLY", "1") != "0"
     return {
-        "password": True,
+        "password": not google_only,
         "google": bool(os.getenv("GOOGLE_CLIENT_ID") and os.getenv("GOOGLE_CLIENT_SECRET")),
         # The phone button is only offered when a code can actually reach the person.
         # Offering it with no SMS provider is a dead end: the code would go to the server
         # log, which the visitor cannot read. ALLOW_LOG_OTP keeps the flow testable.
-        "phone": _sms_configured() or os.getenv("ALLOW_LOG_OTP") == "1",
+        "phone": (not google_only) and (_sms_configured() or os.getenv("ALLOW_LOG_OTP") == "1"),
         "sms": _sms_configured(),
     }
 

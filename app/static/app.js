@@ -1024,39 +1024,17 @@
     } catch { /* ignore */ }
   }
 
-  function openAuth(m) {
-    mode = m;
+  function openAuth() {
+    mode = "login";
     authModal.classList.remove("hidden");
-    $("#authTitle").textContent = m === "login" ? "Sign in" : "Create an account";
-    $("#authSubmit").textContent = m === "login" ? "Sign in" : "Register";
-    $("#authSwitch").textContent = m === "login" ? "Need an account? Register" : "Already registered? Sign in";
-    $("#authName").style.display = m === "login" ? "none" : "block";
-    $("#authError").textContent = "";
+    const error = $("#authError");
+    if (error) error.textContent = "";
+    const close = $("#authClose");
+    if (close) close.focus({ preventScroll: true });
   }
   $("#authClose").addEventListener("click", () => authModal.classList.add("hidden"));
-  $("#authSwitch").addEventListener("click", e => {
-    e.preventDefault(); openAuth(mode === "login" ? "register" : "login");
-  });
-  $("#authForm").addEventListener("submit", async e => {
-    e.preventDefault();
-    const path = mode === "login" ? "/api/auth/login" : "/api/auth/register";
-    try {
-      await api(path, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: $("#authEmail").value,
-          password: $("#authPassword").value,
-          full_name: $("#authName").value,
-        }),
-      });
-      authModal.classList.add("hidden");
-      $("#authPassword").value = "";
-      refreshAccount(); loadHistory(); loadStats();
-    } catch (err) {
-      $("#authError").textContent = err.message;
-    }
-  });
+  /* The panel has one method. Google's redirect is an ordinary link, so there is nothing
+     to wire; the round trip comes back to "/" with ?auth= and the notice explains it. */
 
   /* --------------------------------------------------------------- suggestions
      Typing a long address by hand is the slowest way into the product. The list is
@@ -1163,10 +1141,13 @@
       noemail: ["Google did not share an address.", "Sign-in needs an email address."],
     };
     const [title, detail] = messages[result] || ["Sign-in could not complete.", "Try again."];
+    const goTo = result === "ok"
+      ? '<a class="auth-notice-link" href="#history">See your checks</a>'
+      : "";
 
     const bar = document.createElement("div");
     bar.className = "auth-notice" + (result === "ok" ? " good" : "");
-    bar.innerHTML = `<strong>${title}</strong><span>${detail}</span>
+    bar.innerHTML = `<strong>${title}</strong><span>${detail}</span>${goTo}
       <button type="button" aria-label="Dismiss">\u00d7</button>`;
     bar.querySelector("button").addEventListener("click", () => bar.remove());
     const main = document.querySelector("main");
@@ -1181,82 +1162,24 @@
     if (result === "ok") refreshAccount();
   })();
 
-  /* ---------------------------------------------------------- alternative sign in */
-  (async function initAltAuth() {
+  /* ------------------------------------------------------- is Google reachable? */
+  (async function initAuth() {
     const googleBtn = $("#googleBtn");
-    const alt = $("#authAlt");
-    const phoneStep = $("#phoneStep");
-    const phoneBtn = $("#phoneBtn");
-    const phoneBack = $("#phoneBack");
-    const phoneSend = $("#phoneSend");
-    const phoneVerify = $("#phoneVerify");
-    const phoneError = $("#phoneError");
-    const authOr = $("#authOr");
-    const emailForm = $("#authForm");
-    if (!googleBtn || !phoneStep) return;
+    const note = $("#authNote");
+    if (!googleBtn) return;
 
-    let methods = { google: false, phone: false, sms: false };
     try {
-      methods = await fetch("/api/auth/methods").then((r) => r.json());
-    } catch { /* offline: keep email only */ }
-
-    // never offer a method that cannot work
-    if (!methods.google) googleBtn.remove();
-    if (!methods.phone) { phoneBtn.remove(); }
-    if (!methods.google && !methods.phone) { alt.remove(); authOr.remove(); }
-
-    const showPhone = (on) => {
-      phoneStep.classList.toggle("hidden", !on);
-      emailForm.classList.toggle("hidden", on);
-      if (authOr) authOr.classList.toggle("hidden", on);
-      if (alt) alt.classList.toggle("hidden", on);
-      if (on) $("#phoneInput").focus();
-    };
-
-    phoneBtn.addEventListener("click", () => showPhone(true));
-    phoneBack.addEventListener("click", () => showPhone(false));
-
-    phoneSend.addEventListener("click", async () => {
-      phoneError.textContent = "";
-      const phone = $("#phoneInput").value.trim();
-      if (phone.length < 7) { phoneError.textContent = "Enter a phone number."; return; }
-      phoneSend.disabled = true;
-      phoneSend.textContent = "Sending…";
-      try {
-        const res = await fetch("/api/auth/phone/start", {
-          method: "POST", headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ phone }),
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.detail || "Could not send the code.");
-        $("#phoneCodeStep").classList.remove("hidden");
-        phoneSend.textContent = data.channel === "sms" ? "Code sent" : "Code sent (see server log)";
-        $("#phoneCode").focus();
-      } catch (err) {
-        phoneError.textContent = err.message;
-        phoneSend.disabled = false;
-        phoneSend.textContent = "Send me a code";
+      const methods = await fetch("/api/auth/methods").then((r) => r.json());
+      if (!methods.google) {
+        googleBtn.replaceWith(Object.assign(document.createElement("p"), {
+          className: "auth-note",
+          textContent: "Google sign-in is not configured on this deployment.",
+        }));
+        if (note) note.textContent = "Checking a link works without an account.";
       }
-    });
-
-    phoneVerify.addEventListener("click", async () => {
-      phoneError.textContent = "";
-      const phone = $("#phoneInput").value.trim();
-      const code = $("#phoneCode").value.trim();
-      if (code.length < 4) { phoneError.textContent = "Enter the code."; return; }
-      try {
-        const res = await fetch("/api/auth/phone/verify", {
-          method: "POST", headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ phone, code }),
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.detail || "That code was not accepted.");
-        $("#authModal").classList.add("hidden");
-        refreshAccount(); loadHistory(); loadStats();
-      } catch (err) {
-        phoneError.textContent = err.message;
-      }
-    });
+    } catch {
+      /* offline: the link still works when the network returns */
+    }
   })();
 
   /* ------------------------------------------------------------- dismissing it all
