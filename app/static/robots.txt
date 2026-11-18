@@ -1,8 +1,0 @@
-User-agent: *
-Allow: /
-
-Disallow: /api/
-Disallow: /docs
-Disallow: /redoc
-
-Sitemap: https://nyavu.onrender.com/sitemap.xml
