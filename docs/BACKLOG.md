@@ -10,16 +10,26 @@ The only item nobody has done, and the only one I cannot do. The seven second ex
 the smooth scroll after a scan, the phone layout and the verdict card at true size. Every
 check so far has been headless Edge with scripted input.
 
-### 2. Sign-in keys
-Google is free: create an OAuth client, set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET.
-SMS is not free: a Kenyan message is roughly one shilling on Africa's Talking and several
-times that on Twilio. Until one is configured the phone method reports itself unavailable,
-so the interface offers email only. See docs/AUTH.md.
+### 2. Phone sign-in only
+Google is live: client created, both values in Render, the start endpoint redirects with the
+right callback, and the panel offers it. Phone remains unavailable because no SMS provider
+is configured, which costs roughly a shilling a message in Kenya. Until one is set the
+method reports itself unavailable rather than offering a dead end. See docs/AUTH.md.
 
 ### 3. Measurement
 There is no analytics. The honest next step is aggregate counts only, no URLs: how many
 scans a day, how deep people get, where they stop. That needs a privacy stance that
 matches the product's promise, which is why it has not been bolted on.
+
+## Defects found in places nobody had looked
+
+- watching for these is the habit that has paid off all day: the harness lies before the
+  product does, and features nobody exercises are where the lies hide
+- bulk scan works: CSV with a header, plain lines, an unparseable row that degrades to
+  error rather than failing the run, and an empty file that returns a readable 422
+- the Render helper script failed silently on its first run: a bulk PUT of the environment
+  is rejected with an empty 400, so the values were stored locally and never reached the
+  service. It writes one key at a time now, which is the route that works
 
 ## Done since the last rewrite
 
