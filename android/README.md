@@ -89,3 +89,31 @@ What is not done yet:
   does it. That is the next piece of work, and it needs a layout that survives a narrow phone
 - nothing here has been run on a device. It compiles, the APK installs nothing unusual, and
   the screen order is right, but only a hand on a phone can confirm how it feels
+
+
+---
+
+## Parity with the web app, 0.9.2
+
+Written down plainly, because "ported" is doing a lot of work in a sentence.
+
+**In the app now**
+
+- the palette: sage, bone for actions, serif for written matter, mono for figures and addresses
+- the verdict screen in the product's voice: the headline, the risk out of a hundred with a
+  quiet bar, numbered reasons, and the explanation folded behind a plus
+- the **address dissected** into scheme, name, ending and path, each with the note the site
+  puts under it, and the reading line underneath. Client-side, no network call, same wording
+- branding: the name Nyavu, a net drawn as the launcher icon, and nothing else
+
+**Still only on the web**
+
+- the **examination as an event**: the cursor that writes the address and then reads it from
+  the right. The app shows the dissection complete, without the performance
+- sample addresses, bulk screening, the history screen and optional accounts
+- the model page with its comparison table, the printable verdict, and the router that makes
+  the site three screens rather than two
+
+So: the verdict is ported, the examination is shown but not performed, and the rest of the
+product is absent. Anyone comparing the two side by side will see that immediately, and this
+paragraph exists so the README does not pretend otherwise.

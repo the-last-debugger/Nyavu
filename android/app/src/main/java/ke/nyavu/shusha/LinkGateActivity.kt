@@ -39,6 +39,8 @@ class LinkGateActivity : Activity() {
     private lateinit var foldRow: LinearLayout
     private lateinit var foldBody: TextView
     private lateinit var actions: LinearLayout
+    private lateinit var partsBox: LinearLayout
+    private lateinit var readingNote: TextView
     private var target: String? = null
 
     private fun dp(v: Int) = NyavuTheme.dp(this, v)
@@ -153,6 +155,27 @@ class LinkGateActivity : Activity() {
         reasonsBox = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
         page.addView(reasonsBox)
 
+        partsBox = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            background = tone.panel(this@LinkGateActivity, radius = 16)
+            setPadding(dp(16), dp(14), dp(16), dp(12))
+            visibility = View.GONE
+            val params = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
+            params.topMargin = dp(16)
+            layoutParams = params
+        }
+        page.addView(partsBox)
+
+        readingNote = TextView(this).apply {
+            textSize = 11.5f
+            setTextColor(NyavuTheme.faint)
+            typeface = tone.serif()
+            setPadding(0, dp(10), 0, 0)
+            visibility = View.GONE
+        }
+        page.addView(readingNote)
+
         actions = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             setPadding(0, dp(22), 0, 0)
@@ -227,6 +250,8 @@ class LinkGateActivity : Activity() {
         barFill.requestLayout()
         barTrack.requestLayout()
 
+        showParts(url, risk, established)
+
         // the fold: one sentence that says what the number is, the rest behind the plus
         val note = when {
             established ->
@@ -267,6 +292,45 @@ class LinkGateActivity : Activity() {
             }
         }
         addButton("Close", primary = false) { finish() }
+    }
+
+    /** The address, split into the pieces the verdict is about. */
+    private fun showParts(url: String, risk: String, established: Boolean) {
+        val parts = UrlParts.dissect(url)
+        if (parts.isEmpty()) return
+
+        partsBox.removeAllViews()
+        partsBox.visibility = View.VISIBLE
+        parts.forEach { part ->
+            val row = LinearLayout(this).apply {
+                orientation = LinearLayout.VERTICAL
+                setPadding(0, dp(6), 0, dp(6))
+            }
+            row.addView(TextView(this).apply {
+                text = part.text
+                textSize = 15f
+                typeface = tone.mono()
+                setTextColor(
+                    when {
+                        established -> NyavuTheme.ink
+                        part.wrong && risk != "low" -> tone.toneFor(risk)
+                        part.wrong -> NyavuTheme.WARN
+                        else -> NyavuTheme.ink
+                    }
+                )
+            })
+            row.addView(TextView(this).apply {
+                text = part.note
+                textSize = 11f
+                setTextColor(NyavuTheme.faint)
+                setLineSpacing(dp(2).toFloat(), 1f)
+                setPadding(0, dp(3), 0, 0)
+            })
+            partsBox.addView(row)
+        }
+
+        readingNote.text = UrlParts.readingNote(parts)
+        readingNote.visibility = View.VISIBLE
     }
 
     private fun reasonRow(number: String, text: String): LinearLayout {

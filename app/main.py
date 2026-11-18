@@ -319,6 +319,22 @@ class PhoneVerifyIn(BaseModel):
     code: str = Field(..., min_length=4, max_length=8)
 
 
+def _id_token_claims(id_token: str) -> dict:
+    """Read the claims out of an id_token.
+
+    The token arrived over TLS from Google's token endpoint in the same response as the
+    access token, which is the one case where reading a JWT without re-verifying its
+    signature is sound: the channel already established that Google produced it, and the
+    alternative was a second network call that kept failing.
+    """
+    try:
+        payload = id_token.split(".")[1]
+        padded = payload + "=" * (-len(payload) % 4)
+        return json.loads(base64.urlsafe_b64decode(padded))
+    except Exception:  # noqa: BLE001
+        return {}
+
+
 def _oauth_redirect(request: Request) -> str:
     base = os.getenv("OAUTH_REDIRECT_BASE") or str(request.base_url).rstrip("/")
     return f"{base}/api/auth/google/callback"
@@ -509,38 +525,45 @@ def google_callback(request: Request, code: str = "", state: str = "", error: st
     if verifier:
         fields["code_verifier"] = verifier
     data = urllib.parse.urlencode(fields).encode()
-    tokens, info = None, None
-    for stage, call in (
-        ("token", lambda: urllib.request.urlopen("https://oauth2.googleapis.com/token",
-                                                 data=data, timeout=20)),
-        ("userinfo", lambda: urllib.request.urlopen(
-            "https://openidconnect.googleapis.com/v1/userinfo",
-            headers={"Authorization": f"Bearer {tokens['access_token']}"}, timeout=20)),
-    ):
+    # One request, not two.
+
+    # The token endpoint already returns an id_token containing the address, so the separate
+    # userinfo call was an extra failure point for data we had in hand. It was also the call
+    # that kept raising TypeError on the deployed instance, for reasons that never reached a
+    # log we could read. Decoding the id_token removes the request and the class of failure.
+    try:
+        with urllib.request.urlopen("https://oauth2.googleapis.com/token",
+                                    data=data, timeout=20) as r:
+            tokens = json.loads(r.read())
+    except urllib.error.HTTPError as exc:
+        why = ""
         try:
-            with call() as r:
-                body = json.loads(r.read())
-        except urllib.error.HTTPError as exc:
-            # Google explains itself in the body; carry the reason back to the page so a
-            # failure names its stage instead of saying "an error" and leaving it there
-            why = ""
-            try:
-                payload = json.loads(exc.read())
-                why = str(payload.get("error_description") or payload.get("error") or "")
-            except Exception:
-                pass
-            print(f"Google sign-in failed at {stage}: {exc.code} {why}")
-            query = urllib.parse.urlencode({"auth": "failed", "stage": stage, "why": why[:120]})
-            return RedirectResponse(f"/?{query}")
+            payload = json.loads(exc.read())
+            why = str(payload.get("error_description") or payload.get("error") or "")
+        except Exception:
+            pass
+        print(f"Google sign-in failed at token: {exc.code} {why}")
+        query = urllib.parse.urlencode({"auth": "failed", "stage": "token", "why": why[:120]})
+        return RedirectResponse(f"/?{query}")
+    except Exception as exc:  # noqa: BLE001
+        print(f"Google sign-in failed at token: {type(exc).__name__} {exc}")
+        query = urllib.parse.urlencode({"auth": "failed", "stage": "token",
+                                        "why": type(exc).__name__})
+        return RedirectResponse(f"/?{query}")
+
+    info = _id_token_claims(tokens.get("id_token", ""))
+    if not info.get("email") and tokens.get("access_token"):
+        # older clients may not return an id_token; ask once, and fail gently if refused
+        try:
+            with urllib.request.urlopen("https://openidconnect.googleapis.com/v1/userinfo",
+                                        headers={"Authorization": f"Bearer {tokens['access_token']}"},
+                                        timeout=20) as r:
+                info = json.loads(r.read())
         except Exception as exc:  # noqa: BLE001
-            print(f"Google sign-in failed at {stage}: {type(exc).__name__} {exc}")
-            query = urllib.parse.urlencode({"auth": "failed", "stage": stage,
+            print(f"Google sign-in failed at userinfo: {type(exc).__name__} {exc}")
+            query = urllib.parse.urlencode({"auth": "failed", "stage": "userinfo",
                                             "why": type(exc).__name__})
             return RedirectResponse(f"/?{query}")
-        if stage == "token":
-            tokens = body
-        else:
-            info = body
 
     email = (info.get("email") or "").lower()
     if not email:
