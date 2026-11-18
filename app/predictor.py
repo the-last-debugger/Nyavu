@@ -242,7 +242,8 @@ class Predictor:
             "url": url,
             "host": host,
             "label": label,
-            "verdict": "phishing" if label else "legitimate",
+            # a medium reading is neither cleared nor accused, and the word should say so
+            "verdict": ("phishing" if label else "suspicious" if risk == "medium" else "legitimate"),
             "risk": risk,
             "band": band,
             "probability": round(prob, 4),
