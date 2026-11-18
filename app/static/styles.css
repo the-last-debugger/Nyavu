@@ -7640,3 +7640,185 @@ html.modal-lock, body.verdict-open { overflow: hidden; }
   /* the blur is applied to a layer of its own, behind the card */
   transform: translateZ(0);
 }
+
+/* =====================================================================
+   Printing a verdict
+
+   A checker is something people print, or save as a PDF, to show a colleague what they
+   found. Today that would print a dark screen-sized overlay with a blurred backdrop onto
+   white paper. This turns the verdict into a document: page furniture gone, the card flat,
+   ink on paper, and the colours kept only where they carry meaning.
+   ===================================================================== */
+@media print {
+  @page { margin: 16mm 14mm; }
+
+  html, body {
+    background: #fff !important;
+    color: #111 !important;
+    overflow: visible !important;
+  }
+
+  .topbar,
+  .foot,
+  .scanner,
+  .samples,
+  .data-band,
+  .explain,
+  .hero,
+  .auth-notice,
+  .verdict-backdrop,
+  .verdict-close,
+  .thinking-row,
+  .skip,
+  .suggest-list,
+  [aria-hidden="true"].scan-cursor {
+    display: none !important;
+  }
+
+  .result,
+  .result.overlay {
+    position: static !important;
+    inset: auto !important;
+    transform: none !important;
+    width: auto !important;
+    max-height: none !important;
+    height: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: #fff !important;
+    box-shadow: none !important;
+    overflow: visible !important;
+    animation: none !important;
+    color: #111 !important;
+  }
+
+  .result.overlay::before { display: none !important; }
+
+  .verdict-head,
+  .autopsy,
+  .reasons li,
+  .evidence,
+  details.advanced {
+    background: #fff !important;
+    border: 1px solid #d5d8dc !important;
+    box-shadow: none !important;
+    color: #111 !important;
+  }
+
+  .result h2,
+  .verdict-url,
+  .score-note,
+  .seg-text,
+  .seg-note,
+  .autopsy-caption,
+  .block-title,
+  .reasons li,
+  .limits,
+  .limits-more a {
+    color: #111 !important;
+  }
+
+  .seg-note,
+  .autopsy-caption,
+  .score-note,
+  .verdict-url { color: #444 !important; }
+
+  /* the verdict colour survives, darkened enough to read on paper */
+  .badge.high, .bulk-verdict.high, .seg.flag .seg-text { color: #a01028 !important; }
+  .badge.low, .bulk-verdict.low { color: #16624a !important; }
+  .badge.medium, .bulk-verdict.medium { color: #7a5200 !important; }
+
+  .stamp {
+    border-color: #a01028 !important;
+    color: #a01028 !important;
+  }
+
+  .gauge { display: none !important; }
+
+  .reasons li { break-inside: avoid; page-break-inside: avoid; }
+  .verdict-head { border: 0 !important; }
+  .autopsy { break-inside: avoid; }
+
+  /* the source is worth having on the page */
+  .result::after {
+    content: "Checked by Nyavu, nyavu.onrender.com. A verdict is an assessment, not a guarantee of safety.";
+    display: block;
+    margin-top: 14px;
+    font-size: 9pt;
+    color: #666;
+  }
+}
+
+/* the printed page should use its width: the head's grid and the site's measure both
+   squeezed the verdict into a narrow column on paper */
+@media print {
+  /* only the verdict is forced into a block; forcing every section printed the hidden
+     views as well, which is how the bulk form and the model essay ended up on paper */
+  .result, .verdict-head, .verdict-text {
+    max-width: none !important;
+    width: auto !important;
+    display: block !important;
+    grid-template-columns: none !important;
+  }
+
+  .view:not(.active) { display: none !important; }
+
+  .verdict-text h2, .verdict-head h2, h1 {
+    max-width: none !important;
+    width: auto !important;
+  }
+
+  .verdict-head { padding: 0 0 12px !important; gap: 0 !important; }
+  .verdict-text h2 { font-size: 20pt !important; line-height: 1.15 !important; margin: 4px 0 6px !important; }
+
+  /* the stamp is a decoration on screen; the badge already says the verdict on paper */
+  .stamp { display: none !important; }
+
+  .autopsy { padding: 12px 14px !important; }
+  .autopsy-line { display: flex !important; flex-wrap: wrap !important; gap: 0 22px !important; }
+  .seg { padding-bottom: 8px !important; }
+  .seg-text { font-size: 11pt !important; }
+  .seg-note { font-size: 8pt !important; margin-top: 5px !important; }
+
+  .block-title { margin: 16px 0 8px !important; font-size: 8pt !important; letter-spacing: .14em !important; }
+  .reasons { display: block !important; }
+  .reasons li { padding: 9px 12px 9px 34px !important; font-size: 9.5pt !important; margin-bottom: 6px !important; }
+  .reasons li::before { top: 9px !important; left: 10px !important; width: 17px !important; height: 17px !important; font-size: 8pt !important; }
+
+  .badge { font-size: 11pt !important; }
+  .score-note, .verdict-url { font-size: 9pt !important; }
+}
+
+/* the head kept its grid because a two-class rule outranked the single-class print rule;
+   matching the specificity is the fix, not more !important */
+@media print {
+  .result .verdict-head {
+    display: block !important;
+    grid-template-columns: none !important;
+    gap: 0 !important;
+    padding: 0 0 14px !important;
+  }
+
+  .result .verdict-text {
+    width: 100% !important;
+    max-width: none !important;
+  }
+
+  .result .verdict-text h2 { max-width: none !important; }
+  .result .score-note { max-width: 70ch !important; }
+}
+
+/* the verdict word must survive on paper: match the specificity that sets it on screen */
+@media print {
+  .result .verdict-text .badge,
+  .result .verdict-text .badge.high { color: #a01028 !important; }
+  .result .verdict-text .badge.low,
+  .result .verdict-text .badge.safe { color: #16624a !important; }
+  .result .verdict-text .badge.medium { color: #7a5200 !important; }
+  .result .verdict-text .badge.rep { color: #444 !important; }
+
+  /* the swatch before the word is a screen device */
+  .result .verdict-text .badge::before { display: none !important; }
+}
