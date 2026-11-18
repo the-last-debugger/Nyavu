@@ -517,6 +517,7 @@
       if (row) row.remove();
       normaliseCard(card);
       ensureClose(card);
+      openVerdict(card);
     });
   }
 
@@ -1217,8 +1218,42 @@
     btn.className = "verdict-close";
     btn.setAttribute("aria-label", "Dismiss this verdict");
     btn.innerHTML = "\u00d7";
-    btn.addEventListener("click", () => dismissResult());
+    btn.addEventListener("click", () => {
+      if (document.body.classList.contains("verdict-open")) closeVerdict();
+      else dismissResult();
+    });
     card.appendChild(btn);
+  }
+
+  /* The verdict is a moment rather than a page, so it is lifted above a blurred backdrop
+     when it lands, and closing it returns the visitor to a clean sheet: state cleared,
+     address emptied, document reloaded so nothing stale survives. */
+  let backdrop = null;
+
+  function openVerdict(card) {
+    if (!card || card.classList.contains("overlay")) return;
+    if (!backdrop) {
+      backdrop = document.createElement("div");
+      backdrop.className = "verdict-backdrop";
+      backdrop.addEventListener("click", () => closeVerdict());
+    }
+    document.body.appendChild(backdrop);
+    document.body.classList.add("verdict-open");
+    card.classList.add("overlay");
+    document.documentElement.classList.add("modal-lock");
+    // keep the overlay scrollable from the top
+    card.scrollTop = 0;
+  }
+
+  function closeVerdict() {
+    const card = $("#result");
+    if (backdrop) { backdrop.remove(); backdrop = null; }
+    document.body.classList.remove("verdict-open");
+    document.documentElement.classList.remove("modal-lock");
+    if (card) card.classList.remove("overlay");
+    dismissResult();
+    // a real refresh, which is what "closed" should mean
+    window.location.assign("/");
   }
 
   function dismissResult() {
@@ -1235,7 +1270,9 @@
   }
 
   document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape" && document.body.classList.contains("has-result")) {
+    if (e.key === "Escape" && document.body.classList.contains("verdict-open")) {
+      closeVerdict();
+    } else if (e.key === "Escape" && document.body.classList.contains("has-result")) {
       dismissResult();
     }
   });
