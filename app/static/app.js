@@ -854,8 +854,8 @@
         <tr>
           <td>${new Date(it.created_at).toLocaleString()}</td>
           <td title="${escapeHtml(it.url)}">${escapeHtml(it.host)}</td>
-          <td><span class="pill ${it.risk}">${escapeHtml(it.verdict)}</span></td>
-          <td>${(it.probability * 100).toFixed(1)}%</td>
+          <td><span class="bulk-verdict ${it.risk}">${escapeHtml(it.verdict)}</span></td>
+          <td>${it.probability === null || it.probability === undefined ? "not scored" : Math.round(it.probability * 100)}</td>
         </tr>`).join("");
     } catch (e) {
         empty.classList.remove("hidden");
