@@ -8050,3 +8050,26 @@ dialog.verdict-dialog[open] {
   font-size: 0.86rem;
   line-height: 1.6;
 }
+
+/* The cursors now carry a row as well as a column, so a stacked phone layout is marked
+   correctly rather than having every note appear away from the caret. */
+.scan-cursor {
+  transition: left .12s linear, top .18s ease, opacity .3s ease !important;
+}
+
+.autopsy-caret {
+  top: 0;
+  bottom: auto !important;
+  height: 2px;
+  transition: left .3s cubic-bezier(.4, 0, .2, 1),
+              width .3s cubic-bezier(.4, 0, .2, 1),
+              top .26s cubic-bezier(.4, 0, .2, 1) !important;
+}
+
+@media (max-width: 700px) {
+  .autopsy-caret { height: 3px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scan-cursor, .autopsy-caret { transition: none !important; }
+}

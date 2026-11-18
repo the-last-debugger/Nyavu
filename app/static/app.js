@@ -429,12 +429,35 @@
     const WRITE_START = 380;
     const PER_MS = 62;           // per piece, slow enough to watch being written
 
+    /* Position inside the element the cursors are actually placed in. A single row needs
+       only left, but a phone stacks the pieces into rows, and a cursor that tracks left
+       alone then points at the wrong line while the words appear elsewhere. */
+    const cursorHost = cursor ? cursor.offsetParent || autopsy : null;
+    const place = (el, originX, originY) => {
+      const box = el.getBoundingClientRect();
+      const y = originY === undefined ? box.bottom : box.top;
+      return {
+        left: box.left - originX,
+        top: y - originY,
+        width: box.width,
+      };
+    };
+
     const line = autopsy ? autopsy.querySelector(".autopsy-line") : null;
     const lineLeft = line ? line.getBoundingClientRect().left : 0;
 
+    const hostBox = cursorHost ? cursorHost.getBoundingClientRect() : { left: 0, top: 0 };
+
     if (cursor) {
       cursor.classList.add("on");
-      cursor.style.left = pieces.length ? pieces[0].el.offsetLeft + "px" : "0px";
+      if (pieces.length) {
+        const at = place(pieces[0].el, hostBox.left, hostBox.top);
+        cursor.style.left = at.left + "px";
+        cursor.style.top = at.top + "px";
+      } else {
+        cursor.style.left = "0px";
+        cursor.style.top = "0px";
+      }
     }
 
     let clock = WRITE_START;
@@ -457,7 +480,9 @@
       for (let k = 1; k <= steps; k++) {
         delay(clock + (dur * k) / steps, () => {
           if (!cursor) return;
-          cursor.style.left = (piece.el.offsetLeft + (width * k) / steps) + "px";
+          const at = place(piece.el, hostBox.left, hostBox.top);
+          cursor.style.left = (at.left + (width * k) / steps) + "px";
+          cursor.style.top = at.top + "px";
         });
       }
 
@@ -488,8 +513,12 @@
 
       delay(at, () => {
         if (!caret) return;
-        caret.style.left = seg.offsetLeft + "px";
-        caret.style.width = Math.max(12, seg.offsetWidth) + "px";
+        const caretHost = caret.offsetParent || autopsy;
+        const caretBox = caretHost.getBoundingClientRect();
+        const at = place(seg, caretBox.left, caretBox.top);
+        caret.style.left = at.left + "px";
+        caret.style.width = Math.max(12, at.width) + "px";
+        caret.style.top = (at.top - 2) + "px";
         caret.classList.add("on");
       });
 
