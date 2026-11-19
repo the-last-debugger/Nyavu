@@ -39,3 +39,41 @@
 @media print {
   .result.pending .measures-strip { opacity: 1 !important; }
 }
+
+/* Invisible is not the same as absent. The measurement strip and the dial were hidden with opacity,
+   which kept their height: on a phone that was 124px of nothing above the address, and the first
+   screenshots of the examination looked broken rather than deliberate. They leave the layout now and
+   return at their beats. */
+.result.pending:not(.dialcoming) .measures-strip { display: none !important; }
+.result.pending .gauge-fade:not(.in) { display: none !important; }
+.result.pending .readout { display: none !important; }
+
+@media (max-width: 640px) {
+  .result.pending .verdict-text { margin-bottom: 0 !important; }
+}
+
+/* -------------------------------------------------------------------------------
+   The address on a phone
+
+   Each piece was a stacked row with a 16px gap, which made sense when every piece carried its own
+   note underneath. The notes live in one panel now, so the stack was six rows of mostly air: 314px
+   for an address that fits in two lines. Pieces flow and wrap instead, and the panel sits under them.
+   ------------------------------------------------------------------------------- */
+@media (max-width: 640px) {
+  .autopsy-line {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: baseline !important;
+    gap: 2px 10px !important;
+  }
+  .autopsy-line .seg {
+    display: inline-flex !important;
+    width: auto !important;
+    padding: 1px 0 !important;
+  }
+  .autopsy-panel {
+    margin-top: 10px !important;
+    max-height: 190px;
+  }
+  .autopsy { padding-bottom: 12px !important; }
+}

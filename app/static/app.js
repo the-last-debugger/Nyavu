@@ -134,10 +134,13 @@
     const text = document.getElementById("noteQuote");
     const source = document.getElementById("noteSource");
     if (!text || !source || NOTES.length < 2) return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    /* Reduced motion used to stop the rotation entirely, which on a desktop with "show animations"
+       switched off meant the quotations never changed at all. A text swap is not motion: under
+       reduced motion the line still changes, it just does so without the fade or the rise. */
+    const calm = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     const DWELL = 8000;
-    const FADE = 460;
+    const FADE = calm ? 0 : 460;
     const note = text.closest(".hero-note");
     let index = 0;
     let timer = null;
@@ -147,6 +150,7 @@
        element, and when it was, the quotation stayed transparent while still being selectable: the
        text was there, just unpainted. */
     const paint = (value) => {
+      if (calm) { text.style.opacity = "1"; source.style.opacity = "1"; return; }
       text.style.opacity = value;
       source.style.opacity = value;
     };
