@@ -154,6 +154,10 @@ function autopsyMarkup(r) {
   const { segs, clean, trustedSuffix, host } = autopsySegments(r);
   const flagged = segs.filter((s) => s.flag).length;
 
+  /* The address stays one line and the note appears once, in a panel beneath it. The note used
+     to sit under its own piece, which squeezed it into whatever width was left over: readable
+     at six pieces on a wide screen, unreadable on a phone. One panel gives every note a full
+     line, and the underline that used to sit beneath the note now sweeps along the address. */
   const items = segs.map((s, i) => {
     const cls = ["seg"];
     if (s.flag) cls.push("flag");
@@ -161,9 +165,9 @@ function autopsyMarkup(r) {
     if (s.soft) cls.push("soft");
     if (s.strong) cls.push("strong");
     if (s.tight) cls.push("tight");
-    return `<span class="${cls.join(" ")}" style="--i:${i}" data-role="${escapeHtml(s.role)}">
+    return `<span class="${cls.join(" ")}" style="--i:${i}" data-role="${escapeHtml(s.role)}"
+        data-note="${escapeHtml(s.note)}">
         <span class="seg-text"><span class="seg-ink">${escapeHtml(s.text)}</span></span>
-        <span class="seg-note">${escapeHtml(s.note)}</span>
       </span>`;
   });
 
@@ -178,13 +182,19 @@ function autopsyMarkup(r) {
 
   return `<div class="autopsy ${flagged === 0 ? "clean" : "risky"}" data-flags="${flagged}">
       <div class="autopsy-head">
-        <span class="autopsy-mode" data-state="idle">reviewing the address</span>
+        <span class="autopsy-mode" data-state="idle">where the name sits</span>
       </div>
       <div class="autopsy-line">
         <span class="scan-cursor" aria-hidden="true"><span class="scan-tag"></span></span>
         <span class="autopsy-caret" aria-hidden="true"></span>
         ${items.join("")}
       </div>
+      <ul class="autopsy-all">
+        ${segs.map((s) => `<li><b>${escapeHtml(s.text)}</b> ${escapeHtml(s.note)}</li>`).join("")}
+      </ul>
+      <p class="autopsy-panel" aria-live="polite">
+        <span class="panel-who"></span><span class="panel-say"></span>
+      </p>
       <p class="autopsy-caption">${caption}</p>
     </div>`;
 }

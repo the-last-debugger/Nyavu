@@ -8429,3 +8429,64 @@ dialog.verdict-dialog[open] {
   text-transform: lowercase;
   border-radius: 999px;
 }
+
+/* -------------------------------------------------------------------------------
+   The dissection: one line of address, one note at a time
+
+   The note used to sit under its own piece, squeezed into the width left over. It now
+   appears once, in a panel with a full line, and the underline that used to sit beneath
+   the note sweeps along the address instead.
+   ------------------------------------------------------------------------------- */
+.autopsy-line { align-items: baseline; }
+.autopsy-line .seg { padding-bottom: 0; border-bottom: 0; }
+.autopsy-line .seg .seg-note { display: none; }
+.autopsy-line .seg.speaking .seg-text { color: var(--bone); }
+.autopsy-line .seg.speaking { border-bottom: 1px solid rgba(185, 203, 185, .55); }
+
+.autopsy-panel {
+  display: grid;
+  grid-template-columns: minmax(120px, 190px) 1fr;
+  gap: 18px;
+  align-items: baseline;
+  margin: 16px 0 0;
+  padding: 12px 0 0;
+  border-top: 1px solid var(--line);
+  min-height: 62px;
+  opacity: 0;
+  transition: opacity .3s ease;
+}
+.autopsy-panel.on { opacity: 1; }
+.autopsy-panel .panel-who {
+  font-family: var(--font-mono);
+  font-size: .86rem;
+  color: var(--bone);
+  word-break: break-all;
+}
+.autopsy-panel .panel-say {
+  font-family: var(--font-body);
+  font-size: .84rem;
+  line-height: 1.55;
+  color: var(--muted);
+}
+
+@media (max-width: 700px) {
+  .autopsy-panel { grid-template-columns: 1fr; gap: 6px; min-height: 74px; }
+}
+
+@media print {
+  .autopsy-panel { opacity: 1; }
+  .autopsy-line .seg .seg-note { display: none; }
+}
+
+/* The panel shows one note at a time, which is right on a screen and wrong on paper: a printed
+   verdict has no animation, so every note has to be there. */
+.autopsy-all { display: none; }
+@media print {
+  .autopsy-all { display: block; margin: 10px 0 0; padding: 0 0 0 16px; }
+  .autopsy-all li {
+    font-family: var(--font-body); font-size: 0.78rem; line-height: 1.5;
+    color: var(--muted); margin-bottom: 4px;
+  }
+  .autopsy-all b { font-family: var(--font-mono); font-weight: 400; color: #111; }
+  .autopsy-panel { display: none !important; }
+}
