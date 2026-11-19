@@ -8853,3 +8853,47 @@ html.booting main { opacity: .62; }
   margin-bottom: 3px;
 }
 .feed-note { font-family: var(--font-body); font-size: .8rem; color: var(--muted); line-height: 1.5; }
+
+/* -------------------------------------------------------------------------------
+   Official
+
+   Positive evidence, placed with the verdict rather than under it. It lists why this domain is
+   known, in the same place a report would sit for a bad address.
+   ------------------------------------------------------------------------------- */
+.official-line {
+  margin: 16px 0 0;
+  padding: 12px 15px;
+  border-left: 2px solid var(--signal-safe);
+  background: rgba(87, 192, 138, .07);
+  border-radius: 0 10px 10px 0;
+}
+.official-tag {
+  display: block;
+  font-size: .6rem;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--signal-safe);
+  margin-bottom: 4px;
+}
+.official-say { margin: 0; font-family: var(--font-body); font-size: .92rem; color: var(--text); }
+.official-evidence {
+  margin: 8px 0 0;
+  padding: 0 0 0 14px;
+  list-style: none;
+}
+.official-evidence li {
+  position: relative;
+  font-family: var(--font-body);
+  font-size: .78rem;
+  line-height: 1.6;
+  color: var(--muted);
+}
+.official-evidence li::before {
+  content: "";
+  position: absolute;
+  left: -12px; top: .55em;
+  width: 4px; height: 4px;
+  border-radius: 50%;
+  background: var(--signal-safe);
+  opacity: .7;
+}

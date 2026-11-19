@@ -329,7 +329,8 @@ function autopsyMarkup(r, reported) {
     caption = "Nothing in the name is out of place, which is exactly how an address like this gets past a reader. The report above is what settles it.";
   } else if (flagged === 0) {
     if (known) {
-      caption = `This is the address ${escapeHtml(known)} publishes.`;
+      // the heading already says whose address this is; the caption should add, not repeat
+      caption = `Nothing in ${escapeHtml(host)} is out of place.`;
     } else {
       caption = trustedSuffix
       ? `Nothing in ${escapeHtml(host)} is out of place, and the ending is registry-controlled. It still deserves the caution you would give any link.`

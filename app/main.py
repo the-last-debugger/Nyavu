@@ -229,6 +229,27 @@ def _official_domains() -> set:
     return _OFFICIAL
 
 
+_LEGITIMACY = {}
+
+
+def _legitimacy(name: str) -> dict:
+    """Positive evidence for an official domain, gathered when the list was built."""
+    global _LEGITIMACY
+    if not _LEGITIMACY:
+        try:
+            import json as _json
+            with open(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                                   "data", "legitimacy.json"), encoding="utf-8") as handle:
+                _LEGITIMACY = _json.load(handle)
+        except Exception:                                  # noqa: BLE001
+            _LEGITIMACY = {}
+    for domain, record in _LEGITIMACY.items():
+        if record.get("name") == name:
+            return {"name": name, "domain": domain, "category": record.get("category"),
+                    "evidence": record.get("evidence", [])}
+    return {"name": name, "evidence": []}
+
+
 def _official_name(host: str):
     """The institution whose published domain this is, or None."""
     host = (host or "").lower().strip(".")
@@ -285,7 +306,7 @@ def _apply_feed(result: dict) -> dict:
     # we have direct knowledge, and it should win.
     official = _official_name(result.get("host", ""))
     if official:
-        result["official"] = {"name": official}
+        result["official"] = _legitimacy(official)
         if result.get("verdict") != "legitimate":
             result["verdict"] = "legitimate"
             result["risk"] = "low"

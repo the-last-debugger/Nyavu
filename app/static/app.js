@@ -769,9 +769,9 @@ const TONE = { high: "var(--signal-danger)", medium: "var(--signal-warn)", low: 
       g.style.setProperty("--p", t >= 1 ? String(target) : value.toFixed(2));
       // the colour follows the value the needle is passing, not the value it will reach
       g.style.setProperty("--tone", TONE_OF(t >= 1 ? target : value));
-      if (readout) { readout.textContent = BAND_WORD(value); fitBandWord(readout); }
+      if (readout) { readout.textContent = wordFor(g, value); fitBandWord(readout); }
       if (t >= 1) {
-        if (readout) { readout.textContent = BAND_WORD(target); fitBandWord(readout); }
+        if (readout) { readout.textContent = wordFor(g, target); fitBandWord(readout); }
         if (caption) caption.textContent = "verdict";
         g.classList.add("settled");
         return;
@@ -872,7 +872,21 @@ function feedLine(r) {
   return `<p class="feed-line"><span class="feed-tag">reported</span> On ${escapeHtml(source)}, snapshot ${escapeHtml(feed.generated || "recent")}.${target ? escapeHtml(target) : ""}</p>`;
 }
 
+/* Positive evidence for an official domain: why we know it, not just that nothing was wrong. */
+function officialLine(r) {
+  const official = r.official;
+  if (!official) return "";
+  const items = (official.evidence || []).slice(0, 4)
+    .map((line) => `<li>${escapeHtml(line)}</li>`).join("");
+  return `<div class="official-line"><span class="official-tag">official</span>
+    <p class="official-say">${escapeHtml(official.name)} publishes this address.</p>
+    ${items ? `<ul class="official-evidence">${items}</ul>` : ""}</div>`;
+}
+
 const BAND_WORD = (value) => (value >= 65 ? "dangerous" : value >= 35 ? "suspect" : "safe");
+/* An official domain is not "safe"; it is the address the institution publishes, which is a sharper
+   thing to say and the only case where we know it rather than infer it from the name. */
+const wordFor = (gauge, value) => gauge.dataset.word || BAND_WORD(value);
 
   function render(r) {
     const pct = Math.round(r.probability * 100);
@@ -895,7 +909,9 @@ const BAND_WORD = (value) => (value >= 65 ? "dangerous" : value >= 35 ? "suspect
     };
     /* When the report is what settles it, say so: the model saw a plausible name, and the evidence
        came from outside the name. Claiming "the name carries the marks" here would be untrue. */
-    const verdictLine = r.feed && r.feed.listed
+    const verdictLine = r.official
+      ? "It is on the institution list we keep, built from the addresses institutions publish."
+      : r.feed && r.feed.listed
       ? `The name alone reads ${BAND_WORD(pct)}, which is how an address like this passes.
          A public phishing list reports it${r.feed.target ? ` as an imitation of ${r.feed.target}` : ""}.`
       : r.capped_by_reputation
@@ -976,13 +992,17 @@ const BAND_WORD = (value) => (value >= 65 ? "dangerous" : value >= 35 ? "suspect
         </div>
         </div>
         <div class="verdict-text">
-          <span class="badge ${r.risk}">${r.band}</span>${r.reputation === "established"
+          <span class="badge ${r.risk}">${r.official ? "Official domain" : r.band}</span>${r.reputation === "established" && !r.official
             ? '<span class="badge rep">Established domain</span>' : ""}
-          <h2>${r.risk === "high" ? "This reads dangerous"
+          <h2>${r.official ? `This is the address ${r.official.name} publishes`
+            : r.risk === "high" ? "This reads dangerous"
             : r.risk === "medium" ? "This reads suspect"
             : "This reads safe"}</h2>
           <p class="verdict-url">${escapeHtml(r.url)}</p>
           <p class="verdict-line">${verdictLine}</p>
+          ${officialLine(r)}
+          ${feedLine(r)}
+          ${r.risk === "low" || r.official ? "" : intentLine(r)}
           <details class="score-more">
             <summary>How that was worked out</summary>
             <p class="score-note">${scoreNote}</p>
@@ -1006,8 +1026,6 @@ const BAND_WORD = (value) => (value >= 65 ? "dangerous" : value >= 35 ? "suspect
         <p class="thinking" id="thinking"><span class="dot"></span><span class="phase">Reading the address</span></p>
       </div>
       ${measureStrip(r.features)}
-      ${feedLine(r)}
-      ${r.risk === "low" ? "" : intentLine(r)}
       <h3 class="block-title">${r.risk === "low"
         ? "What stood out, in a good way"
         : r.risk === "medium" ? "What gave Nyavu pause" : "What Nyavu noticed"}</h3>
@@ -1026,6 +1044,7 @@ const BAND_WORD = (value) => (value >= 65 ? "dangerous" : value >= 35 ? "suspect
          opacity, so anything set on the dial itself is overruled. A new parent element has no
          such history. */
       gauge.style.opacity = "";
+      if (r.official) gauge.dataset.word = "official";
     }
     runScene(result);          // the examination owns the clock; it starts the dial itself
     revealResult(result);
