@@ -1,0 +1,644 @@
+{
+ "checked": "2026-11-19",
+ "source": "public sites, DNS validated",
+ "entries": [
+  {
+   "name": "KCB Bank",
+   "domain": "kcb.co.ke",
+   "category": "bank",
+   "source": "kcbgroup.com",
+   "resolves": null
+  },
+  {
+   "name": "Equity Bank",
+   "domain": "equitybank.co.ke",
+   "category": "bank",
+   "source": "equitygroupholdings.com",
+   "resolves": null
+  },
+  {
+   "name": "Co-operative Bank",
+   "domain": "coopbank.co.ke",
+   "category": "bank",
+   "source": "coopbank.co.ke",
+   "resolves": null
+  },
+  {
+   "name": "NCBA Bank",
+   "domain": "ncbagroup.com",
+   "category": "bank",
+   "source": "ncbagroup.com",
+   "resolves": null
+  },
+  {
+   "name": "Absa Kenya",
+   "domain": "absabank.co.ke",
+   "category": "bank",
+   "source": "absa.co.ke",
+   "resolves": null
+  },
+  {
+   "name": "Stanbic Bank Kenya",
+   "domain": "stanbicbank.co.ke",
+   "category": "bank",
+   "source": "standardbank.com",
+   "resolves": null
+  },
+  {
+   "name": "I&M Bank",
+   "domain": "imbank.com",
+   "category": "bank",
+   "source": "imbank.com",
+   "resolves": null
+  },
+  {
+   "name": "Diamond Trust Bank",
+   "domain": "dtbafrica.com",
+   "category": "bank",
+   "source": "dtbafrica.com",
+   "resolves": null
+  },
+  {
+   "name": "Standard Chartered Kenya",
+   "domain": "sc.com",
+   "category": "bank",
+   "source": "sc.com",
+   "resolves": null
+  },
+  {
+   "name": "Family Bank",
+   "domain": "familybank.co.ke",
+   "category": "bank",
+   "source": "familybank.co.ke",
+   "resolves": null
+  },
+  {
+   "name": "National Bank of Kenya",
+   "domain": "nationalbank.co.ke",
+   "category": "bank",
+   "source": "nationalbank.co.ke",
+   "resolves": null
+  },
+  {
+   "name": "SBM Bank Kenya",
+   "domain": "sbmbank.co.ke",
+   "category": "bank",
+   "source": "sbmgroup.mu",
+   "resolves": null
+  },
+  {
+   "name": "Sidian Bank",
+   "domain": "sidianbank.co.ke",
+   "category": "bank",
+   "source": "sidianbank.co.ke",
+   "resolves": null
+  },
+  {
+   "name": "Ecobank Kenya",
+   "domain": "ecobank.com",
+   "category": "bank",
+   "source": "ecobank.com",
+   "resolves": null
+  },
+  {
+   "name": "HFC",
+   "domain": "hfgroup.co.ke",
+   "category": "bank",
+   "source": "hfgroup.co.ke",
+   "resolves": null
+  },
+  {
+   "name": "Kingdom Bank",
+   "domain": "kingdombank.co.ke",
+   "category": "bank",
+   "source": "kingdombank.co.ke",
+   "resolves": null
+  },
+  {
+   "name": "Credit Bank",
+   "domain": "creditbank.co.ke",
+   "category": "bank",
+   "source": "creditbank.co.ke",
+   "resolves": null
+  },
+  {
+   "name": "Bank of Africa Kenya",
+   "domain": "boakenya.com",
+   "category": "bank",
+   "source": "boakenya.com",
+   "resolves": null
+  },
+  {
+   "name": "Prime Bank",
+   "domain": "primebank.co.ke",
+   "category": "bank",
+   "source": "primebank.co.ke",
+   "resolves": null
+  },
+  {
+   "name": "Victoria Commercial Bank",
+   "domain": "victoriabank.co.ke",
+   "category": "bank",
+   "source": "vcb.co.ke",
+   "resolves": null
+  },
+  {
+   "name": "Gulf African Bank",
+   "domain": "gulfafricanbank.com",
+   "category": "bank",
+   "source": "gulfafricanbank.com",
+   "resolves": null
+  },
+  {
+   "name": "Consolidated Bank",
+   "domain": "consolidated-bank.com",
+   "category": "bank",
+   "source": "consolidated-bank.com",
+   "resolves": null
+  },
+  {
+   "name": "Access Bank Kenya",
+   "domain": "accessbankplc.com",
+   "category": "bank",
+   "source": "accessbankplc.com",
+   "resolves": null
+  },
+  {
+   "name": "Citibank Kenya",
+   "domain": "citibank.com",
+   "category": "bank",
+   "source": "citigroup.com",
+   "resolves": null
+  },
+  {
+   "name": "M Oriental Bank",
+   "domain": "moriental.com",
+   "category": "bank",
+   "source": "morientalbank.co.ke",
+   "resolves": null
+  },
+  {
+   "name": "Safaricom",
+   "domain": "safaricom.co.ke",
+   "category": "telecom",
+   "source": "safaricom.co.ke",
+   "resolves": null
+  },
+  {
+   "name": "M-Pesa",
+   "domain": "m-pesa.co.ke",
+   "category": "mobile money",
+   "source": "safaricom.co.ke",
+   "resolves": null
+  },
+  {
+   "name": "Airtel Kenya",
+   "domain": "airtel.co.ke",
+   "category": "telecom",
+   "source": "airtel.co.ke",
+   "resolves": null
+  },
+  {
+   "name": "Telkom Kenya",
+   "domain": "telkom.co.ke",
+   "category": "telecom",
+   "source": "telkom.co.ke",
+   "resolves": null
+  },
+  {
+   "name": "Jamii Telecommunications",
+   "domain": "jtl.co.ke",
+   "category": "telecom",
+   "source": "jtl.co.ke",
+   "resolves": null
+  },
+  {
+   "name": "Kenya Revenue Authority",
+   "domain": "kra.go.ke",
+   "category": "government",
+   "source": "kra.go.ke",
+   "resolves": null
+  },
+  {
+   "name": "eCitizen",
+   "domain": "ecitizen.go.ke",
+   "category": "government",
+   "source": "ecitizen.go.ke",
+   "resolves": null
+  },
+  {
+   "name": "NTSA",
+   "domain": "ntsa.go.ke",
+   "category": "government",
+   "source": "ntsa.go.ke",
+   "resolves": null
+  },
+  {
+   "name": "HELB",
+   "domain": "helb.co.ke",
+   "category": "government",
+   "source": "helb.co.ke",
+   "resolves": null
+  },
+  {
+   "name": "Huduma Centre",
+   "domain": "hudumacentre.go.ke",
+   "category": "government",
+   "source": "hudumacentre.go.ke",
+   "resolves": null
+  },
+  {
+   "name": "NSSF Kenya",
+   "domain": "nssf.or.ke",
+   "category": "government",
+   "source": "nssf.or.ke",
+   "resolves": null
+  },
+  {
+   "name": "SHA (Social Health Authority)",
+   "domain": "sha.go.ke",
+   "category": "government",
+   "source": "sha.go.ke",
+   "resolves": null
+  },
+  {
+   "name": "Kenya Government",
+   "domain": "president.go.ke",
+   "category": "government",
+   "source": "kenya.go.ke",
+   "resolves": null
+  },
+  {
+   "name": "Treasury",
+   "domain": "treasury.go.ke",
+   "category": "government",
+   "source": "treasury.go.ke",
+   "resolves": null
+  },
+  {
+   "name": "Parliament of Kenya",
+   "domain": "parliament.go.ke",
+   "category": "government",
+   "source": "parliament.go.ke",
+   "resolves": null
+  },
+  {
+   "name": "Independent Electoral and Boundaries Commission",
+   "domain": "iebc.or.ke",
+   "category": "government",
+   "source": "iebc.or.ke",
+   "resolves": null
+  },
+  {
+   "name": "Kabarak University",
+   "domain": "kabarak.ac.ke",
+   "category": "university",
+   "source": "kabarak.ac.ke",
+   "resolves": null
+  },
+  {
+   "name": "University of Nairobi",
+   "domain": "uonbi.ac.ke",
+   "category": "university",
+   "source": "uonbi.ac.ke",
+   "resolves": null
+  },
+  {
+   "name": "Strathmore University",
+   "domain": "strathmore.edu",
+   "category": "university",
+   "source": "strathmore.edu",
+   "resolves": null
+  },
+  {
+   "name": "Kenyatta University",
+   "domain": "ku.ac.ke",
+   "category": "university",
+   "source": "ku.ac.ke",
+   "resolves": null
+  },
+  {
+   "name": "JKUAT",
+   "domain": "jkuat.ac.ke",
+   "category": "university",
+   "source": "jkuat.ac.ke",
+   "resolves": null
+  },
+  {
+   "name": "Moi University",
+   "domain": "mu.ac.ke",
+   "category": "university",
+   "source": "mu.ac.ke",
+   "resolves": null
+  },
+  {
+   "name": "Egerton University",
+   "domain": "egerton.ac.ke",
+   "category": "university",
+   "source": "egerton.ac.ke",
+   "resolves": null
+  },
+  {
+   "name": "Maseno University",
+   "domain": "maseno.ac.ke",
+   "category": "university",
+   "source": "maseno.ac.ke",
+   "resolves": null
+  },
+  {
+   "name": "Daystar University",
+   "domain": "daystar.ac.ke",
+   "category": "university",
+   "source": "daystar.ac.ke",
+   "resolves": null
+  },
+  {
+   "name": "USIU Africa",
+   "domain": "usiu.ac.ke",
+   "category": "university",
+   "source": "usiu.ac.ke",
+   "resolves": null
+  },
+  {
+   "name": "Multimedia University of Kenya",
+   "domain": "mmu.ac.ke",
+   "category": "university",
+   "source": "mmu.ac.ke",
+   "resolves": null
+  },
+  {
+   "name": "Technical University of Kenya",
+   "domain": "tukenya.ac.ke",
+   "category": "university",
+   "source": "tukenya.ac.ke",
+   "resolves": null
+  },
+  {
+   "name": "Jumia Kenya",
+   "domain": "jumia.co.ke",
+   "category": "retail",
+   "source": "jumia.co.ke",
+   "resolves": null
+  },
+  {
+   "name": "Kilimall",
+   "domain": "kilimall.co.ke",
+   "category": "retail",
+   "source": "kilimall.co.ke",
+   "resolves": null
+  },
+  {
+   "name": "Kenya Airways",
+   "domain": "kenya-airways.com",
+   "category": "airline",
+   "source": "kenya-airways.com",
+   "resolves": null
+  },
+  {
+   "name": "Nation Media Group",
+   "domain": "nationmedia.com",
+   "category": "media",
+   "source": "nationmedia.com",
+   "resolves": null
+  },
+  {
+   "name": "Standard Media",
+   "domain": "standardmedia.co.ke",
+   "category": "media",
+   "source": "standardmedia.co.ke",
+   "resolves": null
+  },
+  {
+   "name": "Royal Media Services",
+   "domain": "royalmedia.co.ke",
+   "category": "media",
+   "source": "royalmedia.co.ke",
+   "resolves": null
+  },
+  {
+   "name": "Betika",
+   "domain": "betika.com",
+   "category": "betting",
+   "source": "betika.com",
+   "resolves": null
+  },
+  {
+   "name": "SportPesa",
+   "domain": "sportpesa.com",
+   "category": "betting",
+   "source": "sportpesa.com",
+   "resolves": null
+  },
+  {
+   "name": "Kenya Power",
+   "domain": "kplc.co.ke",
+   "category": "utility",
+   "source": "kplc.co.ke",
+   "resolves": null
+  },
+  {
+   "name": "Nairobi Water",
+   "domain": "nairobiwater.co.ke",
+   "category": "utility",
+   "source": "nairobiwater.co.ke",
+   "resolves": null
+  },
+  {
+   "name": "Kenya Red Cross",
+   "domain": "redcross.or.ke",
+   "category": "nGO",
+   "source": "redcross.or.ke",
+   "resolves": null
+  },
+  {
+   "name": "Google",
+   "domain": "google.com",
+   "category": "global",
+   "source": "google.com",
+   "resolves": null
+  },
+  {
+   "name": "Gmail",
+   "domain": "gmail.com",
+   "category": "global",
+   "source": "google.com",
+   "resolves": null
+  },
+  {
+   "name": "Microsoft",
+   "domain": "microsoft.com",
+   "category": "global",
+   "source": "microsoft.com",
+   "resolves": null
+  },
+  {
+   "name": "Outlook",
+   "domain": "outlook.com",
+   "category": "global",
+   "source": "microsoft.com",
+   "resolves": null
+  },
+  {
+   "name": "Apple",
+   "domain": "apple.com",
+   "category": "global",
+   "source": "apple.com",
+   "resolves": null
+  },
+  {
+   "name": "iCloud",
+   "domain": "icloud.com",
+   "category": "global",
+   "source": "apple.com",
+   "resolves": null
+  },
+  {
+   "name": "Amazon",
+   "domain": "amazon.com",
+   "category": "global",
+   "source": "amazon.com",
+   "resolves": null
+  },
+  {
+   "name": "Facebook",
+   "domain": "facebook.com",
+   "category": "global",
+   "source": "meta.com",
+   "resolves": null
+  },
+  {
+   "name": "Meta",
+   "domain": "meta.com",
+   "category": "global",
+   "source": "meta.com",
+   "resolves": null
+  },
+  {
+   "name": "WhatsApp",
+   "domain": "whatsapp.com",
+   "category": "global",
+   "source": "meta.com",
+   "resolves": null
+  },
+  {
+   "name": "Instagram",
+   "domain": "instagram.com",
+   "category": "global",
+   "source": "meta.com",
+   "resolves": null
+  },
+  {
+   "name": "Netflix",
+   "domain": "netflix.com",
+   "category": "global",
+   "source": "netflix.com",
+   "resolves": null
+  },
+  {
+   "name": "PayPal",
+   "domain": "paypal.com",
+   "category": "global",
+   "source": "paypal.com",
+   "resolves": null
+  },
+  {
+   "name": "Binance",
+   "domain": "binance.com",
+   "category": "global",
+   "source": "binance.com",
+   "resolves": null
+  },
+  {
+   "name": "DHL",
+   "domain": "dhl.com",
+   "category": "global",
+   "source": "dhl.com",
+   "resolves": null
+  },
+  {
+   "name": "FedEx",
+   "domain": "fedex.com",
+   "category": "global",
+   "source": "fedex.com",
+   "resolves": null
+  },
+  {
+   "name": "LinkedIn",
+   "domain": "linkedin.com",
+   "category": "global",
+   "source": "linkedin.com",
+   "resolves": null
+  },
+  {
+   "name": "X (Twitter)",
+   "domain": "x.com",
+   "category": "global",
+   "source": "x.com",
+   "resolves": null
+  },
+  {
+   "name": "Telegram",
+   "domain": "telegram.org",
+   "category": "global",
+   "source": "telegram.org",
+   "resolves": null
+  },
+  {
+   "name": "Zoom",
+   "domain": "zoom.us",
+   "category": "global",
+   "source": "zoom.us",
+   "resolves": null
+  },
+  {
+   "name": "Dropbox",
+   "domain": "dropbox.com",
+   "category": "global",
+   "source": "dropbox.com",
+   "resolves": null
+  },
+  {
+   "name": "Adobe",
+   "domain": "adobe.com",
+   "category": "global",
+   "source": "adobe.com",
+   "resolves": null
+  },
+  {
+   "name": "Steam",
+   "domain": "steampowered.com",
+   "category": "global",
+   "source": "steampowered.com",
+   "resolves": null
+  },
+  {
+   "name": "Booking.com",
+   "domain": "booking.com",
+   "category": "global",
+   "source": "booking.com",
+   "resolves": null
+  },
+  {
+   "name": "Airbnb",
+   "domain": "airbnb.com",
+   "category": "global",
+   "source": "airbnb.com",
+   "resolves": null
+  },
+  {
+   "name": "Uber",
+   "domain": "uber.com",
+   "category": "global",
+   "source": "uber.com",
+   "resolves": null
+  },
+  {
+   "name": "Bolt",
+   "domain": "bolt.eu",
+   "category": "global",
+   "source": "bolt.eu",
+   "resolves": null
+  }
+ ],
+ "note": "Domains as published by each institution. Local DNS could not be trusted for validation: coopbank.co.ke and airtel.co.ke fail to resolve in this environment while kcb.co.ke resolves, which is a resolver limitation, not evidence about the domain."
+}

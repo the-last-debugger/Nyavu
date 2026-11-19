@@ -49,7 +49,9 @@ const DISPLAY_NAME = {
 
 /* Institutions whose address we can name, because they publish it. The claim is about our list,
    not about a verification performed just now: nothing is fetched when a link is checked. */
-const KNOWN_INSTITUTIONS = {
+/* The generated list is the source of truth and grows without touching this file; the entries
+   below stay as a fallback for the case where the data file has not loaded. */
+const KNOWN_INSTITUTIONS = Object.assign({
   "kabarak.ac.ke": "Kabarak University",
   "safaricom.co.ke": "Safaricom",
   "kra.go.ke": "the Kenya Revenue Authority",
@@ -58,7 +60,7 @@ const KNOWN_INSTITUTIONS = {
   "coopbank.co.ke": "the Co-operative Bank",
   "strathmore.edu": "Strathmore University",
   "uonbi.ac.ke": "the University of Nairobi",
-};
+}, (typeof window !== "undefined" && window.NYAVU_INSTITUTIONS) || {});
 
 function splitUrl(raw) {
   const url = (raw || "").trim();

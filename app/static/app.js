@@ -888,7 +888,7 @@ const BAND_WORD = (value) => (value >= 65 ? "dangerous" : value >= 35 ? "suspect
       : r.risk === "high"
         ? "The name carries the marks of a phishing address."
         : r.risk === "medium"
-          ? "Something about this name is worth a second look."
+          ? "Something about this name is worth a second look, which is what suspect means here."
           : "Nothing in this name reads as phishing.";
     const scoreNote = r.capped_by_reputation
       ? `Model estimate ${frequency(modelPct === 0 ? 1 : modelPct)} (${modelPct} out of 100), held at ${pct} because the domain is established. Held at ${pct} is a reputation ceiling, not the model's estimate.`
@@ -963,9 +963,9 @@ const BAND_WORD = (value) => (value >= 65 ? "dangerous" : value >= 35 ? "suspect
         <div class="verdict-text">
           <span class="badge ${r.risk}">${r.band}</span>${r.reputation === "established"
             ? '<span class="badge rep">Established domain</span>' : ""}
-          <h2>${r.risk === "high" ? "This one is worth avoiding"
-            : r.risk === "medium" ? "Worth a second look"
-            : "This reads as ordinary"}</h2>
+          <h2>${r.risk === "high" ? "This reads dangerous"
+            : r.risk === "medium" ? "This reads suspect"
+            : "This reads safe"}</h2>
           <p class="verdict-url">${escapeHtml(r.url)}</p>
           <p class="verdict-line">${verdictLine}</p>
           <details class="score-more">
