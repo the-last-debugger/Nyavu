@@ -1115,13 +1115,18 @@ const wordFor = (gauge, value) => gauge.dataset.word || BAND_WORD(value);
     };
     /* When the report is what settles it, say so: the model saw a plausible name, and the evidence
        came from outside the name. Claiming "the name carries the marks" here would be untrue. */
-    const verdictLine = r.official
+    /* A known case should not be explained more weakly than it is labelled. The badge says Phishing;
+       the sentence should say what the address is built to do. */
+    const verdictLine = r.certain && r.decided_by === "credential imitation"
+      ? "This address is built to take a password or a one-time code from someone who trusts the name."
+      : r.official
       ? "It is on the institution list we keep, built from the addresses institutions publish."
       : r.verdict === "suspicious" && (r.reasons || []).some((reason) => reason.indexOf("platform where anyone can publish") >= 0)
         ? "It sits on a platform where anyone can publish, and its path asks for a password or a code."
+      : r.certain && r.decided_by === "public phishing list"
+      ? `It appears on a public phishing list${r.feed && r.feed.target ? `, reported as imitating ${r.feed.target}` : ""}.`
       : r.feed && r.feed.listed
-      ? `The name alone reads ${BAND_WORD(pct)}, which is how an address like this passes.
-         A public phishing list reports it${r.feed.target ? ` as an imitation of ${r.feed.target}` : ""}.`
+      ? `The name alone reads ${BAND_WORD(pct)}, which is how an address like this passes. A public phishing list reports it${r.feed.target ? ` as an imitation of ${r.feed.target}` : ""}.`
       : r.capped_by_reputation
         ? "An established domain, so it is not flagged on the shape of its name."
         : r.risk === "high"
