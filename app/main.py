@@ -1232,13 +1232,10 @@ Sitemap: {origin}/sitemap.xml
 @app.get("/sitemap.xml", include_in_schema=False)
 def sitemap(request: Request):
     origin = _origin(request)
-    today = datetime.now(timezone.utc).date().isoformat()
-    urls = "".join(
-        f"  <url><loc>{origin}{path}</loc><lastmod>{today}</lastmod>"
-        f"<changefreq>{'weekly' if path == '/' else 'monthly'}</changefreq>"
-        f"<priority>{'1.0' if path == '/' else '0.7'}</priority></url>\n"
-        for path in PUBLIC_PAGES
-    )
+    # No lastmod and no changefreq. The dates used to be "today" on every request, which tells a crawler
+    # that every page changed every day and is the one sitemap field where a wrong value is worse than a
+    # missing one. A page whose date cannot be derived from its own content should not claim one.
+    urls = "".join(f"  <url><loc>{origin}{path}</loc></url>\n" for path in PUBLIC_PAGES)
     body = ('<?xml version="1.0" encoding="UTF-8"?>\n'
             '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
             f"{urls}</urlset>\n")
