@@ -1204,7 +1204,34 @@ def _asset_version() -> str:
                 digest.update(fh.read())
         except OSError:
             digest.update(name.encode())
+    # Data counts as part of the build. A refreshed feed snapshot ships without touching a line of
+    # code, so a code-only stamp reported the previous build and made a completed deploy look stuck.
+    digest.update(_data_digest().encode())
     return digest.hexdigest()[:10]
+
+
+_DATA_DIGEST = ""
+
+
+def _data_digest() -> str:
+    """A short hash over the shipped data files, computed once per process."""
+    global _DATA_DIGEST
+    if _DATA_DIGEST:
+        return _DATA_DIGEST
+    root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    inner = hashlib.sha256()
+    for name in ("threat_snapshot.json.gz", "institutions.json", "known_sites.json", "legitimacy.json"):
+        try:
+            with open(os.path.join(root, "data", name), "rb") as fh:
+                while True:
+                    chunk = fh.read(1 << 20)
+                    if not chunk:
+                        break
+                    inner.update(chunk)
+        except OSError:
+            inner.update(name.encode())
+    _DATA_DIGEST = inner.hexdigest()[:10]
+    return _DATA_DIGEST
 
 
 _INDEX_CACHE: dict[str, str] = {}
