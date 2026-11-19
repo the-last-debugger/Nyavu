@@ -205,6 +205,7 @@ def _scan_and_store(url: str, user_id):
         result = state["predictor"].predict(url)
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc))
+    result = _apply_credential_policy(result)
     result = _apply_feed(result)
     result["stored"] = _store_scan(user_id, url, result)
     return result
@@ -291,6 +292,38 @@ def _is_official_domain(host: str) -> bool:
         if ".".join(labels[index:]) in official:
             return True
     return False
+
+
+_CREDENTIAL_PATH = re.compile(
+    r"(login|log-in|signin|sign-in|verify|verification|account|password|passwd|otp|unlock|"
+    r"recover|secure|update|confirm)", re.I)
+
+
+def _credential_imitator(result: dict) -> bool:
+    """A brand in a label its owner does not control, on a path that asks for a secret.
+
+    This is not a borderline case and should not be presented as one: the address is built to take a
+    password or a one-time code from someone who thinks they are talking to the brand.
+    """
+    features = result.get("features") or {}
+    if not features.get("brand_in_wrong_place"):
+        return False
+    return bool(_CREDENTIAL_PATH.search(result.get("url", "")))
+
+
+def _apply_credential_policy(result: dict) -> dict:
+    if result.get("verdict") == "phishing" or not _credential_imitator(result):
+        return result
+    result["verdict"] = "phishing"
+    result["risk"] = "high"
+    result["band"] = "Likely phishing"
+    result["label"] = 1
+    result["probability"] = max(float(result.get("probability") or 0), 0.85)
+    result["reasons"] = [
+        "A brand name sits in a label its owner does not control, on a path that asks for a password "
+        "or a code. An address built that way is a phishing address, not a borderline one."
+    ] + list(result.get("reasons") or [])[:3]
+    return result
 
 
 def _apply_feed(result: dict) -> dict:

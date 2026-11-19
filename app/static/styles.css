@@ -8897,3 +8897,49 @@ html.booting main { opacity: .62; }
   background: var(--signal-safe);
   opacity: .7;
 }
+
+/* The definition belongs where a first-time reader lands, not in a glossary. */
+.definition {
+  margin: 18px 0 0;
+  padding: 12px 15px;
+  max-width: 62ch;
+  border-left: 2px solid rgba(233, 230, 222, .3);
+  font-family: var(--font-body);
+  font-size: .88rem;
+  line-height: 1.55;
+  color: var(--muted);
+}
+.definition strong { color: var(--text); font-weight: 600; }
+
+/* The note reads as a quotation, so it is set like one: serif, generous leading, a thin rule above
+   the attribution, and nothing else competing with it. */
+.hero-note .note-quote {
+  font-family: var(--font-display);
+  font-size: 1.02rem;
+  line-height: 1.6;
+  color: var(--text);
+  margin: 6px 0 10px;
+  transition: opacity .4s ease, transform .4s ease;
+}
+.hero-note .note-source {
+  display: block;
+  font-family: var(--font-body);
+  font-size: .68rem;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--faint);
+  transition: opacity .4s ease;
+}
+.hero-note .note-quote.changing,
+.hero-note .note-source.changing { opacity: 0; transform: translateY(-3px); }
+
+.privacy-line {
+  margin: 0 0 10px;
+  font-family: var(--font-body);
+  font-size: .74rem;
+  color: var(--faint);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-note .note-quote, .hero-note .note-source { transition: none; }
+}
