@@ -51,6 +51,29 @@ def info() -> dict:
             "hosts": len(data["hosts"]), "urls": len(data["urls"])}
 
 
+# Hosts where the path belongs to whoever put it there. A report about one path is not a report about
+# the domain, so these match on the exact URL only.
+SHARED_HOSTS = {
+    "bit.ly", "tinyurl.com", "t.co", "goo.gl", "is.gd", "ow.ly", "buff.ly", "cutt.ly", "rb.gy",
+    "shorturl.at", "rebrand.ly", "tiny.cc", "lnkd.in", "short.io", "s.id", "bit.do", "t.ly", "v.gd",
+    "t.me", "wa.me", "linktr.ee", "forms.gle", "docs.google.com", "drive.google.com", "sites.google.com",
+    "dropbox.com", "onedrive.live.com", "sharepoint.com", "notion.site", "github.io", "netlify.app",
+    "vercel.app", "pages.dev", "blogspot.com", "wordpress.com", "wixsite.com", "weebly.com",
+    "godaddysites.com", "myshopify.com", "azurewebsites.net", "herokuapp.com", "glitch.me",
+    "web.app", "firebaseapp.com", "appspot.com", "cloudfront.net", "s3.amazonaws.com",
+    "storage.googleapis.com", "files.wordpress.com", "medium.com", "substack.com", "carrd.co",
+}
+SHARED_HOST_SUFFIXES = ("github.io", "netlify.app", "vercel.app", "pages.dev", "blogspot.com",
+                        "wordpress.com", "azurewebsites.net", "herokuapp.com", "web.app",
+                        "firebaseapp.com", "appspot.com")
+
+
+def is_shared(host: str) -> bool:
+    """True for a host where anyone can put anything: a shortener, a blog platform, a file host."""
+    host = (host or "").lower().strip(".")
+    return host in SHARED_HOSTS or any(host == s or host.endswith("." + s) for s in SHARED_HOST_SUFFIXES)
+
+
 def lookup(url: str):
     """Return feed evidence for a URL, or None.
 
@@ -72,8 +95,13 @@ def lookup(url: str):
     # was not: the public blocklists contain brand domains too, so www.google.com matched a listed
     # "google.com" and a clean address was escalated. A listed parent is a compromise of that domain,
     # not evidence about the subdomain being checked.
+    # On a host where anyone can put anything, the domain is not the reported thing: the path is.
+    # A phish on bit.ly/x9f2k says nothing about bit.ly, and treating it as though it did called a
+    # link shortener a phishing domain. Those hosts match only when the exact URL matches.
+    shared = host in SHARED_HOSTS or any(host == suffix or host.endswith("." + suffix)
+                                         for suffix in SHARED_HOST_SUFFIXES)
     exact = url in data["urls"]
-    if not exact and host not in data["hosts"]:
+    if not exact and (shared or host not in data["hosts"]):
         return None
     matched_host = host
     return {

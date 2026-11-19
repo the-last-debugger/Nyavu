@@ -1008,8 +1008,8 @@ const TONE = { high: "var(--signal-danger)", medium: "var(--signal-warn)", low: 
     ["is_idn", "punycode present"],
     ["entropy", "character entropy"],
     ["max_label_len", "longest label"],
-    ["brand_present", "a known brand appears"],
-    ["brand_in_wrong_place", "brand in the wrong place"],
+    ["brand_present", "brand in the registered name"],
+    ["brand_in_wrong_place", "brand where it does not belong"],
     ["is_typosquat", "looks like a lookalike"],
     ["typo_distance", "distance to nearest brand"],
     ["digit_in_registrable", "digits in the name"],
@@ -1073,6 +1073,78 @@ function establishedLine(r) {
     ${items ? `<span class="exam-caret known-caret" aria-hidden="true"></span>
       <ul class="known-evidence exam-rows">${items}</ul>` : ""}</div>`;
 }
+
+
+/* The fold has to survive a panel: every row is a check, an observation, and where the observation
+   came from. Prose alone invites "why?"; a row can be pointed at. */
+function foldLedger(r) {
+  const rows = [];
+  const add = (check, observed) => {
+    if (observed) rows.push(`<li><span class="check">${escapeHtml(check)}</span>` +
+      `<span class="observed">${observed}</span></li>`);
+  };
+  const f = r.features || {};
+  const host = r.host || "";
+  const d = r.decision || null;
+  const pct = Math.round((r.model_probability !== undefined ? r.model_probability : r.probability) * 100);
+
+  if (d && d.rule === "credential imitation") {
+    if (d.brand) {
+      add("Brand ownership",
+        `"${escapeHtml(d.brand)}" sits in the label <code>${escapeHtml(d.label || "")}</code>, ` +
+        `while the registered domain is <code>${escapeHtml(d.registrable || "")}</code>. ` +
+        (d.brand_domain ? `That brand uses <code>${escapeHtml(d.brand_domain)}</code>.` : ""));
+    }
+    if (d.keyword) {
+      add("Path intent",
+        `The path contains <code>${escapeHtml(d.keyword)}</code>, a word used where a password or a one-time code is asked for.`);
+    }
+    if (d.scheme === "http") {
+      add("Transport", "The address is <code>http</code>, so anything typed on it travels unencrypted.");
+    }
+    if (d.suspicious_tld && d.tld) {
+      add("Ending", `The ending <code>.${escapeHtml(d.tld)}</code> is on the cheap and abused list.`);
+    }
+  }
+  if (r.feed && r.feed.listed) {
+    add("Public report",
+      `<code>${escapeHtml(r.feed.host || host)}</code> appears on ` +
+      escapeHtml((r.feed.sources || []).join(", ") || "a public list") +
+      (r.feed.generated ? `, snapshot ${escapeHtml(r.feed.generated)}` : "") +
+      (r.feed.target ? `, reported as imitating ${escapeHtml(r.feed.target)}` : "") + ".");
+  }
+  if (r.official) {
+    add("Institution list",
+      `<code>${escapeHtml(r.official.domain || host)}</code> is published by ` +
+      escapeHtml(r.official.name || "the institution") +
+      " on its own site. The list is built from addresses institutions publish.");
+  }
+  if (r.established && !r.official) {
+    add("Reputation",
+      `<code>${escapeHtml(r.established.domain || host)}</code> is inside the Tranco top 1,200. ` +
+      "Popularity is not proof, which is why it is one row and not the verdict.");
+  }
+  if (!d && !r.official) {
+    add("Score", `The name reads as ${pct} in 100, which is in the ` +
+      `<strong>${escapeHtml(BAND_WORD(pct))}</strong> band.`);
+    if (!r.established && Array.isArray(r.reasons) && r.reasons.length) {
+      add("Shape signals", r.reasons.slice(0, 2).map(escapeHtml).join(" "));
+    }
+    add("Lists", "No institution record and no public phishing report matched this address.");
+  }
+  if (r.shared_host) {
+    add("What this cannot tell you",
+      "This is a shortener or a public host, so the address itself can be clean while the destination " +
+      "it points at stays hidden. Open it only where you would open a message from a stranger.");
+  }
+  if (!rows.length) return "";
+  return `<ol class="reason-ledger">${rows.join("")}</ol>`;
+}
+
+const FOLD_METHOD = "Method: a logistic regression over character 2 to 5 grams of the registered name " +
+  "and 17 measurements, calibrated on held-out data (ECE 0.028). Bands: under 35 safe, 35 to 65 suspect, " +
+  "above 65 dangerous. Decisive evidence (a published address, a public report, a brand on a password " +
+  "path) overrides the score. Nothing is fetched, so what the page would have shown is not part of this.";
 
 function officialLine(r) {
   const official = r.official;
@@ -1148,10 +1220,10 @@ const wordFor = (gauge, value) => gauge.dataset.word || BAND_WORD(value);
        under a card that said "this is a phishing address", which is the wrong account of how it was
        reached. The model's reading stays, demoted to what it is. */
     const decisionNote = r.decision
-      ? (r.decision.rule === "credential imitation"
-        ? `Decided by what the address does: ${escapeHtml(r.decision.host || "the host")} carries a brand it does not own${r.decision.keyword ? `, on a path that says "${escapeHtml(r.decision.keyword)}"` : ""}. The model reads the name as ${frequency(modelPct)}; that is not what settled it.`
-        : `Decided by a public phishing list: ${escapeHtml(r.decision.matched || "")} appears on it${r.decision.source ? ` (${escapeHtml(r.decision.source)}, ${escapeHtml(r.decision.generated || "recent")})` : ""}${r.decision.target ? `, reported as imitating ${escapeHtml(r.decision.target)}` : ""}. The model reads the name as ${frequency(modelPct)}; that is not what settled it.`)
-      : scoreNote;
+      ? `A rule settled this, not the score. The model alone reads the name as ${frequency(modelPct)}; the rows below say what overrode it.`
+      : !r.official && !r.established
+        ? "No institution record and no public report cover this address. The score is the whole of the evidence."
+        : scoreNote;
 
     /* An official card already says whose address it is, so the model's "established domain" line
        is redundant there and reads like a second, weaker explanation. */
@@ -1243,7 +1315,9 @@ const wordFor = (gauge, value) => gauge.dataset.word || BAND_WORD(value);
           <details class="score-more">
             <summary>How that was worked out</summary>
             <p class="score-note">${decisionNote}</p>
+            ${foldLedger(r)}
             <p class="band-legend">Bands: under 35 safe, 35 to 65 suspect, above 65 dangerous.</p>
+            <p class="method-note">${FOLD_METHOD}</p>
             ${/* The dissection above already lists every piece with its note. On screen this was the
                   same six lines again; on paper it is the record, since the notes panel is hidden. */""}
             <div class="fold-print-only">

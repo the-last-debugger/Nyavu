@@ -24,7 +24,7 @@ from pydantic import BaseModel, Field
 
 from . import db
 from . import threat
-from .predictor import Predictor
+from .predictor import BRAND_DOMAINS, Predictor, registrable_domain
 
 BASE = os.path.dirname(os.path.abspath(__file__))
 STATIC = os.path.join(BASE, "static")
@@ -383,11 +383,26 @@ def _apply_credential_policy(result: dict) -> dict:
     raw = result.get("url", "")
     path_part = raw.split("/", 3)[3] if raw.count("/") >= 3 else ""
     match = _CREDENTIAL_PATH.search(path_part) or _CREDENTIAL_PATH.search(raw)
+    host = (result.get("host") or "").lower()
+    registered = registrable_domain(host) if host else ""
+    brand = ""
+    label = ""
+    for candidate in sorted(BRAND_DOMAINS, key=len, reverse=True):
+        if candidate in host and BRAND_DOMAINS[candidate] not in (registered, host):
+            brand = candidate
+            label = next((part for part in host.split(".") if candidate in part), "")
+            break
     result["decision"] = {
         "rule": "credential imitation",
-        "host": result.get("host"),
+        "host": host,
+        "registrable": registered,
+        "brand": brand,
+        "brand_domain": BRAND_DOMAINS.get(brand, ""),
+        "label": label,
         "keyword": match.group(0).lower() if match else "",
-        "brand": (result.get("suggestion") or {}).get("brand") or "",
+        "scheme": raw.split(":", 1)[0].lower() if ":" in raw else "https",
+        "tld": registered.rsplit(".", 1)[-1] if "." in registered else "",
+        "suspicious_tld": bool((result.get("features") or {}).get("suspicious_tld")),
     }
     result["label"] = 1
     result["probability"] = max(float(result.get("probability") or 0), 0.85)
@@ -464,6 +479,10 @@ def _apply_feed(result: dict) -> dict:
                 "enough to flag it."
             ] + list(result.get("reasons") or [])[:2]
 
+    # A shortener or a public host can be clean while the thing it points at is not. That is worth
+    # saying, because "legitimate" on a shortened link reads as "safe to click", which is not a claim
+    # the address can support. Set before the feed check, so it is present either way.
+    result["shared_host"] = threat.is_shared(result.get("host") or "")
     feed = threat.lookup(result.get("url", ""))
     if not feed:
         return result
