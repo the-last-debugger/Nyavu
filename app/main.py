@@ -1034,6 +1034,15 @@ def _asset_version() -> str:
                 digest.update(fh.read())
         except OSError:
             digest.update(name.encode())
+    # The server's own code belongs in the stamp too. It did not, so a Python-only fix shipped and
+    # the version endpoint kept reporting the previous build: the marker lied about the deploy.
+    here = os.path.dirname(os.path.abspath(__file__))
+    for name in ("main.py", "predictor.py", "threat.py", "db.py"):
+        try:
+            with open(os.path.join(here, name), "rb") as fh:
+                digest.update(fh.read())
+        except OSError:
+            digest.update(name.encode())
     return digest.hexdigest()[:10]
 
 
