@@ -110,5 +110,12 @@
     "expected": "count == 3",
     "actual": "3 of 3 returned a verdict",
     "status": "Pass"
+  },
+  {
+    "id": "T17",
+    "case": "Daily stats expose the drift signal",
+    "expected": "mean_probability and flagged_share per day",
+    "actual": "6 days, fields present: True",
+    "status": "Pass"
   }
 ]

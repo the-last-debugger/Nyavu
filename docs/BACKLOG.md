@@ -213,9 +213,11 @@ change how this project should be discussed:
 1. **The percentage is honest.** ECE 0.028, Brier 0.1674. When the interface says 80, about 80
    of 100 such addresses are phishing. This claim is stronger than the accuracy headline.
 2. **Domain-level recall is 0.690, not 0.705.** Rows repeat domains; the row figure flatters.
-3. **The model decays.** On a live feed and Tranco ranks 100k-1M: recall 0.570 and false alarms
-   0.302 at threshold 0.50, against 0.705 and 0.198 on the 2025 hold-out. Retraining is not
-   optional maintenance, it is the difference between a working product and a lapsed one.
+3. **What decay costs is precision, not recall.** On 1,774 fresh rows drawn from a large
+   phishing dump and Tranco ranks 100k-1M: recall holds at 0.703 against 0.705 on the 2025
+   hold-out, while false alarms rise from 0.198 to 0.268 and AUC falls from 0.829 to 0.792. An
+   earlier figure of 0.570 came from 86 live-feed domains and is sampling noise; both runs are
+   kept in the repository so the correction is visible.
 4. **The reputation ceiling has a 17.4 per cent blind spot.** Fifteen of 86 phishing domains in
    today's feed sit inside the top-100k allowlist, where the cap reports them at 15 or less.
 
@@ -228,3 +230,21 @@ The ordering that follows: retrain on a schedule with a frozen baseline, curate 
 class so the false-positive rate measures the model rather than Tranco, then acquire a benign
 corpus with paths. The privacy decision on measurement is also the retraining decision, since
 continuous improvement needs recent outcomes and the service stores none by design.
+
+### Retraining is hygiene, not improvement
+
+Measured: training on 2,000 additional fresh rows moved fresh-set F1 from 0.7199 to 0.7196 and
+AUC from 0.792 to 0.805, while dropping the old corpus cost four points on the old hold-out. The
+information in a domain name is the binding constraint, not the age of the corpus.
+
+`/api/stats/daily` now carries `mean_probability` and `flagged_share` per day, computed from
+columns the scans table already had, so drift is visible as a series rather than a debate.
+Retraining stays on the calendar, with the frozen baseline kept for comparison.
+
+### The host has a memory budget, and it is now measured
+
+Free tier: 512 MB and a tenth of a CPU. Loading the model and scoring twenty addresses costs
+169.8 MB with pandas installed and 143.7 MB without, so pandas left the runtime requirements
+(it was only ever used to build a one-row frame) and moved to `requirements-train.txt`. The
+scores are identical to the last bit on 306 addresses. That rules out loading a transformer or
+a second model into the same process on this tier.

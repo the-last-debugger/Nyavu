@@ -258,9 +258,22 @@ def daily_scans(days: int = 14):
     """
     with connect() as c:
         rows = c.execute(
-            "SELECT substr(created_at, 1, 10) AS day, COUNT(*) AS n "
+            "SELECT substr(created_at, 1, 10) AS day, COUNT(*) AS n, "
+            "       AVG(probability) AS mean_probability, "
+            "       SUM(CASE WHEN verdict = 'phishing' THEN 1 ELSE 0 END) AS flagged "
             "FROM scans GROUP BY day ORDER BY day DESC LIMIT ?", (days,)).fetchall()
-    return [{"day": r["day"], "count": int(r["n"])} for r in reversed(rows)]
+    out = []
+    for row in reversed(rows):
+        count = int(row["n"])
+        out.append({
+            "day": row["day"],
+            "count": count,
+            # the mean score and the share flagged are the drift signal: the model's own
+            # behaviour on real traffic moves before anyone complains about a wrong verdict
+            "mean_probability": round(float(row["mean_probability"] or 0.0), 4),
+            "flagged_share": round(float(row["flagged"] or 0) / count, 4) if count else 0.0,
+        })
+    return out
 
 
 def stats():

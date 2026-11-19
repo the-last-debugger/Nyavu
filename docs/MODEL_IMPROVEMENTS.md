@@ -108,30 +108,50 @@ The gain does not survive contact with data it has not seen. A benign-likeness f
 only on legitimate names, made things worse (0.523 detected), and is recorded here so nobody
 repeats it.
 
-## The finding that matters: the model is decaying
+## Does the model decay? Two samples, two different answers
 
-The deployed artefact was judged on addresses it could not have seen, from a live feed on the
-day of the run, with legitimate negatives drawn from Tranco ranks 100,001 to 1,000,000 so the
-reputation ceiling gives nobody a free pass.
+The first run judged the deployed model on the live OpenPhish feed: 86 phishing domains, one
+morning. It detected 0.570 at threshold 0.50. That number is real but small, and a second, much
+larger sample disagrees with it:
 
-| threshold | today's phishing detected | false alarm on long-tail legitimate |
+| sample | size | recall | false alarm | ROC-AUC |
+| --- | --- | --- | --- | --- |
+| 2025 hold-out | 3,573 rows | 0.705 | 0.198 | 0.829 |
+| live feed, one morning | 86 phishing domains | 0.570 | 0.302 | |
+| Phishing.Database dump, Tranco long tail | 1,774 rows, 917 phishing | **0.703** | **0.268** | **0.792** |
+
+The 86-domain sample is the outlier. A live feed carries the addresses being used *right now*,
+which are the newest and most evasive, and 86 domains is small enough that one unusual campaign
+moves the result by five points. The larger sample says what is nearer the truth: **recall on
+fresh data holds up (0.703 against 0.705), and what degrades is precision and ranking quality**,
+with the false alarm rate rising from 0.198 to 0.268 and AUC falling from 0.829 to 0.792.
+
+That is a less dramatic story than "a fifth of the recall is gone", and it is the one the
+evidence supports. The live-feed experiment stays in the repository because the record of a
+dated sample is worth keeping, but the claim attached to it has to be this one.
+
+### Does retraining fix it? Mostly not
+
+Three models, one fresh test set of 1,774 rows, split by domain so a domain cannot appear in
+both halves. Old data is the 2025 corpus; fresh data is 70 per cent of the new rows.
+
+| trained on | on the 2025 hold-out | on fresh data |
 | --- | --- | --- |
-| 0.35 | 0.686 | 0.470 |
-| **0.50** | **0.570** | **0.302** |
-| 0.60 | 0.453 | 0.192 |
-| 0.65 | 0.407 | 0.162 |
+| 2025 corpus only | acc 0.754, F1 0.740, FPR 0.198 | acc 0.717, F1 0.720, recall 0.703, FPR 0.268, AUC 0.792 |
+| 2025 plus fresh | acc 0.755, F1 0.737, FPR 0.181 | acc 0.722, F1 0.720, recall 0.691, FPR 0.246, AUC 0.805 |
+| fresh only | acc 0.704, F1 0.676 | acc 0.722, F1 0.718, recall 0.685, FPR 0.239, AUC 0.792 |
 
-Against the 2025 hold-out, recall at 0.50 was 0.705 and the false-positive rate 0.198. On
-today's traffic they are **0.570 and 0.302**. Some of that is the harder negative sample, not
-pure decay, but the direction is unambiguous and it is the single most important number in this
-document: a deployed model that is retrained never will lose roughly a fifth of its recall
-within a year.
+Adding two thousand fresh rows moves fresh F1 by 0.0003 and AUC by 0.013. Dropping the old
+corpus costs four points on the old hold-out, so the old data still carries the shape of the
+problem. **The binding constraint is not staleness, it is the information in the name.** That
+reorders the agenda: retraining is hygiene, not improvement.
 
-**The reputation ceiling has a blind spot of 17.4 per cent.** Of the 86 phishing domains in
-today's feed, 15 are inside the top-100,000 allowlist, where the design holds the reported risk
-at 15 or below. Their raw scores were low (median 0.236), so the model would have missed most
-of them anyway, but the cap guarantees the miss. Nearly one in five phish now arrives on a
-domain the ceiling protects.
+### The reputation ceiling still has a blind spot
+
+Of the 86 phishing domains in the live feed, 15 sat inside the top-100,000 allowlist, where the
+ceiling reports risk at 15 or below. Their raw scores were low (median 0.236), so the model
+would have missed most of them anyway, but the cap guarantees the miss. On the larger fresh
+sample the ceiling applies to far fewer rows, because Tranco 100k-1M is deliberately outside it.
 
 ## Cost of a mistake, and what that implies for the threshold
 
@@ -154,14 +174,18 @@ edges by policy and state the cost assumption, rather than to nudge one threshol
 
 ## The improvement agenda, in order of expected value
 
-### 1. Retrain on a schedule, and prove it happened
+### 1. Monitor drift, which is now shipped, and retrain as hygiene
 
-Measured decay gives the argument. Weekly or fortnightly retraining, the same grouped split, and
-a frozen baseline kept for comparison. The dashboard should show the current model's age and its
-score distribution against the baseline, because a shift in the distribution of scores is the
-earliest visible failure.
+The evidence reorders this. Retraining on fresh public feeds moved fresh-set F1 by 0.0003, so it
+is not the lever it looked like. What decay does cost is precision: the false alarm rate rose
+from 0.198 to 0.268 without any change in the model.
 
-Cost: an afternoon. Value: recovers most of the 13 points of recall lost in a year.
+`/api/stats/daily` now returns `mean_probability` and `flagged_share` per day, computed from
+columns the table already had. Those two series are the early warning: the model's behaviour on
+real traffic moves before anyone complains. Retraining stays on the calendar as hygiene, with the
+frozen baseline kept for comparison, and the daily series decides when it is urgent.
+
+Cost: done, plus an afternoon per retrain. Value: you find out before users do.
 
 ### 2. Fix the negative class before touching the features
 
@@ -236,6 +260,25 @@ the model is replaced, even though it changed nothing on this corpus.
 - **Drift monitoring (new).** The statistics endpoint already records latency and counts; it
   should also bucket scores by day so the drift above becomes visible before users feel it.
 
+## The host, measured
+
+The free tier gives 512 MB of RAM and one tenth of a CPU. Measured on the development machine,
+as the peak working set of a process that loads the model and scores twenty addresses:
+
+| configuration | resident | note |
+| --- | --- | --- |
+| with pandas installed | 169.8 MB | pandas was imported only to build a one-row frame |
+| without pandas | 143.7 MB | the two fitted transformers are called directly |
+
+The same scores to the last bit: 306 addresses compared, largest difference 0.000e+00. pandas
+moved to `requirements-train.txt`, so the runtime image is smaller and the service keeps 25 MB
+more headroom on a 512 MB box. The model artefact is 2.2 MB and the allowlist 1.5 MB, so the
+weights are not the constraint; the interpreter and the scientific stack are.
+
+What this rules out: anything that loads a transformer, a large embedding table, or a second
+model into the same process. A character CNN of any useful size would not fit comfortably
+beside scikit-learn on this host, which is worth knowing before proposing one.
+
 ## Reproducing
 
 ```
@@ -243,6 +286,7 @@ python ml/experiments/error_analysis.py      # errors, ablation, cost curve
 python ml/experiments/feature_variants.py    # variant table, including the ones that failed
 python ml/experiments/temporal_drift.py      # live feed and Tranco long tail, dated
 python ml/experiments/calibration.py         # Brier, ECE, per-domain recall
+python ml/experiments/refresh_corpus.py      # does fresh data recover the drift
 ```
 
 The temporal script writes `ml/artifacts/temporal_<date>.csv`, so runs on different dates can be

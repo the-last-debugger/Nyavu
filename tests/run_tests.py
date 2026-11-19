@@ -180,6 +180,15 @@ def main() -> None:
     record("T10", "Three URLs are classified and stored", CASES[9][3],
            f"{count} of 3 returned a verdict", count == 3)
 
+    # T17: the daily series carries the drift signal, using columns that already exist
+    _, daily = call("/api/stats/daily")
+    days = daily.get("days") or []
+    fields_ok = bool(days) and all(
+        "mean_probability" in day and "flagged_share" in day for day in days)
+    record("T17", "Daily stats expose the drift signal",
+           "mean_probability and flagged_share per day",
+           f"{len(days)} days, fields present: {fields_ok}", fields_ok)
+
     with open(OUT, "w", encoding="utf-8") as fh:
         json.dump(results, fh, indent=2)
 
