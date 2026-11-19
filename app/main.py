@@ -210,6 +210,39 @@ def _scan_and_store(url: str, user_id):
     return result
 
 
+_OFFICIAL = set()
+
+
+def _official_domains() -> set:
+    """The institution list, loaded once, as the domains a blocklist cannot condemn."""
+    global _OFFICIAL
+    if _OFFICIAL:
+        return _OFFICIAL
+    try:
+        import json as _json
+        with open(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                               "data", "institutions.json"), encoding="utf-8") as handle:
+            data = _json.load(handle)
+        _OFFICIAL = {row["domain"].lower().strip(".") for row in data.get("entries", [])}
+    except Exception:                                      # noqa: BLE001
+        _OFFICIAL = set()
+    return _OFFICIAL
+
+
+def _is_official_domain(host: str) -> bool:
+    host = (host or "").lower().strip(".")
+    if not host:
+        return False
+    official = _official_domains()
+    if host in official:
+        return True
+    labels = host.split(".")
+    for index in range(1, len(labels) - 1):
+        if ".".join(labels[index:]) in official:
+            return True
+    return False
+
+
 def _apply_feed(result: dict) -> dict:
     """Add evidence from the local snapshot of public phishing lists.
 
@@ -217,6 +250,10 @@ def _apply_feed(result: dict) -> dict:
     known campaign. A feed hit is the one piece of evidence that does not come from the name, so it
     is allowed to escalate the verdict; it is never allowed to clear one.
     """
+    # an official domain is never escalated by a blocklist entry: the lists carry brand domains, and
+    # condemning a bank because a list once mentioned it would be worse than missing a hit
+    if _is_official_domain(result.get("host", "")):
+        return result
     feed = threat.lookup(result.get("url", ""))
     if not feed:
         return result

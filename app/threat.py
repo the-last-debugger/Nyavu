@@ -68,19 +68,14 @@ def lookup(url: str):
     if not host:
         return None
 
-    matched_host = None
+    # Only the exact host or the exact URL counts. Walking up to a parent domain looked helpful and
+    # was not: the public blocklists contain brand domains too, so www.google.com matched a listed
+    # "google.com" and a clean address was escalated. A listed parent is a compromise of that domain,
+    # not evidence about the subdomain being checked.
     exact = url in data["urls"]
-    if exact or host in data["hosts"]:
-        matched_host = host
-    else:
-        labels = host.split(".")
-        for index in range(1, len(labels) - 1):
-            parent = ".".join(labels[index:])
-            if parent in data["hosts"]:
-                matched_host = parent
-                break
-    if not matched_host:
+    if not exact and host not in data["hosts"]:
         return None
+    matched_host = host
     return {
         "listed": True,
         "host": matched_host,
