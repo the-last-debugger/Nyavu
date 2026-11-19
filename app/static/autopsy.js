@@ -23,6 +23,34 @@ const KNOWN_BRANDS = ["safaricom", "mpesa", "kra", "equity", "kcb", "coop", "abs
                       "ncba", "stanbic", "google", "facebook", "whatsapp", "paypal",
                       "netflix", "microsoft", "apple", "amazon", "instagram"];
 
+
+/* What each Kenyan ending actually means. This is the honest version of "belongs to": a restricted
+   namespace is a fact about who is allowed to hold a name there, and it needs no lookup. */
+const SUFFIX_MEANING = {
+  "ac.ke": "reserved for universities and colleges accredited in Kenya, so a phisher cannot buy one",
+  "go.ke": "reserved for Kenyan government bodies",
+  "or.ke": "reserved for Kenyan non-profit organisations",
+  "sc.ke": "reserved for Kenyan schools",
+  "ne.ke": "reserved for Kenyan network operators",
+  "co.ke": "open to any registered business, so it says nothing about who owns it",
+  "ac.ug": "reserved for Ugandan universities",
+  "go.ug": "reserved for Ugandan government bodies",
+  "co.ug": "open to any registered Ugandan business",
+};
+
+/* Institutions whose address we can name, because they publish it. The claim is about our list,
+   not about a verification performed just now: nothing is fetched when a link is checked. */
+const KNOWN_INSTITUTIONS = {
+  "kabarak.ac.ke": "Kabarak University",
+  "safaricom.co.ke": "Safaricom",
+  "kra.go.ke": "the Kenya Revenue Authority",
+  "equitybank.co.ke": "Equity Bank",
+  "kcb.co.ke": "KCB Bank",
+  "coopbank.co.ke": "the Co-operative Bank",
+  "strathmore.edu": "Strathmore University",
+  "uonbi.ac.ke": "the University of Nairobi",
+};
+
 function splitUrl(raw) {
   const url = (raw || "").trim();
   const m = url.match(/^([a-zA-Z][\w+.-]*):\/\/([^/?#]*)(.*)$/);
@@ -91,11 +119,17 @@ function autopsySegments(r) {
   } else {
     subs.forEach((label) => {
       const brand = KNOWN_BRANDS.find((b) => label.includes(b));
+      /* An institution's own name, borrowed as a label inside somebody else's domain, is the
+         clearest form of impersonation there is, and "free to invent" undersells it. */
+      const institution = Object.entries(KNOWN_INSTITUTIONS)
+        .find(([domain]) => domain.split(".")[0] === label);
       const hyphens = (label.match(/-/g) || []).length;
       segs.push({
         text: label + ".",
         role: "a label",
-        note: brand
+        note: institution
+          ? `${institution[1]}'s own name, borrowed as a label in a domain they do not own`
+          : brand
           ? `"${brand}" in a label the owner can invent`
           : (clean ? "a label the owner can invent, harmless on its own" : "free to invent"),
         flag: Boolean(brand) || hyphens >= 2,
@@ -118,6 +152,14 @@ function autopsySegments(r) {
     } else {
       nameNote = clean ? "no hyphens to hide behind" : "the name somebody bought";
     }
+    /* When we can name the institution that publishes this address, say so. The claim is about
+       our list, not about a lookup performed just now: nothing is fetched when a link is checked. */
+    const registered = KNOWN_INSTITUTIONS[`${name}.${suffix}`];
+    if (registered) {
+      nameNote = clean
+        ? `${registered}'s own address; it is on our list because they publish it`
+        : `here it sits inside somebody else's domain, not at ${registered}`;
+    }
     segs.push({ text: name, role: "the name", note: nameNote, flag: nameFlag, strong: true });
 
     if (tld) {
@@ -126,8 +168,8 @@ function autopsySegments(r) {
       if (RISKY_TLDS.includes(tld)) {
         tldNote = `".${tld}": cheap and abused`;
         tldFlag = true;
-      } else if (trustedSuffix) {
-        tldNote = `".${tld}", a Kenyan registry ending, not free to buy`;
+      } else if (SUFFIX_MEANING[suffix]) {
+        tldNote = `".${suffix}" is ${SUFFIX_MEANING[suffix]}`;
       } else if (tld === "ke") {
         tldNote = `".ke", Kenya's country ending`;
       } else {
@@ -184,11 +226,16 @@ function autopsyMarkup(r) {
       </span>`;
   });
 
+  const known = KNOWN_INSTITUTIONS[host.replace(/^www\./, "")];
   let caption;
   if (flagged === 0) {
-    caption = trustedSuffix
+    if (known) {
+      caption = `This is the address ${escapeHtml(known)} publishes. We know it from the list we keep, not by visiting the page when you ask.`;
+    } else {
+      caption = trustedSuffix
       ? `Nothing in ${escapeHtml(host)} is out of place, and the ending is registry-controlled. It still deserves the caution you would give any link.`
       : `Nothing in ${escapeHtml(host)} is out of place. That is evidence, not a guarantee.`;
+    }
   } else {
     caption = "Read it from the right. The name before the ending is the one somebody bought.";
   }
