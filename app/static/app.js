@@ -891,6 +891,11 @@ const TONE = { high: "var(--signal-danger)", medium: "var(--signal-warn)", low: 
          fix is to consolidate those rules, which is recorded in the backlog. */
       card.classList.add("verdict-shown");
       card.classList.remove("pending");
+      const gaugeNow = card.querySelector(".gauge");
+      if (gaugeNow && gaugeNow.dataset.word) {
+        const wordNow = gaugeNow.querySelector(".bandword");
+        if (wordNow) wordNow.textContent = gaugeNow.dataset.word;
+      }
       const row = card.querySelector(".thinking-row");
       if (row) row.remove();
       normaliseCard(card);
@@ -942,14 +947,19 @@ const TONE = { high: "var(--signal-danger)", medium: "var(--signal-warn)", low: 
       const moving = t >= 1 || value > 1.5;
       g.style.setProperty("--tone", moving ? TONE_OF(t >= 1 ? target : value) : "#E9E6DE");
       if (readout) {
-        /* an official card withholds its word until the verdict; naming "official" mid-sweep would
-           give the answer away just as surely as a badge would */
-        const shown = moving && !g.dataset.word ? wordFor(g, value) : "";
+        /* While it moves the dial names the band it is in, for every card: that is the level, and it is
+           true whether the address turns out official, safe, suspect or dangerous. The tier word
+           ("official", "established") replaces it only at the verdict. */
+        const shown = moving ? BAND_WORD(value) : "";
         if (readout.textContent !== shown) readout.textContent = shown;
         fitBandWord(readout);
       }
       if (t >= 1) {
-        if (readout) { readout.textContent = wordFor(g, target); fitBandWord(readout); }
+        if (readout) {
+          // the tier word ("official", "established") waits for the verdict itself
+          readout.textContent = g.dataset.word ? "" : wordFor(g, target);
+          fitBandWord(readout);
+        }
         if (caption) caption.textContent = "verdict";
         g.classList.add("settled");
         return;
