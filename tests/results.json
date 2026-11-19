@@ -117,5 +117,12 @@
     "expected": "mean_probability and flagged_share per day",
     "actual": "6 days, fields present: True",
     "status": "Pass"
+  },
+  {
+    "id": "T18",
+    "case": "Bulk scan agrees with a single scan",
+    "expected": "both phishing for a credential imitator",
+    "actual": "single = phishing, bulk = phishing",
+    "status": "Pass"
   }
 ]

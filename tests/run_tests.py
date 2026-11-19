@@ -69,6 +69,23 @@ CASES = [
 ]
 
 
+
+
+def bulk(urls):
+    """Upload a list to /api/scan/bulk and return the parsed response."""
+    import uuid
+    boundary = "----nyavu" + uuid.uuid4().hex
+    body = "\n".join(urls).encode()
+    payload = ((f"--{boundary}\r\nContent-Disposition: form-data; name=\"file\"; "
+                f"filename=\"urls.txt\"\r\nContent-Type: text/plain\r\n\r\n").encode()
+               + body + f"\r\n--{boundary}--\r\n".encode())
+    request = urllib.request.Request(BASE + "/api/scan/bulk", data=payload,
+                                     headers={"Content-Type":
+                                              f"multipart/form-data; boundary={boundary}"})
+    with urllib.request.urlopen(request, timeout=60) as response:
+        return json.loads(response.read())
+
+
 def main() -> None:
     results = []
 
@@ -200,6 +217,16 @@ def main() -> None:
     record("T17", "Daily stats expose the drift signal",
            "mean_probability and flagged_share per day",
            f"{len(days)} days, fields present: {fields_ok}", fields_ok)
+
+    # T18: a batch must reach the same verdict as a single scan
+    target = "http://kcb-bank.secure-login.top/verify"
+    _, single = call("/api/predict", {"url": target}, method="POST")
+    batch = bulk([target])
+    row = (batch.get("results") or [{}])[0]
+    same = row.get("verdict") == single.get("verdict") == "phishing"
+    record("T18", "Bulk scan agrees with a single scan",
+           "both phishing for a credential imitator",
+           f"single = {single.get('verdict')}, bulk = {row.get('verdict')}", same)
 
     with open(OUT, "w", encoding="utf-8") as fh:
         json.dump(results, fh, indent=2)

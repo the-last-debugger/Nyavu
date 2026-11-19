@@ -435,10 +435,17 @@ async def scan_bulk(request: Request, file: UploadFile = File(...)):
     for u in urls:
         try:
             r = state["predictor"].predict(u)
+            # A batch must reach the same verdict as a single scan. It did not: this loop called the
+            # model directly, so neither the credential policy nor the feed snapshot applied, and the
+            # same address could be phishing on one page and suspicious in a CSV.
+            r = _apply_credential_policy(r)
+            r = _apply_feed(r)
             db.add_scan(user["id"] if user else None, u, r["host"], r["verdict"],
                         r["risk"], r["probability"], r["inference_ms"])
-            out.append({k: r[k] for k in ("url", "host", "verdict", "risk",
-                                          "probability", "confidence")})
+            out.append({k: r.get(k) for k in ("url", "host", "verdict", "risk",
+                                              "probability", "confidence")}
+                       | {"official": (r.get("official") or {}).get("name"),
+                          "reported": bool(r.get("feed_listed"))})
         except Exception:
             out.append({"url": u, "host": "", "verdict": "error", "risk": "unknown",
                         "probability": None, "confidence": None})
