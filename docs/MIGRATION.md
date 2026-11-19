@@ -1,5 +1,9 @@
 # Web to native: the worklist
 
+> **Status for the report: work in progress, excluded from the submitted report.** Phase 1
+> runs in a browser export and has never run on a device. What is delivered on a phone is the
+> progressive web application.
+
 Written before any further porting, because the last two attempts failed for the same
 reason: I reskinned web layouts instead of redesigning screens for the platform. Expo's own
 migration guide puts it plainly — *"if it still feels like a website, you ported instead of
@@ -84,10 +88,30 @@ bounded to 86 per cent of the height with a scrolling body.
 
 ## Phase 2 — what a phone adds
 
-| item | why it is worth doing natively |
+### The share target, in detail
+
+"Open with Nyavu" is the feature worth having: someone taps a link in WhatsApp and the system
+offers Nyavu. Android gives two different mechanisms, and only one of them is free.
+
+| mechanism | what the person sees | what the app receives | state |
+| --- | --- | --- | --- |
+| `ACTION_VIEW` with http/https | "Open with Nyavu" in the chooser | the link itself, as the inbound URL | **done**: `intentFilters` in `app.json`, generated into the manifest, read by `src/incoming.js` |
+| `nyavu://check?url=...` | our own scheme, for the QR code on the site | the address in a query parameter | **done** |
+| `ACTION_SEND` text/plain | "Share → Nyavu" | the link as an *extra*, not a URL | **declared, not read**: extras need a native module (`expo-share-intent`) or a custom activity |
+
+The third row is the honest gap. The filter is in the manifest, so Nyavu appears in the share
+sheet, but until the app is built with a module that reads `EXTRA_TEXT`, sharing opens the app
+without the link. The app says so in `src/incoming.js` rather than pretending.
+
+Verified here: the inbound handoff. Loading the build with a link in the URL starts the
+examination without a tap, which is the same code path an `ACTION_VIEW` intent takes.
+
+Not verified here: that Android *offers* Nyavu in the chooser, which needs an installed build
+on a device.
+
+| other item | why it is worth doing natively |
 | --- | --- |
-| QR scanning | the web needs a camera permission prompt too, but a phone is where scanning belongs |
-| Share target | another app shares a link, Nyavu answers with the verdict; the web cannot do this |
+| QR scanning | a phone is where scanning belongs |
 | History | the phone is where you check the same link twice |
 
 ## Phase 3 — the accounts story

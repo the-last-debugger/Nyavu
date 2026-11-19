@@ -38,7 +38,10 @@ http.createServer((req, res) => {
     return;
   }
 
-  const file = path.join(ROOT, req.url === "/" ? "index.html" : req.url.split("?")[0]);
+  // the pathname, not the raw url: a query string like ?url=... is part of the handoff the
+  // app reads, and joining it onto the folder returned a directory and a 404
+  const pathname = new URL(req.url, "http://127.0.0.1").pathname;
+  const file = path.join(ROOT, pathname === "/" ? "index.html" : pathname);
   fs.readFile(file, (error, data) => {
     if (error) {
       res.writeHead(404);

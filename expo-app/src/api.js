@@ -26,7 +26,13 @@ async function call(path, options = {}) {
   if (session) headers.Cookie = session;
   if (options.body) headers["Content-Type"] = "application/json";
 
-  const response = await fetch(`${BASE}${path}`, { ...options, headers });
+  let response;
+  try {
+    response = await fetch(`${BASE}${path}`, { ...options, headers });
+  } catch {
+    // "Failed to fetch" is the browser talking to a developer, not to a person
+    throw new Error("Nyavu could not be reached. Check your connection and try again.");
+  }
   rememberCookies(response);
   const text = await response.text();
   let json = null;
@@ -72,7 +78,12 @@ export async function bulk(urls) {
   };
   if (session) headers.Cookie = session;
 
-  const response = await fetch(`${BASE}/api/scan/bulk`, { method: "POST", headers, body });
+  let response;
+  try {
+    response = await fetch(`${BASE}/api/scan/bulk`, { method: "POST", headers, body });
+  } catch {
+    throw new Error("Nyavu could not be reached. Check your connection and try again.");
+  }
   rememberCookies(response);
   const text = await response.text();
   if (!response.ok) throw new Error(text.slice(0, 120) || "Bulk screening failed.");

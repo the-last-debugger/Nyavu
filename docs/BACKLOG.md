@@ -186,3 +186,18 @@ backwards, then a native sheet for the verdict.
 
 Three things are deliberately not carried over: the model page (a comparison table is a web
 page), the printable verdict (a phone shares instead), and CSV header handling.
+
+---
+
+## For the presentation: what to say about the app
+
+The Android application is **work in progress and excluded from the report**. Two builds exist:
+a Kotlin app published at `dist/Nyavu-1.3.4-debug.apk`, and a React Native port with the
+examination, verdict sheet and shell that has never run on a device. Neither should be claimed
+as delivered.
+
+What *is* delivered on a phone is the progressive web application: installable from the live
+site, styled for the phone, with the examination and the verdict at full size.
+
+The status report for review is `docs/REPORT_STATUS.md`: objectives, measurements, what is
+delivered, and the four things that are not.

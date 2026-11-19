@@ -15,6 +15,7 @@ import { SafeAreaProvider, useSafeAreaInsets } from "react-native-safe-area-cont
 import * as Haptics from "expo-haptics";
 import * as SplashScreen from "expo-splash-screen";
 import * as api from "./src/api";
+import { firstLink, onLink } from "./src/incoming";
 import { dissect } from "./src/dissection";
 import ExamSurface from "./src/ExamSurface";
 import { band, colour, headline, reasonTitle, space, type } from "./src/theme";
@@ -49,6 +50,20 @@ function App() {
     SplashScreen.hideAsync().catch(() => {});
   }, []);
 
+  // arriving from another app: the link that opened us, and links that arrive later
+  useEffect(() => {
+    firstLink().then((address) => {
+      if (address) {
+        setUrl(address);
+        scan(address);
+      }
+    });
+    return onLink((address) => {
+      setUrl(address);
+      scan(address);
+    });
+  }, []);
+
   // the back button closes the sheet first, and only then leaves the screen
   useEffect(() => {
     const onBack = () => {
@@ -69,6 +84,7 @@ function App() {
       buzz(Haptics.ImpactFeedbackStyle.Rigid);
       return;
     }
+    if (phase !== "idle") return;          // one examination at a time
     setError("");
     setPayload(null);
     setPhase("reading");
@@ -83,7 +99,7 @@ function App() {
       setError(issue.message || "That did not work.");
       buzz(Haptics.ImpactFeedbackStyle.Rigid);
     }
-  }, [url]);
+  }, [url, phase]);
 
   const reset = () => {
     setPhase("idle");
@@ -125,6 +141,7 @@ function App() {
 
             <View style={styles.field}>
               <TextInput
+                accessibilityLabel="Link to examine"
                 value={url}
                 onChangeText={setUrl}
                 placeholder="Paste a link"
@@ -186,6 +203,8 @@ function App() {
 function Action({ label, onPress, primary, mono }) {
   return (
     <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={label}
       onPress={() => { buzz(Haptics.ImpactFeedbackStyle.Light); onPress(); }}
       android_ripple={{ color: "rgba(255,255,255,0.08)" }}
       style={({ pressed }) => [
@@ -278,7 +297,15 @@ function VerdictSheet({ payload, sheet, tone, pct, risk, established, onClose })
             <Action
               label="Open link"
               primary
-              onPress={() => { onClose(); Linking.openURL(payload.url).catch(() => {}); }}
+              onPress={() => {
+                const target = String(payload?.url || "");
+                if (!/^https?:\/\//i.test(target)) {
+                  buzz(Haptics.ImpactFeedbackStyle.Rigid);
+                  return;
+                }
+                onClose();
+                Linking.openURL(target).catch(() => {});
+              }}
             />
           ) : null}
           <Action label="Examine another" onPress={onClose} />
