@@ -1287,6 +1287,18 @@ def _asset_version() -> str:
                 digest.update(fh.read())
         except OSError:
             digest.update(name.encode())
+    # The written pages belong in the stamp too. They were not, so a copy-only deploy kept reporting
+    # the previous build: the marker said nothing had changed while the title on the page had.
+    for path in [os.path.join(STATIC, "index.html")] + [
+            os.path.join(STATIC, "pages", name) for name in sorted(os.listdir(os.path.join(STATIC, "pages")))
+            if name.endswith(".html")] + [
+            os.path.join(STATIC, "pages", "learn", name)
+            for name in sorted(os.listdir(os.path.join(STATIC, "pages", "learn"))) if name.endswith(".html")]:
+        try:
+            with open(path, "rb") as fh:
+                digest.update(fh.read())
+        except OSError:
+            digest.update(os.path.basename(path).encode())
     # Data counts as part of the build. A refreshed feed snapshot ships without touching a line of
     # code, so a code-only stamp reported the previous build and made a completed deploy look stuck.
     digest.update(_data_digest().encode())

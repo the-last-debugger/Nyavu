@@ -175,6 +175,13 @@ def check_hidden_without_leaving_layout() -> None:
                 findings.append(report)
 
 
+def check_html_in_stamp() -> None:
+    """A page that is not hashed into the build says "nothing changed" after a copy-only deploy."""
+    text = read(os.path.join(ROOT, "app", "main.py"))
+    if "index.html" not in text.split("def _asset_version", 1)[-1][:4000]:
+        problems.append("main.py: index.html is not part of the build stamp")
+
+
 def check_pages_stamped() -> None:
     """A page served straight from disk skips the build stamp its stylesheet needs."""
     text = read(os.path.join(ROOT, "app", "main.py"))
@@ -213,6 +220,7 @@ if __name__ == "__main__":
     check_dom_lookups()
     check_hidden_without_leaving_layout()
     check_pages_stamped()
+    check_html_in_stamp()
     fresh = compare_baseline()
     if problems:
         print("\n".join(problems))
