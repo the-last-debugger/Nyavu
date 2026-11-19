@@ -379,6 +379,16 @@ def _apply_credential_policy(result: dict) -> dict:
     result["band"] = "Phishing"
     result["certain"] = True
     result["decided_by"] = "credential imitation"
+    # Prefer a word in the path: "verify" says more about intent than "secure" in the hostname.
+    raw = result.get("url", "")
+    path_part = raw.split("/", 3)[3] if raw.count("/") >= 3 else ""
+    match = _CREDENTIAL_PATH.search(path_part) or _CREDENTIAL_PATH.search(raw)
+    result["decision"] = {
+        "rule": "credential imitation",
+        "host": result.get("host"),
+        "keyword": match.group(0).lower() if match else "",
+        "brand": (result.get("suggestion") or {}).get("brand") or "",
+    }
     result["label"] = 1
     result["probability"] = max(float(result.get("probability") or 0), 0.85)
     result["reasons"] = [
@@ -463,6 +473,13 @@ def _apply_feed(result: dict) -> dict:
     result["band"] = "Phishing"
     result["certain"] = True
     result["decided_by"] = "public phishing list"
+    result["decision"] = {
+        "rule": "public phishing list",
+        "matched": feed.get("host"),
+        "target": feed.get("target") or "",
+        "source": (feed.get("sources") or [""])[0],
+        "generated": feed.get("generated") or "",
+    }
     if result.get("verdict") != "phishing":
         result["verdict"] = "phishing"
         result["risk"] = "high"

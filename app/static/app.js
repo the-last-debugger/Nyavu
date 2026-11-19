@@ -1144,6 +1144,15 @@ const wordFor = (gauge, value) => gauge.dataset.word || BAND_WORD(value);
       : r.capped_by_reputation
       ? `Model estimate ${frequency(modelPct === 0 ? 1 : modelPct)}, held at ${pct} because the domain is established. The ceiling is a policy, not the model's estimate.`
       : `Model estimate ${frequency(pct)}. Read from the name alone.`;
+    /* When a rule settled the verdict, the fold has to say so. It used to say "read from the name alone"
+       under a card that said "this is a phishing address", which is the wrong account of how it was
+       reached. The model's reading stays, demoted to what it is. */
+    const decisionNote = r.decision
+      ? (r.decision.rule === "credential imitation"
+        ? `Decided by what the address does: ${escapeHtml(r.decision.host || "the host")} carries a brand it does not own${r.decision.keyword ? `, on a path that says "${escapeHtml(r.decision.keyword)}"` : ""}. The model reads the name as ${frequency(modelPct)}; that is not what settled it.`
+        : `Decided by a public phishing list: ${escapeHtml(r.decision.matched || "")} appears on it${r.decision.source ? ` (${escapeHtml(r.decision.source)}, ${escapeHtml(r.decision.generated || "recent")})` : ""}${r.decision.target ? `, reported as imitating ${escapeHtml(r.decision.target)}` : ""}. The model reads the name as ${frequency(modelPct)}; that is not what settled it.`)
+      : scoreNote;
+
     /* An official card already says whose address it is, so the model's "established domain" line
        is redundant there and reads like a second, weaker explanation. */
     /* The reputation line explains a clearance. On any card that is not clearing the address it is a
@@ -1233,7 +1242,7 @@ const wordFor = (gauge, value) => gauge.dataset.word || BAND_WORD(value);
           ${r.risk === "low" || r.official ? "" : intentLine(r)}
           <details class="score-more">
             <summary>How that was worked out</summary>
-            <p class="score-note">${scoreNote}</p>
+            <p class="score-note">${decisionNote}</p>
             <p class="band-legend">Bands: under 35 safe, 35 to 65 suspect, above 65 dangerous.</p>
             ${/* The dissection above already lists every piece with its note. On screen this was the
                   same six lines again; on paper it is the record, since the notes panel is hidden. */""}

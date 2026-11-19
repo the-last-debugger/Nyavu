@@ -1,0 +1,16 @@
+﻿The fold explains the verdict it is attached to
+
+Asked whether "How that was worked out" matches the card: it did not. A known credential case said
+"This address is built to take a password or a one-time code" while the fold said "Read from the name
+alone", which is the wrong account of how the verdict was reached.
+
+The server now records what decided a known case: the rule, the host, the word in the path, the matched
+feed host with its target and source. The fold leads with it:
+
+- Decided by what the address does: kcb-bank.secure-login.top carries a brand it does not own, on a path
+  that says verify. The model reads the name as about 99 in 100; that is not what settled it.
+- Decided by a public phishing list: www.account-aplem.com appears on it (PhishTank, 2026-11-19),
+  reported as imitating Apple. The model reads the name as about 74 in 100; that is not what settled it.
+
+The word in the path is preferred over the hostname, so verify is credited rather than secure. Suite 19
+of 19.
