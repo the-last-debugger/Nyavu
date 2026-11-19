@@ -1216,6 +1216,7 @@ const wordFor = (gauge, value) => gauge.dataset.word || BAND_WORD(value);
           <span class="badge ${r.risk}">${r.official ? "Official domain" : r.established ? "Established" : r.band}</span>${r.reputation === "established" && !r.official && !r.established && r.verdict === "legitimate"
             ? '<span class="badge rep">Established domain</span>' : ""}
           <h2>${r.official ? `This is the address ${r.official.name} publishes`
+            : r.certain ? "This is a phishing address"
             : r.risk === "high" ? "This reads dangerous"
             : r.risk === "medium" ? "This reads suspect"
             : "This reads safe"}</h2>

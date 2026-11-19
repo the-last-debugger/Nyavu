@@ -368,11 +368,17 @@ def _credential_imitator(result: dict) -> bool:
 
 
 def _apply_credential_policy(result: dict) -> dict:
-    if result.get("verdict") == "phishing" or not _credential_imitator(result):
+    # Certainty does not depend on what the model said: a credential-imitating address is known
+    # phishing whether the model agreed or not.
+    if not _credential_imitator(result):
         return result
     result["verdict"] = "phishing"
     result["risk"] = "high"
-    result["band"] = "Likely phishing"
+    # Known: a brand in a label its owner does not control, on a path asking for a secret. There is
+    # nothing likely about it.
+    result["band"] = "Phishing"
+    result["certain"] = True
+    result["decided_by"] = "credential imitation"
     result["label"] = 1
     result["probability"] = max(float(result.get("probability") or 0), 0.85)
     result["reasons"] = [
@@ -453,10 +459,16 @@ def _apply_feed(result: dict) -> dict:
         return result
     result["feed"] = feed
     result["feed_listed"] = True
+    # A report is knowledge, not a guess, so the word is not hedged even if the model already agreed.
+    result["band"] = "Phishing"
+    result["certain"] = True
+    result["decided_by"] = "public phishing list"
     if result.get("verdict") != "phishing":
         result["verdict"] = "phishing"
         result["risk"] = "high"
-        result["band"] = "Listed in a phishing feed"
+        result["band"] = "Phishing"
+        result["certain"] = True
+        result["decided_by"] = "public phishing list"
         result["label"] = 1
         reason = ("This address appears on a public phishing list"
                   + (f" (imitating {feed['target']})" if feed.get("target") else "")
