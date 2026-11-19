@@ -9128,3 +9128,31 @@ html.booting main { opacity: .62; }
 /* The bulk table shows the same evidence a single scan does, in its own column. */
 .table .bulk-evidence { color: var(--muted); font-size: .82rem; }
 .table .bulk-evidence:not(:empty) { white-space: nowrap; }
+
+/* -------------------------------------------------------------------------------
+   No spoilers
+
+   The card was announcing its conclusion before the examination finished: the likely-goal line was
+   painted from the first frame, and a flagged measurement turned red about two seconds in, so the
+   answer was readable long before the dial moved. Everything that states a conclusion now waits for
+   the verdict, and the measurements keep neutral colours while they are being gathered.
+   ------------------------------------------------------------------------------- */
+.result.pending .intent-line,
+.result.pending .feed-line,
+.result.pending .official-line,
+.result.pending .known-line {
+  display: none !important;
+}
+
+.result.pending .measure.hot {
+  color: var(--muted) !important;
+  border-color: var(--line) !important;
+  background: transparent !important;
+}
+.result.pending .measure.hot::before { display: none !important; }
+.result.pending .measure { transition: none !important; }
+
+/* the colours arrive with the verdict, not before it */
+.result.verdict-shown .measure.hot {
+  transition: color .4s ease .2s, border-color .4s ease .2s, background .4s ease .2s;
+}

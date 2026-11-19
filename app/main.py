@@ -1181,7 +1181,7 @@ def indexnow_key(key_name: str):
     raise HTTPException(status_code=404, detail="Not found")
 
 
-_ASSET_FILES = ("styles.css", "app.js", "autopsy.js", "institutions.js", "sw.js")
+_ASSET_FILES = ("styles.css", "guards.css", "app.js", "autopsy.js", "institutions.js", "sw.js")
 
 
 def _asset_version() -> str:
@@ -1268,7 +1268,7 @@ def index(request: Request):
         html = html.replace("<!--verification-->", "\n".join(tags).strip())
         html = html.replace("https://nyavu.onrender.com/", origin + "/")
         version = _asset_version()
-        for name in ("styles.css", "app.js", "autopsy.js", "institutions.js"):
+        for name in ("styles.css", "guards.css", "app.js", "autopsy.js", "institutions.js"):
             html = html.replace(f'"/{name}"', f'"/{name}?v={version}"')
         html = html.replace("<!--build-->", f'<meta name="nyavu-build" content="{version}" />')
         _INDEX_CACHE[origin] = html

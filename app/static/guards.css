@@ -1,0 +1,38 @@
+﻿/* -------------------------------------------------------------------------------
+   No spoilers
+
+   The verdict was readable almost from the click: the likely-goal line was painted immediately, and a
+   flagged measurement turned colour about two seconds in. The rules that were meant to hide them kept
+   losing to the older stylesheet, which owns display and colour for these blocks in a dozen places.
+
+   So the gate lives in its own file, loaded last, with nothing to compete against. Anything that
+   states a conclusion waits for the verdict to be shown.
+   ------------------------------------------------------------------------------- */
+.result.pending .intent-line,
+.result.pending .feed-line,
+.result.pending .official-line,
+.result.pending .known-line,
+.result.pending .verdict-text h2,
+.result.pending .verdict-text .badge,
+.result.pending .stamp,
+.result.pending .block-title,
+.result.pending .reasons,
+.result.pending details.score-more {
+  display: none !important;
+}
+
+/* measurements keep neutral colours while they are being gathered */
+.result.pending .measure.hot {
+  color: var(--muted) !important;
+  border-color: var(--line) !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+/* The measurement strip carries the values, and several of them state the answer. It arrives with the
+   verdict, so the examination shows the address being read and nothing that settles it. */
+.result.pending .measures-strip { opacity: 0 !important; }
+.result.verdict-shown .measures-strip { opacity: 1; transition: opacity .45s ease .1s; }
+
+@media print {
+  .result.pending .measures-strip { opacity: 1 !important; }
+}
