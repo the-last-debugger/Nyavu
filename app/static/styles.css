@@ -9341,3 +9341,41 @@ html.booting main { opacity: .62; }
 @media (min-width: 901px) {
   .hero-copy { max-width: 52ch; }
 }
+
+
+/* ---------------------------------------------------------------------------
+   The evaluation page
+
+   Long-form: tables of counts, a reliability curve, four worked errors. It is
+   the page a panel reads, so the type is quiet and the numbers are not.
+   --------------------------------------------------------------------------- */
+.eval { max-width: 840px; margin: 0 auto; padding: 56px 24px 96px; }
+.eval h1 { font-family: Georgia, serif; font-weight: 400; font-size: clamp(2rem, 1.5rem + 2vw, 2.9rem); letter-spacing: -0.02em; margin: 10px 0 16px; color: var(--text); }
+.eval h2 { font-family: Georgia, serif; font-weight: 400; font-size: 1.34rem; margin: 46px 0 12px; color: var(--text); }
+.eval p, .eval li { color: var(--muted); line-height: 1.72; }
+.eval strong { color: var(--text); font-weight: 600; }
+.eval p strong { color: var(--text); }
+.eval-table { width: 100%; border-collapse: collapse; margin: 18px 0 8px; }
+.eval-table th { text-align: left; font-family: "JetBrains Mono", monospace; font-size: .64rem; letter-spacing: .11em; text-transform: uppercase; color: var(--faint); font-weight: 400; padding: 0 12px 9px 0; border-bottom: 1px solid var(--line-hi); }
+.eval-table td { padding: 10px 12px 10px 0; border-bottom: 1px solid var(--line); font-size: .9rem; color: var(--text); vertical-align: top; }
+.eval-table td:first-child { color: var(--muted); }
+.eval-note { font-size: .82rem !important; border-left: 2px solid var(--line-hi); padding-left: 13px; margin-top: 16px; color: var(--faint) !important; }
+.eval-curve { width: 100%; max-width: 540px; height: auto; display: block; margin: 20px 0 8px; }
+.eval-cases { list-style: none; margin: 18px 0 0; padding: 0; }
+.eval-case { border-top: 1px solid var(--line); padding: 18px 0; }
+.eval-case-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px; margin: 0 0 8px; }
+.eval-case-kind { font-family: "JetBrains Mono", monospace; font-size: .62rem; letter-spacing: .11em; text-transform: uppercase; color: var(--faint); }
+.eval-case-head code { font-family: "JetBrains Mono", monospace; font-size: .82rem; color: var(--text); word-break: break-all; }
+.eval-case-body { margin: 0 0 6px !important; font-size: .9rem; }
+.eval-case-quiet { color: var(--faint) !important; font-size: .8rem !important; }
+.eval-limits { margin: 14px 0 0; padding-left: 20px; }
+.eval-limits li { margin-bottom: 9px; }
+.eval-code { background: #0a0f18; border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px; overflow-x: auto; font-family: "JetBrains Mono", monospace; font-size: .78rem; line-height: 1.65; color: var(--text); margin: 16px 0 8px; }
+.eval-tag { font-weight: 600; }
+.eval-tag.phish { color: var(--signal-danger); }
+.eval-tag.clear { color: var(--signal-safe); }
+@media (max-width: 640px) {
+  .eval { padding: 40px 20px 72px; }
+  .eval-table td, .eval-table th { padding-right: 8px; font-size: .84rem; }
+  .eval-table th { font-size: .58rem; }
+}

@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>How Nyavu was measured | Evaluation</title>
+<meta name="description" content="The held-out evaluation behind Nyavu: the corpus, the domain-disjoint split, the confusion matrix, calibration and the errors the model makes." />
+<link rel="canonical" href="https://nyavu.onrender.com/evaluation" />
+<meta property="og:type" content="website" />
+<meta property="og:title" content="How Nyavu was measured" />
+<meta property="og:description" content="A machine-learning phishing URL detector from Kabarak University, built in the open and reported honestly." />
+<meta property="og:url" content="https://nyavu.onrender.com/evaluation" />
+<meta property="og:image" content="https://nyavu.onrender.com/og.png" />
+<meta name="theme-color" content="#04060b" />
+<link rel="icon" href="/icon-192.png" />
+<link rel="stylesheet" href="/styles.css" />
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "How Nyavu was measured",
+  "description": "The held-out evaluation behind Nyavu: corpus, domain-disjoint split, confusion matrix, calibration and worked errors.",
+  "author": {
+    "@type": "Organization",
+    "name": "Nyavu"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Nyavu"
+  },
+  "mainEntityOfPage": "https://nyavu.onrender.com/evaluation"
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Nyavu",
+      "item": "https://nyavu.onrender.com/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Evaluation",
+      "item": "https://nyavu.onrender.com/evaluation"
+    }
+  ]
+}
+</script>
+</head>
+<body>
+
+<header class="topbar">
+  <a class="brand" href="/">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" aria-hidden="true">
+  <g fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M8.00,13.00 Q-15.10,57.66 45.50,90.00"/>
+    <path d="M29.00,13.00 Q17.45,57.66 47.75,90.00"/>
+    <path d="M50.00,13.00 Q50.00,57.66 50.00,90.00"/>
+    <path d="M71.00,13.00 Q82.55,57.66 52.25,90.00"/>
+    <path d="M92.00,13.00 Q115.10,57.66 54.50,90.00"/>
+    <path class="weft" d="M4.46,51.79 L15.84,52.46 L27.23,53.14 L38.61,53.41 L50.00,53.68 L61.39,53.41 L72.77,53.14 L84.16,52.46 L95.54,51.79"/>
+  </g>
+  <g fill="currentColor" stroke="none">
+    <circle cx="8.00" cy="13.00" r="1.9"/><circle cx="29.00" cy="13.00" r="1.9"/><circle cx="50.00" cy="13.00" r="1.9"/><circle cx="71.00" cy="13.00" r="1.9"/><circle cx="92.00" cy="13.00" r="1.9"/>
+  </g>
+</svg>
+    <span>Nyavu</span>
+  </a>
+  <nav class="nav">
+    <a href="/">Detector</a>
+    <a href="/learn/how-phishing-works">Learn</a>
+    <a href="/about">About</a>
+    <a href="/evaluation" class="active">Evaluation</a>
+  </nav>
+  <div class="account"><a class="btn ghost" href="/">Check a link</a></div>
+</header>
+
+<main>
+  <article class="eval">
+    <p class="page-kicker">Nyavu</p>
+    <h1>How Nyavu was measured</h1>
+    <p class="page-lede">One held-out set, split by registrable domain, reported without rounding up. Every
+    number the interface quotes is produced by this page's method, and the mistakes are shown too.</p>
+
+    <section>
+      <h2>The corpus</h2>
+      <p>17,730 addresses, 8,865 labelled phishing and 8,865 labelled
+      benign, drawn from 16,185 registrable domains. The classes are balanced by construction, not by
+      chance, so accuracy is not an artefact of a lopsided sample.
+      Benign addresses come from Tranco (8,865); phishing addresses come from
+      Phishing.Database (8,736) and OpenPhish
+      (129).</p>
+    </section>
+
+    <section>
+      <h2>The split, and why it is grouped</h2>
+      <p>Train and test are split by <strong>registrable domain</strong>, not by URL, with a fixed seed. A campaign
+      puts many near-identical URLs on one domain; splitting by URL would put the same domain on both sides and
+      report a score that comes from memory rather than from reading.</p>
+      <table class="eval-table"><thead><tr><th></th><th>count</th></tr></thead><tbody><tr><td>rows</td><td>17,730</td></tr><tr><td>train rows</td><td>14,157</td></tr><tr><td>test rows</td><td>3,573</td></tr><tr><td>registrable domains</td><td>16,185</td></tr><tr><td>train domains</td><td>12,948</td></tr><tr><td>test domains</td><td>3,237</td></tr><tr><td>domains in both sides</td><td>0</td></tr></tbody></table>
+      <p class="eval-note">The zero is measured, not assumed: the split was regenerated from the corpus and the
+      domains intersected. The test set also reproduces the stored predictions URL for URL.</p>
+    </section>
+
+    <section>
+      <h2>The numbers</h2>
+      <table class="eval-table"><thead><tr><th>measure</th><th>value</th></tr></thead><tbody><tr><td>accuracy</td><td>75.40%</td></tr><tr><td>precision</td><td>77.91%</td></tr><tr><td>recall</td><td>70.50%</td></tr><tr><td>F1</td><td>74.02%</td></tr><tr><td>ROC AUC</td><td>82.93%</td></tr><tr><td>false positive rate</td><td>19.76%</td></tr><tr><td>false negative rate</td><td>29.50%</td></tr></tbody></table>
+      <p>Five-fold grouped cross-validation, which repeats the domain-disjoint discipline on the training
+      portion: accuracy 72.80% (sd 1.01),
+      F1 70.70% (sd 1.34),
+      AUC 80.69% (sd 1.44).</p>
+      <table class="eval-table"><thead><tr><th>model</th><th>accuracy</th><th>F1</th><th>ROC AUC</th><th>false positive rate</th></tr></thead><tbody><tr><td>Logistic Regression</td><td>75.40%</td><td>74.02%</td><td>82.93%</td><td>19.76%</td></tr><tr><td>Random Forest</td><td>71.34%</td><td>68.14%</td><td>78.29%</td><td>19.09%</td></tr><tr><td>Linear SVM</td><td>75.59%</td><td>74.25%</td><td>82.67%</td><td>19.64%</td></tr></tbody></table>
+      <p class="eval-note">Logistic Regression was selected because it produces calibrated probabilities, which the interface depends on, and its F1 was within 0.01 of the highest score (Linear SVM).</p>
+    </section>
+
+    <section>
+      <h2>The confusion matrix</h2>
+      <table class="eval-table"><thead><tr><th></th><th>called benign</th><th>called phishing</th></tr></thead><tbody><tr><td><span class="eval-tag phish">phishing</span> (1,776)</td><td>524 missed</td><td>1,252 caught</td></tr><tr><td><span class="eval-tag clear">benign</span> (1,797)</td><td>1,442 cleared</td><td>355 false alarms</td></tr></tbody></table>
+      <p>1,776 phishing addresses in the test set, 1,252 caught and 524
+      missed. 1,797 benign addresses, 1,442 cleared and 355 flagged.
+      The false alarms matter: they are the reason a verdict is written as an assessment, not a fact.</p>
+    </section>
+
+    <section>
+      <h2>Does the number mean what it says?</h2>
+      <p>Calibration asks whether an address scored 80 is phishing about 80 times in 100. Expected calibration
+      error on the test set is <strong>2.80%</strong>. The curve below plots predicted against observed
+      across ten bins; the dashed line is perfect calibration.</p>
+      <svg class="eval-curve" viewBox="0 0 520 300" role="img" aria-label="Reliability curve: predicted probability against observed outcome rate">
+  <rect x="0" y="0" width="520" height="300" fill="none" />
+  <line x1="44" y1="256" x2="476" y2="44" stroke="#8D97AB" stroke-dasharray="4 4" stroke-width="1" />
+  <line x1="44" y1="256" x2="476" y2="256" stroke="#2a3346" stroke-width="1" />
+  <line x1="44" y1="256" x2="44" y2="44" stroke="#2a3346" stroke-width="1" />
+  <polyline points="70.1,234.7 108.7,209.9 152.8,201.8 195.2,187.3 238.5,157.7 281.2,135.7 325.4,126.6 367.6,103.7 408.9,69.0 460.7,52.1" fill="none" stroke="#57C08A" stroke-width="2" />
+  <circle cx="70.1" cy="234.7" r="3.4" fill="#57C08A" /><circle cx="108.7" cy="209.9" r="3.4" fill="#57C08A" /><circle cx="152.8" cy="201.8" r="3.4" fill="#57C08A" /><circle cx="195.2" cy="187.3" r="3.4" fill="#57C08A" /><circle cx="238.5" cy="157.7" r="3.4" fill="#57C08A" /><circle cx="281.2" cy="135.7" r="3.4" fill="#57C08A" /><circle cx="325.4" cy="126.6" r="3.4" fill="#57C08A" /><circle cx="367.6" cy="103.7" r="3.4" fill="#57C08A" /><circle cx="408.9" cy="69.0" r="3.4" fill="#57C08A" /><circle cx="460.7" cy="52.1" r="3.4" fill="#57C08A" />
+  <text x="260.0" y="288" fill="#8D97AB" font-size="11" text-anchor="middle" font-family="monospace">predicted probability</text>
+  <text x="14" y="150.0" fill="#8D97AB" font-size="11" text-anchor="middle" font-family="monospace" transform="rotate(-90 14 150.0)">observed rate</text>
+  <text x="52.64" y="243.76" fill="#8D97AB" font-size="10" font-family="monospace">0</text>
+  <text x="470" y="243.76" fill="#8D97AB" font-size="10" font-family="monospace">1</text>
+</svg>
+      <table class="eval-table"><thead><tr><th>bin</th><th>n</th><th>predicted</th><th>observed</th></tr></thead><tbody><tr><td>0.0-0.1</td><td>338</td><td>0.060</td><td>0.101</td></tr><tr><td>0.1-0.2</td><td>492</td><td>0.150</td><td>0.217</td></tr><tr><td>0.2-0.3</td><td>454</td><td>0.252</td><td>0.256</td></tr><tr><td>0.3-0.4</td><td>352</td><td>0.350</td><td>0.324</td></tr><tr><td>0.4-0.5</td><td>330</td><td>0.450</td><td>0.464</td></tr><tr><td>0.5-0.6</td><td>312</td><td>0.549</td><td>0.567</td></tr><tr><td>0.6-0.7</td><td>226</td><td>0.651</td><td>0.611</td></tr><tr><td>0.7-0.8</td><td>252</td><td>0.749</td><td>0.718</td></tr><tr><td>0.8-0.9</td><td>373</td><td>0.845</td><td>0.882</td></tr><tr><td>0.9-1.0</td><td>444</td><td>0.965</td><td>0.962</td></tr></tbody></table>
+      <p class="eval-note">Read the ends honestly: below 0.2 the model is under-confident, predicting about 6 in 100
+      where 10 in 100 were phishing, and about 15 where 22 were. Near the top it is close. That is the safer
+      direction to be wrong in for a detector, since it under-states risk rather than inventing it.</p>
+    </section>
+
+    <section>
+      <h2>Where the bands come from</h2>
+      <p>The verdict threshold is 50: at or above it the card says phishing. The bands around that line are for
+      reading the score, not for changing the decision. They sit 15 points either side so a score near the middle
+      is shown as uncertain rather than pushed to one side. The sweep is the evidence for that choice.</p>
+      <table class="eval-table"><thead><tr><th>threshold</th><th>precision</th><th>recall</th><th>false positive rate</th><th>false negative rate</th></tr></thead><tbody><tr><td>30</td><td>66.36%</td><td>85.53%</td><td>42.85%</td><td>14.47%</td></tr><tr><td>35</td><td>68.90%</td><td>82.21%</td><td>36.67%</td><td>17.79%</td></tr><tr><td>50</td><td>77.91%</td><td>70.50%</td><td>19.76%</td><td>29.50%</td></tr><tr><td>65</td><td>84.99%</td><td>56.76%</td><td>9.91%</td><td>43.24%</td></tr><tr><td>70</td><td>87.65%</td><td>52.76%</td><td>7.35%</td><td>47.24%</td></tr></tbody></table>
+      <p>At 35 the detector catches 82.21% of phishing at the cost of
+      flagging 36.67% of benign addresses; at 65 it flags
+      9.91% but misses more than it catches. The middle is
+      where both errors stay visible, which is the honest place for a warning.</p>
+    </section>
+
+    <section>
+      <h2>What it gets wrong</h2>
+      <ul class="eval-cases">
+        <li class="eval-case">
+      <p class="eval-case-head"><span class="eval-case-kind">False positive</span>
+      <code>http://marpple.shop</code></p>
+      <p class="eval-case-body">Labelled <strong>benign</strong> by Tranco, scored
+      <strong>96.8 in 100</strong>. The name is short and ends in .shop, a cheap ending the model has learned to distrust, and the reputation list does not reach this domain.</p>
+      <p class="eval-case-body eval-case-quiet">Measured: cheap ending, length 12.</p>
+    </li>
+<li class="eval-case">
+      <p class="eval-case-head"><span class="eval-case-kind">False positive</span>
+      <code>http://telegram.im</code></p>
+      <p class="eval-case-body">Labelled <strong>benign</strong> by Tranco, scored
+      <strong>95.6 in 100</strong>. This is Telegram's own .im address. The character patterns of the name resemble the brand-imitating domains in the corpus, and there is no institution or reputation entry to override the score.</p>
+      <p class="eval-case-body eval-case-quiet">Measured: length 11.</p>
+    </li>
+<li class="eval-case">
+      <p class="eval-case-head"><span class="eval-case-kind">False negative</span>
+      <code>http://doxa.rs</code></p>
+      <p class="eval-case-body">Labelled <strong>phishing</strong> by Phishing.Database, scored
+      <strong>3.3 in 100</strong>. Four letters, no digits, no hyphens, no brand: there is almost nothing in the name for the model to read, which is the case it is weakest at.</p>
+      <p class="eval-case-body eval-case-quiet">Measured: length 7.</p>
+    </li>
+<li class="eval-case">
+      <p class="eval-case-head"><span class="eval-case-kind">False negative</span>
+      <code>https://mobilefb-vvme9wil.88live.tv</code></p>
+      <p class="eval-case-body">Labelled <strong>phishing</strong> by Phishing.Database, scored
+      <strong>3.5 in 100</strong>. The brand sits in a subdomain, but the model reads only the registered domain, so the imitation is invisible to it and the host looks like a hosting suffix.</p>
+      <p class="eval-case-body eval-case-quiet">Measured: 2 digits, length 9.</p>
+    </li>
+      </ul>
+      <p class="eval-note">These are the highest-confidence errors in the held-out set, not curated examples:
+      two benign addresses the model was most sure about, and two phishing addresses it was most sure were fine.
+      They are the fastest way to see the shape of its blind spots.</p>
+    </section>
+
+    <section>
+      <h2>What it cannot see</h2>
+      <ul class="eval-limits">
+        <li><strong>Paths and queries.</strong> Only the registered domain and its shape are read. A clean domain
+        with a hostile path is invisible to the model, though the interface's credential rule catches some.</li>
+        <li><strong>Registration and reputation.</strong> There is no WHOIS, no age, no certificate data. The
+        reputation signal is a Tranco top-1,200 list and an institution list of published addresses.</li>
+        <li><strong>Page content.</strong> Nothing is fetched, so what the page would have shown is unknown.</li>
+        <li><strong>Time.</strong> The corpus has a date. A domain re-registered after it was labelled can change
+        class, which is why a report is dated.</li>
+        <li><strong>A miss never clears an address.</strong> Absence from a list is not evidence of safety, and the
+        card says so.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Reproducing it</h2>
+      <pre class="eval-code">python ml/train.py
+
+# split: GroupShuffleSplit(n_splits=1, test_size=0.2, random_state=42)
+#        groups = registrable domain of the host
+# model: logistic regression, C=4, liblinear, calibrated
+# test:  3,573 rows, 3,237 domains, none seen in training</pre>
+      <p>Artefacts: <code>ml/artifacts/metrics.json</code> (all three models, cross-validation, threshold sweep),
+      <code>ml/artifacts/holdout_predictions.csv</code> (per-URL probabilities used for the curve and the matrix),
+      <code>data/processed/urls_v2.csv</code> (the corpus). This page is generated from those files by
+      <code>python tools/build_evaluation.py</code> rather than typed, which is why its numbers cannot drift
+      from the model's.</p>
+    </section>
+  </article>
+</main>
+
+<footer class="foot">
+  <p>Nyavu · Kabarak University · COMP324 Team Project ·
+     <a href="/learn/how-phishing-works">How phishing links work</a> ·
+     A verdict is an assessment, not a guarantee of safety.</p>
+</footer>
+
+<script src="/version-tag.js?v=1"></script>
+</body>
+</html>

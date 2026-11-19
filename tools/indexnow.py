@@ -12,7 +12,7 @@ import urllib.request
 
 DEFAULT_ORIGIN = "https://nyavu.onrender.com"
 KEY = "nyavu2026indexnow"
-PAGES = ["/", "/learn/is-this-link-safe", "/learn/how-phishing-works", "/about"]
+PAGES = ["/", "/learn/is-this-link-safe", "/learn/how-phishing-works", "/about", "/faq", "/evaluation"]
 ENDPOINTS = ["https://api.indexnow.org/indexnow", "https://www.bing.com/indexnow"]
 
 
