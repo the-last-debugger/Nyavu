@@ -165,3 +165,24 @@ harness is at `C:\dev\_tools\android\run-apk.ps1`.
 Until then, the app's verification stops at: it compiles, `aapt` confirms the label, icon and
 permissions, and the interface is reviewed by reading it. Everything about how it feels is
 still a judgement only a running device can make.
+
+---
+
+## The app: a worklist before more code
+
+Two attempts at the Android app failed the same way: they reproduced the web layout on a
+phone instead of redesigning for the platform. Expo's migration guide is blunt about it —
+*"if it still feels like a website, you ported instead of redesigned."* The Kotlin app was
+rigid because every screen assembled itself from literals in view constructors, and the first
+React Native pass reskinned the same cards and a text caret drawn as a `|` character.
+
+`docs/MIGRATION.md` now holds the worklist: twelve surfaces bucketed as nativize-now,
+nativize-later, port-as-is or drop, with the reasoning for each and what "done" means.
+
+The decision that orders everything: **the examination is the product**, so it is built first
+and built for the phone — full-bleed, one character per measured position, a real caret that
+springs between them, haptics as each piece lands, then the notes read from the ending
+backwards, then a native sheet for the verdict.
+
+Three things are deliberately not carried over: the model page (a comparison table is a web
+page), the printable verdict (a phone shares instead), and CSV header handling.
