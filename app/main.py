@@ -1201,10 +1201,16 @@ def sitemap(request: Request):
     return Response(content=body, media_type="application/xml")
 
 
+# IndexNow verifies ownership by fetching this key from the site root. A default is baked in so
+# indexing does not depend on someone remembering a dashboard setting; the environment can override it.
+# The key is public by design, so committing it costs nothing.
+INDEXNOW_KEY_DEFAULT = "nyavu2026indexnow"
+
+
 @app.get("/{key_name}.txt", include_in_schema=False)
 def indexnow_key(key_name: str):
     """Bing verifies an IndexNow key by fetching it from the root of the site."""
-    expected = os.getenv("INDEXNOW_KEY", "")
+    expected = os.getenv("INDEXNOW_KEY", "") or INDEXNOW_KEY_DEFAULT
     if expected and key_name == expected:
         return Response(content=expected, media_type="text/plain")
     raise HTTPException(status_code=404, detail="Not found")
