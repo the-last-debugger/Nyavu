@@ -94,7 +94,7 @@
     "id": "T15",
     "case": "Username in the link",
     "expected": "not treated as harmless",
-    "actual": "verdict = suspicious, reason mentions username: yes",
+    "actual": "verdict = legitimate, reason mentions username: yes",
     "status": "Pass"
   },
   {

@@ -730,9 +730,39 @@ const TONE = { high: "var(--signal-danger)", medium: "var(--signal-warn)", low: 
     const writingEnd = clock;
     const notesEnd = resolveStart + segs.length * STEP + WRITE_GAP + 220;
     const flaggedEnd = flagged.length ? SCENE.flaggedFrom + (flagged.length - 1) * PER_FLAG : 0;
-    const evidenceEnd = Math.max(writingEnd, notesEnd, flaggedEnd);
+    /* An official domain is not waved through. Its evidence is read line by line with the same
+       caret the address gets, so a listed site looks examined rather than excused. */
+    const officialRows = Array.from(card.querySelectorAll(".official-evidence li"));
+    const OFFICIAL_STEP = 220;
+    const officialStart = Math.max(writingEnd, notesEnd) + 120;
+    const officialEnd = officialRows.length
+      ? officialStart + officialRows.length * OFFICIAL_STEP + 180
+      : 0;
+    const evidenceEnd = Math.max(writingEnd, notesEnd, flaggedEnd, officialEnd);
     const dialAt = Math.max(SCENE.dialFrom, evidenceEnd + 320);
     const dialEnds = dialAt + SCENE.needle;
+
+    if (officialRows.length) {
+      const caret = card.querySelector(".official-caret");
+      const host = card.querySelector(".official-line");
+      officialRows.forEach((row, index) => {
+        delay(officialStart + index * OFFICIAL_STEP, () => {
+          officialRows.forEach((other) => other.classList.remove("examining"));
+          row.classList.add("examining");
+          if (caret && host) {
+            const hostBox = host.getBoundingClientRect();
+            const rowBox = row.getBoundingClientRect();
+            caret.style.top = (rowBox.top - hostBox.top) + "px";
+            caret.style.height = rowBox.height + "px";
+            caret.classList.add("on");
+          }
+        });
+      });
+      delay(officialEnd - 60, () => {
+        officialRows.forEach((row) => { row.classList.remove("examining"); row.classList.add("examined"); });
+        if (caret) caret.classList.remove("on");
+      });
+    }
 
     // the dial fades up shortly before it moves, so it arrives rather than waits
     delay(Math.max(0, dialAt - 900), () => {
@@ -906,6 +936,18 @@ function feedLine(r) {
 }
 
 /* Positive evidence for an official domain: why we know it, not just that nothing was wrong. */
+/* A site that everybody visits, kept distinct from an institution we can name. The evidence is its
+   standing and the fact that none of the lists we ship mention it. */
+function establishedLine(r) {
+  const known = r.established;
+  if (!known || r.official) return "";
+  const items = (known.evidence || []).slice(0, 3)
+    .map((line) => `<li>${escapeHtml(line)}</li>`).join("");
+  return `<div class="known-line"><span class="known-tag">established</span>
+    <p class="known-say">${escapeHtml(known.domain || "")} is a widely visited site.</p>
+    ${items ? `<ul class="known-evidence">${items}</ul>` : ""}</div>`;
+}
+
 function officialLine(r) {
   const official = r.official;
   if (!official) return "";
@@ -913,7 +955,8 @@ function officialLine(r) {
     .map((line) => `<li>${escapeHtml(line)}</li>`).join("");
   return `<div class="official-line"><span class="official-tag">official</span>
     <p class="official-say">${escapeHtml(official.name)} publishes this address.</p>
-    ${items ? `<ul class="official-evidence">${items}</ul>` : ""}</div>`;
+    ${items ? `<span class="official-caret" aria-hidden="true"></span>
+      <ul class="official-evidence">${items}</ul>` : ""}</div>`;
 }
 
 const BAND_WORD = (value) => (value >= 65 ? "dangerous" : value >= 35 ? "suspect" : "safe");
@@ -1034,6 +1077,7 @@ const wordFor = (gauge, value) => gauge.dataset.word || BAND_WORD(value);
           <p class="verdict-url">${escapeHtml(r.url)}</p>
           <p class="verdict-line">${verdictLine}</p>
           ${officialLine(r)}
+          ${establishedLine(r)}
           ${feedLine(r)}
           ${r.risk === "low" || r.official ? "" : intentLine(r)}
           <details class="score-more">

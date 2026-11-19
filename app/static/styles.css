@@ -8943,3 +8943,74 @@ html.booting main { opacity: .62; }
   .hero-note .note-quote, .hero-note .note-source { transition: none; }
 }
 
+
+/* -------------------------------------------------------------------------------
+   The record, examined
+
+   The same caret that reads the address now reads the evidence for an official domain, line by
+   line. A site we list should look deliberated on, not waved through.
+   ------------------------------------------------------------------------------- */
+.official-line { position: relative; }
+.official-caret {
+  position: absolute;
+  left: -2px;
+  width: 2px;
+  height: 0;
+  border-radius: 2px;
+  background: var(--signal-safe);
+  opacity: 0;
+  transition: top .22s ease, height .22s ease, opacity .2s ease;
+}
+.official-caret.on { opacity: .9; }
+.official-evidence li {
+  transition: background .2s ease, color .2s ease, box-shadow .2s ease;
+  border-radius: 4px;
+}
+.official-evidence li.examining {
+  color: var(--text);
+  background: rgba(87, 192, 138, .10);
+  box-shadow: inset 2px 0 0 var(--signal-safe);
+  padding-left: 6px;
+  margin-left: -6px;
+}
+.official-evidence li.examined { color: var(--muted); }
+
+@media (prefers-reduced-motion: reduce) {
+  .official-caret { display: none; }
+  .official-evidence li { transition: none; }
+}
+
+/* The second tier: a site the world uses, which is not the same claim as an address we can name. */
+.known-line {
+  margin: 16px 0 0;
+  padding: 12px 15px;
+  border-left: 2px solid rgba(233, 230, 222, .22);
+  background: rgba(255, 255, 255, .025);
+  border-radius: 0 10px 10px 0;
+}
+.known-tag {
+  display: block;
+  font-size: .6rem;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--faint);
+  margin-bottom: 4px;
+}
+.known-say { margin: 0; font-family: var(--font-body); font-size: .9rem; color: var(--text); }
+.known-evidence { margin: 8px 0 0; padding: 0 0 0 14px; list-style: none; }
+.known-evidence li {
+  position: relative;
+  font-family: var(--font-body);
+  font-size: .78rem;
+  line-height: 1.6;
+  color: var(--muted);
+}
+.known-evidence li::before {
+  content: "";
+  position: absolute;
+  left: -12px; top: .55em;
+  width: 4px; height: 4px;
+  border-radius: 50%;
+  background: var(--bone);
+  opacity: .5;
+}

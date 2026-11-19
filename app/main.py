@@ -251,6 +251,42 @@ def _legitimacy(name: str) -> dict:
     return {"name": name, "evidence": []}
 
 
+_KNOWN = {}
+
+
+def _known_sites() -> dict:
+    """Worldwide sites we know, kept apart from the institution list.
+
+    The tier matters: an institution domain is one we can name, a known site is one everybody visits.
+    Both are cleared, but only the first is called official.
+    """
+    global _KNOWN
+    if not _KNOWN:
+        try:
+            import json as _json
+            with open(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                                   "data", "known_sites.json"), encoding="utf-8") as handle:
+                _KNOWN = _json.load(handle)
+        except Exception:                                  # noqa: BLE001
+            _KNOWN = {}
+    return _KNOWN
+
+
+def _known_site(host: str):
+    host = (host or "").lower().strip(".")
+    if not host:
+        return None
+    known = _known_sites()
+    labels = host.split(".")
+    for index in range(0, max(0, len(labels) - 1)):
+        candidate = ".".join(labels[index:])
+        if candidate in known:
+            record = known[candidate]
+            return {"domain": candidate, "rank": record.get("rank"),
+                    "evidence": record.get("evidence", [])}
+    return None
+
+
 def _official_name(host: str):
     """The institution whose published domain this is, or None."""
     host = (host or "").lower().strip(".")
@@ -349,6 +385,24 @@ def _apply_feed(result: dict) -> dict:
             result["reputation"] = result.get("reputation") or "established"
             result["reasons"] = [f"This is the address {official} publishes."] + list(result.get("reasons") or [])[:3]
         return result
+    known = _known_site(result.get("host", ""))
+    if known:
+        result["established"] = known
+        features = result.get("features") or {}
+        # The same reasoning as an official domain, one step weaker: a site this widely used is not
+        # cleared on the shape of its name. A brand in a label its owner does not control still wins.
+        if result.get("verdict") != "legitimate" and not features.get("brand_in_wrong_place"):
+            result["verdict"] = "legitimate"
+            result["risk"] = "low"
+            result["band"] = "Likely legitimate"
+            result["label"] = 0
+            result["probability"] = min(float(result.get("probability") or 0), 0.15)
+            result["reputation"] = result.get("reputation") or "established"
+            result["reasons"] = [
+                f"Among the {known['rank']} most visited sites worldwide. Name-level evidence is not "
+                "enough to flag it."
+            ] + list(result.get("reasons") or [])[:2]
+
     feed = threat.lookup(result.get("url", ""))
     if not feed:
         return result
