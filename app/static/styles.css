@@ -9107,3 +9107,15 @@ html.booting main { opacity: .62; }
   .exam-caret { display: none; }
   .exam-row { transition: none; }
 }
+
+/* The statement above the evidence is part of the record, so it is read first rather than sitting
+   outside the sweep. As a paragraph it needs the row's spacing reset. */
+.exam-block .official-say.exam-row,
+.exam-block .known-say.exam-row {
+  margin: 0 0 4px;
+}
+.exam-row.examining.official-say,
+.exam-row.examining.known-say {
+  padding-left: 8px;
+  margin-left: -8px;
+}

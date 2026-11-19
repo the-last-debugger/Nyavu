@@ -1021,7 +1021,7 @@ function establishedLine(r) {
   const items = (known.evidence || []).slice(0, 3)
     .map((line) => `<li class="exam-row">${escapeHtml(line)}</li>`).join("");
   return `<div class="known-line exam-block"><span class="known-tag">established</span>
-    <p class="known-say">${escapeHtml(known.domain || "")} is a widely visited site.</p>
+    <p class="known-say exam-row">${escapeHtml(known.domain || "")} is a widely visited site.</p>
     ${items ? `<span class="exam-caret known-caret" aria-hidden="true"></span>
       <ul class="known-evidence exam-rows">${items}</ul>` : ""}</div>`;
 }
@@ -1032,7 +1032,7 @@ function officialLine(r) {
   const items = (official.evidence || []).slice(0, 4)
     .map((line) => `<li class="exam-row">${escapeHtml(line)}</li>`).join("");
   return `<div class="official-line exam-block"><span class="official-tag">official</span>
-    <p class="official-say">${escapeHtml(official.name)} publishes this address.</p>
+    <p class="official-say exam-row">${escapeHtml(official.name)} publishes this address.</p>
     ${items ? `<span class="exam-caret official-caret" aria-hidden="true"></span>
       <ul class="official-evidence exam-rows">${items}</ul>` : ""}</div>`;
 }
