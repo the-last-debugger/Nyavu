@@ -248,3 +248,25 @@ Free tier: 512 MB and a tenth of a CPU. Loading the model and scoring twenty add
 (it was only ever used to build a one-row frame) and moved to `requirements-train.txt`. The
 scores are identical to the last bit on 306 addresses. That rules out loading a transformer or
 a second model into the same process on this tier.
+
+### Shipped since: no-account history, drift series, leaner service
+
+Three changes made on the assumption that most visitors will never sign in, and that the host
+is small.
+
+1. **Device-only history.** Every successful scan is also kept in the visitor's own browser,
+   capped at twenty-five, and shown when the account has nothing to show. Nothing is posted and
+   nothing is keyed to a person. A Forget control removes the list from storage as well as from
+   the view. Verified in production: two scans, two rows, survives a reload, Forget empties
+   both.
+2. **Drift is a series now.** `/api/stats/daily` returns mean probability and the share flagged
+   per day, from columns the scans table already had. No schema change. A rising series is the
+   earliest visible failure, and it costs nothing to look at.
+3. **pandas left the runtime.** It was imported only to build a one-row frame. Calling the two
+   fitted transformers directly removed it: 169.8 MB to 143.7 MB of peak working set, identical
+   scores on 306 addresses. Test suite is 17 of 17, including the new drift case.
+
+**Known mismatch, for the record.** The submitted report's Figure 9 shows the signed-out history
+as an empty prompt. That is still what a first-time visitor sees, but a returning visitor now
+sees rows, so the figure and the sentence above it are no longer the whole truth. If the report
+is ever resubmitted, both need updating.
