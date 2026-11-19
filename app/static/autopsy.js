@@ -273,6 +273,12 @@ function intentLine(r) {
   if (!found) return "";
   const { goals, borrowed, brand } = found;
   const who = borrowed || (brand ? (DISPLAY_NAME[brand] || brand[0].toUpperCase() + brand.slice(1)) : "");
+  /* A known credential case already says in the sentence what the address is built to take. Repeating
+     the goal here made the card state it twice; the block names the target instead, which the sentence
+     does not. */
+  if (r.certain && r.decided_by === "credential imitation" && who) {
+    return `<p class="intent-line intent-target"><span class="intent-tag">impersonating</span> ${escapeHtml(who)}</p>`;
+  }
   let lead;
   if (who && goals.length) {
     lead = `Looks built to imitate ${escapeHtml(who)} and ${escapeHtml(goals[0].goal)}.`;
