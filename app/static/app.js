@@ -172,7 +172,8 @@
     }
   });
 
-  const TONE = { high: "var(--danger)", medium: "var(--warn)", low: "var(--safe)" };
+  // the dial speaks in the signal palette; the muted tokens stay for furniture
+const TONE = { high: "var(--signal-danger)", medium: "var(--signal-warn)", low: "var(--signal-safe)" };
 
 
   /* Small things people notice: numbers that count to their value, and a scanning
@@ -733,7 +734,7 @@
     });
   }
 
-  const TONE_OF = (v) => (v < 35 ? "#7FA98F" : v < 65 ? "#ffb020" : "#ff4d6d");
+  const TONE_OF = (v) => (v < 35 ? "#57C08A" : v < 65 ? "#E6B450" : "#EF4444");
 
   /* The needle makes one gesture: it rises, overshoots by a few points, and settles.
      No vibration, no dithering, and it stops dead when it arrives. */
@@ -928,15 +929,16 @@
         <div class="gauge" style="--p:0; --tone:${TONE[r.risk]}" data-target="${pct}">
           <svg class="dial" viewBox="0 0 200 132" aria-hidden="true">
             <path class="track" d="M22 112 A78 78 0 0 1 178 112" />
-            <!-- The three bands, faded, so a reader can see the shape of the scale before the
-                 needle moves. pathLength=100 lets the dash pattern be written in percent:
-                 0 to 35 clear, 35 to 65 a look, above 65 a concern. -->
+            <!-- The three zones, on a thin ring outside the arc. Drawn on the arc itself they were
+                 half hidden by the readout pill and the track; outside it, nothing covers them.
+                 pathLength=100 lets the dash pattern be written in percent: 0 to 35 clear,
+                 35 to 65 a look, above 65 a concern. -->
             <path class="band band-clear" pathLength="100" stroke-dasharray="35 65"
-                  stroke-dashoffset="0" d="M22 112 A78 78 0 0 1 178 112" />
+                  stroke-dashoffset="0" d="M14 112 A86 86 0 0 1 186 112" />
             <path class="band band-caution" pathLength="100" stroke-dasharray="30 70"
-                  stroke-dashoffset="-35" d="M22 112 A78 78 0 0 1 178 112" />
+                  stroke-dashoffset="-35" d="M14 112 A86 86 0 0 1 186 112" />
             <path class="band band-concern" pathLength="100" stroke-dasharray="35 65"
-                  stroke-dashoffset="-65" d="M22 112 A78 78 0 0 1 178 112" />
+                  stroke-dashoffset="-65" d="M14 112 A86 86 0 0 1 186 112" />
             <path class="fill" d="M22 112 A78 78 0 0 1 178 112" />
           </svg>
           <div class="needle"></div>
