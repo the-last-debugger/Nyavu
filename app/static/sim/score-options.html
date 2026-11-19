@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Score presentation — three options</title>
+<link rel="stylesheet" href="/styles.css">
+<style>
+  body { background: var(--bg); margin: 0; padding: 30px 22px 60px; }
+  .wrap { max-width: 1020px; margin: 0 auto; }
+  h1 { font-family: var(--font-display); font-size: 1.5rem; margin: 0 0 6px; color: var(--text); }
+  .sub { font-family: var(--font-body); font-size: .82rem; color: var(--faint); margin: 0 0 26px; }
+  .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .opt { border: 1px solid var(--line); border-radius: 16px; padding: 18px; background: rgba(255,255,255,.02); }
+  .opt h2 { font-family: var(--font-body); font-size: .72rem; letter-spacing: .14em; text-transform: uppercase; color: var(--accent); margin: 0 0 14px; }
+  .url { font-family: var(--font-mono); font-size: .72rem; color: var(--muted); margin: 0 0 12px; word-break: break-all; }
+  .big { font-family: var(--font-mono); font-size: 2.4rem; color: var(--text); line-height: 1; }
+  .band { font-family: var(--font-display); font-size: 1.25rem; color: var(--text); margin: 8px 0 6px; }
+  .sentence { font-family: var(--font-body); font-size: .82rem; color: var(--muted); line-height: 1.55; margin: 0 0 10px; }
+  .tiny { font-family: var(--font-body); font-size: .72rem; color: var(--faint); line-height: 1.5; margin: 10px 0 0; }
+  .freq { font-family: var(--font-mono); font-size: .8rem; color: var(--muted); }
+  .pill { display: inline-block; font-family: var(--font-body); font-size: .66rem; letter-spacing: .1em;
+          text-transform: uppercase; border: 1px solid var(--line); border-radius: 999px; padding: 3px 9px; color: var(--faint); }
+  .pill.safe { color: #B9CBB9; border-color: rgba(185,203,185,.4); }
+  .pill.warn { color: #E6C27A; border-color: rgba(230,194,122,.4); }
+  .pill.bad { color: #E39AA4; border-color: rgba(227,154,164,.4); }
+  .note { font-family: var(--font-body); font-size: .72rem; color: var(--faint); margin-top: 18px; }
+  .pros { font-family: var(--font-body); font-size: .72rem; color: var(--faint); margin: 12px 0 0; padding-left: 16px; line-height: 1.6; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>How should the verdict be presented?</h1>
+  <p class="sub">The same address, three ways. The model's own estimate here is 22 out of 100; the 15 in the current design is a reputation ceiling, not the model.</p>
+
+  <div class="grid">
+    <section class="opt">
+      <h2>1 · Today</h2>
+      <p class="url">https://www.safaricom.co.ke/</p>
+      <div class="big">15<small style="font-size:.8rem;color:var(--faint)"> / 100</small></div>
+      <p class="band">This reads as ordinary</p>
+      <p class="sentence">Scored 15 out of 100, which is a ceiling rather than an estimate.</p>
+      <span class="pill safe">Established domain</span>
+      <ul class="pros">
+        <li>honest: the number is the number</li>
+        <li>but "15" looks like fifteen problems</li>
+        <li>and the ceiling hides the model's 22</li>
+      </ul>
+    </section>
+
+    <section class="opt">
+      <h2>2 · Binary</h2>
+      <p class="url">https://www.safaricom.co.ke/</p>
+      <div class="big">0<small style="font-size:.8rem;color:var(--faint)"> % risk</small></div>
+      <p class="band">Safe</p>
+      <p class="sentence">Nothing in this address matches a phishing pattern.</p>
+      <ul class="pros">
+        <li>nothing to misread</li>
+        <li>but 0 claims certainty we do not have</li>
+        <li>and 100 would claim the same</li>
+        <li>a model that is wrong one time in four cannot honestly print 0 or 100</li>
+      </ul>
+    </section>
+
+    <section class="opt">
+      <h2>3 · Verdict first</h2>
+      <p class="url">https://www.safaricom.co.ke/</p>
+      <span class="pill safe">Likely legitimate</span>
+      <p class="band">This reads as ordinary</p>
+      <p class="sentence">An established domain, so it is not flagged on the shape of its name.</p>
+      <p class="freq">▸ How that was worked out</p>
+      <p class="tiny">Model estimate: about 1 in 5 · held at 15 by the reputation ceiling.<br>
+        Bands: under 35 clear · 35 to 65 worth a look · above 65 a concern.</p>
+      <ul class="pros">
+        <li>the thinking is done for the reader</li>
+        <li>the number survives for anyone who wants it</li>
+        <li>no false certainty: "likely", not "safe"</li>
+      </ul>
+    </section>
+  </div>
+
+  <p class="note">Option 3 keeps every fact option 1 carries, in the order a non-specialist reads: verdict, reason, then evidence.</p>
+</div>
+</body>
+</html>
