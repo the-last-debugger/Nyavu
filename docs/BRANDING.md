@@ -8,10 +8,14 @@ still mint and the site was sage.
 
 ## What it is
 
-A throwing net seen from the side: strands leave an apex at the top, bow outward and land on
-a base line in knots, and two wefts cross them, sagging a little so they read as rope rather
-than as rules. It is not a spiderweb, which is radial and unknotted, and it is not a grid,
-which says nothing about catching anything.
+A net inverted into a shield: the rim is the top edge, knotted where every strand hangs from
+it; the strands fall and close to a short blunt tip rather than a spike; two wefts cross them
+and hang slightly towards the tip so they read as rope rather than as rules.
+
+It was drawn as an upright net first, an apex at the top landing on a base line. Turned over,
+the same drawing becomes a shield, which is closer to what the product is: something held in
+front of the reader. That inversion is the whole change, and it is one constant in the
+geometry rather than a second drawing.
 
 The wordmark is not part of the drawing. "Nyavu" is set in the product's serif beside it, so
 the mark can stand alone as an icon and the name can change weight with the layout.

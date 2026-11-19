@@ -25,24 +25,31 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # ---------------------------------------------------------------- geometry
 
 def net_geometry():
-    """Strands, wefts and knots in a 0..1 box, apex at the top."""
-    apex = (0.5, 0.10)
-    strands = 9
-    spread = 0.86          # how wide the base is, as a fraction of the box
-    base_y = 0.92
-    sag = 0.26             # how far a strand bows outward
+    """A shield drawn as a net.
 
-    ends = []
+    The rim is the top edge, wide and knotted; the strands fall to a short blunt tip rather
+    than a spike, so they do not collapse into a blob where they meet. Two wefts cross them
+    and hang slightly towards the tip, which is what makes it read as a net rather than as a
+    shield with stripes.
+    """
+    rim_y = 0.13
+    tip_y = 0.90
+    strands = 9
+    rim_half = 0.42        # the rim spans 0.08 .. 0.92
+    tip_half = 0.045       # a blunt tip, not a point
+
+    tops, bottoms = [], []
     for i in range(strands):
         t = i / (strands - 1)
-        x = 0.5 + (t - 0.5) * spread
-        ends.append((x, base_y))
+        tops.append((0.5 + (t - 0.5) * 2 * rim_half, rim_y))
+        bottoms.append((0.5 + (t - 0.5) * 2 * tip_half, tip_y))
 
-    # each strand: quadratic from the apex to its base point, bowing away from the centre
     strand_curves = []
-    for (x, y) in ends:
-        control = (x + (x - apex[0]) * sag, apex[1] + (y - apex[1]) * 0.42)
-        strand_curves.append((apex, control, (x, y)))
+    for top, bottom in zip(tops, bottoms):
+        # the control point pulls the strand outwards near the middle, which is what gives a
+        # shield its shoulder
+        control = (top[0] + (top[0] - 0.5) * 0.55, rim_y + (tip_y - rim_y) * 0.58)
+        strand_curves.append((top, control, bottom))
 
     def at(curve, t):
         (x0, y0), (x1, y1), (x2, y2) = curve
@@ -50,18 +57,16 @@ def net_geometry():
         return (u * u * x0 + 2 * u * t * x1 + t * t * x2,
                 u * u * y0 + 2 * u * t * y1 + t * t * y2)
 
-    # two wefts, each a smooth band through the same fraction of every strand, sagging a
-    # little in the middle so they read as rope rather than as rules
     wefts = []
-    for fraction, sag_amount in ((0.46, 0.030), (0.74, 0.022)):
+    for fraction, sag_amount in ((0.38, 0.022), (0.68, 0.016)):
         band = []
         for curve in strand_curves:
             x, y = at(curve, fraction)
             band.append((x, y + sag_amount * math.sin(math.pi * min(max(x, 0.0), 1.0))))
         wefts.append(band)
 
-    knots = [at(curve, 1.0) for curve in strand_curves]
-    return strand_curves, wefts, knots, apex
+    knots = tops
+    return strand_curves, wefts, knots, (0.5, tip_y)
 
 
 def curve_points(control_a, control_b, control_c, steps=26):
@@ -110,6 +115,13 @@ def draw_mark(draw, size, colour, knot_colour, scale=1.0, offset=(0.0, 0.0), wid
         cx, cy = px(knot)
         draw.ellipse([cx - r, cy - r, cx + r, cy + r], fill=knot_colour)
 
+    # nine rounded strand ends meeting at the tip read as a frayed edge; one small filled cap
+    # closes the shape the way the corner of a shield is closed
+    tip_x, tip_y = px((0.5, 0.90))
+    cap_w = size * 0.070 * scale
+    cap_h = size * 0.020 * scale
+    draw.ellipse([tip_x - cap_w, tip_y - cap_h, tip_x + cap_w, tip_y + cap_h], fill=colour)
+
 
 def icon(size: int) -> Image.Image:
     s = size * SS
@@ -119,7 +131,7 @@ def icon(size: int) -> Image.Image:
     d.rounded_rectangle([pad, pad, s - pad, s - pad], radius=int(s * 0.235),
                         fill=FIELD + (255,), outline=EDGE, width=max(1, s // 160))
     # the mark sits in the lower two thirds, so the dome reads as an arch in the square
-    draw_mark(d, s, SAGE + (240,), KNOT + (255,), scale=0.80, offset=(0.10, 0.12))
+    draw_mark(d, s, SAGE + (240,), KNOT + (255,), scale=0.82, offset=(0.09, 0.07))
     return img.resize((size, size), Image.LANCZOS)
 
 
@@ -127,7 +139,7 @@ def mark_only(size: int, colour=BONE, knot=None) -> Image.Image:
     s = size * SS
     img = Image.new("RGBA", (s, s), (0, 0, 0, 0))
     d = ImageDraw.Draw(img)
-    draw_mark(d, s, colour + (255,), (knot or colour) + (255,), scale=0.94, offset=(0.03, 0.03))
+    draw_mark(d, s, colour + (255,), (knot or colour) + (255,), scale=0.90, offset=(0.05, 0.05))
     return img.resize((size, size), Image.LANCZOS)
 
 
