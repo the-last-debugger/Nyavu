@@ -1,0 +1,66 @@
+{
+  "url": "http://safaricom-secure-login.tk/verify",
+  "host": "safaricom-secure-login.tk",
+  "label": 1,
+  "verdict": "phishing",
+  "risk": "high",
+  "band": "Likely phishing",
+  "probability": 0.9998,
+  "model_probability": 0.9998,
+  "capped_by_reputation": false,
+  "confidence": 100.0,
+  "reputation": null,
+  "suggested": {
+    "brand": "safaricom",
+    "domain": "safaricom.co.ke"
+  },
+  "reasons": [
+    "The brand 'safaricom' appears in this domain, but 'safaricom' actually uses safaricom.co.ke; the extra or altered wording is a common impersonation trick.",
+    "Uses the '.tk' top-level domain, which is frequently associated with free or cheap bulk registration and abuse.",
+    "The domain contains 2 hyphens, a pattern often used to mimic a brand inside a compound domain.",
+    "The domain has high character entropy, consistent with machine-generated names.",
+    "The address uses HTTP rather than HTTPS, so anything typed into the page would travel unencrypted. Older and institutional sites often work this way."
+  ],
+  "evidence": [
+    {
+      "token": "com-",
+      "weight": 0.1673
+    },
+    {
+      "token": "cure",
+      "weight": 0.1006
+    },
+    {
+      "token": "ecure",
+      "weight": 0.0891
+    },
+    {
+      "token": "afar",
+      "weight": 0.0876
+    },
+    {
+      "token": "afari",
+      "weight": 0.0876
+    }
+  ],
+  "features": {
+    "domain_len": 25,
+    "num_labels": 2,
+    "num_hyphens": 2,
+    "num_digits": 0,
+    "digit_ratio": 0.0,
+    "hyphen_ratio": 0.08,
+    "tld_len": 2,
+    "suspicious_tld": 1,
+    "is_ip": 0,
+    "is_idn": 0,
+    "entropy": 4.0039,
+    "max_label_len": 22,
+    "brand_present": 1,
+    "brand_in_wrong_place": 1,
+    "is_typosquat": 0,
+    "typo_distance": 17,
+    "digit_in_registrable": 0
+  },
+  "inference_ms": 153.16
+}

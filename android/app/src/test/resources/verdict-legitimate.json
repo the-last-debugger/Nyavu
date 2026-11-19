@@ -1,0 +1,59 @@
+{
+  "url": "https://www.safaricom.co.ke/",
+  "host": "www.safaricom.co.ke",
+  "label": 0,
+  "verdict": "legitimate",
+  "risk": "low",
+  "band": "Likely legitimate",
+  "probability": 0.15,
+  "model_probability": 0.2154,
+  "capped_by_reputation": true,
+  "confidence": 85.0,
+  "reputation": "established",
+  "suggested": null,
+  "reasons": [
+    "This is an established domain, among the 100,000 most visited on the internet. Name-level evidence is not enough to flag it."
+  ],
+  "evidence": [
+    {
+      "token": "afar",
+      "weight": 0.109
+    },
+    {
+      "token": "afari",
+      "weight": 0.109
+    },
+    {
+      "token": "safa",
+      "weight": 0.109
+    },
+    {
+      "token": "safar",
+      "weight": 0.109
+    },
+    {
+      "token": "o.ke",
+      "weight": 0.1038
+    }
+  ],
+  "features": {
+    "domain_len": 15,
+    "num_labels": 3,
+    "num_hyphens": 0,
+    "num_digits": 0,
+    "digit_ratio": 0.0,
+    "hyphen_ratio": 0.0,
+    "tld_len": 2,
+    "suspicious_tld": 0,
+    "is_ip": 0,
+    "is_idn": 0,
+    "entropy": 3.3736,
+    "max_label_len": 9,
+    "brand_present": 1,
+    "brand_in_wrong_place": 0,
+    "is_typosquat": 0,
+    "typo_distance": 6,
+    "digit_in_registrable": 0
+  },
+  "inference_ms": 16.13
+}

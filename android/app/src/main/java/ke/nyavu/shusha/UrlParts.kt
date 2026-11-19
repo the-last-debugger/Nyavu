@@ -46,21 +46,36 @@ object UrlParts {
             return parts
         }
 
-        val suffix = when {
-            labels.size >= 3 && TWO_LABEL_SUFFIXES.contains(
-                labels.takeLast(2).joinToString(".").lowercase()) ->
-                labels.takeLast(2).joinToString(".")
-            labels.size >= 2 -> labels.last()
-            else -> ""
-        }
-        val nameEnd = if (suffix.isEmpty()) labels.size else labels.size - suffix.count { it == '.' } - 1
-        val name = labels.take(nameEnd).joinToString(".")
+        // A name has three parts, not two: any subdomains, the registrable name, and the
+        // ending. Showing "www.safaricom" as one piece and calling "www" the name was wrong
+        // and taught the opposite of the lesson.
+        val twoLabel = labels.size >= 3 &&
+            TWO_LABEL_SUFFIXES.contains(labels.takeLast(2).joinToString(".").lowercase())
+        val suffixLabels = if (twoLabel) 2 else 1
+        val suffixStart = labels.size - suffixLabels
+        val beforeSuffix = labels.take(suffixStart)
 
-        if (name.isNotEmpty()) {
-            parts += Part(name, "\"${name.substringBefore(".")}\" is what the address claims to be",
-                "name", wrong = false)
+        val registrable = beforeSuffix.lastOrNull().orEmpty()
+        val subdomains = beforeSuffix.dropLast(1)
+
+        if (subdomains.isNotEmpty()) {
+            parts += Part(
+                subdomains.joinToString(".") + ".",
+                "a subdomain: anyone can put a word in front of a name",
+                "subdomain",
+                wrong = false,
+            )
         }
-        if (suffix.isNotEmpty()) {
+        if (registrable.isNotEmpty()) {
+            parts += Part(
+                registrable,
+                "\"$registrable\" is the name this address is registered under",
+                "name",
+                wrong = false,
+            )
+        }
+        if (suffixStart < labels.size) {
+            val suffix = labels.drop(suffixStart).joinToString(".")
             val ending = suffix.substringAfterLast(".")
             val cheap = CHEAP_ENDINGS.contains(ending.lowercase())
             parts += Part(
@@ -71,9 +86,11 @@ object UrlParts {
                 wrong = cheap,
             )
         }
-        if (rest.isNotEmpty()) {
+        if (rest.isNotEmpty() && rest != "/") {
             val path = rest.substringBefore('?')
-            parts += Part(path, "the path, cosmetic", "path", wrong = false)
+            if (path.isNotEmpty() && path != "/") {
+                parts += Part(path, "the path, cosmetic", "path", wrong = false)
+            }
         }
         return parts
     }

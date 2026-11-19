@@ -1,0 +1,48 @@
+{
+  "url": "https://user:pass@example.com/login",
+  "host": "example.com",
+  "label": 0,
+  "verdict": "suspicious",
+  "risk": "medium",
+  "band": "Suspicious",
+  "probability": 0.5,
+  "model_probability": 0.3413,
+  "capped_by_reputation": false,
+  "confidence": 50.0,
+  "reputation": "established",
+  "suggested": null,
+  "reasons": [
+    "This link carries a username before the host, which can be used to make a different domain appear in front of the real one.",
+    "This is an established domain, among the 100,000 most visited on the internet. Name-level evidence is not enough to flag it."
+  ],
+  "evidence": [
+    {
+      "token": "ple.c",
+      "weight": 0.1808
+    },
+    {
+      "token": "ple.",
+      "weight": 0.1056
+    }
+  ],
+  "features": {
+    "domain_len": 11,
+    "num_labels": 2,
+    "num_hyphens": 0,
+    "num_digits": 0,
+    "digit_ratio": 0.0,
+    "hyphen_ratio": 0.0,
+    "tld_len": 3,
+    "suspicious_tld": 0,
+    "is_ip": 0,
+    "is_idn": 0,
+    "entropy": 3.0958,
+    "max_label_len": 7,
+    "brand_present": 0,
+    "brand_in_wrong_place": 0,
+    "is_typosquat": 0,
+    "typo_distance": 3,
+    "digit_in_registrable": 0
+  },
+  "inference_ms": 41.13
+}

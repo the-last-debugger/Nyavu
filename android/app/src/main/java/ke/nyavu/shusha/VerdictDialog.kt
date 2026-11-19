@@ -30,7 +30,8 @@ class VerdictDialog(
 
     private fun dp(v: Int) = NyavuTheme.dp(host, v)
 
-    fun show() {
+    /** Shows the verdict and hands back the dialog, so a test can draw it. */
+    fun show(): Dialog {
         val verdict = payload.optString("verdict")
         val risk = payload.optString("risk")
         val pct = Math.round(payload.optDouble("probability", 0.0) * 100).toInt()
@@ -262,6 +263,8 @@ class VerdictDialog(
         val examination = Examination(host, parts, examinationRows) { }
         examination.start()
         dialog.setOnDismissListener { examination.cancel() }
+
+        return dialog
     }
 
     private fun reasonRow(number: String, text: String): LinearLayout {
