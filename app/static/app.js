@@ -115,33 +115,63 @@
      Lines about trust and deception, in the register of a war quote rather than a warning banner.
      Only the first is a quotation, and it is attributed; the rest are written for this page. */
   const NOTES = [
-    ["All warfare is based on deception.", "Sun Tzu, The Art of War"],
-    ["A link does not lie. It waits for you to believe it.", "Nyavu"],
-    ["Every phishing page is a door painted onto a wall.", "Nyavu"],
-    ["You do not lose a password to a thief. You hand it to a stranger wearing a familiar name.", "Nyavu"],
-    ["The name you recognise is the only part they did not have to earn.", "Nyavu"],
-    ["They do not break in. They are invited.", "Nyavu"],
-    ["A one-time code is one time for you, and once is enough for them.", "Nyavu"],
-    ["Trust is not a feeling. It is a reading, done from the right.", "Nyavu"],
+    ["“All warfare is based on deception.”", "Sun Tzu, The Art of War"],
+    ["“A link does not lie. It waits for you to believe it.”", "Nyavu"],
+    ["“Every phishing page is a door painted onto a wall.”", "Nyavu"],
+    ["“You do not lose a password to a thief. You hand it to a stranger wearing a familiar name.”", "Nyavu"],
+    ["“The name you recognise is the only part they did not have to earn.”", "Nyavu"],
+    ["“They do not break in. They are invited.”", "Nyavu"],
+    ["“A one-time code is one time for you, and once is enough for them.”", "Nyavu"],
+    ["“Trust is not a feeling. It is a reading, done from the right.”", "Nyavu"],
   ];
 
+  /* Five seconds a line: at about four words a second, a line of this length needs roughly three,
+     and the rest is the glance back before it goes. WCAG 2.2.2 asks for a way to stop movement, so
+     the rotation pauses while the note is hovered or focused, and again when the tab is hidden.
+     Under prefers-reduced-motion there is no rotation at all: the first line simply stands. */
   (function rotateNotes() {
     const text = document.getElementById("noteQuote");
     const source = document.getElementById("noteSource");
     if (!text || !source || NOTES.length < 2) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    const DWELL = 5000;
+    const FADE = 460;
+    const note = text.closest(".hero-note");
     let index = 0;
-    setInterval(() => {
+    let timer = null;
+    let paused = false;
+
+    const advance = () => {
+      if (paused) return;
       index = (index + 1) % NOTES.length;
       text.classList.add("changing");
       source.classList.add("changing");
-      setTimeout(() => {
+      window.setTimeout(() => {
         text.textContent = NOTES[index][0];
         source.textContent = NOTES[index][1];
         text.classList.remove("changing");
         source.classList.remove("changing");
-      }, 420);
-    }, 7000);
+      }, FADE);
+    };
+
+    const start = () => {
+      if (timer) window.clearInterval(timer);
+      timer = window.setInterval(advance, DWELL);
+    };
+    const pause = () => { paused = true; };
+    const resume = () => { paused = false; };
+
+    if (note) {
+      note.addEventListener("pointerenter", pause);
+      note.addEventListener("pointerleave", resume);
+      note.addEventListener("focusin", pause);
+      note.addEventListener("focusout", resume);
+    }
+    document.addEventListener("visibilitychange", () => {
+      if (document.hidden) pause(); else resume();
+    });
+    start();
   })();
 
   function route() {

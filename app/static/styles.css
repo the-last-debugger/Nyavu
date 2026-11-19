@@ -8944,6 +8944,7 @@ html.booting main { opacity: .62; }
 }
 
 
+
 /* -------------------------------------------------------------------------------
    The record, examined
 
@@ -9013,4 +9014,42 @@ html.booting main { opacity: .62; }
   border-radius: 50%;
   background: var(--bone);
   opacity: .5;
+
+/* The note is a quotation, so it is set like one: hanging quotation marks, serif, and a rule under
+   the attribution. The marks are drawn by the stylesheet so the text itself stays clean. */
+.hero-note .note-figure { margin: 0; }
+.hero-note .note-quote {
+  position: relative;
+  margin: 0 0 10px;
+  padding: 0 0 0 1.1em;
+  font-family: var(--font-display);
+  font-size: 1.04rem;
+  line-height: 1.62;
+  color: var(--text);
+  transition: opacity .45s ease, transform .45s ease;
+  text-indent: 0;
 }
+
+
+.hero-note .note-source {
+  display: block;
+  padding-left: 1.1em;
+  font-family: var(--font-body);
+  font-size: .68rem;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--faint);
+  transition: opacity .45s ease;
+}
+.hero-note .note-quote.changing,
+.hero-note .note-source.changing { opacity: 0; transform: translateY(-4px); }
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-note .note-quote, .hero-note .note-source { transition: none; }
+
+}
+
+/* Quotation marks, drawn here so the text stays clean and either mark can be styled alone. */
+.hero-note .note-quote { position: relative; padding-left: 1.05em; }
+
+
