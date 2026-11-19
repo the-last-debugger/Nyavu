@@ -270,3 +270,27 @@ is small.
 as an empty prompt. That is still what a first-time visitor sees, but a returning visitor now
 sees rows, so the figure and the sentence above it are no longer the whole truth. If the report
 is ever resubmitted, both need updating.
+
+### Shipped: the examination, the verdict, and no way to skip
+
+Three changes are live on `main`:
+
+1. **The examination is one clock, eleven seconds**, and the dial is sequenced after the evidence
+   rather than timed against it. Measured: pieces written 3.3 s, flagged 4.2 and 4.5 s, notes
+   7.9 s, dial begins 8.2 s, needle settles 11.1 s, verdict 11.4 s.
+2. **Verdict first, number underneath.** The dial's readout is a band word, clear, caution or
+   concern; the card leads with a pill, a headline and one sentence; the probability moves into
+   the fold as a frequency. A capped verdict says the domain is established and reports the
+   model's own estimate separately, which answers the question Dr Komen asked.
+3. **The examination cannot be skipped.** The control, its handler and the finish-jump function
+   are gone. If the answer is worth reading, it is worth watching arrive.
+
+While removing the skip path, an earlier patch was found to have matched the wrong copy of a
+duplicated line: the needle's colour fix had landed in the skip path rather than in the sweep, so
+deleting the dead code would have silently reverted it. The tone is now set where the animation
+actually runs.
+
+Live verification, with the service worker cleared: bundle v=b08f9d3374, no skip control, the
+verdict sentence at opacity 0 during the examination and visible only after the needle settles,
+the capped detail reading "Model estimate about 1 in 5 (22 out of 100), held at 15 because the
+domain is established", no console errors, suite 17 of 17.
