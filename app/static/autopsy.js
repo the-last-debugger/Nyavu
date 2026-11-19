@@ -202,9 +202,7 @@ function autopsyMarkup(r) {
         <span class="autopsy-caret" aria-hidden="true"></span>
         ${items.join("")}
       </div>
-      <p class="autopsy-panel" aria-live="polite">
-        <span class="panel-who"></span><span class="panel-say"></span>
-      </p>
+      <ol class="autopsy-panel" aria-live="polite"></ol>
       <p class="autopsy-caption">${caption}</p>
     </div>`;
 }

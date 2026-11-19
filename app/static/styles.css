@@ -8525,11 +8525,7 @@ dialog.verdict-dialog[open] {
    before the needle moves, the readout appears only at that moment, and the bands step
    back once the reading is in.
    ------------------------------------------------------------------------------- */
-.result .gauge { opacity: 0; transform: scale(.965); }
-.result .gauge.arriving {
-  opacity: 1; transform: none;
-  transition: opacity .9s ease, transform .9s cubic-bezier(.22, 1, .36, 1);
-}
+
 .gauge .readout { opacity: 0; transition: opacity .35s ease .12s; }
 .gauge.armed .readout { opacity: 1; }
 
@@ -8683,4 +8679,41 @@ html.booting main { opacity: .62; }
   .result details.score-more { display: block !important; }
   .result details.score-more > * { display: block !important; }
   .result details.score-more summary { display: none !important; }
+}
+
+/* -------------------------------------------------------------------------------
+   Notes accumulate
+
+   Replacing the note each time meant the examination ended with a single note left, which is
+   the opposite of a report. Every note now stays, in reading order, under the address.
+   ------------------------------------------------------------------------------- */
+.autopsy-panel {
+  display: block;
+  list-style: none;
+  margin: 14px 0 0;
+  padding: 0;
+  border-top: 1px solid var(--line);
+  max-height: 260px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+.autopsy-panel .note-item {
+  display: grid;
+  grid-template-columns: minmax(110px, 190px) 1fr;
+  gap: 16px;
+  align-items: baseline;
+  padding: 7px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, .05);
+  animation: note-in .3s ease-out;
+}
+.autopsy-panel .note-word { font-family: var(--font-mono); font-size: .82rem; color: var(--bone); word-break: break-all; }
+.autopsy-panel .note-say { font-family: var(--font-body); font-size: .8rem; color: var(--muted); line-height: 1.45; }
+.autopsy-panel .note-item:last-child { border-bottom: 0; }
+@keyframes note-in { from { opacity: 0; transform: translateY(3px); } to { opacity: 1; transform: none; } }
+
+.autopsy-line .seg.key-piece { border-bottom-color: rgba(233, 230, 222, .8); }
+
+@media (max-width: 640px) {
+  .autopsy-panel .note-item { grid-template-columns: 1fr; gap: 2px; }
+  .autopsy-panel { max-height: 220px; }
 }

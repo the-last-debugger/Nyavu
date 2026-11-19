@@ -635,15 +635,28 @@
          markers on one line: the caret ahead and the lit piece behind. With the note in its own
          panel, the lit piece is the marker, so the caret stays out of the reading. */
       delay(at + WRITE_GAP, () => {
-        /* the note lands in the panel, and the piece it belongs to is the one that stays lit */
+        /* Notes accumulate. They used to replace one another, which meant that by the end of the
+           examination only the last piece read had a note left: the opposite of a report. Now
+           every note stays, in reading order, and the piece being read is the one lit. */
         const panel = autopsy ? autopsy.querySelector(".autopsy-panel") : null;
-        const who = panel ? panel.querySelector(".panel-who") : null;
-        const say = panel ? panel.querySelector(".panel-say") : null;
         segs.forEach((other) => other.classList.remove("speaking"));
         seg.classList.add("speaking");
-        if (who) who.textContent = (seg.querySelector(".seg-text") || seg).textContent.trim();
-        if (say) say.textContent = seg.dataset.note || "";
-        if (panel) panel.classList.add("on");
+        seg.classList.add("read");
+        if (panel) {
+          const item = document.createElement("li");
+          item.className = "note-item";
+          const word = document.createElement("span");
+          word.className = "note-word";
+          word.textContent = (seg.querySelector(".seg-text") || seg).textContent.trim();
+          const said = document.createElement("span");
+          said.className = "note-say";
+          said.textContent = seg.dataset.note || "";
+          item.appendChild(word);
+          item.appendChild(said);
+          panel.appendChild(item);
+          panel.classList.add("on");
+          item.scrollIntoView({ block: "nearest" });
+        }
         if (mode && mode.dataset.state !== "reading") {
           mode.textContent = "reading from the ending";
           mode.dataset.state = "reading";
@@ -654,18 +667,13 @@
     delay(resolveStart + segs.length * STEP + WRITE_GAP + 220, () => {
       if (caret) caret.classList.remove("on");
       if (autopsy) autopsy.classList.add("swept");
-      /* Land the panel on the registered name when the sweep finishes. The sweep reads from the
-         ending outwards, so its last piece is the scheme, which is the weakest possible final
-         note for a label that says "the name is what was registered". */
+      /* The sweep is over: every note is on the panel, and the registered name keeps the
+         highlight because it is the piece the verdict rests on. */
       segs.forEach((other) => other.classList.remove("speaking"));
       const registered = segs.find((el) => el.dataset.role === "the name");
       if (registered) {
-        const panel = autopsy ? autopsy.querySelector(".autopsy-panel") : null;
-        const who = panel ? panel.querySelector(".panel-who") : null;
-        const say = panel ? panel.querySelector(".panel-say") : null;
         registered.classList.add("speaking");
-        if (who) who.textContent = (registered.querySelector(".seg-text") || registered).textContent.trim();
-        if (say) say.textContent = registered.dataset.note || "";
+        registered.classList.add("key-piece");
       }
       if (mode) {
         mode.textContent = "the name is what was registered";
