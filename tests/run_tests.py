@@ -11,6 +11,7 @@ from __future__ import annotations
 import json
 import os
 import urllib.error
+import time
 import urllib.request
 
 BASE = os.environ.get("NYAVU_BASE", "http://127.0.0.1:8000")
@@ -18,7 +19,14 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(HERE, "results.json")
 
 
-def call(path, payload=None, method=None):
+def call(path, payload=None, method=None, retry_on_throttle=True):
+    """Call the service, waiting out its own rate limiter.
+
+    The suite issues about thirty calls. The limiter exists to stop abuse, and a test run is
+    indistinguishable from a burst, so a second run straight after a first gets 429s and cases
+    fail for a reason that has nothing to do with the case. One short wait and a retry keeps
+    the suite honest without weakening the limiter.
+    """
     url = BASE + path
     data = json.dumps(payload).encode() if payload is not None else None
     req = urllib.request.Request(url, data=data, method=method or ("POST" if data else "GET"))
@@ -28,6 +36,10 @@ def call(path, payload=None, method=None):
         with urllib.request.urlopen(req, timeout=30) as r:
             return r.status, json.loads(r.read().decode())
     except urllib.error.HTTPError as e:
+        if e.code == 429 and retry_on_throttle:
+            # one window is sixty seconds; waiting less just burns the retry
+            time.sleep(30)
+            return call(path, payload, method, retry_on_throttle=False)
         try:
             return e.code, json.loads(e.read().decode())
         except Exception:

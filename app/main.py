@@ -4,6 +4,7 @@ from __future__ import annotations
 import csv
 from datetime import datetime, timezone
 import json
+import logging
 import urllib.request
 import urllib.error
 import urllib.parse
@@ -27,6 +28,8 @@ from .predictor import Predictor
 BASE = os.path.dirname(os.path.abspath(__file__))
 STATIC = os.path.join(BASE, "static")
 
+log = logging.getLogger("nyavu")
+
 app = FastAPI(
     title="Nyavu API",
     version="1.0.0",
@@ -36,14 +39,36 @@ app = FastAPI(
 state: dict = {}
 
 
+def _init_storage() -> bool:
+    """Prepare the database, but do not let it decide whether the service starts.
+
+    The free-tier database suspends when idle, and a spin-up can reach this code while the
+    database is still waking. Refusing to start in that window turns a slow afternoon into an
+    outage, so storage is attempted with a short backoff and then reported as degraded: every
+    verdict still works, and only history and statistics are unavailable until the next write.
+    """
+    for attempt in (1, 2, 3):
+        try:
+            db.init_db()
+            db.migrate_auth()
+            return True
+        except Exception as exc:                      # noqa: BLE001 - storage is best effort
+            log.warning("storage not ready (attempt %d/3): %s", attempt, exc)
+            time.sleep(0.4 * attempt)
+    log.error("starting without storage; verdicts will still be served")
+    return False
+
+
 @app.on_event("startup")
 def _startup() -> None:
-    db.init_db()
-    db.migrate_auth()
+    state["storage_ready"] = _init_storage()
     state["predictor"] = Predictor()
     m = state["predictor"].info()["metrics"]
-    db.record_model(state["predictor"].info()["model"], "1.0.0",
-                    m["accuracy"], m["f1"])
+    try:
+        db.record_model(state["predictor"].info()["model"], "1.0.0",
+                        m["accuracy"], m["f1"])
+    except Exception as exc:                          # noqa: BLE001
+        log.warning("model record not written: %s", exc)
 
 
 
@@ -64,7 +89,10 @@ def _client_ip(request: Request) -> str:
 
 def _limit_for(path: str) -> tuple[str, int] | None:
     if path == "/api/predict":
-        return "predict", 30
+        # A person comparing several links, or a demonstrator working through a list, reaches
+        # thirty calls in a minute without trying. Sixty still stops a script and does not
+        # interrupt a person.
+        return "predict", 60
     if path == "/api/scan/bulk":
         return "bulk", 5
     if path.startswith("/api/auth"):
@@ -150,13 +178,33 @@ def current_user(request: Request):
     return db.user_for_token(request.cookies.get("pg_session", ""))
 
 
+def _store_scan(user_id, url: str, result: dict) -> bool:
+    """Record a scan, but never at the cost of the verdict.
+
+    The free-tier database suspends when idle, so the first request after a quiet period can
+    lose its connection mid-write. A person who asked for a verdict should still get one: the
+    write is retried once and then abandoned with a log line, because losing the record is a
+    smaller failure than losing the answer.
+    """
+    for attempt in (1, 2):
+        try:
+            db.add_scan(user_id, url, result["host"], result["verdict"], result["risk"],
+                        result["probability"], result["inference_ms"])
+            return True
+        except Exception as exc:                     # noqa: BLE001 - storage is best effort
+            if attempt == 2:
+                log.warning("scan not stored after retry: %s", exc)
+            else:
+                time.sleep(0.2)
+    return False
+
+
 def _scan_and_store(url: str, user_id):
     try:
         result = state["predictor"].predict(url)
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc))
-    db.add_scan(user_id, url, result["host"], result["verdict"], result["risk"],
-                result["probability"], result["inference_ms"])
+    result["stored"] = _store_scan(user_id, url, result)
     return result
 
 
@@ -165,7 +213,9 @@ def _scan_and_store(url: str, user_id):
 # --------------------------------------------------------------------------- #
 @app.get("/api/health")
 def health():
-    return {"status": "ok", "db": db.backend(), "model_loaded": "predictor" in state}
+    return {"status": "ok" if state.get("storage_ready", True) else "degraded",
+            "db": db.backend(), "model_loaded": "predictor" in state,
+            "storage_ready": bool(state.get("storage_ready", True))}
 
 
 @app.get("/api/model")
@@ -238,6 +288,14 @@ async def scan_bulk(request: Request, file: UploadFile = File(...)):
     return {"count": len(out), "flagged": flagged, "results": out}
 
 
+def _safe_history(limit: int, user_id):
+    try:
+        return db.recent_scans(limit, user_id)
+    except Exception as exc:                          # noqa: BLE001
+        log.warning("history unavailable: %s", exc)
+        return None
+
+
 @app.get("/api/history")
 def history(request: Request, limit: int = 20):
     """Only the signed-in user's own scans.
@@ -249,19 +307,31 @@ def history(request: Request, limit: int = 20):
     if not user:
         return {"items": [], "note": "Sign in to keep a private scan history."}
     limit = max(1, min(limit, 100))
-    return {"items": db.recent_scans(limit, user["id"])}
+    items = _safe_history(limit, user["id"])
+    if items is None:
+        return {"items": [], "note": "History is unavailable for a moment. Try again shortly."}
+    return {"items": items}
 
 
 @app.get("/api/stats")
 def get_stats():
-    return db.stats()
+    try:
+        return db.stats()
+    except Exception as exc:                          # noqa: BLE001
+        log.warning("stats unavailable: %s", exc)
+        return {"total_scans": 0, "phishing": 0, "legitimate": 0, "users": 0,
+                "note": "Statistics are unavailable for a moment."}
 
 
 @app.get("/api/stats/daily")
 def get_daily_stats(days: int = 14):
     """Scan volume per day, for the sparkline. This service's own traffic only."""
     days = max(2, min(days, 60))
-    return {"days": db.daily_scans(days)}
+    try:
+        return {"days": db.daily_scans(days)}
+    except Exception as exc:                          # noqa: BLE001
+        log.warning("daily stats unavailable: %s", exc)
+        return {"days": [], "note": "Statistics are unavailable for a moment."}
 
 
 # --------------------------------------------------------------------------- #
