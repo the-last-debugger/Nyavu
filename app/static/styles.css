@@ -8825,3 +8825,31 @@ html.booting main { opacity: .62; }
   font-size: clamp(.66rem, 1.6vw, .92rem) !important;
   padding: 3px 10px !important;
 }
+
+/* -------------------------------------------------------------------------------
+   Reported
+
+   The only evidence in the card that does not come from the name. It sits above the intent line
+   because a report outranks a guess about intent, and it carries its source and its date, because
+   a list can go stale and a domain can be re-registered.
+   ------------------------------------------------------------------------------- */
+.feed-line {
+  margin: 14px 0 0;
+  padding: 10px 14px;
+  border-left: 2px solid rgba(239, 68, 68, .55);
+  background: rgba(239, 68, 68, .06);
+  border-radius: 0 8px 8px 0;
+  font-family: var(--font-body);
+  font-size: .88rem;
+  line-height: 1.5;
+  color: var(--text);
+}
+.feed-tag {
+  display: block;
+  font-size: .6rem;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: #F3B4C0;
+  margin-bottom: 3px;
+}
+.feed-note { font-family: var(--font-body); font-size: .8rem; color: var(--muted); line-height: 1.5; }

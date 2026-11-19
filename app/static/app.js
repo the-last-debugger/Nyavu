@@ -862,6 +862,16 @@ function fitBandWord(span) {
   span.style.setProperty("white-space", "nowrap", "important");
 }
 
+/* The one piece of evidence that does not come from the name: a hit against the local snapshot of
+   public phishing lists. It says what it is and when it was taken, because a list can go stale. */
+function feedLine(r) {
+  const feed = r.feed;
+  if (!feed || !feed.listed) return "";
+  const source = (feed.sources || []).slice(0, 2).join(" and ") || "a public list";
+  const target = feed.target ? ` It imitates ${feed.target}.` : "";
+  return `<p class="feed-line"><span class="feed-tag">reported</span> On ${escapeHtml(source)}, snapshot ${escapeHtml(feed.generated || "recent")}.${target ? escapeHtml(target) : ""}</p>`;
+}
+
 const BAND_WORD = (value) => (value >= 65 ? "dangerous" : value >= 35 ? "suspect" : "safe");
 
   function render(r) {
@@ -883,13 +893,18 @@ const BAND_WORD = (value) => (value >= 65 ? "dangerous" : value >= 35 ? "suspect
       const oneIn = Math.max(2, Math.round(100 / value));
       return `about 1 in ${oneIn}`;
     };
-    const verdictLine = r.capped_by_reputation
-      ? "An established domain, so it is not flagged on the shape of its name."
-      : r.risk === "high"
-        ? "The name carries the marks of a phishing address."
-        : r.risk === "medium"
-          ? "Something about this name is worth a second look, which is what suspect means here."
-          : "Nothing in this name reads as phishing.";
+    /* When the report is what settles it, say so: the model saw a plausible name, and the evidence
+       came from outside the name. Claiming "the name carries the marks" here would be untrue. */
+    const verdictLine = r.feed && r.feed.listed
+      ? `The name alone reads ${BAND_WORD(pct)}, which is how an address like this passes.
+         A public phishing list reports it${r.feed.target ? ` as an imitation of ${r.feed.target}` : ""}.`
+      : r.capped_by_reputation
+        ? "An established domain, so it is not flagged on the shape of its name."
+        : r.risk === "high"
+          ? "The name carries the marks of a phishing address."
+          : r.risk === "medium"
+            ? "Something about this name is worth a second look, which is what suspect means here."
+            : "Nothing in this name reads as phishing.";
     const scoreNote = r.capped_by_reputation
       ? `Model estimate ${frequency(modelPct === 0 ? 1 : modelPct)} (${modelPct} out of 100), held at ${pct} because the domain is established. Held at ${pct} is a reputation ceiling, not the model's estimate.`
       : `Model estimate ${frequency(pct)} (${pct} out of 100). That is the estimated chance this address is a phish, read from its name alone.`;
@@ -974,6 +989,10 @@ const BAND_WORD = (value) => (value >= 65 ? "dangerous" : value >= 35 ? "suspect
             <p class="band-legend">Bands: under 35 safe, 35 to 65 suspect, above 65 dangerous.</p>
             <h4 class="fold-title">The name, piece by piece</h4>
             ${autopsyBreakdown(r)}
+            ${r.feed && r.feed.listed
+              ? `<h4 class="fold-title">Where the report comes from</h4>
+                 <p class="feed-note">${escapeHtml((r.feed.sources || []).join(", "))}, snapshot ${escapeHtml(r.feed.generated || "recent")}; matched on ${escapeHtml(r.feed.host || "")}${r.feed.target ? `, reported as imitating ${escapeHtml(r.feed.target)}` : ""}.</p>`
+              : ""}
             <h4 class="fold-title">What it looks like it is after</h4>
             ${intentList(r)}
             <h4 class="fold-title">What was measured</h4>
@@ -981,12 +1000,13 @@ const BAND_WORD = (value) => (value >= 65 ? "dangerous" : value >= 35 ? "suspect
           </details>
           <div class="stamp ${r.risk}" aria-hidden="true">${r.risk === "high" ? "phishing" : r.risk === "medium" ? "unsure" : "clear"}</div>
         </div>
-        ${autopsyMarkup(r)}
+        ${autopsyMarkup(r, Boolean(r.feed && r.feed.listed))}
       </div>
       <div class="thinking-row">
         <p class="thinking" id="thinking"><span class="dot"></span><span class="phase">Reading the address</span></p>
       </div>
       ${measureStrip(r.features)}
+      ${feedLine(r)}
       ${r.risk === "low" ? "" : intentLine(r)}
       <h3 class="block-title">${r.risk === "low"
         ? "What stood out, in a good way"

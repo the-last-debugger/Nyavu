@@ -10,8 +10,8 @@
     "id": "T02",
     "case": "Established legitimate domain is not flagged",
     "expected": "verdict == legitimate",
-    "actual": "verdict = legitimate (0.0003)",
-    "status": "Pass"
+    "actual": "verdict = phishing (0.0003)",
+    "status": "Fail"
   },
   {
     "id": "T03",

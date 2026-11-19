@@ -302,7 +302,7 @@ function intentList(r) {
   return `<ul class="intent-list">${who}${rows}</ul>`;
 }
 
-function autopsyMarkup(r) {
+function autopsyMarkup(r, reported) {
   const { segs, clean, trustedSuffix, host } = autopsySegments(r);
   const flagged = segs.filter((s) => s.flag).length;
 
@@ -325,7 +325,9 @@ function autopsyMarkup(r) {
 
   const known = KNOWN_INSTITUTIONS[host.replace(/^www\./, "")];
   let caption;
-  if (flagged === 0) {
+  if (reported) {
+    caption = "Nothing in the name is out of place, which is exactly how an address like this gets past a reader. The report above is what settles it.";
+  } else if (flagged === 0) {
     if (known) {
       caption = `This is the address ${escapeHtml(known)} publishes.`;
     } else {

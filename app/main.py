@@ -23,6 +23,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
 from . import db
+from . import threat
 from .predictor import Predictor
 
 BASE = os.path.dirname(os.path.abspath(__file__))
@@ -204,7 +205,32 @@ def _scan_and_store(url: str, user_id):
         result = state["predictor"].predict(url)
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc))
+    result = _apply_feed(result)
     result["stored"] = _store_scan(user_id, url, result)
+    return result
+
+
+def _apply_feed(result: dict) -> dict:
+    """Add evidence from the local snapshot of public phishing lists.
+
+    The model judges the shape of a name, which is why a clean-looking address can still be a
+    known campaign. A feed hit is the one piece of evidence that does not come from the name, so it
+    is allowed to escalate the verdict; it is never allowed to clear one.
+    """
+    feed = threat.lookup(result.get("url", ""))
+    if not feed:
+        return result
+    result["feed"] = feed
+    result["feed_listed"] = True
+    if result.get("verdict") != "phishing":
+        result["verdict"] = "phishing"
+        result["risk"] = "high"
+        result["band"] = "Listed in a phishing feed"
+        result["label"] = 1
+        reason = ("This address appears on a public phishing list"
+                  + (f" (imitating {feed['target']})" if feed.get("target") else "")
+                  + f", snapshot {feed['generated']}. A list can go stale, but a report is a reason to stop.")
+        result["reasons"] = [reason] + list(result.get("reasons") or [])[:3]
     return result
 
 
