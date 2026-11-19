@@ -5,8 +5,11 @@
  * than being pinned by a cache, with the cache as an offline fallback only. API calls
  * are never cached: a stale verdict would be worse than no verdict.
  */
-const VERSION = "nyavu-v7";
-const SHELL = ["/", "/styles.css", "/app.js", "/autopsy.js", "/manifest.webmanifest",
+const VERSION = "nyavu-v8";
+// guards.css carries the no-spoiler gate; a cached shell without it shows the verdict early, which is
+// exactly what a stale service worker would do to a reader who has visited before.
+const SHELL = ["/", "/styles.css", "/guards.css", "/app.js", "/autopsy.js", "/institutions.js",
+               "/manifest.webmanifest",
                "/icon-192.png", "/icon-512.png", "/logo-mark.svg", "/logo-mark-small.svg", "/favicon-32.png", "/fonts/jetbrains-mono-500.woff2"];
 
 self.addEventListener("install", (event) => {

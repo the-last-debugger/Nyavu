@@ -77,3 +77,33 @@
   }
   .autopsy { padding-bottom: 12px !important; }
 }
+
+/* -------------------------------------------------------------------------------
+   The dial is blank until it has a reading
+
+   At zero the needle and the fill were already green, because the tone follows the value and the value
+   starts at zero. A person watching the needle sit in the green end of the scale reads "safe" before
+   anything has been measured. While the examination is running the needle and the arc are neutral;
+   the colour arrives with the verdict, together with the word.
+   ------------------------------------------------------------------------------- */
+.result.pending .gauge .needle {
+  background: linear-gradient(180deg, #E9E6DE, #FFFFFF) !important;
+  box-shadow: 0 0 16px rgba(233, 230, 222, .35) !important;
+}
+.result.pending .gauge .fill {
+  stroke: #E9E6DE !important;
+  filter: drop-shadow(0 0 12px rgba(233, 230, 222, .45)) !important;
+}
+.result.pending .gauge .pivot,
+.result.pending .gauge .dot {
+  background: #E9E6DE !important;
+  box-shadow: none !important;
+}
+
+/* the handle at the needle's base was still carrying the tone */
+.result.pending .gauge .needle::after,
+.result.pending .gauge .needle::before {
+  background: #E9E6DE !important;
+  box-shadow: 0 0 12px rgba(233, 230, 222, .45) !important;
+  border-color: #E9E6DE !important;
+}
