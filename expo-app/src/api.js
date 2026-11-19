@@ -7,7 +7,9 @@
  */
 import { Platform } from "react-native";
 
-export const BASE = "https://nyavu.onrender.com";
+// On a phone the API is a different origin, so it is absolute. In a browser build it is
+// same-origin, which is what a deployed web build and the local preview proxy both expect.
+export const BASE = Platform.OS === "web" ? "" : "https://nyavu.onrender.com";
 
 let session = null;
 

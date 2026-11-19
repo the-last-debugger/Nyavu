@@ -1,132 +1,116 @@
 /**
- * Nyavu, in React Native: one screen, and the examination is the point.
+ * Nyavu, native.
  *
- * The Kotlin app could show a dissection, but making it feel like writing took a chain of
- * handlers, one per character, because the View system has no notion of a value that
- * animates. Here the same idea is a single interval and one piece of state, which is why
- * this port exists at all.
- *
- * What it does: you paste an address, the caret types it out left to right, then the notes
- * arrive from the ending backwards, and the verdict lands. Nothing else: no tabs, no bulk
- * list, no model page.
+ * One screen and one sheet. The shell does the things a phone expects: safe areas, the
+ * Android back button closing the sheet before leaving the screen, ripple on Android and an
+ * opacity dip elsewhere, haptics on the actions that matter, and a sheet that can be dragged
+ * down. The examination is the product and lives in ExamSurface.
  */
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
-  Animated, Easing, Image, Linking, Platform, Pressable, SafeAreaView, ScrollView,
-  StyleSheet, Text, TextInput, View,
+  Animated, BackHandler, Easing, Image, Linking, PanResponder, Platform, Pressable,
+  SafeAreaView, ScrollView, StyleSheet, Text, TextInput, View,
 } from "react-native";
+import { SafeAreaProvider, useSafeAreaInsets } from "react-native-safe-area-context";
+import * as Haptics from "expo-haptics";
+import * as SplashScreen from "expo-splash-screen";
 import * as api from "./src/api";
-import { dissect, readingNote } from "./src/dissection";
+import { dissect } from "./src/dissection";
+import ExamSurface from "./src/ExamSurface";
 import { band, colour, headline, reasonTitle, space, type } from "./src/theme";
 
-// the site's rhythm: one character every 52ms, a note 320ms after the caret reaches it
-const PER_CHARACTER = 52;
-const NOTE_GAP = 320;
+SplashScreen.preventAutoHideAsync().catch(() => {});
 
-export default function App() {
+const SAMPLES = [
+  "safaricom.co.ke",
+  "safaricom-secure-login.tk",
+  "mpesa.co.ke.verify-account.top",
+];
+
+const buzz = (style) => {
+  try {
+    Haptics.impactAsync(style);
+  } catch {
+    // a device without haptics is still a device
+  }
+};
+
+function App() {
+  const insets = useSafeAreaInsets();
+  const [phase, setPhase] = useState("idle");   // idle | reading | exam | verdict
   const [url, setUrl] = useState("");
-  const [phase, setPhase] = useState("idle");   // idle | reading | writing | explaining | verdict
   const [payload, setPayload] = useState(null);
   const [error, setError] = useState("");
-  const [typed, setTyped] = useState(0);
-  const [notesShown, setNotesShown] = useState(0);
+  const [examKey, setExamKey] = useState(0);
 
-  const parts = payload ? dissect(payload.url) : [];
-  const totalChars = parts.reduce((sum, part) => sum + part.text.length, 0);
-
-  const caret = useRef(new Animated.Value(1)).current;
   const sheet = useRef(new Animated.Value(0)).current;
 
-  // the caret blinks while it is idle or thinking, and stops while it is writing
   useEffect(() => {
-    if (phase === "writing") {
-      caret.setValue(1);
-      return undefined;
-    }
-    const loop = Animated.loop(
-      Animated.sequence([
-        Animated.timing(caret, { toValue: 0.15, duration: 420, useNativeDriver: true }),
-        Animated.timing(caret, { toValue: 1, duration: 420, useNativeDriver: true }),
-      ])
-    );
-    loop.start();
-    return () => loop.stop();
-  }, [phase, caret]);
+    SplashScreen.hideAsync().catch(() => {});
+  }, []);
 
-  // the examination: type every character, then read the notes backwards
+  // the back button closes the sheet first, and only then leaves the screen
   useEffect(() => {
-    if (phase !== "writing" || !totalChars) return undefined;
-    let index = 0;
-    let noteTimer = null;
-    const typing = setInterval(() => {
-      index += 1;
-      setTyped(index);
-      if (index >= totalChars) {
-        clearInterval(typing);
-        setPhase("explaining");
-        let shown = 0;
-        noteTimer = setInterval(() => {
-          shown += 1;
-          setNotesShown(shown);
-          if (shown >= parts.length) {
-            clearInterval(noteTimer);
-            setPhase("verdict");
-            Animated.timing(sheet, {
-              toValue: 1, duration: 240, easing: Easing.out(Easing.cubic), useNativeDriver: true,
-            }).start();
-          }
-        }, NOTE_GAP);
+    const onBack = () => {
+      if (phase === "verdict" || phase === "exam") {
+        reset();
+        return true;
       }
-    }, PER_CHARACTER);
-    return () => {
-      clearInterval(typing);
-      if (noteTimer) clearInterval(noteTimer);
+      return false;
     };
-  }, [phase, totalChars, parts.length, sheet]);
+    const subscription = BackHandler.addEventListener("hardwareBackPress", onBack);
+    return () => subscription.remove();
+  }, [phase]);
 
   const scan = useCallback(async (value) => {
     const target = (value ?? url).trim();
     if (!target) {
       setError("Paste a link first.");
+      buzz(Haptics.ImpactFeedbackStyle.Rigid);
       return;
     }
     setError("");
     setPayload(null);
-    setTyped(0);
-    setNotesShown(0);
     setPhase("reading");
+    buzz(Haptics.ImpactFeedbackStyle.Medium);
     try {
       const result = await api.predict(target);
       setPayload(result);
-      setPhase("writing");
+      setExamKey((key) => key + 1);
+      setPhase("exam");
     } catch (issue) {
       setPhase("idle");
       setError(issue.message || "That did not work.");
+      buzz(Haptics.ImpactFeedbackStyle.Rigid);
     }
   }, [url]);
 
   const reset = () => {
     setPhase("idle");
     setPayload(null);
-    setTyped(0);
-    setNotesShown(0);
+    sheet.setValue(0);
   };
 
-  const typedFor = (index) => {
-    let before = 0;
-    for (let i = 0; i < index; i += 1) before += parts[i].text.length;
-    return Math.max(0, Math.min(parts[index].text.length, typed - before));
-  };
+  const showVerdict = useCallback(() => {
+    setPhase("verdict");
+    buzz(Haptics.ImpactFeedbackStyle.Heavy);
+    Animated.timing(sheet, {
+      toValue: 1, duration: 280, easing: Easing.out(Easing.cubic), useNativeDriver: true,
+    }).start();
+  }, [sheet]);
 
+  const parts = payload ? dissect(payload.url) : [];
   const risk = payload?.risk || "low";
   const pct = Math.round((payload?.probability ?? 0) * 100);
   const established = payload?.reputation === "established";
   const tone = established ? colour.safe : band(risk);
-  const examining = phase === "writing" || phase === "explaining" || phase === "verdict";
 
   return (
-    <SafeAreaView style={styles.app}>
-      <ScrollView contentContainerStyle={styles.page} keyboardShouldPersistTaps="handled">
+    <View style={[styles.app, { paddingTop: insets.top }]}>
+      <ScrollView
+        contentContainerStyle={[styles.page, { paddingBottom: space(8) + insets.bottom }]}
+        keyboardShouldPersistTaps="handled"
+      >
         <View style={styles.header}>
           <Image source={require("./assets/logo-mark.png")} style={styles.mark} resizeMode="contain" />
           <View>
@@ -138,6 +122,7 @@ export default function App() {
         {phase === "idle" ? (
           <>
             <Text style={styles.headline}>Read the address before you trust it.</Text>
+
             <View style={styles.field}>
               <TextInput
                 value={url}
@@ -152,15 +137,18 @@ export default function App() {
                 returnKeyType="go"
               />
             </View>
-            <Pressable style={styles.primary} onPress={() => scan()}>
-              <Text style={styles.primaryText}>Examine it</Text>
-            </Pressable>
+
+            <Action label="Examine it" onPress={() => scan()} primary />
             {error ? <Text style={styles.warning}>{error}</Text> : null}
+
             <Text style={styles.label}>OR TRY ONE</Text>
-            {["safaricom.co.ke", "safaricom-secure-login.tk", "mpesa.co.ke.verify-account.top"].map((sample) => (
-              <Pressable key={sample} onPress={() => { setUrl(sample); scan(sample); }}>
-                <Text style={styles.sample}>{sample}</Text>
-              </Pressable>
+            {SAMPLES.map((sample) => (
+              <Action
+                key={sample}
+                label={sample}
+                onPress={() => { setUrl(sample); scan(sample); }}
+                mono
+              />
             ))}
           </>
         ) : null}
@@ -168,85 +156,134 @@ export default function App() {
         {phase === "reading" ? (
           <View style={styles.readingRow}>
             <Text style={styles.reading}>Reading the address</Text>
-            <Animated.Text style={[styles.caretGlyph, { opacity: caret }]}>|</Animated.Text>
           </View>
         ) : null}
 
-        {examining ? (
-          <View style={styles.plate}>
-            <Text style={styles.plateLabel}>
-              {phase === "writing" ? "REVIEWING THE ADDRESS" : "READING FROM THE RIGHT"}
-            </Text>
-            {parts.map((part, index) => {
-              const shown = part.text.slice(0, typedFor(index));
-              const typing = shown.length < part.text.length;
-              const noteVisible = parts.length - index <= notesShown;
-              return (
-                <View key={`${part.role}-${index}`} style={styles.part}>
-                  <Text style={[styles.partText, { color: part.wrong && !established ? tone : colour.ink }]}>
-                    {shown}
-                    {typing ? <Animated.Text style={{ opacity: caret }}>|</Animated.Text> : null}
-                  </Text>
-                  {noteVisible ? <Text style={styles.partNote}>{part.note}</Text> : null}
-                </View>
-              );
-            })}
-            {notesShown > 0 ? <Text style={styles.readingNote}>{readingNote(parts)}</Text> : null}
-          </View>
-        ) : null}
-
-        {phase === "verdict" ? (
-          <Animated.View
-            style={[
-              styles.verdict,
-              {
-                opacity: sheet,
-                transform: [{ translateY: sheet.interpolate({ inputRange: [0, 1], outputRange: [18, 0] }) }],
-              },
-            ]}
-          >
-            <Text style={styles.headline}>{established ? "An established domain" : headline(risk)}</Text>
-            <View style={styles.figureRow}>
-              <Text style={[styles.figure, { color: tone }]}>{pct}</Text>
-              <Text style={styles.figureLabel}>risk out of 100</Text>
-            </View>
-            <Text style={styles.note}>
-              {established
-                ? `Held at ${pct} so a known site is never flagged on the shape of its name.`
-                : `Scored ${pct} out of 100. That is the estimated chance this address is a phish, read from its name alone.`}
-            </Text>
-
-            <Text style={styles.label}>{reasonTitle(risk).toUpperCase()}</Text>
-            {(payload?.reasons || []).slice(0, 4).map((reason, index) => (
-              <View key={index} style={styles.reason}>
-                <Text style={styles.reasonNumber}>{index + 1}</Text>
-                <Text style={styles.reasonText}>{reason}</Text>
-              </View>
-            ))}
-
-            <View style={styles.actions}>
-              {risk === "low" || established ? (
-                <Pressable
-                  style={styles.primary}
-                  onPress={() => { reset(); Linking.openURL(payload.url).catch(() => {}); }}
-                >
-                  <Text style={styles.primaryText}>Open link</Text>
-                </Pressable>
-              ) : null}
-              <Pressable style={styles.ghost} onPress={reset}>
-                <Text style={styles.ghostText}>Examine another</Text>
-              </Pressable>
-            </View>
-          </Animated.View>
+        {phase === "exam" || phase === "verdict" ? (
+          <ExamSurface
+            key={examKey}
+            parts={parts}
+            onFinished={showVerdict}
+          />
         ) : null}
       </ScrollView>
-    </SafeAreaView>
+
+      {phase === "verdict" ? (
+        <VerdictSheet
+          payload={payload}
+          sheet={sheet}
+          tone={tone}
+          pct={pct}
+          risk={risk}
+          established={established}
+          onClose={reset}
+        />
+      ) : null}
+    </View>
+  );
+}
+
+function Action({ label, onPress, primary, mono }) {
+  return (
+    <Pressable
+      onPress={() => { buzz(Haptics.ImpactFeedbackStyle.Light); onPress(); }}
+      android_ripple={{ color: "rgba(255,255,255,0.08)" }}
+      style={({ pressed }) => [
+        primary ? styles.primary : styles.sampleRow,
+        pressed && Platform.OS !== "android" && { opacity: 0.7 },
+      ]}
+    >
+      <Text style={[
+        primary ? styles.primaryText : styles.sample,
+        mono && { fontFamily: type.mono },
+      ]}>
+        {label}
+      </Text>
+    </Pressable>
+  );
+}
+
+function VerdictSheet({ payload, sheet, tone, pct, risk, established, onClose }) {
+  const insets = useSafeAreaInsets();
+  const drag = useRef(new Animated.Value(0)).current;
+
+  const pan = useMemo(
+    () => PanResponder.create({
+      onMoveShouldSetPanResponder: (_, gesture) => gesture.dy > 6,
+      onPanResponderMove: (_, gesture) => {
+        if (gesture.dy > 0) drag.setValue(gesture.dy);
+      },
+      onPanResponderRelease: (_, gesture) => {
+        if (gesture.dy > 110) {
+          buzz(Haptics.ImpactFeedbackStyle.Light);
+          onClose();
+        } else {
+          Animated.spring(drag, { toValue: 0, useNativeDriver: true, stiffness: 320, damping: 30 }).start();
+        }
+      },
+    }),
+    [drag, onClose]
+  );
+
+  const reasons = (payload?.reasons || []).slice(0, 4);
+
+  return (
+    <View style={StyleSheet.absoluteFill} pointerEvents="box-none">
+      <Pressable style={styles.scrim} onPress={onClose} />
+      <Animated.View
+        {...pan.panHandlers}
+        style={[
+          styles.sheet,
+          { paddingBottom: insets.bottom + space(5) },
+          {
+            transform: [
+              { translateY: Animated.add(sheet.interpolate({ inputRange: [0, 1], outputRange: [420, 0] }), drag) },
+            ],
+          },
+        ]}
+      >
+        <View style={styles.grabber} />
+        <Text style={styles.sheetHeadline}>
+          {established ? "An established domain" : headline(risk)}
+        </Text>
+
+        <View style={styles.figureRow}>
+          <Text style={[styles.figure, { color: tone }]}>{pct}</Text>
+          <Text style={styles.figureLabel}>risk out of 100</Text>
+        </View>
+
+        <Text style={styles.note}>
+          {established
+            ? `Held at ${pct} so a known site is never flagged on the shape of its name.`
+            : `Scored ${pct} out of 100. That is the estimated chance this address is a phish, read from its name alone.`}
+        </Text>
+
+        <Text style={styles.label}>{reasonTitle(risk).toUpperCase()}</Text>
+        {reasons.map((reason, index) => (
+          <View key={index} style={styles.reason}>
+            <Text style={styles.reasonNumber}>{index + 1}</Text>
+            <Text style={styles.reasonText}>{reason}</Text>
+          </View>
+        ))}
+
+        <View style={{ marginTop: space(4), gap: space(2) }}>
+          {risk === "low" || established ? (
+            <Action
+              label="Open link"
+              primary
+              onPress={() => { onClose(); Linking.openURL(payload.url).catch(() => {}); }}
+            />
+          ) : null}
+          <Action label="Examine another" onPress={onClose} />
+        </View>
+      </Animated.View>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   app: { flex: 1, backgroundColor: colour.bg },
-  page: { paddingHorizontal: space(5), paddingTop: space(4), paddingBottom: space(10) },
+  page: { paddingHorizontal: space(5), paddingTop: space(3) },
   header: { flexDirection: "row", alignItems: "center", gap: space(3), marginBottom: space(6) },
   mark: { width: 34, height: 34, tintColor: colour.accentSoft },
   brand: { fontFamily: type.serif, fontWeight: "700", fontSize: 24, color: colour.ink },
@@ -254,33 +291,41 @@ const styles = StyleSheet.create({
   headline: { fontFamily: type.serif, fontSize: 26, lineHeight: 33, color: colour.ink, marginBottom: space(4) },
   field: { borderWidth: 1, borderColor: colour.line, backgroundColor: colour.raised, borderRadius: 14 },
   input: {
-    fontFamily: type.body, fontSize: 15, color: colour.ink,
+    fontFamily: type.body, fontSize: 16, color: colour.ink,
     paddingHorizontal: space(4), paddingVertical: Platform.OS === "web" ? space(3) : space(2),
     outlineStyle: "none",
   },
-  primary: { height: 50, borderRadius: 26, backgroundColor: colour.bone, alignItems: "center", justifyContent: "center", marginTop: space(3) },
-  primaryText: { fontFamily: type.body, fontWeight: "700", fontSize: 15, color: colour.onBone },
+  primary: { minHeight: 52, borderRadius: 26, backgroundColor: colour.bone, alignItems: "center", justifyContent: "center", marginTop: space(3) },
+  primaryText: { fontFamily: type.body, fontWeight: "700", fontSize: 16, color: colour.onBone },
+  sampleRow: { minHeight: 48, justifyContent: "center", borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: colour.line },
+  sample: { fontFamily: type.body, fontSize: 14, color: colour.muted },
   warning: { fontFamily: type.body, fontSize: 12, color: colour.warn, marginTop: space(3) },
   label: { fontFamily: type.body, fontSize: 9.5, letterSpacing: 1.6, color: colour.faint, marginTop: space(6), marginBottom: space(1) },
-  sample: { fontFamily: type.mono, fontSize: 13, color: colour.muted, paddingVertical: space(2) },
-  readingRow: { flexDirection: "row", alignItems: "center", gap: space(1), marginTop: space(4) },
-  reading: { fontFamily: type.body, fontSize: 12.5, color: colour.faint },
-  caretGlyph: { fontFamily: type.mono, fontSize: 14, color: colour.accentSoft },
-  plate: { borderWidth: 1, borderColor: colour.line, backgroundColor: colour.panel, borderRadius: 16, padding: space(4), marginTop: space(4) },
-  plateLabel: { fontFamily: type.body, fontSize: 9.5, letterSpacing: 1.6, color: colour.faint, marginBottom: space(3) },
-  part: { marginBottom: space(3) },
-  partText: { fontFamily: type.mono, fontSize: 16 },
-  partNote: { fontFamily: type.body, fontSize: 11, color: colour.faint, marginTop: space(1) },
-  readingNote: { fontFamily: type.serif, fontSize: 12, color: colour.muted, marginTop: space(1) },
-  verdict: { marginTop: space(4) },
-  figureRow: { flexDirection: "row", alignItems: "flex-end" },
+  readingRow: { marginTop: space(6) },
+  reading: { fontFamily: type.body, fontSize: 13, color: colour.faint },
+  scrim: { ...StyleSheet.absoluteFillObject, backgroundColor: "rgba(3,7,11,0.72)" },
+  sheet: {
+    position: "absolute", left: 0, right: 0, bottom: 0,
+    backgroundColor: colour.panel,
+    borderTopLeftRadius: 24, borderTopRightRadius: 24,
+    borderTopWidth: 1, borderColor: colour.line,
+    paddingHorizontal: space(5), paddingTop: space(2),
+  },
+  grabber: { alignSelf: "center", width: 44, height: 4, borderRadius: 2, backgroundColor: "rgba(255,255,255,0.18)", marginBottom: space(4) },
+  sheetHeadline: { fontFamily: type.serif, fontSize: 24, lineHeight: 30, color: colour.ink },
+  figureRow: { flexDirection: "row", alignItems: "flex-end", marginTop: space(2) },
   figure: { fontFamily: type.mono, fontSize: 34 },
   figureLabel: { fontFamily: type.body, fontSize: 11.5, color: colour.faint, marginLeft: space(2), paddingBottom: space(2) },
-  note: { fontFamily: type.body, fontSize: 12.5, color: colour.muted, marginTop: space(3), lineHeight: 19 },
-  reason: { flexDirection: "row", backgroundColor: colour.panel, borderRadius: 14, borderWidth: 1, borderColor: colour.line, padding: space(3), marginTop: space(2) },
+  note: { fontFamily: type.body, fontSize: 12.5, color: colour.muted, marginTop: space(2), lineHeight: 19 },
+  reason: { flexDirection: "row", backgroundColor: colour.bg, borderRadius: 14, borderWidth: 1, borderColor: colour.line, padding: space(3), marginTop: space(2) },
   reasonNumber: { fontFamily: type.mono, fontSize: 10, color: colour.faint, width: 18 },
   reasonText: { flex: 1, fontFamily: type.body, fontSize: 12.5, color: colour.muted, lineHeight: 19 },
-  actions: { marginTop: space(4), gap: space(2) },
-  ghost: { height: 46, borderRadius: 26, borderWidth: 1, borderColor: colour.line, alignItems: "center", justifyContent: "center" },
-  ghostText: { fontFamily: type.body, fontWeight: "700", fontSize: 14, color: colour.ink },
 });
+
+export default function Root() {
+  return (
+    <SafeAreaProvider>
+      <App />
+    </SafeAreaProvider>
+  );
+}
