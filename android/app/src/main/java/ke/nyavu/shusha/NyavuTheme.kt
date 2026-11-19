@@ -66,6 +66,27 @@ object NyavuTheme {
         setPadding(0, dp(context, 20), 0, dp(context, 9))
     }
 
+    /** A line that breathes while work is out, the same rhythm the detector uses. */
+    fun breathing(context: Context, base: String): Pair<TextView, Runnable> {
+        val view = TextView(context).apply {
+            text = base
+            textSize = 12f
+            setTextColor(faint)
+        }
+        val frames = listOf(base, "$base.", "$base..", "$base...")
+        var index = 0
+        val ticker = object : Runnable {
+            override fun run() {
+                view.text = frames[index % frames.size]
+                index++
+                view.postDelayed(this, 320)
+            }
+        }
+        view.post(ticker)
+        view.tag = ticker
+        return view to ticker
+    }
+
     /** The verdict colour, in the web's key: red for phishing, amber for unsure, sage for clear. */
     fun toneFor(risk: String): Int = when (risk) {
         "high", "phishing" -> DANGER

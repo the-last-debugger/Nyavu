@@ -68,12 +68,15 @@ class MainActivity : Activity() {
             })
             addView(TextView(this@MainActivity).apply {
                 text = "Your personal link inspector"
-                textSize = 12f
+                textSize = 11.5f
                 setTextColor(NyavuTheme.faint)
+                isSingleLine = true
+                ellipsize = android.text.TextUtils.TruncateAt.END
             })
         }, LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f))
 
         accountLabel = TextView(this).apply {
+            text = "Sign in"
             textSize = 11.5f
             setTextColor(NyavuTheme.muted)
             setPadding(dp(12), dp(8), dp(12), dp(8))
@@ -88,14 +91,20 @@ class MainActivity : Activity() {
 
         navBar = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
-            setPadding(dp(10), dp(6), dp(10), dp(12))
+            gravity = Gravity.CENTER_VERTICAL
+            setPadding(dp(6), dp(4), dp(6), dp(10))
+            setBackgroundColor(NyavuTheme.PANEL)
         }
+        root.addView(View(this).apply { setBackgroundColor(0x1FFFFFFF) },
+            LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 1))
         tabs.forEachIndexed { index, label ->
             navBar.addView(TextView(this).apply {
                 text = label
-                textSize = 12f
+                textSize = 11f
                 gravity = Gravity.CENTER
-                setPadding(0, dp(10), 0, dp(10))
+                isSingleLine = true
+                ellipsize = android.text.TextUtils.TruncateAt.END
+                setPadding(0, dp(11), 0, dp(11))
                 setOnClickListener { select(index) }
                 layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
             })
@@ -418,10 +427,7 @@ class MainActivity : Activity() {
         val list = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
         column.addView(list)
 
-        list.addView(TextView(this).apply {
-            text = "Loading"
-            textSize = 12f
-            setTextColor(NyavuTheme.faint)
+        list.addView(NyavuTheme.breathing(this, "Reading your history").first.apply {
             setPadding(0, dp(12), 0, 0)
         })
         Thread {
@@ -489,11 +495,7 @@ class MainActivity : Activity() {
         column.addView(NyavuTheme.label(this, "Classifiers compared"))
         val table = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
         column.addView(table)
-        table.addView(TextView(this).apply {
-            text = "Loading"
-            textSize = 12f
-            setTextColor(NyavuTheme.faint)
-        })
+        table.addView(NyavuTheme.breathing(this, "Loading the measurements").first)
 
         Thread {
             val res = runCatching { Api.model(this) }.getOrNull()
