@@ -1586,11 +1586,18 @@ const wordFor = (gauge, value) => gauge.dataset.word || BAND_WORD(value);
         <p class="lede"><strong>${r.flagged}</strong> of <strong>${r.count}</strong>
         URLs were flagged as phishing.</p>
         <div class="table-scroll"><table class="table">
-          <thead><tr><th>Host</th><th>Verdict</th><th>Risk out of 100</th></tr></thead>
-          <tbody>${r.results.map(x => `
+          <thead><tr><th>Host</th><th>Verdict</th><th>Risk out of 100</th><th>Evidence</th></tr></thead>
+          <tbody>${r.results.map(x => {
+            /* A batch used to drop the one thing a single scan shows: whose address it is, and
+               whether a public list has reported it. */
+            const evidence = x.official ? `official: ${escapeHtml(x.official)}`
+              : x.reported ? "reported on a phishing list" : "—";
+            return `
             <tr><td title="${escapeHtml(x.url)}">${escapeHtml(x.host || x.url)}</td>
             <td><span class="bulk-verdict ${x.risk}">${escapeHtml(x.verdict)}</span></td>
-            <td>${x.probability === null || x.probability === undefined ? "not scored" : Math.round(x.probability * 100)}</td></tr>`).join("")}
+            <td>${x.probability === null || x.probability === undefined ? "not scored" : Math.round(x.probability * 100)}</td>
+            <td class="bulk-evidence">${evidence}</td></tr>`;
+          }).join("")}
           </tbody></table></div>`;
       loadStats();
     } catch (err) {

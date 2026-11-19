@@ -514,7 +514,10 @@ def predict(payload: UrlIn, request: Request):
 async def scan_bulk(request: Request, file: UploadFile = File(...)):
     """Accept a CSV with a 'url' column (or one URL per line)."""
     user = current_user(request)
-    raw = (await file.read()).decode("utf-8", "ignore")
+    # utf-8-sig: a CSV exported by Excel or written by PowerShell starts with a BOM, and with a BOM
+    # on the first header cell the "url" column was not recognised. The file then fell through to
+    # line parsing and the header row itself was scored as an address.
+    raw = (await file.read()).decode("utf-8-sig", "ignore")
     urls = []
     try:
         reader = csv.DictReader(io.StringIO(raw))
@@ -524,7 +527,8 @@ async def scan_bulk(request: Request, file: UploadFile = File(...)):
         else:
             raise ValueError
     except Exception:
-        urls = [ln.strip() for ln in raw.splitlines() if ln.strip()]
+        urls = [ln.strip() for ln in raw.splitlines()
+                if ln.strip() and ln.strip().lower().lstrip("\ufeff") not in ("url", "urls")]
 
     urls = urls[:200]
     if not urls:

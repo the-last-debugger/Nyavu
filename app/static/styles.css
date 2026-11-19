@@ -9124,3 +9124,7 @@ html.booting main { opacity: .62; }
 @media print {
   .exam-caret, .autopsy-caret { display: none !important; }
 }
+
+/* The bulk table shows the same evidence a single scan does, in its own column. */
+.table .bulk-evidence { color: var(--muted); font-size: .82rem; }
+.table .bulk-evidence:not(:empty) { white-space: nowrap; }
