@@ -202,3 +202,29 @@ site, styled for the phone, with the examination and the verdict at full size.
 
 The status report for review is `docs/REPORT_STATUS.md`: objectives, measurements, what is
 delivered, and the four things that are not.
+
+---
+
+## The model, measured (19 November)
+
+`docs/MODEL_IMPROVEMENTS.md` now holds the full analysis and the agenda. The four numbers that
+change how this project should be discussed:
+
+1. **The percentage is honest.** ECE 0.028, Brier 0.1674. When the interface says 80, about 80
+   of 100 such addresses are phishing. This claim is stronger than the accuracy headline.
+2. **Domain-level recall is 0.690, not 0.705.** Rows repeat domains; the row figure flatters.
+3. **The model decays.** On a live feed and Tranco ranks 100k-1M: recall 0.570 and false alarms
+   0.302 at threshold 0.50, against 0.705 and 0.198 on the 2025 hold-out. Retraining is not
+   optional maintenance, it is the difference between a working product and a lapsed one.
+4. **The reputation ceiling has a 17.4 per cent blind spot.** Fifteen of 86 phishing domains in
+   today's feed sit inside the top-100k allowlist, where the cap reports them at 15 or less.
+
+What was tried and did not work, so nobody repeats it: a bigger brand list (no gain), character
+shape features (+0.36 points in-domain, zero on today's data), a benign-likeness feature
+(worse), gradient boosting without n-grams (much worse). What is blocked: path and redirect
+features, because the corpus contains no paths at all.
+
+The ordering that follows: retrain on a schedule with a frozen baseline, curate the negative
+class so the false-positive rate measures the model rather than Tranco, then acquire a benign
+corpus with paths. The privacy decision on measurement is also the retraining decision, since
+continuous improvement needs recent outcomes and the service stores none by design.
