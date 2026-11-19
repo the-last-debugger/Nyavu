@@ -9072,3 +9072,38 @@ html.booting main { opacity: .62; }
   z-index: 3;
 }
 .autopsy-caret.on { opacity: 1; }
+
+/* -------------------------------------------------------------------------------
+   The record, examined — both tiers
+
+   The official block and the established block are read the same way: a caret steps down the
+   evidence, one line at a time, so a listed site looks examined rather than excused.
+   ------------------------------------------------------------------------------- */
+.exam-block { position: relative; }
+.exam-caret {
+  position: absolute;
+  left: -2px;
+  width: 2px;
+  height: 0;
+  border-radius: 2px;
+  background: var(--signal-safe);
+  opacity: 0;
+  transition: top .22s ease, height .22s ease, opacity .2s ease;
+}
+.known-line .exam-caret { background: var(--bone); }
+.exam-caret.on { opacity: .9; }
+.exam-row { transition: background .2s ease, color .2s ease, box-shadow .2s ease; border-radius: 4px; }
+.exam-row.examining {
+  color: var(--text);
+  background: rgba(255, 255, 255, .07);
+  box-shadow: inset 2px 0 0 var(--signal-safe);
+  padding-left: 6px;
+  margin-left: -6px;
+}
+.known-line .exam-row.examining { box-shadow: inset 2px 0 0 var(--bone); background: rgba(255, 255, 255, .05); }
+.exam-row.examined { color: var(--muted); }
+
+@media (prefers-reduced-motion: reduce) {
+  .exam-caret { display: none; }
+  .exam-row { transition: none; }
+}

@@ -795,7 +795,13 @@ const TONE = { high: "var(--signal-danger)", medium: "var(--signal-warn)", low: 
     const flaggedEnd = flagged.length ? SCENE.flaggedFrom + (flagged.length - 1) * PER_FLAG : 0;
     /* An official domain is not waved through. Its evidence is read line by line with the same
        caret the address gets, so a listed site looks examined rather than excused. */
-    const officialRows = Array.from(card.querySelectorAll(".official-evidence li"));
+    /* One sweep over every examined record: the official evidence and the established evidence are
+       read the same way, with their own caret, in the order they appear. */
+    const examBlocks = Array.from(card.querySelectorAll(".exam-block"))
+      .map((block) => ({ block, caret: block.querySelector(".exam-caret"),
+                         rows: Array.from(block.querySelectorAll(".exam-row")) }))
+      .filter((entry) => entry.rows.length);
+    const officialRows = examBlocks.flatMap((entry) => entry.rows.map((row) => ({ entry, row })));
     const OFFICIAL_STEP = 220;
     const officialStart = Math.max(writingEnd, notesEnd) + 120;
     const officialEnd = officialRows.length
@@ -808,22 +814,30 @@ const TONE = { high: "var(--signal-danger)", medium: "var(--signal-warn)", low: 
     if (officialRows.length) {
       const caret = card.querySelector(".official-caret");
       const host = card.querySelector(".official-line");
-      officialRows.forEach((row, index) => {
+      officialRows.forEach((entry, index) => {
+        const { row, entry: owner } = entry;
         delay(officialStart + index * OFFICIAL_STEP, () => {
-          officialRows.forEach((other) => other.classList.remove("examining"));
+          examBlocks.forEach((block) => {
+            block.rows.forEach((other) => other.classList.remove("examining"));
+            if (block.caret) block.caret.classList.remove("on");
+          });
           row.classList.add("examining");
-          if (caret && host) {
+          const caretEl = owner.caret;
+          const host = owner.block;
+          if (caretEl && host) {
             const hostBox = host.getBoundingClientRect();
             const rowBox = row.getBoundingClientRect();
-            caret.style.top = (rowBox.top - hostBox.top) + "px";
-            caret.style.height = rowBox.height + "px";
-            caret.classList.add("on");
+            caretEl.style.top = (rowBox.top - hostBox.top) + "px";
+            caretEl.style.height = rowBox.height + "px";
+            caretEl.classList.add("on");
           }
         });
       });
       delay(officialEnd - 60, () => {
-        officialRows.forEach((row) => { row.classList.remove("examining"); row.classList.add("examined"); });
-        if (caret) caret.classList.remove("on");
+        examBlocks.forEach((block) => {
+          block.rows.forEach((row) => { row.classList.remove("examining"); row.classList.add("examined"); });
+          if (block.caret) block.caret.classList.remove("on");
+        });
       });
     }
 
@@ -1005,21 +1019,22 @@ function establishedLine(r) {
   const known = r.established;
   if (!known || r.official) return "";
   const items = (known.evidence || []).slice(0, 3)
-    .map((line) => `<li>${escapeHtml(line)}</li>`).join("");
-  return `<div class="known-line"><span class="known-tag">established</span>
+    .map((line) => `<li class="exam-row">${escapeHtml(line)}</li>`).join("");
+  return `<div class="known-line exam-block"><span class="known-tag">established</span>
     <p class="known-say">${escapeHtml(known.domain || "")} is a widely visited site.</p>
-    ${items ? `<ul class="known-evidence">${items}</ul>` : ""}</div>`;
+    ${items ? `<span class="exam-caret known-caret" aria-hidden="true"></span>
+      <ul class="known-evidence exam-rows">${items}</ul>` : ""}</div>`;
 }
 
 function officialLine(r) {
   const official = r.official;
   if (!official) return "";
   const items = (official.evidence || []).slice(0, 4)
-    .map((line) => `<li>${escapeHtml(line)}</li>`).join("");
-  return `<div class="official-line"><span class="official-tag">official</span>
+    .map((line) => `<li class="exam-row">${escapeHtml(line)}</li>`).join("");
+  return `<div class="official-line exam-block"><span class="official-tag">official</span>
     <p class="official-say">${escapeHtml(official.name)} publishes this address.</p>
-    ${items ? `<span class="official-caret" aria-hidden="true"></span>
-      <ul class="official-evidence">${items}</ul>` : ""}</div>`;
+    ${items ? `<span class="exam-caret official-caret" aria-hidden="true"></span>
+      <ul class="official-evidence exam-rows">${items}</ul>` : ""}</div>`;
 }
 
 const BAND_WORD = (value) => (value >= 65 ? "dangerous" : value >= 35 ? "suspect" : "safe");
