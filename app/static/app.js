@@ -715,8 +715,16 @@ const TONE = { high: "var(--signal-danger)", medium: "var(--signal-warn)", low: 
         if (!caret) return;
         const host = caret.offsetParent || autopsy;
         const hostBox = host.getBoundingClientRect();
+        /* Measure the glyphs, not the box. On a phone each piece is a full-width grid row, so the
+           element rect made the caret span the whole line and read as a rule rather than a mark. */
         const words = seg.querySelector(".seg-text") || seg;
-        const wb = words.getBoundingClientRect();
+        let wb = words.getBoundingClientRect();
+        try {
+          const range = document.createRange();
+          range.selectNodeContents(words);
+          const glyphs = range.getBoundingClientRect();
+          if (glyphs.width > 0) wb = glyphs;
+        } catch (error) { /* keep the element rect */ }
         caret.style.left = (wb.left - hostBox.left) + "px";
         caret.style.width = Math.max(12, wb.width) + "px";
         caret.style.top = (wb.bottom - hostBox.top - 3) + "px";
