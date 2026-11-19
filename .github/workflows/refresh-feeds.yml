@@ -1,0 +1,51 @@
+﻿# Refreshes the local snapshot of public phishing lists.
+#
+# The snapshot is what lets a scan say "this address appears on a public list" without fetching
+# anything at scan time, so it has to be rebuilt off the request path. tools/refresh_feeds.py unions
+# the new download with the previous snapshot, which is why a thin or throttled source cannot shrink
+# coverage.
+#
+# The commit it makes touches only data/threat_snapshot.json.gz, so a refresh cannot change behaviour
+# by accident; the build stamp includes the data files, so a deploy that only refreshed data is still
+# visible at /api/version.
+
+name: refresh-feeds
+
+on:
+  schedule:
+    - cron: "17 3 1 * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Rebuild the snapshot
+        run: python tools/refresh_feeds.py
+
+      - name: Commit if it changed
+        run: |
+          if git diff --quiet -- data/threat_snapshot.json.gz; then
+            echo "snapshot unchanged"
+            exit 0
+          fi
+          python - <<'PY'
+          import gzip, json
+          snap = json.load(gzip.open("data/threat_snapshot.json.gz", "rb"))
+          print(f"hosts {len(snap['hosts']):,} | urls {len(snap['urls']):,} | targets {len(snap['targets']):,}")
+          PY
+          git config user.name "nyavu-bot"
+          git config user.email "nyavu-bot@users.noreply.github.com"
+          git add data/threat_snapshot.json.gz
+          git commit -m "Refresh the feed snapshot"
+          git push
