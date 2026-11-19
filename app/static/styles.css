@@ -9053,3 +9053,8 @@ html.booting main { opacity: .62; }
 .hero-note .note-quote { position: relative; padding-left: 1.05em; }
 
 
+
+/* The note sits above the hero's decorative layers. It was present, selectable and hit-testable, and
+   still painted underneath them: the region measured black while the DOM said the text was there. */
+.hero { isolation: isolate; }
+.hero-note { position: relative; z-index: 3; }

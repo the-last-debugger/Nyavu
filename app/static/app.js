@@ -142,16 +142,22 @@
     let timer = null;
     let paused = false;
 
+    /* Opacity is driven inline rather than through a class. The class version could be left on the
+       element, and when it was, the quotation stayed transparent while still being selectable: the
+       text was there, just unpainted. */
+    const paint = (value) => {
+      text.style.opacity = value;
+      source.style.opacity = value;
+    };
+
     const advance = () => {
       if (paused) return;
-      index = (index + 1) % NOTES.length;
-      text.classList.add("changing");
-      source.classList.add("changing");
+      paint("0");
       window.setTimeout(() => {
+        index = (index + 1) % NOTES.length;
         text.textContent = NOTES[index][0];
         source.textContent = NOTES[index][1];
-        text.classList.remove("changing");
-        source.classList.remove("changing");
+        paint("1");
       }, FADE);
     };
 
@@ -171,6 +177,9 @@
     document.addEventListener("visibilitychange", () => {
       if (document.hidden) pause(); else resume();
     });
+    text.classList.remove("changing");
+    source.classList.remove("changing");
+    paint("1");
     start();
   })();
 
