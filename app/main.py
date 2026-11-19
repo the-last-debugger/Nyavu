@@ -1310,4 +1310,33 @@ def index(request: Request):
     return HTMLResponse(_INDEX_CACHE[origin])
 
 
+# --------------------------------------------------------------------------- #
+# HEAD requests
+#
+# Starlette answers HEAD only for routes that declare it, so /about, /learn/*,
+# /download/* and /api/* answered 404 to a HEAD while answering 200 to a GET. Link
+# checkers, preview bots and uptime monitors all use HEAD, so a healthy site looked
+# broken to them. This runs the GET and sends the headers without the body.
+# --------------------------------------------------------------------------- #
+class HeadAsGet:
+    def __init__(self, app):
+        self.app = app
+
+    async def __call__(self, scope, receive, send):
+        if scope.get("type") != "http" or scope.get("method") != "HEAD":
+            await self.app(scope, receive, send)
+            return
+        inner = dict(scope)
+        inner["method"] = "GET"
+
+        async def without_body(message):
+            if message.get("type") == "http.response.body":
+                message = {**message, "body": b"", "more_body": False}
+            await send(message)
+
+        await self.app(inner, receive, without_body)
+
+
+app.add_middleware(HeadAsGet)
+
 app.mount("/", StaticFiles(directory=STATIC, html=True), name="static")
