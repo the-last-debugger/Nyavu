@@ -9119,3 +9119,8 @@ html.booting main { opacity: .62; }
   padding-left: 8px;
   margin-left: -8px;
 }
+
+/* paper cannot move, so the mark should not be laid out at all */
+@media print {
+  .exam-caret, .autopsy-caret { display: none !important; }
+}
