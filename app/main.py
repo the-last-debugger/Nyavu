@@ -1098,14 +1098,34 @@ def app_version() -> dict:
 # Static front end
 # --------------------------------------------------------------------------- #
 
+_PAGE_CACHE: dict[str, str] = {}
+
+
+def _page(relative: str) -> str:
+    """Read a written page and stamp its stylesheet with the build.
+
+    The shell did this and the written pages did not, so after a stylesheet change a returning
+    visitor could get the new HTML with yesterday's CSS. Pages are cached per process; a deploy
+    restarts the process, so the stamp cannot outlive the build it belongs to.
+    """
+    if relative not in _PAGE_CACHE:
+        with open(os.path.join(STATIC, relative), encoding="utf-8") as fh:
+            html = fh.read()
+        version = _asset_version()
+        html = html.replace('href="/styles.css"', f'href="/styles.css?v={version}"')
+        html = html.replace('src="/version-tag.js?v=1"', f'src="/version-tag.js?v={version}"')
+        _PAGE_CACHE[relative] = html
+    return _PAGE_CACHE[relative]
+
+
 @app.get("/about")
 def about():
-    return FileResponse(os.path.join(STATIC, "pages", "about.html"))
+    return HTMLResponse(_page(os.path.join("pages", "about.html")))
 
 
 @app.get("/faq")
 def faq():
-    return FileResponse(os.path.join(STATIC, "pages", "faq.html"))
+    return HTMLResponse(_page(os.path.join("pages", "faq.html")))
 
 
 @app.get("/learn/{slug}")
@@ -1115,7 +1135,7 @@ def learn(slug: str):
     path = os.path.join(STATIC, "pages", "learn", f"{slug}.html")
     if not os.path.exists(path):
         raise HTTPException(status_code=404)
-    return FileResponse(path)
+    return HTMLResponse(_page(os.path.join("pages", "learn", f"{slug}.html")))
 
 
 # --------------------------------------------------------------------------- #
