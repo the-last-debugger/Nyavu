@@ -8490,3 +8490,28 @@ dialog.verdict-dialog[open] {
   .autopsy-all b { font-family: var(--font-mono); font-weight: 400; color: #111; }
   .autopsy-panel { display: none !important; }
 }
+
+/* -------------------------------------------------------------------------------
+   The scale, before it is read
+
+   Three faded bands sit on the dial so a reader can see where clear, caution and concern
+   fall before the needle moves. They are deliberately dull: the bright arc is the reading,
+   and a faded one must never be mistaken for it.
+   ------------------------------------------------------------------------------- */
+.gauge .band {
+  fill: none;
+  stroke-width: 13;
+  stroke-linecap: butt;
+  opacity: .26;
+}
+.gauge .band-clear { stroke: #7FA98F; }
+.gauge .band-caution { stroke: #ffb020; }
+.gauge .band-concern { stroke: #ff4d6d; }
+
+@media print {
+  .gauge .band { opacity: .34; }
+}
+
+/* The role tag used to sit above the piece being written. With the note panel naming the
+   active piece, the tag only collides with the head label. */
+.autopsy-line .scan-tag { display: none; }

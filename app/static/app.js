@@ -844,6 +844,15 @@
         <div class="gauge" style="--p:0; --tone:${TONE[r.risk]}" data-target="${pct}">
           <svg class="dial" viewBox="0 0 200 132" aria-hidden="true">
             <path class="track" d="M22 112 A78 78 0 0 1 178 112" />
+            <!-- The three bands, faded, so a reader can see the shape of the scale before the
+                 needle moves. pathLength=100 lets the dash pattern be written in percent:
+                 0 to 35 clear, 35 to 65 a look, above 65 a concern. -->
+            <path class="band band-clear" pathLength="100" stroke-dasharray="35 65"
+                  stroke-dashoffset="0" d="M22 112 A78 78 0 0 1 178 112" />
+            <path class="band band-caution" pathLength="100" stroke-dasharray="30 70"
+                  stroke-dashoffset="-35" d="M22 112 A78 78 0 0 1 178 112" />
+            <path class="band band-concern" pathLength="100" stroke-dasharray="35 65"
+                  stroke-dashoffset="-65" d="M22 112 A78 78 0 0 1 178 112" />
             <path class="fill" d="M22 112 A78 78 0 0 1 178 112" />
           </svg>
           <div class="needle"></div>
