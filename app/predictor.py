@@ -5,12 +5,13 @@ import json
 from urllib.parse import parse_qs, urlsplit
 import os
 import time
+import warnings
 
 import re
 
 import joblib
 import numpy as np
-import pandas as pd
+from scipy.sparse import hstack
 
 import sys as _sys
 
@@ -210,13 +211,25 @@ class Predictor:
         # One frame, one transform. Building the frame column-by-column and calling
         # transform twice (score, then explanation) accounted for most of the request's
         # server time on a small CPU.
-        data = {c: feats.get(c, 0) for c in FEATURE_ORDER}
-        data["domain"] = domain
-        row = pd.DataFrame([data], columns=list(FEATURE_ORDER) + ["domain"])
-
         prep = self.pipeline.named_steps["prep"]
         clf = self.pipeline.named_steps["clf"]
-        Xt = prep.transform(row)
+
+        # The two fitted transformers are called directly instead of going through the
+        # ColumnTransformer, because that path requires a pandas frame and pandas costs
+        # tens of megabytes of resident memory on a 512 MB host just to hold one row.
+        # The column order below must match prep.transformers, and a test asserts that the
+        # scores are identical to the frame path.
+        vectorizer = prep.named_transformers_["domain_ngrams"]
+        scaler = prep.named_transformers_["numeric"]
+        text_block = vectorizer.transform([domain])
+        with warnings.catch_warnings():
+            # the scaler was fitted on named columns; passing a bare array is what lets pandas
+            # leave the server, and the warning it raises is noise rather than a problem
+            warnings.filterwarnings("ignore", message="X does not have valid feature names")
+            numeric_block = scaler.transform(
+                np.asarray([[float(feats.get(c, 0)) for c in FEATURE_ORDER]], dtype=float)
+            )
+        Xt = hstack([text_block, numeric_block], format="csr")
 
         if hasattr(clf, "predict_proba"):
             prob = float(clf.predict_proba(Xt)[0, 1])

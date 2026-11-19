@@ -1,0 +1,4 @@
+# Training and analysis only. The service does not install these.
+-r requirements.txt
+pandas>=2.2
+matplotlib>=3.8
