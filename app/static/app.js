@@ -183,12 +183,12 @@
     const target = Number(g && g.dataset.target ? g.dataset.target : 0);
     if (g) {
       g.style.setProperty("--p", target);
-      g.style.setProperty("--tone", TONE_OF(target));
+      g.style.setProperty("--tone", TONE_OF(t >= 1 ? target : value));
     }
     const ro = card.querySelector(".readout span");
-    if (ro) ro.textContent = target;
+    if (ro) ro.textContent = BAND_WORD(target);
     const cap = card.querySelector(".readout small");
-    if (cap) cap.textContent = "risk";
+    if (cap) cap.textContent = "verdict";
     const scene = card.querySelector(".fishing");
     if (scene) scene.style.display = "none";
     card.classList.remove("pending");
@@ -710,10 +710,10 @@
       }
       g.style.setProperty("--p", t >= 1 ? String(target) : value.toFixed(2));
       g.style.setProperty("--tone", TONE_OF(target));
-      if (readout) readout.textContent = String(Math.round(value));
+      if (readout) readout.textContent = BAND_WORD(value);
       if (t >= 1) {
-        if (readout) readout.textContent = String(target);
-        if (caption) caption.textContent = "% risk";
+        if (readout) readout.textContent = BAND_WORD(target);
+        if (caption) caption.textContent = "verdict";
         return;
       }
       requestAnimationFrame(frame);
@@ -784,6 +784,11 @@
     return `<div class="measures-strip" aria-hidden="true">${chips}</div>`;
   }
 
+  /* A band word, not a percentage. Research on confidence display is consistent: people read
+     the same number differently depending on mood and situation, so the primary readout names
+     the band and the number lives in the details as a frequency. */
+  const BAND_WORD = (value) => (value >= 65 ? "concern" : value >= 35 ? "caution" : "clear");
+
   function render(r) {
     const pct = Math.round(r.probability * 100);
 
@@ -793,13 +798,26 @@
     /* An established domain is held at a ceiling of fifteen, which is not the model's
        estimate: it is a prior applied so a known site is never flagged on the shape of its
        name. Saying "15" without saying that invites the reading "fifteen problems". */
-    const scoreNote = r.capped_by_reputation
-      ? `Scored ${pct} out of 100, which is a ceiling rather than an estimate. The name-based model put this address at ${Math.round((r.model_probability || 0) * 100)}, and an established domain holds it at ${pct} so that a known site is never flagged on the shape of its name.`
+    /* The verdict leads in words. The measurement follows, as a frequency rather than a
+       percentage, because "about 1 in 5" is read more accurately than "22 out of 100". */
+    const modelPct = Math.round((r.model_probability !== undefined ? r.model_probability : r.probability) * 100);
+    const frequency = (value) => {
+      if (value <= 1) return "less than 1 in 100";
+      if (value >= 99) return "about 99 in 100";
+      if (value >= 50) return `about ${Math.round(value)} in 100`;
+      const oneIn = Math.max(2, Math.round(100 / value));
+      return `about 1 in ${oneIn}`;
+    };
+    const verdictLine = r.capped_by_reputation
+      ? "An established domain, so it is not flagged on the shape of its name."
       : r.risk === "high"
-      ? `Scored ${pct} out of 100. That is the estimated chance this address is a phish, read from its name alone. Anything above 65 is treated as a concern.`
-      : r.risk === "medium"
-        ? `Scored ${pct} out of 100. That is the estimated chance this address is a phish, read from its name alone. Below half, but not low enough to call it safe.`
-        : `Scored ${pct} out of 100. That is the estimated chance this address is a phish, not a count of things wrong with it. A real site rarely reads zero, because the figure is a probability.`;
+        ? "The name carries the marks of a phishing address."
+        : r.risk === "medium"
+          ? "Something about this name is worth a second look."
+          : "Nothing in this name reads as phishing.";
+    const scoreNote = r.capped_by_reputation
+      ? `Model estimate ${frequency(modelPct === 0 ? 1 : modelPct)} (${modelPct} out of 100), held at ${pct} because the domain is established. Held at ${pct} is a reputation ceiling, not the model's estimate.`
+      : `Model estimate ${frequency(pct)} (${pct} out of 100). That is the estimated chance this address is a phish, read from its name alone.`;
     const reasons = r.reasons.length
       ? r.reasons.map(t => `<li>${escapeHtml(t)}</li>`).join("")
       : `<li class="safe">No strong phishing indicators were found in the URL text.</li>`;
@@ -846,7 +864,7 @@
             <path class="fill" d="M22 112 A78 78 0 0 1 178 112" />
           </svg>
           <div class="needle"></div>
-          <div class="readout"><span>0</span><small>risk</small></div>
+          <div class="readout"><span class="bandword">clear</span><small>band</small></div>
         </div>
         <div class="verdict-text">
           <span class="badge ${r.risk}">${r.band}</span>${r.reputation === "established"
@@ -855,10 +873,11 @@
             : r.risk === "medium" ? "Worth a second look"
             : "This reads as ordinary"}</h2>
           <p class="verdict-url">${escapeHtml(r.url)}</p>
-          <p class="score-note">${noteLead(scoreNote)}</p>
+          <p class="verdict-line">${verdictLine}</p>
           <details class="score-more">
             <summary>How that was worked out</summary>
-            <p>${noteTail(scoreNote)}</p>
+            <p class="score-note">${scoreNote}</p>
+            <p class="band-legend">Bands: under 35 clear, 35 to 65 worth a look, above 65 a concern.</p>
             <dl class="feat-grid">${featRows}</dl>
           </details>
           <div class="stamp ${r.risk}" aria-hidden="true">${r.risk === "high" ? "phishing" : r.risk === "medium" ? "unsure" : "clear"}</div>

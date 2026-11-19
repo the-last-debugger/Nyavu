@@ -8384,3 +8384,48 @@ dialog.verdict-dialog[open] {
 /* On a phone the strip is moved inside the verdict head, which is a two-column grid, so it
    has to span both columns or it lands in one cell and overlaps the dissection. */
 .measures-strip { grid-column: 1 / -1; width: 100%; }
+
+/* The band word replaces the numeral in the dial. "concern" is a word, not a figure, so it
+   needs different type from the 2.6rem number it took over. */
+.readout .bandword {
+  font-family: var(--font-display);
+  font-size: 1.02rem;
+  letter-spacing: .01em;
+  color: var(--text);
+}
+.verdict-line {
+  margin: 10px 0 0;
+  font-family: var(--font-body);
+  font-size: .92rem;
+  line-height: 1.55;
+  color: var(--muted);
+}
+.band-legend {
+  margin: 10px 0 2px;
+  font-family: var(--font-body);
+  font-size: .74rem;
+  color: var(--faint);
+}
+
+/* The verdict sentence is new, and the pending rules predate it: without this the answer is
+   readable while the dial is still deciding, which defeats withholding it until the needle
+   settles. */
+.result.pending .verdict-line { opacity: 0; transform: translateY(6px); filter: blur(3px); }
+.result.verdict-shown .verdict-line {
+  opacity: 1; transform: none; filter: none;
+  transition: opacity .5s ease .18s, transform .5s ease .18s, filter .5s ease .18s;
+}
+@media (prefers-reduced-motion: reduce) {
+  .result.pending .verdict-line { filter: none; }
+}
+@media print { .result.pending .verdict-line { opacity: 1; filter: none; transform: none; } }
+
+/* The readout pill was sized for a two-digit number. A band word needs less type and tighter
+   padding, or it spills outside the dial it is supposed to sit inside. */
+.gauge .readout span.bandword {
+  padding: 3px 10px;
+  font-size: .82rem;
+  letter-spacing: .06em;
+  text-transform: lowercase;
+  border-radius: 999px;
+}
