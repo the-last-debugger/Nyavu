@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>The dissection — four options</title>
+<link rel="stylesheet" href="/styles.css">
+<style>
+  body { background: var(--bg); margin: 0; padding: 28px 20px 60px; }
+  .wrap { max-width: 1180px; margin: 0 auto; }
+  h1 { font-family: var(--font-display); font-size: 1.45rem; margin: 0 0 4px; color: var(--text); }
+  .sub { font-family: var(--font-body); font-size: .8rem; color: var(--faint); margin: 0 0 24px; max-width: 70ch; }
+  .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+  .opt { border: 1px solid var(--line); border-radius: 16px; padding: 18px 18px 16px; background: rgba(255,255,255,.02); }
+  .opt h2 { font-family: var(--font-body); font-size: .68rem; letter-spacing: .14em; text-transform: uppercase; color: var(--accent); margin: 0 0 4px; }
+  .opt .kind { font-family: var(--font-body); font-size: .74rem; color: var(--faint); margin: 0 0 14px; }
+  .box { border: 1px solid var(--line); border-radius: 12px; padding: 16px; }
+
+  /* option 1: today, condensed */
+  .row-pieces { display: flex; flex-wrap: wrap; gap: 18px; align-items: flex-start; }
+  .piece { min-width: 92px; }
+  .piece .w { font-family: var(--font-mono); font-size: .95rem; color: var(--text); display: block; }
+  .piece .n { font-family: var(--font-body); font-size: .68rem; color: var(--faint); display: block; margin-top: 8px; line-height: 1.45; }
+  .piece.hot .w { color: #F3B4C0; }
+
+  /* option 2: ladder */
+  .ladder { display: flex; flex-direction: column; gap: 2px; }
+  .rung { display: grid; grid-template-columns: 150px 86px 1fr; gap: 12px; align-items: baseline;
+          padding: 8px 10px; border-radius: 8px; }
+  .rung .w { font-family: var(--font-mono); font-size: .95rem; color: var(--text); }
+  .rung .role { font-family: var(--font-body); font-size: .64rem; letter-spacing: .1em; text-transform: uppercase; color: var(--faint); }
+  .rung .n { font-family: var(--font-body); font-size: .74rem; color: var(--muted); line-height: 1.45; }
+  .rung.now { background: rgba(143,169,143,.08); }
+  .rung.now .role { color: var(--accent); }
+  .rung.hot .w { color: #F3B4C0; }
+
+  /* option 3: one line, notes in a panel */
+  .oneline { font-family: var(--font-mono); font-size: 1.02rem; color: var(--text); line-height: 1.9; }
+  .oneline .under { border-bottom: 1px solid rgba(185,203,185,.5); }
+  .oneline .hot { color: #F3B4C0; border-bottom-color: rgba(243,180,192,.5); }
+  .panel { margin-top: 12px; border-left: 1px solid var(--line); padding: 2px 0 2px 14px; }
+  .panel .who { font-family: var(--font-mono); font-size: .8rem; color: var(--text); }
+  .panel .say { font-family: var(--font-body); font-size: .78rem; color: var(--muted); margin: 6px 0 0; line-height: 1.5; }
+
+  /* option 4: two readings */
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .two h3 { font-family: var(--font-body); font-size: .64rem; letter-spacing: .1em; text-transform: uppercase; color: var(--faint); margin: 0 0 8px; }
+  .two p { font-family: var(--font-mono); font-size: .86rem; color: var(--text); margin: 0 0 8px; word-break: break-all; }
+  .two .note { font-family: var(--font-body); font-size: .72rem; color: var(--muted); line-height: 1.5; }
+  .note-good { color: #B9CBB9; }
+
+  .pros { font-family: var(--font-body); font-size: .7rem; color: var(--faint); margin: 14px 0 0; padding-left: 16px; line-height: 1.65; }
+  .muted { color: var(--faint); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>The dissection, four ways</h1>
+  <p class="sub">Same address each time: <span style="font-family:var(--font-mono)">http://mpesa.co.ke.verify-account.top/</span>. The address is six pieces; three of them matter.</p>
+
+  <div class="grid">
+    <section class="opt">
+      <h2>1 · Today</h2>
+      <p class="kind">pieces in a row, notes beneath each one, label above</p>
+      <div class="box">
+        <div style="font-family:var(--font-body);font-size:.64rem;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin-bottom:12px">reading from the right</div>
+        <div class="row-pieces">
+          <span class="piece"><span class="w">http://</span><span class="n">no HTTPS: nothing here is encrypted</span></span>
+          <span class="piece hot"><span class="w">mpesa.</span><span class="n">“mpesa” in a label the owner can invent</span></span>
+          <span class="piece"><span class="w">co.</span><span class="n">free to invent</span></span>
+          <span class="piece"><span class="w">ke.</span><span class="n">free to invent</span></span>
+          <span class="piece hot"><span class="w">verify-account</span><span class="n">one hyphen: often a sign, sometimes just a name</span></span>
+          <span class="piece hot"><span class="w">.top</span><span class="n">“.top”: cheap and abused</span></span>
+        </div>
+      </div>
+      <ul class="pros">
+        <li>the address reads as one line on a wide screen</li>
+        <li>but notes sit in narrow columns and wrap badly</li>
+        <li>the label explains the method, not the finding</li>
+      </ul>
+    </section>
+
+    <section class="opt">
+      <h2>2 · Ladder</h2>
+      <p class="kind">one row per piece, read from the bottom up</p>
+      <div class="box ladder">
+        <div class="rung"><span class="w">http://</span><span class="role">scheme</span><span class="n">No HTTPS, so anything typed into the page travels unencrypted.</span></div>
+        <div class="rung"><span class="w">mpesa.</span><span class="role">subdomain</span><span class="n">A label the owner of the domain can invent. It is not the name.</span></div>
+        <div class="rung"><span class="w">co.</span><span class="role">label</span><span class="n">Part of a compound ending, not free to buy.</span></div>
+        <div class="rung"><span class="w">ke.</span><span class="role">label</span><span class="n">Part of a compound ending, not free to buy.</span></div>
+        <div class="rung now hot"><span class="w">verify-account</span><span class="role">the name</span><span class="n">This is what somebody registered. Read it before the ending.</span></div>
+        <div class="rung hot"><span class="w">.top</span><span class="role">ending</span><span class="n">Cheap and abused.</span></div>
+      </div>
+      <ul class="pros">
+        <li>no wrapping, works on a phone unchanged</li>
+        <li>the active row can travel upward as it is read</li>
+        <li>but it stops looking like an address</li>
+      </ul>
+    </section>
+
+    <section class="opt">
+      <h2>3 · One line, one panel</h2>
+      <p class="kind">address stays whole; the note appears once, as the read moves</p>
+      <div class="box">
+        <div class="oneline">http://<span class="hot">mpesa.</span>co.ke.<span class="under">verify-account</span><span class="hot">.top</span>/</div>
+        <div class="panel">
+          <span class="who">verify-account</span>
+          <p class="say">The name somebody actually registered. Everything in front of it is a label its owner invented; the ending is registry-controlled. This is the part to read.</p>
+        </div>
+      </div>
+      <ul class="pros">
+        <li>notes get a full line to breathe, so they stop wrapping</li>
+        <li>the address never breaks into columns</li>
+        <li>the highlight can sweep right to left, panel changing with it</li>
+      </ul>
+    </section>
+
+    <section class="opt">
+      <h2>4 · Two readings</h2>
+      <p class="kind">what a hurried reader sees, beside what it is</p>
+      <div class="box two">
+        <div>
+          <h3>as it looks</h3>
+          <p>mpesa.co.ke…</p>
+          <p class="note">The eye stops at the first familiar word.</p>
+        </div>
+        <div>
+          <h3>as it is registered</h3>
+          <p class="note-good">verify-account.top</p>
+          <p class="note">The name before the ending. Someone registered this, and put a bank’s name in front of it.</p>
+        </div>
+      </div>
+      <ul class="pros">
+        <li>teaches the lesson in one comparison</li>
+        <li>strongest for a non-specialist</li>
+        <li>but doubles the content and cannot show every piece</li>
+      </ul>
+    </section>
+  </div>
+</div>
+</body>
+</html>
