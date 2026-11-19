@@ -23,8 +23,10 @@ and the running service.
 | Specific III | **half met**, and this is the honest weak point | accuracy is measured; the clarity of the explanations to non-expert users is **not** evaluated. The report's conclusions now say so |
 
 **On "mobile":** the general objective says web *and mobile*. What is delivered is a
-progressive web application that installs on a phone and is styled for it. A native Android
-application exists but is **work in progress** and is excluded from this report.
+progressive web application that installs on a phone and is styled for it, which is the mobile
+delivery route evaluated here. A native Android application and a browser extension are **out
+of scope**: the supervisor confirmed the native build is not required now that the installed
+web application covers the mobile case, and the extension is deferred to future work.
 
 ## 3. The model, measured
 
@@ -69,9 +71,10 @@ input validation, the reputation ceiling, the dissection, and the bulk path.
 1. **Explanation clarity is not evaluated.** Specific objective III asks for it. We have design
    review and informal feedback, not a study with representative users. The fix is an afternoon
    with eight to ten people and a printed form; it has not happened.
-2. **The native Android application is work in progress** and is excluded from this report.
-   A React Native port has the examination, the verdict sheet and the shell; it has not been
-   run on a device and is not distributed.
+2. **The native Android application is out of scope by agreement.** A React Native port exists
+   with the examination, verdict sheet and shell, and a Kotlin build was distributed during
+   development, but neither is part of what is submitted or evaluated. The installed web
+   application is the mobile delivery route.
 3. **Measurement is undecided.** There is no analytics, because "we never see your links" and
    "we track everything" cannot both be true, and the second needs a decision that has not been
    taken.

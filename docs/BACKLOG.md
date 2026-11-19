@@ -191,7 +191,8 @@ page), the printable verdict (a phone shares instead), and CSV header handling.
 
 ## For the presentation: what to say about the app
 
-The Android application is **work in progress and excluded from the report**. Two builds exist:
+The Android application is **out of scope**. The supervisor confirmed it is not required now
+that the installed web application covers the mobile case. Two builds exist:
 a Kotlin app published at `dist/Nyavu-1.3.4-debug.apk`, and a React Native port with the
 examination, verdict sheet and shell that has never run on a device. Neither should be claimed
 as delivered.
