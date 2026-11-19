@@ -11,8 +11,8 @@ android {
         applicationId = "ke.nyavu.shusha"
         minSdk = 26
         targetSdk = 34
-        versionCode = 20
-        versionName = "1.3.3"
+        versionCode = 21
+        versionName = "1.3.4"
     }
     buildTypes {
         release {

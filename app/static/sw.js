@@ -5,9 +5,9 @@
  * than being pinned by a cache, with the cache as an offline fallback only. API calls
  * are never cached: a stale verdict would be worse than no verdict.
  */
-const VERSION = "nyavu-v6";
+const VERSION = "nyavu-v7";
 const SHELL = ["/", "/styles.css", "/app.js", "/autopsy.js", "/manifest.webmanifest",
-               "/icon-192.png", "/icon-512.png", "/logo-mark.svg", "/favicon-32.png", "/fonts/jetbrains-mono-500.woff2"];
+               "/icon-192.png", "/icon-512.png", "/logo-mark.svg", "/logo-mark-small.svg", "/favicon-32.png", "/fonts/jetbrains-mono-500.woff2"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(

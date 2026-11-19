@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-label="Nyavu">
+  <g fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M8.00,13.00 Q-15.10,57.66 45.50,90.00"/>
+    <path d="M29.00,13.00 Q17.45,57.66 47.75,90.00"/>
+    <path d="M50.00,13.00 Q50.00,57.66 50.00,90.00"/>
+    <path d="M71.00,13.00 Q82.55,57.66 52.25,90.00"/>
+    <path d="M92.00,13.00 Q115.10,57.66 54.50,90.00"/>
+    <path class="weft" d="M4.46,51.79 L15.84,52.46 L27.23,53.14 L38.61,53.41 L50.00,53.68 L61.39,53.41 L72.77,53.14 L84.16,52.46 L95.54,51.79"/>
+  </g>
+  <g fill="currentColor" stroke="none">
+    <circle cx="8.00" cy="13.00" r="1.9"/><circle cx="29.00" cy="13.00" r="1.9"/><circle cx="50.00" cy="13.00" r="1.9"/><circle cx="71.00" cy="13.00" r="1.9"/><circle cx="92.00" cy="13.00" r="1.9"/>
+  </g>
+</svg>

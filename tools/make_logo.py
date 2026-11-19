@@ -24,7 +24,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # ---------------------------------------------------------------- geometry
 
-def net_geometry():
+def net_geometry(compact: bool = False):
     """A shield drawn as a net.
 
     The rim is the top edge, wide and knotted; the strands fall to a short blunt tip rather
@@ -34,7 +34,7 @@ def net_geometry():
     """
     rim_y = 0.13
     tip_y = 0.90
-    strands = 9
+    strands = 5 if compact else 9
     rim_half = 0.42        # the rim spans 0.08 .. 0.92
     tip_half = 0.045       # a blunt tip, not a point
 
@@ -58,7 +58,8 @@ def net_geometry():
                 u * u * y0 + 2 * u * t * y1 + t * t * y2)
 
     wefts = []
-    for fraction, sag_amount in ((0.38, 0.022), (0.68, 0.016)):
+    bands = ((0.46, 0.022),) if compact else ((0.38, 0.022), (0.68, 0.016))
+    for fraction, sag_amount in bands:
         band = []
         for curve in strand_curves:
             x, y = at(curve, fraction)
@@ -95,9 +96,10 @@ def smooth_path(points, steps=12):
 
 # ------------------------------------------------------------------ drawing
 
-def draw_mark(draw, size, colour, knot_colour, scale=1.0, offset=(0.0, 0.0), width_scale=1.0):
-    strands, wefts, knots, _ = net_geometry()
-    stroke = max(1, int(size * 0.019 * width_scale))
+def draw_mark(draw, size, colour, knot_colour, scale=1.0, offset=(0.0, 0.0),
+              width_scale=1.0, compact: bool = False):
+    strands, wefts, knots, _ = net_geometry(compact=compact)
+    stroke = max(1, int(size * (0.034 if compact else 0.019) * width_scale))
 
     def px(p):
         x = (p[0] * scale + offset[0]) * size
@@ -131,20 +133,23 @@ def icon(size: int) -> Image.Image:
     d.rounded_rectangle([pad, pad, s - pad, s - pad], radius=int(s * 0.235),
                         fill=FIELD + (255,), outline=EDGE, width=max(1, s // 160))
     # the mark sits in the lower two thirds, so the dome reads as an arch in the square
-    draw_mark(d, s, SAGE + (240,), KNOT + (255,), scale=0.82, offset=(0.09, 0.07))
+    compact = size <= 72
+    draw_mark(d, s, SAGE + (240,), KNOT + (255,), scale=0.80 if compact else 0.82,
+              offset=(0.10, 0.06) if compact else (0.09, 0.07), compact=compact)
     return img.resize((size, size), Image.LANCZOS)
 
 
-def mark_only(size: int, colour=BONE, knot=None) -> Image.Image:
+def mark_only(size: int, colour=BONE, knot=None, compact: bool = False) -> Image.Image:
     s = size * SS
     img = Image.new("RGBA", (s, s), (0, 0, 0, 0))
     d = ImageDraw.Draw(img)
-    draw_mark(d, s, colour + (255,), (knot or colour) + (255,), scale=0.90, offset=(0.05, 0.05))
+    draw_mark(d, s, colour + (255,), (knot or colour) + (255,), scale=0.90, offset=(0.05, 0.05),
+              compact=compact)
     return img.resize((size, size), Image.LANCZOS)
 
 
-def svg() -> str:
-    strands, wefts, knots, _ = net_geometry()
+def svg(compact: bool = False) -> str:
+    strands, wefts, knots, _ = net_geometry(compact=compact)
     pts = []
     for a, c, b in strands:
         pts.append(
@@ -160,7 +165,7 @@ def svg() -> str:
     return (
         '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" '
         'aria-label="Nyavu">\n'
-        '  <g fill="none" stroke="currentColor" stroke-width="1.9" '
+        f'  <g fill="none" stroke="currentColor" stroke-width="{3.4 if compact else 1.9}" '
         'stroke-linecap="round" stroke-linejoin="round">\n    '
         + "\n    ".join(pts) + "\n  </g>\n"
         '  <g fill="currentColor" stroke="none">\n    ' + dots + "\n  </g>\n"
@@ -193,6 +198,7 @@ if __name__ == "__main__":
     mark_only(192).save(os.path.join(
         ROOT, "android", "app", "src", "main", "res", "drawable-nodpi", "logo_mark.png"))
     mark_only(512).save(os.path.join(ROOT, "docs", "logo-preview.png"))
-    with open(os.path.join(ROOT, "app", "static", "logo-mark.svg"), "w", encoding="utf-8") as fh:
-        fh.write(svg())
+    for name, compact in (("logo-mark.svg", False), ("logo-mark-small.svg", True)):
+        with open(os.path.join(ROOT, "app", "static", name), "w", encoding="utf-8") as fh:
+            fh.write(svg(compact=compact))
     print("logo-mark.png, logo-mark.svg and docs/logo-preview.png written")

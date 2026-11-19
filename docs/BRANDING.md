@@ -35,6 +35,18 @@ the mark can stand alone as an icon and the name can change weight with the layo
 | Android welcome screen | same drawable | 96 dp |
 | Documentation preview | `docs/logo-preview.png` | 512 px, transparent |
 
+## Two cuts
+
+The mark exists in two weights, generated from the same geometry.
+
+- **detailed**, nine strands and two wefts, for the About plate (68 px) and the large icons
+  (96 px and up). At 32 px it is mush: the strands merge into a smudge
+- **compact**, five strands, one weft and a stroke about three quarters thicker, for the
+  favicon, the header at 30 px and the two smallest Android densities
+
+Same drawing, fewer threads. The silhouette does the work at small sizes; the mesh does it at
+large ones.
+
 ## Rules
 
 - The mark is bone (`#E9E6DE`) or sage (`#8FA98F`) on the product's background. On a light
