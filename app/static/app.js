@@ -917,6 +917,9 @@ const TONE = { high: "var(--signal-danger)", medium: "var(--signal-warn)", low: 
     g.classList.add("armed");
     const fade = g.closest(".gauge-fade");
     if (fade) fade.classList.add("armed");
+    /* At zero there is no band. The readout is emptied here rather than left holding the word from
+       the last render, so a needle sitting still cannot read "safe". */
+    if (readout) { readout.textContent = ""; fitBandWord(readout); }
     if (caption) caption.textContent = "estimating";
     const started = performance.now();
     const easeOut = (x) => 1 - Math.pow(1 - Math.min(1, Math.max(0, x)), 3);
@@ -933,9 +936,18 @@ const TONE = { high: "var(--signal-danger)", medium: "var(--signal-warn)", low: 
         value = Math.max(0, Math.min(100, base + swing));
       }
       g.style.setProperty("--p", t >= 1 ? String(target) : value.toFixed(2));
-      // the colour follows the value the needle is passing, not the value it will reach
-      g.style.setProperty("--tone", TONE_OF(t >= 1 ? target : value));
-      if (readout) { readout.textContent = wordFor(g, value); fitBandWord(readout); }
+      /* Neutral until the needle actually moves: sitting at zero in a band colour reads as that band.
+         Once it is moving, the colour and the word are the band it is passing through, so the reading
+         happens in front of the reader rather than being announced at the start. */
+      const moving = t >= 1 || value > 1.5;
+      g.style.setProperty("--tone", moving ? TONE_OF(t >= 1 ? target : value) : "#E9E6DE");
+      if (readout) {
+        /* an official card withholds its word until the verdict; naming "official" mid-sweep would
+           give the answer away just as surely as a badge would */
+        const shown = moving && !g.dataset.word ? wordFor(g, value) : "";
+        if (readout.textContent !== shown) readout.textContent = shown;
+        fitBandWord(readout);
+      }
       if (t >= 1) {
         if (readout) { readout.textContent = wordFor(g, target); fitBandWord(readout); }
         if (caption) caption.textContent = "verdict";
@@ -1160,7 +1172,7 @@ const wordFor = (gauge, value) => gauge.dataset.word || BAND_WORD(value);
     result.innerHTML = `
       <div class="verdict-head">
         <div class="gauge-fade">
-        <div class="gauge" style="--p:0; --tone:${TONE[r.risk]}" data-target="${pct}">
+        <div class="gauge" style="--p:0; --tone:#E9E6DE" data-target="${pct}">
           <svg class="dial" viewBox="0 0 200 132" aria-hidden="true">
             <path class="track" d="M22 112 A78 78 0 0 1 178 112" />
             <!-- The three zones, on a thin ring outside the arc. Drawn on the arc itself they were
