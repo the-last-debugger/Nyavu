@@ -53,11 +53,63 @@
   }
 
   function afterRoute(target) {
-    if (target === "history") loadHistory();
-    if (target === "model") loadModel();
-    if (target === "detector") { loadStats(); loadSparkline(); }
+    if (target === "history") transit.track(loadHistory());
+    if (target === "model") transit.track(loadModel());
+    if (target === "detector") { transit.track(loadStats()); transit.track(loadSparkline()); }
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
+
+  /* ------------------------------------------------------------------ transit
+     A thin bar at the top of the page while something is actually being fetched or a view is
+     changing. Research on response times is blunt: below a second a person needs no indicator,
+     above a second they need to know the system is working. This page is a single-page app, so
+     without it a change of view looks static even though data is arriving behind it. */
+  const transit = (() => {
+    const bar = document.createElement("div");
+    bar.id = "transit";
+    bar.setAttribute("aria-hidden", "true");
+    const attach = () => { if (!bar.isConnected && document.body) document.body.appendChild(bar); };
+    if (document.body) attach();
+    else document.addEventListener("DOMContentLoaded", attach, { once: true });
+    // the script can be parsed before <body> exists, and DOMContentLoaded may already have
+    // fired by the time this runs; attaching on first use covers both cases
+    window.addEventListener("load", attach, { once: true });
+    let pending = 0;
+    return {
+      start() {
+        attach();
+        pending += 1;
+        bar.classList.add("on");
+        bar.classList.remove("done");
+      },
+      track(promise) {
+        this.start();
+        return Promise.resolve(promise).finally(() => this.done());
+      },
+      done() {
+        pending = Math.max(0, pending - 1);
+        if (pending) return;
+        bar.classList.add("done");
+        setTimeout(() => { bar.classList.remove("on", "done"); }, 320);
+      },
+    };
+  })();
+
+  /* The first visit does real work: fonts, the shell, the counters. A brief fade covers that
+     work honestly and gives the page the sense of having arrived, which is what people expect of
+     an application. It runs once per session, not on every navigation. */
+  (function arrival() {
+    let seen = false;
+    try { seen = sessionStorage.getItem("nyavu.arrived") === "1"; } catch (e) { seen = false; }
+    if (seen) return;
+    document.documentElement.classList.add("booting");
+    const settle = () => {
+      document.documentElement.classList.remove("booting");
+      try { sessionStorage.setItem("nyavu.arrived", "1"); } catch (e) { /* storage may be off */ }
+    };
+    window.addEventListener("load", () => setTimeout(settle, 420), { once: true });
+    setTimeout(settle, 1600);
+  })();
 
   function route() {
     const id = (location.hash || "#detector").slice(1);
@@ -65,12 +117,16 @@
     const current = views.find(v => v.classList.contains("active"));
     if (current && current.id === target) { afterRoute(target); return; }
 
+    // the bar covers the transition, the view swap and the new view's data
+    transit.start();
     if (canViewTransition) {
       const t = document.startViewTransition(() => applyRoute(target));
-      t.finished.then(() => afterRoute(target)).catch(() => afterRoute(target));
+      t.finished.then(() => { afterRoute(target); transit.done(); })
+        .catch(() => { afterRoute(target); transit.done(); });
     } else {
       applyRoute(target);
       afterRoute(target);
+      transit.done();
     }
   }
   window.addEventListener("hashchange", route);
@@ -100,9 +156,9 @@
       });
       render(r);
       rememberLocally(r);
-      loadStats();
-      loadSparkline();
-      loadHistory();
+      transit.track(loadStats());
+      transit.track(loadSparkline());
+      transit.track(loadHistory());
     } catch (err) {
       result.classList.remove("hidden");
   ensureClose(result);
@@ -636,6 +692,12 @@
     const dialAt = Math.max(SCENE.dialFrom, evidenceEnd + 320);
     const dialEnds = dialAt + SCENE.needle;
 
+    // the dial fades up shortly before it moves, so it arrives rather than waits
+    delay(Math.max(0, dialAt - 900), () => {
+      const fade = card.querySelector(".gauge-fade");
+      if (fade) fade.classList.add("in");
+    });
+
     delay(dialAt, () => {
       say("Weighing the evidence");
       card.classList.add("dialcoming");
@@ -675,6 +737,11 @@
     const caption = g.querySelector(".readout small");
     const token = ++sweepToken;
 
+    /* Nothing on the dial reads as an answer until the needle moves. Before this, the readout
+       said "clear" while the verdict was still unknown, which read as a verdict. */
+    g.classList.add("armed");
+    const fade = g.closest(".gauge-fade");
+    if (fade) fade.classList.add("armed");
     if (caption) caption.textContent = "estimating";
     const started = performance.now();
     const easeOut = (x) => 1 - Math.pow(1 - Math.min(1, Math.max(0, x)), 3);
@@ -697,6 +764,7 @@
       if (t >= 1) {
         if (readout) readout.textContent = BAND_WORD(target);
         if (caption) caption.textContent = "verdict";
+        g.classList.add("settled");
         return;
       }
       requestAnimationFrame(frame);
@@ -841,6 +909,7 @@
     result.classList.add("pending");
     result.innerHTML = `
       <div class="verdict-head">
+        <div class="gauge-fade">
         <div class="gauge" style="--p:0; --tone:${TONE[r.risk]}" data-target="${pct}">
           <svg class="dial" viewBox="0 0 200 132" aria-hidden="true">
             <path class="track" d="M22 112 A78 78 0 0 1 178 112" />
@@ -857,6 +926,7 @@
           </svg>
           <div class="needle"></div>
           <div class="readout"><span class="bandword">clear</span><small>band</small></div>
+        </div>
         </div>
         <div class="verdict-text">
           <span class="badge ${r.risk}">${r.band}</span>${r.reputation === "established"
@@ -889,7 +959,16 @@
     result._target = pct;
     result.dataset.target = String(pct);
     const gauge = result.querySelector(".gauge");
-    if (gauge) gauge.dataset.target = String(pct);
+    if (gauge) {
+      gauge.dataset.target = String(pct);
+      /* The stylesheet carries a decade of pending-state rules that fight over the dial's
+         opacity. Setting the idle state inline makes the intended behaviour unambiguous: hidden
+         until it arrives, then eased up by the scene. */
+      /* The fade lives on a wrapper: the stylesheet carries older rules for .gauge that force its
+         opacity, so anything set on the dial itself is overruled. A new parent element has no
+         such history. */
+      gauge.style.opacity = "";
+    }
     runScene(result);          // the examination owns the clock; it starts the dial itself
     revealResult(result);
   }
@@ -1019,6 +1098,10 @@
       const data = await api("/api/stats/daily?days=14");
       drawSparkline(data.days);
     } catch { /* the strip is decoration until data exists */ }
+    finally {
+      const holder = document.getElementById("spark");
+      if (holder) holder.classList.remove("is-loading");
+    }
   }
 
   async function loadStats() {
@@ -1029,6 +1112,10 @@
       // they belong to the signed-in view rather than the front door.
       countUp($("#statTotal"), s.total_scans);
     } catch { /* non-critical */ }
+    finally {
+      const strip = document.getElementById("statsStrip");
+      if (strip) strip.classList.remove("is-loading");
+    }
   }
 
   async function loadCorpusSize() {
@@ -1161,7 +1248,7 @@
   document.addEventListener("click", (event) => {
     if (event.target && event.target.id === "historyForget") {
       forgetLocal();
-      loadHistory();
+      transit.track(loadHistory());
     }
   });
 
@@ -1310,7 +1397,7 @@
             await api("/api/auth/logout", { method: "POST" });
           } finally {
             out.disabled = false;
-            refreshAccount(); loadStats(); loadHistory();
+            refreshAccount(); transit.track(loadStats()); transit.track(loadHistory());
           }
         };
         $("#historyNote").textContent = "Scans recorded against your account.";
@@ -1687,8 +1774,8 @@
   /* ------------------------------------------------------------------ boot */
   route();
   refreshAccount();
-  loadStats();
-  loadSparkline();
+  transit.track(loadStats());
+  transit.track(loadSparkline());
   loadCorpusSize();
   watchSections();
 
