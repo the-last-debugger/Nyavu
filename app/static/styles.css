@@ -9015,6 +9015,7 @@ html.booting main { opacity: .62; }
   border-radius: 50%;
   background: var(--bone);
   opacity: .5;
+}
 
 /* The note is a quotation, so it is set like one: hanging quotation marks, serif, and a rule under
    the attribution. The marks are drawn by the stylesheet so the text itself stays clean. */
@@ -9155,4 +9156,51 @@ html.booting main { opacity: .62; }
 /* the colours arrive with the verdict, not before it */
 .result.verdict-shown .measure.hot {
   transition: color .4s ease .2s, border-color .4s ease .2s, background .4s ease .2s;
+}
+
+
+/* ---------------------------------------------------------------------------
+   The questions block
+
+   Written for a person who arrived from a search result and wants the short
+   answers: what it is, what it reads, whether it opens the link, whether it can
+   be wrong. Visible text and the FAQPage markup say the same thing, which is
+   what makes it useful rather than decorative.
+   --------------------------------------------------------------------------- */
+.faq { max-width: 720px; margin: 72px auto 0; padding: 0 24px; }
+.faq h2 {
+  font-family: Georgia, "Times New Roman", serif;
+  font-weight: 400;
+  font-size: clamp(1.5rem, 1.2rem + 1.2vw, 1.9rem);
+  letter-spacing: -0.01em;
+  color: var(--text);
+  margin: 0 0 20px;
+}
+.faq details { border-top: 1px solid var(--line); padding: 15px 0; }
+.faq details:last-of-type { border-bottom: 1px solid var(--line); }
+.faq summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 18px;
+  cursor: pointer;
+  list-style: none;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1.06rem;
+  line-height: 1.4;
+  color: var(--text);
+}
+.faq summary::-webkit-details-marker { display: none; }
+.faq summary::after {
+  content: "+";
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 1rem;
+  color: var(--faint);
+  transition: transform .18s ease;
+}
+.faq details[open] summary::after { transform: rotate(45deg); }
+.faq details p { margin: 11px 0 0; color: var(--muted); line-height: 1.7; max-width: 64ch; }
+@media (max-width: 640px) {
+  .faq { margin-top: 52px; padding: 0 20px; }
+  .faq summary { font-size: 1rem; }
 }

@@ -4,8 +4,8 @@
 <!--build-->
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<title>Nyavu. Phishing URL Checker | Is This Link Safe?</title>
-<meta name="description" content="Check any suspicious link before you click it. Nyavu uses machine learning to score a URL from its text alone and explains exactly why it looks like phishing. Free, no sign-up." />
+<title>Nyavu phishing checker, Kabarak University | Check a link before you click</title>
+<meta name="description" content="Nyavu is a free phishing checker built at Kabarak University. Paste a suspicious link and it scores the address from its text alone, then explains in plain language why it looks like phishing. No sign-up, and nothing is opened." />
 <meta name="theme-color" content="#04060b" />
 <link rel="manifest" href="/manifest.webmanifest" />
 <link rel="icon" href="/favicon-32.png" sizes="32x32" />
@@ -13,15 +13,79 @@
 <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 <link rel="canonical" href="https://nyavu.onrender.com/" />
 <meta name="robots" content="index, follow" />
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What is Nyavu?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Nyavu is a free phishing checker built as a COMP324 project at Kabarak University. It reads a web address and tells you whether it looks like phishing, then explains why."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How does it decide?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Three things, in order of authority: the list of addresses institutions publish, public phishing reports, and a model that reads the shape of the name. When a rule settles it, the card says so and names the rule."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Does it open the link?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No. Nyavu never fetches the page, never takes a screenshot and never stores the address. It scores the text of the address itself, which is the part a phisher cannot hide."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Does it know Kenyan brands?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "It keeps a list of Kenyan institutions, including banks, mobile networks, universities and government services, so an address borrowing one of those names is caught even when no public list has reported it yet."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can a verdict be wrong?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. The model is right about 75 times in 100 on held-out data, so a verdict is one opinion, not a guarantee. It exists to make a person look at the part of the address that matters before they click."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is it free?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. No account, no payment, no tracking of who you are. The history on the scanner page stays in your own browser."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Who built it?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Four students at Kabarak University, for COMP324. The model, the lists and the writing are part of the same project."
+      }
+    }
+  ]
+}
+</script>
 <!--verification-->
 <meta property="og:type" content="website" />
 <meta property="og:site_name" content="Nyavu" />
-<meta property="og:title" content="Nyavu, check a link before you click it" />
+<meta property="og:title" content="Nyavu phishing checker, Kabarak University" />
 <meta property="og:description" content="Machine-learning phishing URL detection that explains its verdict in plain language. Free, no page fetching, no account required." />
 <meta property="og:url" content="https://nyavu.onrender.com/" />
 <meta property="og:image" content="https://nyavu.onrender.com/og.png" />
 <meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:title" content="Nyavu, check a link before you click it" />
+<meta name="twitter:title" content="Nyavu phishing checker, Kabarak University" />
 <meta name="twitter:description" content="Machine-learning phishing URL detection that explains its verdict. Free and open." />
 <script type="application/ld+json">
 {
@@ -79,7 +143,7 @@
     <div class="hero hero-plated">
       <div class="hero-copy">
 
-        <h1>Read the address before you trust it.</h1>
+        <h1>Nyavu phishing checker: read the address before you trust it.</h1>
         <p class="lede">Paste a link. Nyavu reads the name the way you should: from the right, where it counts.</p>
         <p class="definition"><strong>Phishing</strong> is an address built to look like someone you
         trust, so that you hand over a password, a one-time code, or a payment.</p>
@@ -247,6 +311,7 @@
     </p>
   </section>
 
+<section class="faq" aria-labelledby="faq-title">  <h2 id="faq-title">Questions people ask</h2>  <details><summary>What is Nyavu?</summary><p>Nyavu is a free phishing checker built as a COMP324 project at Kabarak University. It reads a web address and tells you whether it looks like phishing, then explains why.</p></details>  <details><summary>How does it decide?</summary><p>Three things, in order of authority: the list of addresses institutions publish, public phishing reports, and a model that reads the shape of the name. When a rule settles it, the card says so and names the rule.</p></details>  <details><summary>Does it open the link?</summary><p>No. Nyavu never fetches the page, never takes a screenshot and never stores the address. It scores the text of the address itself, which is the part a phisher cannot hide.</p></details>  <details><summary>Does it know Kenyan brands?</summary><p>It keeps a list of Kenyan institutions, including banks, mobile networks, universities and government services, so an address borrowing one of those names is caught even when no public list has reported it yet.</p></details>  <details><summary>Can a verdict be wrong?</summary><p>Yes. The model is right about 75 times in 100 on held-out data, so a verdict is one opinion, not a guarantee. It exists to make a person look at the part of the address that matters before they click.</p></details>  <details><summary>Is it free?</summary><p>Yes. No account, no payment, no tracking of who you are. The history on the scanner page stays in your own browser.</p></details>  <details><summary>Who built it?</summary><p>Four students at Kabarak University, for COMP324. The model, the lists and the writing are part of the same project.</p></details></section>
 </main>
 
 <footer class="foot">
