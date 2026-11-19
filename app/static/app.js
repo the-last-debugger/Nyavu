@@ -181,6 +181,28 @@
     text.classList.remove("changing");
     source.classList.remove("changing");
     paint("1");
+
+    /* Reserve the height of the tallest line so the page does not move when the quotation changes.
+       The measurement runs on the live element, briefly, because a cloned node measured at the wrong
+       width under-reported (105px where the real line needs 164px) and the reservation was useless. */
+    const reserve = () => {
+      const current = text.textContent;
+      text.style.minHeight = "0";
+      let tallest = 0;
+      NOTES.forEach((line) => {
+        text.textContent = line[0];
+        tallest = Math.max(tallest, text.getBoundingClientRect().height);
+      });
+      text.textContent = current;
+      if (tallest) text.style.minHeight = Math.ceil(tallest) + "px";
+    };
+
+    reserve();
+    let resizeTimer = null;
+    window.addEventListener("resize", () => {
+      window.clearTimeout(resizeTimer);
+      resizeTimer = window.setTimeout(reserve, 160);
+    });
     start();
   })();
 
@@ -1065,6 +1087,8 @@ const wordFor = (gauge, value) => gauge.dataset.word || BAND_WORD(value);
        came from outside the name. Claiming "the name carries the marks" here would be untrue. */
     const verdictLine = r.official
       ? "It is on the institution list we keep, built from the addresses institutions publish."
+      : r.verdict === "suspicious" && (r.reasons || []).some((reason) => reason.indexOf("platform where anyone can publish") >= 0)
+        ? "It sits on a platform where anyone can publish, and its path asks for a password or a code."
       : r.feed && r.feed.listed
       ? `The name alone reads ${BAND_WORD(pct)}, which is how an address like this passes.
          A public phishing list reports it${r.feed.target ? ` as an imitation of ${r.feed.target}` : ""}.`
@@ -1078,8 +1102,14 @@ const wordFor = (gauge, value) => gauge.dataset.word || BAND_WORD(value);
     const scoreNote = r.capped_by_reputation
       ? `Model estimate ${frequency(modelPct === 0 ? 1 : modelPct)} (${modelPct} out of 100), held at ${pct} because the domain is established. Held at ${pct} is a reputation ceiling, not the model's estimate.`
       : `Model estimate ${frequency(pct)} (${pct} out of 100). That is the estimated chance this address is a phish, read from its name alone.`;
-    const reasons = r.reasons.length
-      ? r.reasons.map(t => `<li>${escapeHtml(t)}</li>`).join("")
+    /* An official card already says whose address it is, so the model's "established domain" line
+       is redundant there and reads like a second, weaker explanation. */
+    /* The reputation line explains a clearance. On any card that is not clearing the address it is a
+       contradiction, so it is dropped whenever the verdict is not legitimate. */
+    const shownReasons = (r.reasons || []).filter((t) =>
+      !(t.indexOf("This is an established domain") === 0 && (r.official || r.verdict !== "legitimate")));
+    const reasons = shownReasons.length
+      ? shownReasons.map(t => `<li>${escapeHtml(t)}</li>`).join("")
       : `<li class="safe">No strong phishing indicators were found in the URL text.</li>`;
 
     const evidence = r.evidence && r.evidence.length
@@ -1146,7 +1176,7 @@ const wordFor = (gauge, value) => gauge.dataset.word || BAND_WORD(value);
         </div>
         </div>
         <div class="verdict-text">
-          <span class="badge ${r.risk}">${r.official ? "Official domain" : r.band}</span>${r.reputation === "established" && !r.official
+          <span class="badge ${r.risk}">${r.official ? "Official domain" : r.established ? "Established" : r.band}</span>${r.reputation === "established" && !r.official && !r.established && r.verdict === "legitimate"
             ? '<span class="badge rep">Established domain</span>' : ""}
           <h2>${r.official ? `This is the address ${r.official.name} publishes`
             : r.risk === "high" ? "This reads dangerous"
