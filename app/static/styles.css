@@ -8291,3 +8291,27 @@ dialog.verdict-dialog[open] {
   margin: 0 0 18px;
   color: var(--accent-strong, #B9CBB9);
 }
+
+/* On a phone the scanner wraps into two rows, and the link icon fell to the second row
+   beside the button, where it meant nothing. It belongs to the field: absolutely placed at
+   the left of the row, with the input padded to clear it. */
+@media (max-width: 860px) {
+  .input-row { position: relative; }
+
+  .input-icon {
+    position: absolute;
+    left: 16px;
+    top: 22px;
+    margin: 0;
+  }
+
+  #urlInput {
+    padding-left: 30px !important;
+  }
+
+  .input-row .btn.primary {
+    order: 2;
+  }
+
+  #qrBtn { order: 3; }
+}
