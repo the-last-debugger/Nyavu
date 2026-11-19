@@ -888,10 +888,17 @@
         })()
       : "";
 
-    const featRows = Object.entries(r.features)
-      .filter(([, v]) => v !== 0 && v !== 0.0)
-      .slice(0, 18)
-      .map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join("");
+    /* All seventeen, zeros included. A reader who is told that no known brand appears is being
+       told something; hiding the zero makes the list look like a fault count rather than a set of
+       measurements. */
+    const featRows = FEATURE_LABELS
+      .map(([key, label]) => {
+        const raw = r.features ? r.features[key] : undefined;
+        const value = raw === undefined ? 0 : raw;
+        const shown = Number.isInteger(value) ? value : Number(value).toFixed(4);
+        const hot = FEATURE_HOT.has(key) && value;
+        return `<div${hot ? ' class="hot"' : ""}><dt>${escapeHtml(label)}</dt><dd>${shown}</dd></div>`;
+      }).join("");
 
     document.body.classList.add("has-result");
     result.classList.remove("hidden");
@@ -940,7 +947,10 @@
             <summary>How that was worked out</summary>
             <p class="score-note">${scoreNote}</p>
             <p class="band-legend">Bands: under 35 clear, 35 to 65 worth a look, above 65 a concern.</p>
-            <dl class="feat-grid">${featRows}</dl>
+            <h4 class="fold-title">The name, piece by piece</h4>
+            ${autopsyBreakdown(r)}
+            <h4 class="fold-title">What was measured</h4>
+            <dl class="feat-grid all">${featRows}</dl>
           </details>
           <div class="stamp ${r.risk}" aria-hidden="true">${r.risk === "high" ? "phishing" : r.risk === "medium" ? "unsure" : "clear"}</div>
         </div>

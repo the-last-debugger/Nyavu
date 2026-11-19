@@ -8635,3 +8635,52 @@ html.booting main { opacity: .62; }
   .gauge-fade { opacity: 1; transition: none; }
   .gauge-fade .readout { opacity: 1; transition: none; }
 }
+
+/* -------------------------------------------------------------------------------
+   The detailed report, behind the fold
+
+   The examination shows one note at a time, which is right while it runs and wrong as a
+   record. Everything survives here: every piece with its note, and all seventeen
+   measurements including the zeros.
+
+   The fold is also hidden until the verdict lands. It was appearing while the answer was
+   still being computed, offering to explain something that did not exist yet.
+   ------------------------------------------------------------------------------- */
+.result.pending details.score-more { display: none; }
+
+.fold-title {
+  margin: 18px 0 8px;
+  font-family: var(--font-body);
+  font-size: .68rem;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+.breakdown { list-style: none; margin: 0; padding: 0; }
+.breakdown li {
+  display: grid;
+  grid-template-columns: minmax(90px, 170px) minmax(70px, 110px) 1fr;
+  gap: 12px;
+  align-items: baseline;
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, .05);
+}
+.breakdown .bd-word { font-family: var(--font-mono); font-size: .82rem; color: var(--text); word-break: break-all; }
+.breakdown .bd-role { font-family: var(--font-body); font-size: .62rem; letter-spacing: .1em;
+                      text-transform: uppercase; color: var(--faint); }
+.breakdown .bd-note { font-family: var(--font-body); font-size: .76rem; color: var(--muted); line-height: 1.45; }
+
+.feat-grid.all { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+.feat-grid.all div.hot dt { color: var(--bone); }
+.feat-grid.all div.hot dd { color: var(--bone); }
+
+@media (max-width: 640px) {
+  .breakdown li { grid-template-columns: 1fr; gap: 2px; }
+}
+
+/* paper has no fold */
+@media print {
+  .result details.score-more { display: block !important; }
+  .result details.score-more > * { display: block !important; }
+  .result details.score-more summary { display: none !important; }
+}

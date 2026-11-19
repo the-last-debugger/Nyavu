@@ -150,6 +150,19 @@ function autopsySegments(r) {
   return { segs, clean, trustedSuffix, host: hostOnly };
 }
 
+
+/* The complete breakdown, for the fold and for paper: every piece with its role and its note.
+   The examination shows one note at a time, so this is where the whole reading survives. */
+function autopsyBreakdown(r) {
+  const { segs } = autopsySegments(r);
+  const items = segs.map((s) => `<li>
+      <span class="bd-word">${escapeHtml(s.text)}</span>
+      <span class="bd-role">${escapeHtml(s.role)}</span>
+      <span class="bd-note">${escapeHtml(s.note)}</span>
+    </li>`).join("");
+  return `<ul class="breakdown">${items}</ul>`;
+}
+
 function autopsyMarkup(r) {
   const { segs, clean, trustedSuffix, host } = autopsySegments(r);
   const flagged = segs.filter((s) => s.flag).length;
@@ -189,9 +202,6 @@ function autopsyMarkup(r) {
         <span class="autopsy-caret" aria-hidden="true"></span>
         ${items.join("")}
       </div>
-      <ul class="autopsy-all">
-        ${segs.map((s) => `<li><b>${escapeHtml(s.text)}</b> ${escapeHtml(s.note)}</li>`).join("")}
-      </ul>
       <p class="autopsy-panel" aria-live="polite">
         <span class="panel-who"></span><span class="panel-say"></span>
       </p>
