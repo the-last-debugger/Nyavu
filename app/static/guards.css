@@ -92,3 +92,12 @@
 @media print {
   .fold-print-only { display: block; }
 }
+
+/* The verdict sentence was hidden with opacity, so it held 160px of empty space on a phone for the whole
+   examination: the card looked broken above the address. Hidden content must leave the layout. */
+.result.pending .verdict-line { display: none !important; }
+.result.verdict-shown .verdict-line { display: block; }
+
+/* Before the first note lands the panel is an empty box with a 74px minimum: a void at the top of the
+   examination. It leaves the layout until it has something in it. */
+.autopsy-panel:empty { display: none !important; }
