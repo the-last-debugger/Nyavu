@@ -8897,3 +8897,16 @@ html.booting main { opacity: .62; }
   background: var(--signal-safe);
   opacity: .7;
 }
+
+/* The definition belongs where a first-time reader lands, not in a glossary. */
+.definition {
+  margin: 18px 0 0;
+  padding: 12px 15px;
+  max-width: 62ch;
+  border-left: 2px solid rgba(233, 230, 222, .3);
+  font-family: var(--font-body);
+  font-size: .88rem;
+  line-height: 1.55;
+  color: var(--muted);
+}
+.definition strong { color: var(--text); font-weight: 600; }

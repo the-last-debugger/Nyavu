@@ -24,6 +24,22 @@ except OSError:
 RESTRICTED = {"ac.ke": "reserved for accredited universities", "go.ke": "reserved for government bodies",
               "or.ke": "reserved for non-profits", "sc.ke": "reserved for schools"}
 
+# Provenance a reader can check, by category: the second line for institutions that publish
+# no sitemap and sit outside the top 100,000.
+REGISTER = {
+    "bank": "licensed by the Central Bank of Kenya",
+    "telecom": "licensed by the Communications Authority of Kenya",
+    "mobile money": "operated under Safaricom's licence",
+    "government": "published under the government .go.ke namespace",
+    "university": "accredited by the Commission for University Education",
+    "utility": "a regulated Kenyan utility",
+    "media": "a Kenyan media house",
+    "retail": "a Kenyan retailer",
+    "airline": "a licensed Kenyan carrier",
+    "nGO": "a registered Kenyan organisation",
+    "global": "the company's own published domain",
+}
+
 records = {}
 for row in institutions:
     domain = row["domain"].lower()
@@ -36,8 +52,9 @@ for row in institutions:
     suffix = ".".join(domain.split(".")[-2:])
     if suffix in RESTRICTED:
         evidence.append(f".{suffix} is {RESTRICTED[suffix]}")
-    if row.get("category"):
-        evidence.append(f"Listed as {row['category']}")
+    register = REGISTER.get((row.get("category") or "").lower())
+    if register:
+        evidence.append(register[0].upper() + register[1:])
     records[domain] = {"name": row["name"], "category": row.get("category"),
                        "pages": count, "ranked": domain in allow, "evidence": evidence}
 
