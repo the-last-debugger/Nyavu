@@ -1125,7 +1125,7 @@ function foldLedger(r) {
       "Popularity is not proof, which is why it is one row and not the verdict.");
   }
   if (!d && !r.official) {
-    add("Score", `The name reads as ${pct} in 100, which is in the ` +
+    add("Score", `Nyavu reads the name at ${pct} in 100, in the ` +
       `<strong>${escapeHtml(BAND_WORD(pct))}</strong> band.`);
     if (!r.established && Array.isArray(r.reasons) && r.reasons.length) {
       add("Shape signals", r.reasons.slice(0, 2).map(escapeHtml).join(" "));
@@ -1141,10 +1141,11 @@ function foldLedger(r) {
   return `<ol class="reason-ledger">${rows.join("")}</ol>`;
 }
 
-const FOLD_METHOD = "Method: a logistic regression over character 2 to 5 grams of the registered name " +
-  "and 17 measurements, calibrated on held-out data (ECE 0.028). Bands: under 35 safe, 35 to 65 suspect, " +
-  "above 65 dangerous. Decisive evidence (a published address, a public report, a brand on a password " +
-  "path) overrides the score. Nothing is fetched, so what the page would have shown is not part of this.";
+const FOLD_METHOD = "How Nyavu reads a name: character 2 to 5 grams of the registered name and 17 " +
+  "measurements, through a logistic regression calibrated on held-out data (ECE 0.028). Bands: under 35 " +
+  "safe, 35 to 65 suspect, above 65 dangerous. A published address, a public report or a brand on a " +
+  "password path settles the verdict instead of the score. Nothing is fetched, so what the page would " +
+  "have shown is not part of this.";
 
 function officialLine(r) {
   const official = r.official;
@@ -1212,17 +1213,18 @@ const wordFor = (gauge, value) => gauge.dataset.word || BAND_WORD(value);
        said "official" while the note underneath reported the model's 61 in 100, which reads as a
        contradiction rather than as an explanation. Say which decided. */
     const scoreNote = r.official
-      ? `The model reads the name as ${frequency(r.model_probability !== undefined ? Math.round(r.model_probability * 100) : Math.round(r.probability * 100))}, but this is the address ${r.official.name} publishes, and the list decides here.`
+      ? `Nyavu reads the name at ${frequency(r.model_probability !== undefined ? Math.round(r.model_probability * 100) : Math.round(r.probability * 100))}, but this is the address ${r.official.name} publishes, and a published address outranks a reading of the name.`
       : r.capped_by_reputation
-      ? `Model estimate ${frequency(modelPct === 0 ? 1 : modelPct)}, held at ${pct} because the domain is established. The ceiling is a policy, not the model's estimate.`
-      : `Model estimate ${frequency(pct)}. Read from the name alone.`;
-    /* When a rule settled the verdict, the fold has to say so. It used to say "read from the name alone"
-       under a card that said "this is a phishing address", which is the wrong account of how it was
-       reached. The model's reading stays, demoted to what it is. */
+      ? `Nyavu reads the name at ${frequency(modelPct === 0 ? 1 : modelPct)} and holds it at ${pct} because the domain is established. That ceiling is a policy, not an estimate.`
+      : `Nyavu reads the name at ${frequency(pct)}.`;
+    /* When a rule settled the verdict, the fold has to say so, in Nyavu's voice. It used to say "read from
+       the name alone" under a card that said "this is a phishing address", and later "the model ...", which
+       made the detector sound like a third party explaining itself. Nyavu's own reading stays, demoted to
+       what it is. */
     const decisionNote = r.decision
-      ? `A rule settled this, not the score. The model alone reads the name as ${frequency(modelPct)}; the rows below say what overrode it.`
+      ? `Nyavu did not settle this on the score alone. Read on its own, the name comes out at ${frequency(modelPct)}; what settled it is in the rows below.`
       : !r.official && !r.established
-        ? "No institution record and no public report cover this address. The score is the whole of the evidence."
+        ? "Nyavu has no institution record and no public report for this address, so the name is all there is to read."
         : scoreNote;
 
     /* An official card already says whose address it is, so the model's "established domain" line
@@ -1313,7 +1315,7 @@ const wordFor = (gauge, value) => gauge.dataset.word || BAND_WORD(value);
           ${feedLine(r)}
           ${r.risk === "low" || r.official ? "" : intentLine(r)}
           <details class="score-more">
-            <summary>How that was worked out</summary>
+            <summary>How Nyavu worked it out</summary>
             <p class="score-note">${decisionNote}</p>
             ${foldLedger(r)}
             <p class="band-legend">Bands: under 35 safe, 35 to 65 suspect, above 65 dangerous.</p>
