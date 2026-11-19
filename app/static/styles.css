@@ -8315,3 +8315,19 @@ dialog.verdict-dialog[open] {
 
   #qrBtn { order: 3; }
 }
+
+/* A quiet action, not a primary one: forgetting local entries is reversible in the sense
+   that only the list goes, and it should never compete with the main call to action. */
+.link-button {
+  margin-top: 6px;
+  padding: 0;
+  background: none;
+  border: 0;
+  color: var(--faint);
+  font-family: var(--font-body);
+  font-size: 0.78rem;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.link-button:hover { color: var(--muted); }

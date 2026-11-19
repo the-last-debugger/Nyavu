@@ -99,6 +99,7 @@
         body: JSON.stringify({ url }),
       });
       render(r);
+      rememberLocally(r);
       loadStats();
       loadSparkline();
       loadHistory();
@@ -958,11 +959,76 @@
     });
   })();
 
+
+  /* ------------------------------------------------- device-only history */
+  /* Most people will never create an account, and a History tab that is always empty is a
+     dead tab. These entries live in this browser's storage only: nothing is posted, nothing
+     is keyed to a person, and Forget removes them. The server's behaviour is unchanged. */
+  const LOCAL_KEY = "nyavu.recent.v1";
+  const LOCAL_LIMIT = 25;
+
+  function readLocal() {
+    try {
+      const raw = localStorage.getItem(LOCAL_KEY);
+      const parsed = raw ? JSON.parse(raw) : [];
+      return Array.isArray(parsed) ? parsed : [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function rememberLocally(result) {
+    try {
+      const entry = {
+        at: new Date().toISOString(),
+        host: result.host || result.url,
+        url: result.url,
+        verdict: result.verdict,
+        risk: result.risk,
+        probability: result.probability,
+      };
+      const next = [entry, ...readLocal()].slice(0, LOCAL_LIMIT);
+      localStorage.setItem(LOCAL_KEY, JSON.stringify(next));
+    } catch (e) {
+      // storage can be full or blocked; a failed convenience must not break a scan
+    }
+  }
+
+  function forgetLocal() {
+    try {
+      localStorage.removeItem(LOCAL_KEY);
+    } catch (e) {
+      // nothing to do
+    }
+  }
+
   async function loadHistory() {
     const tbody = $("#historyTable tbody");
     const empty = $("#historyEmpty");
     try {
-      const { items } = await api("/api/history?limit=25");
+      let { items } = await api("/api/history?limit=25");
+      let onDevice = false;
+      if (!items.length) {
+        // no account, or an account with nothing yet: show what this browser remembers
+        items = readLocal().map(entry => ({
+          created_at: entry.at,
+          url: entry.url,
+          host: entry.host,
+          verdict: entry.verdict,
+          risk: entry.risk,
+          probability: entry.probability,
+        }));
+        onDevice = items.length > 0;
+      }
+      const note = $("#historyNote");
+      if (note) {
+        note.textContent = onDevice
+          ? "Kept in this browser only. Nothing was sent to Nyavu, and Forget removes them."
+          : "Your most recent URL checks.";
+      }
+      const forget = $("#historyForget");
+      if (forget) forget.classList.toggle("hidden", !onDevice);
+
       empty.classList.toggle("hidden", items.length > 0);
       $("#historyTable").classList.toggle("hidden", items.length === 0);
       tbody.innerHTML = items.map(it => `
@@ -978,6 +1044,13 @@
         if (t) t.textContent = "Could not load history";
       }
   }
+
+  document.addEventListener("click", (event) => {
+    if (event.target && event.target.id === "historyForget") {
+      forgetLocal();
+      loadHistory();
+    }
+  });
 
   /* ----------------------------------------------------------------- model */
   async function loadModel() {
