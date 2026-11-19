@@ -30,8 +30,11 @@
 }
 /* The measurement strip carries the values, and several of them state the answer. It arrives with the
    verdict, so the examination shows the address being read and nothing that settles it. */
-.result.pending .measures-strip { opacity: 0 !important; }
-.result.verdict-shown .measures-strip { opacity: 1; transition: opacity .45s ease .1s; }
+/* The strip arrives when the needle does, not at the click. It was keyed to the verdict, but the
+   strip is removed a few seconds into the scene, so the gate hid it permanently. The dial's arrival
+   is the right beat: the measurements are in, and the answer is still withheld until it settles. */
+.result.pending:not(.dialcoming) .measures-strip { opacity: 0 !important; }
+.result.dialcoming .measures-strip { opacity: 1; transition: opacity .5s ease; }
 
 @media print {
   .result.pending .measures-strip { opacity: 1 !important; }
