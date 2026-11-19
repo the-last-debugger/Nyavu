@@ -125,17 +125,18 @@
     ["“Trust is not a feeling. It is a reading, done from the right.”", "Nyavu"],
   ];
 
-  /* Five seconds a line: at about four words a second, a line of this length needs roughly three,
-     and the rest is the glance back before it goes. WCAG 2.2.2 asks for a way to stop movement, so
-     the rotation pauses while the note is hovered or focused, and again when the tab is hidden.
-     Under prefers-reduced-motion there is no rotation at all: the first line simply stands. */
+  /* Eight seconds a line. At about four words a second the longest line needs four, so half the
+     dwell is reading and half is stillness: enough time to look away and come back without losing
+     the sentence. WCAG 2.2.2 asks for a way to stop movement, so the rotation pauses while the note
+     is hovered or focused, and again when the tab is hidden. Under prefers-reduced-motion there is
+     no rotation at all: the first line simply stands. */
   (function rotateNotes() {
     const text = document.getElementById("noteQuote");
     const source = document.getElementById("noteSource");
     if (!text || !source || NOTES.length < 2) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
-    const DWELL = 5000;
+    const DWELL = 8000;
     const FADE = 460;
     const note = text.closest(".hero-note");
     let index = 0;
@@ -707,6 +708,21 @@ const TONE = { high: "var(--signal-danger)", medium: "var(--signal-warn)", low: 
       /* The caret used to travel to the next piece before the note arrived, which left two
          markers on one line: the caret ahead and the lit piece behind. With the note in its own
          panel, the lit piece is the marker, so the caret stays out of the reading. */
+      /* The caret steps under the piece before its note arrives. It was left behind when the notes
+         moved into a panel, and the examination lost the thing that made it legible: a mark that
+         travels. Its underline is the only marker now; the segment keeps a brighter colour. */
+      delay(at - 60, () => {
+        if (!caret) return;
+        const host = caret.offsetParent || autopsy;
+        const hostBox = host.getBoundingClientRect();
+        const words = seg.querySelector(".seg-text") || seg;
+        const wb = words.getBoundingClientRect();
+        caret.style.left = (wb.left - hostBox.left) + "px";
+        caret.style.width = Math.max(12, wb.width) + "px";
+        caret.style.top = (wb.bottom - hostBox.top - 3) + "px";
+        caret.classList.add("on");
+      });
+
       delay(at + WRITE_GAP, () => {
         /* Notes accumulate. They used to replace one another, which meant that by the end of the
            examination only the last piece read had a note left: the opposite of a report. Now

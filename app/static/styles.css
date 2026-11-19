@@ -8450,7 +8450,8 @@ dialog.verdict-dialog[open] {
 .autopsy-line .seg { padding-bottom: 0; border-bottom: 0; }
 .autopsy-line .seg .seg-note { display: none; }
 .autopsy-line .seg.speaking .seg-text { color: var(--bone); }
-.autopsy-line .seg.speaking { border-bottom: 1px solid rgba(185, 203, 185, .55); }
+/* one marker: the caret. A second underline on the segment read as a duplicate. */
+.autopsy-line .seg.speaking { border-bottom: 0; }
 
 .autopsy-panel {
   display: grid;
@@ -9058,3 +9059,16 @@ html.booting main { opacity: .62; }
    still painted underneath them: the region measured black while the DOM said the text was there. */
 .hero { isolation: isolate; }
 .hero-note { position: relative; z-index: 3; }
+
+/* One underline, and it moves. The segments carried a static rule each, so every piece looked
+   underlined all the time and the travelling caret read as noise rather than as a cursor. */
+.autopsy-line .seg { border-bottom-color: transparent !important; }
+.autopsy-line .seg.speaking .seg-text { color: var(--bone); }
+.autopsy-caret {
+  height: 3px !important;
+  background: #E9E6DE !important;
+  box-shadow: 0 0 16px rgba(233, 230, 222, .8) !important;
+  opacity: 0;
+  z-index: 3;
+}
+.autopsy-caret.on { opacity: 1; }
