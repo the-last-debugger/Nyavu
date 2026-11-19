@@ -101,3 +101,10 @@
 /* Before the first note lands the panel is an empty box with a 74px minimum: a void at the top of the
    examination. It leaves the layout until it has something in it. */
 .autopsy-panel:empty { display: none !important; }
+
+/* The dissector kept two invisible blocks in the flow while the address was being read: a scan cursor
+   left over from the old tag design, and the closing caption, which is revealed only after the sweep.
+   Together they were 60px of nothing on a phone. */
+.autopsy-line .scan-cursor { display: none !important; }
+.autopsy-caption { display: none !important; }
+.autopsy.swept .autopsy-caption { display: block !important; }
