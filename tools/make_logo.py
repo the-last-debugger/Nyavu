@@ -1,0 +1,186 @@
+"""The Nyavu mark: a cast net, drawn once and exported everywhere.
+
+The reference is a throwing net seen edge on: strands leave an apex at the top, sag to a
+base line, and end in knots. Two wefts cross them, so the mesh reads as a net rather than a
+fan. A wordmark is not part of the mark; the name is set in the product's serif beside it.
+
+Everything the web and the app use is generated here, so the two cannot drift apart:
+the favicon, the manifest icons, the Apple touch icon, the five Android densities, a
+transparent copy of the mark for the page header, and an SVG of the same geometry.
+"""
+from PIL import Image, ImageDraw
+import math
+import os
+
+SAGE = (143, 169, 143)
+KNOT = (203, 215, 203)
+FIELD = (10, 15, 21)
+BONE = (233, 227, 214)
+EDGE = (255, 255, 255, 26)
+
+SS = 4
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+
+# ---------------------------------------------------------------- geometry
+
+def net_geometry():
+    """Strands, wefts and knots in a 0..1 box, apex at the top."""
+    apex = (0.5, 0.10)
+    strands = 9
+    spread = 0.86          # how wide the base is, as a fraction of the box
+    base_y = 0.92
+    sag = 0.26             # how far a strand bows outward
+
+    ends = []
+    for i in range(strands):
+        t = i / (strands - 1)
+        x = 0.5 + (t - 0.5) * spread
+        ends.append((x, base_y))
+
+    # each strand: quadratic from the apex to its base point, bowing away from the centre
+    strand_curves = []
+    for (x, y) in ends:
+        control = (x + (x - apex[0]) * sag, apex[1] + (y - apex[1]) * 0.42)
+        strand_curves.append((apex, control, (x, y)))
+
+    def at(curve, t):
+        (x0, y0), (x1, y1), (x2, y2) = curve
+        u = 1 - t
+        return (u * u * x0 + 2 * u * t * x1 + t * t * x2,
+                u * u * y0 + 2 * u * t * y1 + t * t * y2)
+
+    # two wefts, each a smooth band through the same fraction of every strand, sagging a
+    # little in the middle so they read as rope rather than as rules
+    wefts = []
+    for fraction, sag_amount in ((0.46, 0.030), (0.74, 0.022)):
+        band = []
+        for curve in strand_curves:
+            x, y = at(curve, fraction)
+            band.append((x, y + sag_amount * math.sin(math.pi * min(max(x, 0.0), 1.0))))
+        wefts.append(band)
+
+    knots = [at(curve, 1.0) for curve in strand_curves]
+    return strand_curves, wefts, knots, apex
+
+
+def curve_points(control_a, control_b, control_c, steps=26):
+    pts = []
+    for i in range(steps + 1):
+        t = i / steps
+        u = 1 - t
+        pts.append((
+            u * u * control_a[0] + 2 * u * t * control_b[0] + t * t * control_c[0],
+            u * u * control_a[1] + 2 * u * t * control_b[1] + t * t * control_c[1],
+        ))
+    return pts
+
+
+def smooth_path(points, steps=12):
+    """A polyline smoothed through its points, for the wefts."""
+    out = []
+    for i in range(len(points) - 1):
+        a, b = points[i], points[i + 1]
+        mid = ((a[0] + b[0]) / 2, (a[1] + b[1]) / 2)
+        out.append(a)
+        out.append(mid)
+    out.append(points[-1])
+    return out
+
+
+# ------------------------------------------------------------------ drawing
+
+def draw_mark(draw, size, colour, knot_colour, scale=1.0, offset=(0.0, 0.0), width_scale=1.0):
+    strands, wefts, knots, _ = net_geometry()
+    stroke = max(1, int(size * 0.019 * width_scale))
+
+    def px(p):
+        x = (p[0] * scale + offset[0]) * size
+        y = (p[1] * scale + offset[1]) * size
+        return (x, y)
+
+    # every point goes through px: the geometry is 0..1 and the canvas is pixels, and
+    # forgetting that once drew the whole net inside a single pixel
+    for a, c, b in strands:
+        draw.line([px(p) for p in curve_points(a, c, b)], fill=colour, width=stroke, joint="curve")
+    for weft in wefts:
+        draw.line([px(p) for p in smooth_path(weft)], fill=colour, width=stroke, joint="curve")
+    for knot in knots:
+        r = size * 0.022
+        cx, cy = px(knot)
+        draw.ellipse([cx - r, cy - r, cx + r, cy + r], fill=knot_colour)
+
+
+def icon(size: int) -> Image.Image:
+    s = size * SS
+    img = Image.new("RGBA", (s, s), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    pad = int(s * 0.055)
+    d.rounded_rectangle([pad, pad, s - pad, s - pad], radius=int(s * 0.235),
+                        fill=FIELD + (255,), outline=EDGE, width=max(1, s // 160))
+    # the mark sits in the lower two thirds, so the dome reads as an arch in the square
+    draw_mark(d, s, SAGE + (240,), KNOT + (255,), scale=0.80, offset=(0.10, 0.12))
+    return img.resize((size, size), Image.LANCZOS)
+
+
+def mark_only(size: int, colour=BONE, knot=None) -> Image.Image:
+    s = size * SS
+    img = Image.new("RGBA", (s, s), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    draw_mark(d, s, colour + (255,), (knot or colour) + (255,), scale=0.94, offset=(0.03, 0.03))
+    return img.resize((size, size), Image.LANCZOS)
+
+
+def svg() -> str:
+    strands, wefts, knots, _ = net_geometry()
+    pts = []
+    for a, c, b in strands:
+        pts.append(
+            f'<path d="M{a[0]*100:.2f},{a[1]*100:.2f} Q{c[0]*100:.2f},{c[1]*100:.2f} '
+            f'{b[0]*100:.2f},{b[1]*100:.2f}"/>'
+        )
+    for weft in wefts:
+        commands = " L".join(f"{x*100:.2f},{y*100:.2f}" for x, y in smooth_path(weft))
+        pts.append(f'<path class="weft" d="M{commands}"/>')
+    dots = "".join(
+        f'<circle cx="{x*100:.2f}" cy="{y*100:.2f}" r="1.9"/>' for x, y in knots
+    )
+    return (
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" '
+        'aria-label="Nyavu">\n'
+        '  <g fill="none" stroke="currentColor" stroke-width="1.9" '
+        'stroke-linecap="round" stroke-linejoin="round">\n    '
+        + "\n    ".join(pts) + "\n  </g>\n"
+        '  <g fill="currentColor" stroke="none">\n    ' + dots + "\n  </g>\n"
+        "</svg>\n"
+    )
+
+
+TARGETS = {
+
+    "android/app/src/main/res/mipmap-mdpi/ic_launcher.png": 48,
+    "android/app/src/main/res/mipmap-hdpi/ic_launcher.png": 72,
+    "android/app/src/main/res/mipmap-xhdpi/ic_launcher.png": 96,
+    "android/app/src/main/res/mipmap-xxhdpi/ic_launcher.png": 144,
+    "android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png": 192,
+    "app/static/icon-192.png": 192,
+    "app/static/icon-512.png": 512,
+    "app/static/apple-touch-icon.png": 180,
+    "app/static/favicon-32.png": 32,
+}
+
+if __name__ == "__main__":
+    for rel, size in TARGETS.items():
+        path = os.path.join(ROOT, rel)
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        icon(size).save(path)
+        print(f"{rel:58} {size}px")
+
+    mark_only(512).save(os.path.join(ROOT, "app", "static", "logo-mark.png"))
+    # the in-app mark has no field behind it: it sits on the app's own background
+    mark_only(192).save(os.path.join(
+        ROOT, "android", "app", "src", "main", "res", "drawable-nodpi", "logo_mark.png"))
+    mark_only(512).save(os.path.join(ROOT, "docs", "logo-preview.png"))
+    with open(os.path.join(ROOT, "app", "static", "logo-mark.svg"), "w", encoding="utf-8") as fh:
+        fh.write(svg())
+    print("logo-mark.png, logo-mark.svg and docs/logo-preview.png written")

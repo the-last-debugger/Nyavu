@@ -11,6 +11,7 @@ import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.FrameLayout
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.ScrollView
 import android.widget.TextView
@@ -58,6 +59,11 @@ class MainActivity : Activity() {
             gravity = Gravity.CENTER_VERTICAL
             setPadding(dp(20), dp(18), dp(20), dp(10))
         }
+        header.addView(ImageView(this).apply {
+            setImageResource(R.drawable.logo_mark)
+            scaleType = ImageView.ScaleType.FIT_CENTER
+        }, LinearLayout.LayoutParams(dp(34), dp(34)).apply { rightMargin = dp(10) })
+
         header.addView(LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             addView(TextView(this@MainActivity).apply {

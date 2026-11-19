@@ -43,7 +43,7 @@ class WelcomeActivity : Activity() {
         }
 
         val mark = ImageView(this).apply {
-            setImageResource(R.mipmap.ic_launcher)
+            setImageResource(R.drawable.logo_mark)
             scaleType = ImageView.ScaleType.FIT_CENTER
         }
         page.addView(mark, LinearLayout.LayoutParams(dp(96), dp(96)).apply { bottomMargin = dp(26) })

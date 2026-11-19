@@ -8272,3 +8272,22 @@ dialog.verdict-dialog[open] {
     flex: 1 1 auto !important;
   }
 }
+
+/* the brand mark: the net, at the size the wordmark needs, taking the surrounding ink */
+.brand svg {
+  width: 30px;
+  height: 30px;
+  color: var(--accent-strong, #B9CBB9);
+  flex: none;
+}
+
+.brand span { font-size: 1.12rem; }
+
+/* the mark on its own, where a page needs the logo without the name */
+.logo-plate {
+  display: block;
+  width: 68px;
+  height: 68px;
+  margin: 0 0 18px;
+  color: var(--accent-strong, #B9CBB9);
+}
