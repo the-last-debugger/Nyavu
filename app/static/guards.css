@@ -85,3 +85,10 @@
   box-shadow: 0 0 12px rgba(233, 230, 222, .45) !important;
   border-color: #E9E6DE !important;
 }
+
+/* The fold keeps the record for paper, where the notes panel is not printed, and stops repeating it
+   on screen, where the dissection above already shows every piece with its note. */
+.fold-print-only { display: none; }
+@media print {
+  .fold-print-only { display: block; }
+}

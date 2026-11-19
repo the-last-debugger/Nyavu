@@ -1077,7 +1077,11 @@ function establishedLine(r) {
 function officialLine(r) {
   const official = r.official;
   if (!official) return "";
-  const items = (official.evidence || []).slice(0, 4)
+  /* "On the institution list..." is what the sentence above already says; listing it again made the
+     block read as repetition rather than as support. */
+  const items = (official.evidence || [])
+    .filter((line) => line.indexOf("On the institution list") !== 0)
+    .slice(0, 4)
     .map((line) => `<li class="exam-row">${escapeHtml(line)}</li>`).join("");
   return `<div class="official-line exam-block"><span class="official-tag">official</span>
     <p class="official-say exam-row">${escapeHtml(official.name)} publishes this address.</p>
@@ -1125,9 +1129,16 @@ const wordFor = (gauge, value) => gauge.dataset.word || BAND_WORD(value);
           : r.risk === "medium"
             ? "Something about this name is worth a second look, which is what suspect means here."
             : "Nothing in this name reads as phishing.";
-    const scoreNote = r.capped_by_reputation
-      ? `Model estimate ${frequency(modelPct === 0 ? 1 : modelPct)} (${modelPct} out of 100), held at ${pct} because the domain is established. Held at ${pct} is a reputation ceiling, not the model's estimate.`
-      : `Model estimate ${frequency(pct)} (${pct} out of 100). That is the estimated chance this address is a phish, read from its name alone.`;
+    /* One form of the number. It used to appear twice in the same sentence, as "about 1 in 25" and
+       again as "(4 out of 100)", which reads as two different figures. */
+    /* An official domain is decided by the list, and the model can disagree with it loudly: the card
+       said "official" while the note underneath reported the model's 61 in 100, which reads as a
+       contradiction rather than as an explanation. Say which decided. */
+    const scoreNote = r.official
+      ? `The model reads the name as ${frequency(r.model_probability !== undefined ? Math.round(r.model_probability * 100) : Math.round(r.probability * 100))}, but this is the address ${r.official.name} publishes, and the list decides here.`
+      : r.capped_by_reputation
+      ? `Model estimate ${frequency(modelPct === 0 ? 1 : modelPct)}, held at ${pct} because the domain is established. The ceiling is a policy, not the model's estimate.`
+      : `Model estimate ${frequency(pct)}. Read from the name alone.`;
     /* An official card already says whose address it is, so the model's "established domain" line
        is redundant there and reads like a second, weaker explanation. */
     /* The reputation line explains a clearance. On any card that is not clearing the address it is a
@@ -1218,14 +1229,19 @@ const wordFor = (gauge, value) => gauge.dataset.word || BAND_WORD(value);
             <summary>How that was worked out</summary>
             <p class="score-note">${scoreNote}</p>
             <p class="band-legend">Bands: under 35 safe, 35 to 65 suspect, above 65 dangerous.</p>
-            <h4 class="fold-title">The name, piece by piece</h4>
-            ${autopsyBreakdown(r)}
-            ${r.feed && r.feed.listed
-              ? `<h4 class="fold-title">Where the report comes from</h4>
-                 <p class="feed-note">${escapeHtml((r.feed.sources || []).join(", "))}, snapshot ${escapeHtml(r.feed.generated || "recent")}; matched on ${escapeHtml(r.feed.host || "")}${r.feed.target ? `, reported as imitating ${escapeHtml(r.feed.target)}` : ""}.</p>`
+            ${/* The dissection above already lists every piece with its note. On screen this was the
+                  same six lines again; on paper it is the record, since the notes panel is hidden. */""}
+            <div class="fold-print-only">
+              <h4 class="fold-title">The name, piece by piece</h4>
+              ${autopsyBreakdown(r)}
+              ${r.feed && r.feed.listed
+                ? `<h4 class="fold-title">Where the report comes from</h4>
+                   <p class="feed-note">${escapeHtml((r.feed.sources || []).join(", "))}, snapshot ${escapeHtml(r.feed.generated || "recent")}; matched on ${escapeHtml(r.feed.host || "")}${r.feed.target ? `, reported as imitating ${escapeHtml(r.feed.target)}` : ""}.</p>`
+                : ""}
+            </div>
+            ${r.risk === "low" || r.official
+              ? `<h4 class="fold-title">What it looks like it is after</h4>${intentList(r)}`
               : ""}
-            <h4 class="fold-title">What it looks like it is after</h4>
-            ${intentList(r)}
             <h4 class="fold-title">What was measured</h4>
             <dl class="feat-grid all">${featRows}</dl>
           </details>
