@@ -394,6 +394,21 @@
      from 0.9 each piece is annotated      5.6  the needle settles
      2.6  the flagged pieces are called    6.4  the verdict lands
      --------------------------------------------------------------------------- */
+    /* One clock for the whole examination, so its length can be changed in one place rather
+       than in nine scattered literals. 10.9 seconds end to end: long enough to be watched
+       without being an insult, which is what the first version got wrong at seven. */
+    const SCENE = {
+      start: 420,            // the address arrives on the table
+      chipsFrom: 900,        // the measurements begin arriving
+      chipGap: 148,          // seventeen of them, about two and a half seconds
+      chipSettle: 4300,      // the strip dissolves as the dial takes over
+      writeStart: 420,       // the cursor begins writing the pieces
+      perPiece: 78,          // slower than before, so the writing reads as writing
+      flaggedFrom: 4100,     // flagged pieces are called out
+      dialFrom: 6000,        // the earliest the needle may start; it waits for the evidence
+      needle: 2900,          // how long the hunt lasts, once the evidence is in
+    };
+
   function runScene(root) {
     // may be handed the document or the card itself
     const card = root && root.matches && root.matches(".result") ? root : root.querySelector(".result");
@@ -407,7 +422,7 @@
     const say = (text) => { if (phase) phase.textContent = text; };
     const delay = (ms, fn) => setTimeout(fn, ms);
 
-    delay(350, () => {
+    delay(SCENE.start, () => {
       if (autopsy) autopsy.classList.add("live");
       say("Reading the address");
     });
@@ -433,17 +448,15 @@
         // to be readable: it appears at once and stays for a beat before the verdict arrives
         chips.forEach((chip) => chip.classList.add("on"));
         if (strip) strip.classList.add("live");
-        delay(2200, settle);
       } else {
         strip.classList.add("live");
         chips.forEach((chip, index) => {
-          delay(560 + index * 96, () => {
+          delay(SCENE.chipsFrom + index * SCENE.chipGap, () => {
             chip.classList.add("on");
             if (index % 5 === 0 && index > 0) say(`Measuring ${index + 1} of ${chips.length}`);
           });
         });
-        delay(560 + chips.length * 96 + 260, () => say("Weighing the evidence"));
-        delay(2900, settle);
+        delay(SCENE.chipsFrom + chips.length * SCENE.chipGap + 300, () => say("Weighing the evidence"));
       }
     }
 
@@ -464,8 +477,8 @@
       }))
       .sort((a, b) => a.el.offsetLeft - b.el.offsetLeft);
 
-    const WRITE_START = 380;
-    const PER_MS = 62;           // per piece, slow enough to watch being written
+    const WRITE_START = SCENE.writeStart;
+    const PER_MS = SCENE.perPiece;   // per piece, slow enough to watch being written
 
     /* Position inside the element the cursors are actually placed in. A single row needs
        only left, but a phone stacks the pieces into rows, and a cursor that tracks left
@@ -623,22 +636,34 @@
     });
 
     const flagged = segs.filter((el) => el.classList.contains("flag"));
+    const PER_FLAG = 300;
     flagged.forEach((seg, i) => {
-      delay(2600 + i * 280, () => {
+      delay(SCENE.flaggedFrom + i * PER_FLAG, () => {
         seg.classList.add("called");
         say("Comparing against known brands");
       });
     });
 
-    delay(3400, () => {
+    /* The dial is the last thing to move. Its start is not a fixed number: it waits until the
+       writing, the notes and the flagged pieces have all finished, so the examination ends on
+       the needle settling instead of the needle talking over the evidence. */
+    const writingEnd = clock;
+    const notesEnd = resolveStart + segs.length * STEP + WRITE_GAP + 220;
+    const flaggedEnd = flagged.length ? SCENE.flaggedFrom + (flagged.length - 1) * PER_FLAG : 0;
+    const evidenceEnd = Math.max(writingEnd, notesEnd, flaggedEnd);
+    const dialAt = Math.max(SCENE.dialFrom, evidenceEnd + 320);
+    const dialEnds = dialAt + SCENE.needle;
+
+    delay(dialAt, () => {
       say("Weighing the evidence");
       card.classList.add("dialcoming");
-      sweepNeedle(card, 2200);
+      if (strip) strip.classList.add("settled");
+      sweepNeedle(card, SCENE.needle);
     });
 
-    delay(5600, () => say("Reaching a verdict"));
+    delay(Math.max(dialAt + 400, dialEnds - 520), () => say("Reaching a verdict"));
 
-    delay(6800, () => {
+    delay(dialEnds + 280, () => {
       /* The card grows by the height of the reasons at this instant. Animating that
          height has been attempted four ways, including animating the container itself,
          and the browser applies the new height without interpolating it: legacy rules in
@@ -651,6 +676,7 @@
       if (row) row.remove();
       normaliseCard(card);
       ensureClose(card);
+      window.__sceneEnd = performance.now();
       openVerdict(card);
     });
   }
