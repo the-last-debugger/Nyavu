@@ -229,6 +229,35 @@ def _official_domains() -> set:
     return _OFFICIAL
 
 
+def _official_name(host: str):
+    """The institution whose published domain this is, or None."""
+    host = (host or "").lower().strip(".")
+    labels = host.split(".") if host else []
+    for index in range(0, max(0, len(labels) - 1)):
+        candidate = ".".join(labels[index:])
+        for row in _official_rows():
+            if row["domain"].lower().strip(".") == candidate:
+                return row["name"]
+    return None
+
+
+_OFFICIAL_ROWS = []
+
+
+def _official_rows() -> list:
+    global _OFFICIAL_ROWS
+    if _OFFICIAL_ROWS:
+        return _OFFICIAL_ROWS
+    try:
+        import json as _json
+        with open(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                               "data", "institutions.json"), encoding="utf-8") as handle:
+            _OFFICIAL_ROWS = _json.load(handle).get("entries", [])
+    except Exception:                                      # noqa: BLE001
+        _OFFICIAL_ROWS = []
+    return _OFFICIAL_ROWS
+
+
 def _is_official_domain(host: str) -> bool:
     host = (host or "").lower().strip(".")
     if not host:
@@ -250,9 +279,21 @@ def _apply_feed(result: dict) -> dict:
     known campaign. A feed hit is the one piece of evidence that does not come from the name, so it
     is allowed to escalate the verdict; it is never allowed to clear one.
     """
-    # an official domain is never escalated by a blocklist entry: the lists carry brand domains, and
-    # condemning a bank because a list once mentioned it would be worse than missing a hit
-    if _is_official_domain(result.get("host", "")):
+    # An official domain is not to be condemned by either half of the system. The list carries brand
+    # domains, so a stale entry must not escalate them; and the model judges shape, so it will happily
+    # flag "kcb.co.ke" for being short. The institution's own published address is the one case where
+    # we have direct knowledge, and it should win.
+    official = _official_name(result.get("host", ""))
+    if official:
+        result["official"] = {"name": official}
+        if result.get("verdict") != "legitimate":
+            result["verdict"] = "legitimate"
+            result["risk"] = "low"
+            result["band"] = "Likely legitimate"
+            result["label"] = 0
+            result["probability"] = min(float(result.get("probability") or 0), 0.2)
+            result["reputation"] = result.get("reputation") or "established"
+            result["reasons"] = [f"This is the address {official} publishes."] + list(result.get("reasons") or [])[:3]
         return result
     feed = threat.lookup(result.get("url", ""))
     if not feed:
