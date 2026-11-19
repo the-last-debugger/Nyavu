@@ -25,6 +25,15 @@
   --warn:      #ffb020;
   --danger:    #ff4d6d;
 
+  /* The signal palette. The tokens above are interface furniture: calm, desaturated, and they
+     should stay that way. These three are read as a verdict, so they carry the chroma the
+     furniture cannot. The old pair failed for measurable reasons: the safe green sat at 13%
+     saturation (a grey-green, which reads weak) and the danger sat at hue 349, eleven degrees
+     past red towards magenta, which reads pink. */
+  --signal-safe:   #57C08A;
+  --signal-warn:   #E6B450;
+  --signal-danger: #EF4444;
+
   --radius:    14px;
   --radius-lg: 22px;
   --shadow:    0 30px 80px rgba(0, 0, 0, 0.65);
@@ -8385,7 +8394,7 @@ dialog.verdict-dialog[open] {
    has to span both columns or it lands in one cell and overlaps the dissection. */
 .measures-strip { grid-column: 1 / -1; width: 100%; }
 
-/* The band word replaces the numeral in the dial. "concern" is a word, not a figure, so it
+/* The band word replaces the numeral in the dial. "dangerous" is a word, not a figure, so it
    needs different type from the 2.6rem number it took over. */
 .readout .bandword {
   font-family: var(--font-display);
@@ -8497,11 +8506,11 @@ dialog.verdict-dialog[open] {
   fill: none;
   stroke-width: 13;
   stroke-linecap: butt;
-  opacity: .26;
+  opacity: .22;
 }
-.gauge .band-clear { stroke: #7FA98F; }
-.gauge .band-caution { stroke: #ffb020; }
-.gauge .band-concern { stroke: #ff4d6d; }
+.gauge .band-safe { stroke: var(--signal-safe); }
+.gauge .band-suspect { stroke: var(--signal-warn); }
+.gauge .band-dangerous { stroke: var(--signal-danger); }
 
 @media print {
   .gauge .band { opacity: .34; }
@@ -8524,8 +8533,8 @@ dialog.verdict-dialog[open] {
 .gauge .readout { opacity: 0; transition: opacity .35s ease .12s; }
 .gauge.armed .readout { opacity: 1; }
 
-.gauge .band { opacity: .14; transition: opacity .6s ease; }
-.gauge.settled .band { opacity: .05; }
+.gauge .band { opacity: .22; transition: opacity .6s ease; }
+.gauge.settled .band { opacity: .10; }
 
 /* the reading is the one thing that should glow */
 .gauge .fill { filter: drop-shadow(0 0 16px var(--tone)) saturate(1.15); }
@@ -8713,6 +8722,7 @@ html.booting main { opacity: .62; }
   .autopsy-panel { max-height: 220px; }
 }
 
+
 /* -------------------------------------------------------------------------------
    What the link looks like it is after
 
@@ -8756,4 +8766,62 @@ html.booting main { opacity: .62; }
 
 @media (max-width: 640px) {
   .intent-list li { grid-template-columns: 1fr; gap: 2px; }
+}
+
+/* The bands were legible only if you already knew they were there. Faded is the intent; invisible
+   is not. 0.32 at rest and 0.14 once the reading lands, against strokes that now carry chroma. */
+.gauge .band { opacity: .32; }
+.gauge.settled .band { opacity: .14; }
+
+/* At rest the three zones are the only thing on the dial, so they carry a little more weight. */
+.gauge:not(.settled) .band { opacity: .38; }
+
+/* The zones belong on their own ring: on the arc they were covered by the track, the pill and the
+   needle, which is why they read as absent. A thin worn ring outside the arc is legible without
+   competing with the reading. */
+.gauge .band {
+  stroke-width: 4;
+  stroke-linecap: butt;
+  opacity: .5;
+}
+.gauge:not(.settled) .band { opacity: .62; }
+.gauge.settled .band { opacity: .3; }
+
+@media print {
+  .gauge .band { opacity: .75; }
+
+}
+
+/* "dangerous" is three characters longer than anything the pill was built for, and it was
+   spilling out of the right edge. The pill now hugs its word and the word is sized to fit the
+   dial rather than to match the old numerals. */
+.gauge .readout { width: auto; max-width: 98%; }
+.gauge .readout span.bandword {
+  font-size: clamp(.62rem, 3.4vw, .8rem);
+  letter-spacing: .02em;
+  padding: 3px 9px;
+  white-space: nowrap;
+}
+
+/* A mobile rule sets .gauge .readout span to 1.5rem !important, which was sized for a two-digit
+   number and pushes a word out of its pill. Same weight, more specific. */
+.gauge .readout span.bandword {
+  font-size: clamp(.6rem, 3.1vw, .78rem) !important;
+  padding: 3px 9px !important;
+  letter-spacing: .02em !important;
+}
+.gauge .readout span { width: auto !important; max-width: 100% !important; }
+
+/* Inside the verdict dialog the readout pill keeps a width from the numeral days, so a word longer
+   than "concern" is clipped by its own background. In the dialog the pill is allowed to hug the
+   word and to overflow visibly if it must. */
+.verdict-dialog .gauge .readout span,
+.verdict-dialog .gauge .readout span.bandword {
+  width: auto !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  overflow: visible !important;
+  white-space: nowrap !important;
+  font-size: clamp(.66rem, 1.6vw, .92rem) !important;
+  padding: 3px 10px !important;
 }

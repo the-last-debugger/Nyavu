@@ -172,7 +172,8 @@
     }
   });
 
-  const TONE = { high: "var(--danger)", medium: "var(--warn)", low: "var(--safe)" };
+  // the dial speaks in the signal palette; the muted tokens stay for furniture
+const TONE = { high: "var(--signal-danger)", medium: "var(--signal-warn)", low: "var(--signal-safe)" };
 
 
   /* Small things people notice: numbers that count to their value, and a scanning
@@ -733,7 +734,7 @@
     });
   }
 
-  const TONE_OF = (v) => (v < 35 ? "#7FA98F" : v < 65 ? "#ffb020" : "#ff4d6d");
+  const TONE_OF = (v) => (v < 35 ? "#57C08A" : v < 65 ? "#E6B450" : "#EF4444");
 
   /* The needle makes one gesture: it rises, overshoots by a few points, and settles.
      No vibration, no dithering, and it stops dead when it arrives. */
@@ -768,9 +769,9 @@
       g.style.setProperty("--p", t >= 1 ? String(target) : value.toFixed(2));
       // the colour follows the value the needle is passing, not the value it will reach
       g.style.setProperty("--tone", TONE_OF(t >= 1 ? target : value));
-      if (readout) readout.textContent = BAND_WORD(value);
+      if (readout) { readout.textContent = BAND_WORD(value); fitBandWord(readout); }
       if (t >= 1) {
-        if (readout) readout.textContent = BAND_WORD(target);
+        if (readout) { readout.textContent = BAND_WORD(target); fitBandWord(readout); }
         if (caption) caption.textContent = "verdict";
         g.classList.add("settled");
         return;
@@ -846,7 +847,22 @@
   /* A band word, not a percentage. Research on confidence display is consistent: people read
      the same number differently depending on mood and situation, so the primary readout names
      the band and the number lives in the details as a frequency. */
-  const BAND_WORD = (value) => (value >= 65 ? "concern" : value >= 35 ? "caution" : "clear");
+  /* Three rungs, one part of speech, rising severity: safe, suspect, dangerous. "Suspect" is the
+   honest middle, because suspicion is what a name can support and proof is what it cannot. */
+/* A legacy rule sets .gauge .readout span to 1.5rem !important, sized for a two-digit number, and it
+   clips any word longer than "concern". Inline !important is the only thing that outranks a
+   stylesheet !important, so the pill is sized from the script. */
+function fitBandWord(span) {
+  if (!span) return;
+  span.style.setProperty("font-size", "11px", "important");
+  span.style.setProperty("padding", "3px 9px", "important");
+  span.style.setProperty("width", "auto", "important");
+  span.style.setProperty("max-width", "none", "important");
+  span.style.setProperty("overflow", "visible", "important");
+  span.style.setProperty("white-space", "nowrap", "important");
+}
+
+const BAND_WORD = (value) => (value >= 65 ? "dangerous" : value >= 35 ? "suspect" : "safe");
 
   function render(r) {
     const pct = Math.round(r.probability * 100);
@@ -928,19 +944,20 @@
         <div class="gauge" style="--p:0; --tone:${TONE[r.risk]}" data-target="${pct}">
           <svg class="dial" viewBox="0 0 200 132" aria-hidden="true">
             <path class="track" d="M22 112 A78 78 0 0 1 178 112" />
-            <!-- The three bands, faded, so a reader can see the shape of the scale before the
-                 needle moves. pathLength=100 lets the dash pattern be written in percent:
-                 0 to 35 clear, 35 to 65 a look, above 65 a concern. -->
-            <path class="band band-clear" pathLength="100" stroke-dasharray="35 65"
-                  stroke-dashoffset="0" d="M22 112 A78 78 0 0 1 178 112" />
-            <path class="band band-caution" pathLength="100" stroke-dasharray="30 70"
-                  stroke-dashoffset="-35" d="M22 112 A78 78 0 0 1 178 112" />
-            <path class="band band-concern" pathLength="100" stroke-dasharray="35 65"
-                  stroke-dashoffset="-65" d="M22 112 A78 78 0 0 1 178 112" />
+            <!-- The three zones, on a thin ring outside the arc. Drawn on the arc itself they were
+                 half hidden by the readout pill and the track; outside it, nothing covers them.
+                 pathLength=100 lets the dash pattern be written in percent: 0 to 35 clear,
+                 35 to 65 suspect, above 65 dangerous. -->
+            <path class="band band-safe" pathLength="100" stroke-dasharray="35 65"
+                  stroke-dashoffset="0" d="M14 112 A86 86 0 0 1 186 112" />
+            <path class="band band-suspect" pathLength="100" stroke-dasharray="30 70"
+                  stroke-dashoffset="-35" d="M14 112 A86 86 0 0 1 186 112" />
+            <path class="band band-dangerous" pathLength="100" stroke-dasharray="35 65"
+                  stroke-dashoffset="-65" d="M14 112 A86 86 0 0 1 186 112" />
             <path class="fill" d="M22 112 A78 78 0 0 1 178 112" />
           </svg>
           <div class="needle"></div>
-          <div class="readout"><span class="bandword">clear</span><small>band</small></div>
+          <div class="readout"><span class="bandword">safe</span><small>band</small></div>
         </div>
         </div>
         <div class="verdict-text">
@@ -954,7 +971,7 @@
           <details class="score-more">
             <summary>How that was worked out</summary>
             <p class="score-note">${scoreNote}</p>
-            <p class="band-legend">Bands: under 35 clear, 35 to 65 worth a look, above 65 a concern.</p>
+            <p class="band-legend">Bands: under 35 safe, 35 to 65 suspect, above 65 dangerous.</p>
             <h4 class="fold-title">The name, piece by piece</h4>
             ${autopsyBreakdown(r)}
             <h4 class="fold-title">What it looks like it is after</h4>
