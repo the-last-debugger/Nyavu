@@ -133,11 +133,14 @@ def plot_comparison(results, path):
     fig, ax = plt.subplots(figsize=(6.6, 2.9), dpi=220)
     for i, n in enumerate(names):
         vals = [results[n][m] * 100 for m in metrics]
-        ax.bar(x + i * w, vals, w, label=n)
+        bars = ax.bar(x + i * w, vals, w, label=n)
+        ax.bar_label(bars, fmt="%.1f", padding=1, fontsize=6)
     ax.set_xticks(x + w * (len(names) - 1) / 2)
     ax.set_xticklabels([m.capitalize() for m in metrics])
     ax.set_ylabel("Percent")
-    ax.set_ylim(85, 100.5)
+    # every metric sits between 60 and 80, so a window near 100 drew empty axes: the bars
+    # were clipped out of sight and the figure shipped blank
+    ax.set_ylim(0, 100)
     ax.legend(fontsize=8, frameon=False, ncol=3)
     ax.grid(axis="y", alpha=.25)
     fig.tight_layout()
