@@ -9260,3 +9260,84 @@ html.booting main { opacity: .62; }
   .reason-ledger li { grid-template-columns: 1fr; gap: 5px; padding: 12px 0; }
   .reason-ledger .check { padding-top: 0; }
 }
+
+
+/* ---------------------------------------------------------------------------
+   The menu button
+
+   A disclosure control in the header. It is the way to pages that are not tabs of
+   the detector: the FAQ, the two guides, About, the Android build.
+   --------------------------------------------------------------------------- */
+.menu-btn {
+  display: inline-grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  margin-left: auto;
+  padding: 0;
+  border-radius: 11px;
+  border: 1px solid var(--line-hi);
+  background: var(--panel);
+  color: var(--text);
+  cursor: pointer;
+  transition: background .18s ease, border-color .18s ease;
+}
+.menu-btn:hover { background: var(--panel-hi); }
+.menu-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.menu-btn svg { width: 19px; height: 19px; }
+.menu-panel {
+  position: absolute;
+  top: calc(100% - 4px);
+  right: clamp(16px, 4vw, 40px);
+  z-index: 45;
+  min-width: 216px;
+  padding: 7px;
+  display: grid;
+  gap: 1px;
+  border-radius: 15px;
+  border: 1px solid var(--line-hi);
+  background: #0a0f18;
+  box-shadow: 0 26px 70px rgba(0, 0, 0, .6);
+}
+.menu-panel[hidden] { display: none; }
+.menu-panel a {
+  padding: 10px 12px;
+  border-radius: 9px;
+  color: var(--text);
+  text-decoration: none;
+  font-family: var(--font-body);
+  font-size: .92rem;
+}
+.menu-panel a:hover, .menu-panel a:focus-visible { background: var(--panel-hi); }
+
+/* The definition now sits under the quotation, not beside the headline: the quotes keep the
+   right column's first position, and the definition reads as a footnote to them. */
+.hero-note .definition {
+  margin: 26px 0 0;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+  max-width: 36ch;
+  font-size: .84rem;
+  line-height: 1.62;
+  color: var(--muted);
+}
+.hero-note .definition strong { color: var(--text); }
+
+/* The FAQ page reuses the folding list from the home page, without its section margins. */
+.faq-page { max-width: 800px; margin: 0 auto; padding: 56px 24px 80px; }
+.faq-page h1 { font-family: Georgia, serif; font-weight: 400; font-size: clamp(2rem, 1.5rem + 2vw, 2.9rem); letter-spacing: -0.02em; margin: 10px 0 14px; color: var(--text); }
+.page-kicker { font-family: "JetBrains Mono", monospace; font-size: .66rem; letter-spacing: .16em; text-transform: uppercase; color: var(--faint); margin: 0; }
+.page-lede { color: var(--muted); line-height: 1.65; margin: 0 0 30px; max-width: 60ch; }
+.faq-inline { margin: 0; padding: 0; max-width: none; }
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+
+
+/* The headline needed three lines, not five, once it carried the search phrase. At 52ch it fits in
+   three and the copy column measures the same as the quotation column, so neither side leaves a
+   void under it. Scoped to desktop: on a phone the measure is the viewport. */
+@media (min-width: 901px) {
+  .hero-copy { max-width: 52ch; }
+}

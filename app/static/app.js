@@ -2101,6 +2101,36 @@ const wordFor = (gauge, value) => gauge.dataset.word || BAND_WORD(value);
     else if (document.body.classList.contains("has-result")) dismissResult();
   });
 
+
+  /* ------------------------------------------------------------ the menu
+     A disclosure, not a menu widget: one button that shows a panel of links, aria-expanded
+     reporting state, Escape closing it and returning focus to the button, and a click
+     anywhere else closing it. That is the W3C disclosure navigation pattern, which suits a
+     list of pages; role="menu" would promise arrow-key behaviour this does not implement. */
+  (function menu() {
+    const button = document.getElementById("menuBtn");
+    const panel = document.getElementById("menuPanel");
+    if (!button || !panel) return;
+    const setOpen = (open) => {
+      button.setAttribute("aria-expanded", String(open));
+      panel.hidden = !open;
+    };
+    button.addEventListener("click", (event) => {
+      event.stopPropagation();
+      setOpen(panel.hidden);
+    });
+    document.addEventListener("click", (event) => {
+      if (panel.hidden) return;
+      if (panel.contains(event.target) || button.contains(event.target)) return;
+      setOpen(false);
+    });
+    document.addEventListener("keydown", (event) => {
+      if (event.key !== "Escape" || panel.hidden) return;
+      setOpen(false);
+      button.focus();
+    });
+  })();
+
   document.querySelectorAll('.nav a[href="#detector"], .brand').forEach((el) => {
     el.addEventListener("click", () => {
       if (document.body.classList.contains("has-result")) dismissResult();

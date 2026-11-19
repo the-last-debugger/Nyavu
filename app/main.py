@@ -1103,6 +1103,11 @@ def about():
     return FileResponse(os.path.join(STATIC, "pages", "about.html"))
 
 
+@app.get("/faq")
+def faq():
+    return FileResponse(os.path.join(STATIC, "pages", "faq.html"))
+
+
 @app.get("/learn/{slug}")
 def learn(slug: str):
     if not slug.replace("-", "").isalnum():
@@ -1121,7 +1126,7 @@ def learn(slug: str):
 # routes (#model, #history) are deliberately absent: a fragment cannot be indexed as a
 # page, and listing it would only produce duplicates of the home page.
 # --------------------------------------------------------------------------- #
-PUBLIC_PAGES = ["/", "/learn/is-this-link-safe", "/learn/how-phishing-works", "/about"]
+PUBLIC_PAGES = ["/", "/learn/is-this-link-safe", "/learn/how-phishing-works", "/about", "/faq"]
 
 
 def _origin(request: Request) -> str:
