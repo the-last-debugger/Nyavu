@@ -8331,3 +8331,56 @@ dialog.verdict-dialog[open] {
   cursor: pointer;
 }
 .link-button:hover { color: var(--muted); }
+
+/* ------------------------------------------------------------------ measurements */
+/* The evidence the dial summarises, shown while the examination runs and then dissolved.
+   It is transient on purpose: the finished card carries the same figures in its own place,
+   and two copies of the same list would read as clutter rather than as work. */
+.measures-strip {
+  display: none;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 14px 0 0;
+  max-height: 0;
+  opacity: 0;
+  transition: opacity .35s ease, max-height .5s cubic-bezier(.22, 1, .36, 1), margin .5s ease;
+}
+.result.pending .measures-strip { display: flex; }
+.measures-strip.live { opacity: 1; max-height: 220px; }
+.measures-strip.settled { opacity: 0; max-height: 0; margin-top: 0; overflow: hidden; }
+
+.measure {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 7px;
+  padding: 4px 9px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font-family: var(--font-mono);
+  font-size: .64rem;
+  letter-spacing: .01em;
+  color: var(--muted);
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity .22s ease, transform .22s ease, color .3s ease, border-color .3s ease;
+}
+.measure b { font-weight: 400; color: var(--faint); }
+.measure.on { opacity: 1; transform: none; }
+.measure.hot { color: var(--bone); border-color: rgba(233, 230, 222, .38); }
+.measure.hot b { color: var(--bone); }
+
+@media (max-width: 640px) {
+  .measure:not(.key) { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .measure { transition: none; transform: none; }
+  .measures-strip { transition: none; }
+}
+
+/* The pile of measurements belongs to the examination, not to the printed verdict. */
+@media print { .measures-strip { display: none !important; } }
+
+/* On a phone the strip is moved inside the verdict head, which is a two-column grid, so it
+   has to span both columns or it lands in one cell and overlaps the dissection. */
+.measures-strip { grid-column: 1 / -1; width: 100%; }

@@ -199,6 +199,8 @@
     normaliseCard(card);
     const line = document.getElementById("thinking");
     if (line && line.parentElement) line.parentElement.remove();
+    const strip = card.querySelector(".measures-strip");
+    if (strip) strip.remove();
     const skip = document.getElementById("skipBtn");
     if (skip) skip.remove();
   }
@@ -409,6 +411,41 @@
       if (autopsy) autopsy.classList.add("live");
       say("Reading the address");
     });
+
+    /* The measurements arrive in the extractor's own order while the address is being read.
+       They are the evidence the dial will summarise, so the wait shows the work instead of
+       hiding it. The strip dissolves when the dial begins, because the finished card shows
+       the same figures in its own place and two copies would be noise. */
+    const strip = card.querySelector(".measures-strip");
+    const chips = strip ? Array.from(strip.children) : [];
+
+    /* On a phone the dissection fills the card, so a strip below it arrives out of sight.
+       Moving it above the dissection on narrow screens keeps the evidence where the eye is
+       while the address is being written. The desktop order is unchanged. */
+    if (strip && autopsy && window.matchMedia("(max-width: 640px)").matches) {
+      autopsy.parentElement.insertBefore(strip, autopsy);
+    }
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const settle = () => { if (strip) strip.classList.add("settled"); };
+    if (chips.length) {
+      if (reduced) {
+        // no choreography for anyone who asked for less movement, but the evidence still has
+        // to be readable: it appears at once and stays for a beat before the verdict arrives
+        chips.forEach((chip) => chip.classList.add("on"));
+        if (strip) strip.classList.add("live");
+        delay(2200, settle);
+      } else {
+        strip.classList.add("live");
+        chips.forEach((chip, index) => {
+          delay(560 + index * 96, () => {
+            chip.classList.add("on");
+            if (index % 5 === 0 && index > 0) say(`Measuring ${index + 1} of ${chips.length}`);
+          });
+        });
+        delay(560 + chips.length * 96 + 260, () => say("Weighing the evidence"));
+        delay(2900, settle);
+      }
+    }
 
     /* The address is written out by a cursor, left to right, one piece at a time. Then the
        notes resolve from the ending backwards, which is the lesson. Writing it is the
@@ -682,6 +719,45 @@
     return tail || lead;
   }
 
+  /* The seventeen measurements, in the order the extractor computes them. The examination
+     shows them arriving one at a time, so the list is the pipeline rather than decoration. */
+  const FEATURE_LABELS = [
+    ["domain_len", "length of the name"],
+    ["num_labels", "labels in the name"],
+    ["num_hyphens", "hyphens"],
+    ["num_digits", "digits"],
+    ["digit_ratio", "share of digits"],
+    ["hyphen_ratio", "share of hyphens"],
+    ["tld_len", "length of the ending"],
+    ["suspicious_tld", "ending is cheap or abused"],
+    ["is_ip", "host is a raw address"],
+    ["is_idn", "punycode present"],
+    ["entropy", "character entropy"],
+    ["max_label_len", "longest label"],
+    ["brand_present", "a known brand appears"],
+    ["brand_in_wrong_place", "brand in the wrong place"],
+    ["is_typosquat", "looks like a lookalike"],
+    ["typo_distance", "distance to nearest brand"],
+    ["digit_in_registrable", "digits in the name"],
+  ];
+  const FEATURE_HOT = new Set(["suspicious_tld", "brand_in_wrong_place", "is_typosquat", "is_ip"]);
+  /* On a phone only the measurements that can move the band are worth the vertical space:
+     the four that decide a verdict in practice. The rest are one tap away in the card. */
+  const FEATURE_PHONE = new Set(["suspicious_tld", "brand_in_wrong_place", "is_typosquat", "is_ip"]);
+
+  function measureStrip(features) {
+    const narrow = window.matchMedia("(max-width: 640px)").matches;
+    const chips = FEATURE_LABELS.map(([key, label]) => {
+      const value = features && features[key] !== undefined ? features[key] : 0;
+      const shown = Number.isInteger(value) ? value : Number(value).toFixed(4);
+      const hot = FEATURE_HOT.has(key) && value;
+      const keyish = narrow && FEATURE_PHONE.has(key);
+      return `<span class="measure${hot ? " hot" : ""}${keyish ? " key" : ""}">` +
+             `<b>${escapeHtml(label)}</b>${shown}</span>`;
+    }).join("");
+    return `<div class="measures-strip" aria-hidden="true">${chips}</div>`;
+  }
+
   function render(r) {
     const pct = Math.round(r.probability * 100);
 
@@ -767,6 +843,7 @@
         <p class="thinking" id="thinking"><span class="dot"></span><span class="phase">Reading the address</span></p>
         <button type="button" class="skip" id="skipBtn">Skip the theatre</button>
       </div>
+      ${measureStrip(r.features)}
       <h3 class="block-title">${r.risk === "low"
         ? "What stood out, in a good way"
         : r.risk === "medium" ? "What gave Nyavu pause" : "What Nyavu noticed"}</h3>
