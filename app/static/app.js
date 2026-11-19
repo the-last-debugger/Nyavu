@@ -172,44 +172,6 @@
   let sweepToken = 0;
 
 
-  /* Skip: jump the theatre to its end. The result is already known; the animation is
-     a presentation of it, never a delay in computing it. */
-  /* Skip: land on the finished state immediately, without the theatre. */
-  function finishNow() {
-    sweepToken++;
-    const card = document.querySelector(".result.pending");
-    if (!card) return;
-    const g = card.querySelector(".gauge");
-    const target = Number(g && g.dataset.target ? g.dataset.target : 0);
-    if (g) {
-      g.style.setProperty("--p", target);
-      g.style.setProperty("--tone", TONE_OF(t >= 1 ? target : value));
-    }
-    const ro = card.querySelector(".readout span");
-    if (ro) ro.textContent = BAND_WORD(target);
-    const cap = card.querySelector(".readout small");
-    if (cap) cap.textContent = "verdict";
-    const scene = card.querySelector(".fishing");
-    if (scene) scene.style.display = "none";
-    card.classList.remove("pending");
-    card.classList.remove("zooming");
-    ensureClose(card);
-    // the skip path must show the same verdict as the theatrical one
-    card.classList.add("verdict-shown");
-    normaliseCard(card);
-    const line = document.getElementById("thinking");
-    if (line && line.parentElement) line.parentElement.remove();
-    const strip = card.querySelector(".measures-strip");
-    if (strip) strip.remove();
-    const skip = document.getElementById("skipBtn");
-    if (skip) skip.remove();
-  }
-
-
-  document.addEventListener("click", (event) => {
-    if (event.target && event.target.id === "skipBtn") finishNow();
-  });
-
   /* The dial starts almost still, accelerates, becomes frantic, then commits.
      Seven seconds of it. Colour follows the band the needle is passing through,
      so the dial reads as undecided while it hunts.
@@ -709,7 +671,8 @@
         value = Math.max(0, Math.min(100, base + swing));
       }
       g.style.setProperty("--p", t >= 1 ? String(target) : value.toFixed(2));
-      g.style.setProperty("--tone", TONE_OF(target));
+      // the colour follows the value the needle is passing, not the value it will reach
+      g.style.setProperty("--tone", TONE_OF(t >= 1 ? target : value));
       if (readout) readout.textContent = BAND_WORD(value);
       if (t >= 1) {
         if (readout) readout.textContent = BAND_WORD(target);
@@ -886,7 +849,6 @@
       </div>
       <div class="thinking-row">
         <p class="thinking" id="thinking"><span class="dot"></span><span class="phase">Reading the address</span></p>
-        <button type="button" class="skip" id="skipBtn">Skip the theatre</button>
       </div>
       ${measureStrip(r.features)}
       <h3 class="block-title">${r.risk === "low"
