@@ -957,6 +957,8 @@
             <p class="band-legend">Bands: under 35 clear, 35 to 65 worth a look, above 65 a concern.</p>
             <h4 class="fold-title">The name, piece by piece</h4>
             ${autopsyBreakdown(r)}
+            <h4 class="fold-title">What it looks like it is after</h4>
+            ${intentList(r)}
             <h4 class="fold-title">What was measured</h4>
             <dl class="feat-grid all">${featRows}</dl>
           </details>
@@ -968,6 +970,7 @@
         <p class="thinking" id="thinking"><span class="dot"></span><span class="phase">Reading the address</span></p>
       </div>
       ${measureStrip(r.features)}
+      ${r.risk === "low" ? "" : intentLine(r)}
       <h3 class="block-title">${r.risk === "low"
         ? "What stood out, in a good way"
         : r.risk === "medium" ? "What gave Nyavu pause" : "What Nyavu noticed"}</h3>

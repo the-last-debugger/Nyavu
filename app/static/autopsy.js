@@ -38,6 +38,15 @@ const SUFFIX_MEANING = {
   "co.ug": "open to any registered Ugandan business",
 };
 
+/* How a borrowed name is written when we say it back. "Kra" is not a word; "KRA" is. */
+const DISPLAY_NAME = {
+  mpesa: "M-Pesa", safaricom: "Safaricom", kra: "KRA", ecitizen: "eCitizen", ntsa: "NTSA",
+  helb: "HELB", huduma: "Huduma Centre", equity: "Equity", kcb: "KCB", coop: "Co-operative Bank",
+  absa: "Absa", ncba: "NCBA", stanbic: "Stanbic", google: "Google", facebook: "Facebook",
+  whatsapp: "WhatsApp", paypal: "PayPal", netflix: "Netflix", microsoft: "Microsoft",
+  apple: "Apple", amazon: "Amazon", instagram: "Instagram",
+};
+
 /* Institutions whose address we can name, because they publish it. The claim is about our list,
    not about a verification performed just now: nothing is fetched when a link is checked. */
 const KNOWN_INSTITUTIONS = {
@@ -205,6 +214,92 @@ function autopsyBreakdown(r) {
   return `<ul class="breakdown">${items}</ul>`;
 }
 
+
+/* What a link is probably after.
+   A name cannot prove intent, but it often names it: a path that says "verify" is asking for a
+   password, and a domain that borrows "mpesa" is asking for a PIN. Every goal below is inferred
+   from the address and its path alone, which is why the copy says "looks" rather than "is". The
+   vocabulary follows the plain-language rule: name the thing taken, not the technique. */
+const INTENT_CUES = [
+  { goal: "get a password or a one-time code",
+    words: ["login", "log-in", "signin", "sign-in", "verify", "verification", "account",
+            "update", "confirm", "auth", "password", "passwd", "otp", "unlock", "recover"] },
+  { goal: "take an M-Pesa PIN or a payment",
+    words: ["mpesa", "m-pesa", "paybill", "till", "wallet", "payment", "pay", "billing",
+            "invoice", "refund", "deposit", "transaction"] },
+  { goal: "collect identity or tax details",
+    words: ["kra", "ecitizen", "ntsa", "helb", "huduma", "tax", "passport", "id-number"] },
+  { goal: "take a deposit on an investment",
+    words: ["invest", "crypto", "bitcoin", "forex", "profit", "trading", "earn", "bonus"] },
+  { goal: "charge a fee for a parcel that is not coming",
+    words: ["parcel", "delivery", "tracking", "courier", "dhl", "posta", "shipping"] },
+  { goal: "collect application details for a job or a loan",
+    words: ["job", "career", "vacancy", "loan", "grant", "apply", "shortlist"] },
+];
+
+function intentOf(r) {
+  if (!r || !r.url) return null;
+  const { name, subs, suffix, path } = splitUrl(r.url);
+  const host = `${name}.${suffix}`;
+  const haystack = [name, subs.join(" "), path].join(" ").toLowerCase();
+
+  // whose name is being borrowed, if any
+  let borrowed = null;
+  Object.entries(KNOWN_INSTITUTIONS).forEach(([domain, label]) => {
+    const key = domain.split(".")[0];
+    const appears = subs.some((s) => s === key) || name === key;
+    if (appears && host !== domain.replace(/^www\./, "")) borrowed = label;
+  });
+  const brand = KNOWN_BRANDS.find((b) => haystack.includes(b));
+
+  const goals = INTENT_CUES
+    .map((cue) => {
+      const hits = cue.words.filter((word) => haystack.includes(word));
+      return { goal: cue.goal, cue: hits[0] || "", score: hits.length };
+    })
+    .filter((entry) => entry.cue)
+    .sort((a, b) => b.score - a.score);
+
+  if (!goals.length && !borrowed && !brand) return null;
+  return { goals, borrowed, brand, host };
+}
+
+/* One sentence, and it must stay a guess: the address says what it wants, the page would say what
+   it does, and we never read the page. */
+function intentLine(r) {
+  const found = intentOf(r);
+  if (!found) return "";
+  const { goals, borrowed, brand } = found;
+  const who = borrowed || (brand ? (DISPLAY_NAME[brand] || brand[0].toUpperCase() + brand.slice(1)) : "");
+  let lead;
+  if (who && goals.length) {
+    lead = `Looks built to imitate ${escapeHtml(who)} and ${escapeHtml(goals[0].goal)}.`;
+  } else if (who) {
+    lead = `Borrows the name ${escapeHtml(who)} without owning it.`;
+  } else {
+    lead = `The address is shaped to ${escapeHtml(goals[0].goal)}.`;
+  }
+  return `<p class="intent-line"><span class="intent-tag">likely goal</span> ${lead}</p>`;
+}
+
+
+function intentList(r) {
+  const found = intentOf(r);
+  if (!found) {
+    return `<p class="intent-none">No goal is legible from the name alone. That is not the same as
+      harmless: a plain address can still lead somewhere bad.</p>`;
+  }
+  const rows = found.goals.map((entry) => `<li>
+      <span class="goal">${escapeHtml(entry.goal)}</span>
+      <span class="cue">named by "${escapeHtml(entry.cue)}"</span>
+    </li>`).join("");
+  const who = found.borrowed ? `<li>
+      <span class="goal">borrow ${escapeHtml(found.borrowed)}'s name</span>
+      <span class="cue">the name appears in the address, not the domain</span>
+    </li>` : "";
+  return `<ul class="intent-list">${who}${rows}</ul>`;
+}
+
 function autopsyMarkup(r) {
   const { segs, clean, trustedSuffix, host } = autopsySegments(r);
   const flagged = segs.filter((s) => s.flag).length;
@@ -230,7 +325,7 @@ function autopsyMarkup(r) {
   let caption;
   if (flagged === 0) {
     if (known) {
-      caption = `This is the address ${escapeHtml(known)} publishes. We know it from the list we keep, not by visiting the page when you ask.`;
+      caption = `This is the address ${escapeHtml(known)} publishes.`;
     } else {
       caption = trustedSuffix
       ? `Nothing in ${escapeHtml(host)} is out of place, and the ending is registry-controlled. It still deserves the caution you would give any link.`
