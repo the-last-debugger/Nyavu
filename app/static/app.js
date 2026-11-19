@@ -111,6 +111,39 @@
     setTimeout(settle, 1600);
   })();
 
+  /* ------------------------------------------------------------------ notes
+     Lines about trust and deception, in the register of a war quote rather than a warning banner.
+     Only the first is a quotation, and it is attributed; the rest are written for this page. */
+  const NOTES = [
+    ["All warfare is based on deception.", "Sun Tzu, The Art of War"],
+    ["A link does not lie. It waits for you to believe it.", "Nyavu"],
+    ["Every phishing page is a door painted onto a wall.", "Nyavu"],
+    ["You do not lose a password to a thief. You hand it to a stranger wearing a familiar name.", "Nyavu"],
+    ["The name you recognise is the only part they did not have to earn.", "Nyavu"],
+    ["They do not break in. They are invited.", "Nyavu"],
+    ["A one-time code is one time for you, and once is enough for them.", "Nyavu"],
+    ["Trust is not a feeling. It is a reading, done from the right.", "Nyavu"],
+  ];
+
+  (function rotateNotes() {
+    const text = document.getElementById("noteQuote");
+    const source = document.getElementById("noteSource");
+    if (!text || !source || NOTES.length < 2) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    let index = 0;
+    setInterval(() => {
+      index = (index + 1) % NOTES.length;
+      text.classList.add("changing");
+      source.classList.add("changing");
+      setTimeout(() => {
+        text.textContent = NOTES[index][0];
+        source.textContent = NOTES[index][1];
+        text.classList.remove("changing");
+        source.classList.remove("changing");
+      }, 420);
+    }, 7000);
+  })();
+
   function route() {
     const id = (location.hash || "#detector").slice(1);
     const target = $("#" + id) ? id : "detector";
