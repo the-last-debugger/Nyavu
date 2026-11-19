@@ -243,6 +243,13 @@ function VerdictSheet({ payload, sheet, tone, pct, risk, established, onClose })
         ]}
       >
         <View style={styles.grabber} />
+
+        <ScrollView
+          style={styles.sheetScroll}
+          contentContainerStyle={{ paddingBottom: space(2) }}
+          showsVerticalScrollIndicator={false}
+          bounces
+        >
         <Text style={styles.sheetHeadline}>
           {established ? "An established domain" : headline(risk)}
         </Text>
@@ -276,6 +283,7 @@ function VerdictSheet({ payload, sheet, tone, pct, risk, established, onClose })
           ) : null}
           <Action label="Examine another" onPress={onClose} />
         </View>
+        </ScrollView>
       </Animated.View>
     </View>
   );
@@ -304,8 +312,10 @@ const styles = StyleSheet.create({
   readingRow: { marginTop: space(6) },
   reading: { fontFamily: type.body, fontSize: 13, color: colour.faint },
   scrim: { ...StyleSheet.absoluteFillObject, backgroundColor: "rgba(3,7,11,0.72)" },
+  sheetScroll: { maxHeight: "66%" },
   sheet: {
     position: "absolute", left: 0, right: 0, bottom: 0,
+    maxHeight: "86%",
     backgroundColor: colour.panel,
     borderTopLeftRadius: 24, borderTopRightRadius: 24,
     borderTopWidth: 1, borderColor: colour.line,

@@ -6,14 +6,37 @@
     "orientation": "portrait",
     "userInterfaceStyle": "dark",
     "newArchEnabled": false,
+    "backgroundColor": "#04060B",
+    "icon": "./assets/icon.png",
     "android": {
-      "package": "ke.nyavu.client"
+      "package": "ke.nyavu.client",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#04060B"
+      },
+      "edgeToEdgeEnabled": true,
+      "softwareKeyboardLayoutMode": "resize"
     },
     "ios": {
-      "supportsTablet": false
+      "supportsTablet": false,
+      "backgroundColor": "#04060B"
+    },
+    "splash": {
+      "image": "./assets/splash-mark.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#04060B"
     },
     "plugins": [
-      "expo-status-bar"
+      "expo-status-bar",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash-mark.png",
+          "backgroundColor": "#04060B",
+          "imageWidth": 160,
+          "resizeMode": "contain"
+        }
+      ]
     ]
   }
 }

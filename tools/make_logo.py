@@ -197,6 +197,14 @@ if __name__ == "__main__":
     # the in-app mark has no field behind it: it sits on the app's own background
     mark_only(192).save(os.path.join(
         ROOT, "android", "app", "src", "main", "res", "drawable-nodpi", "logo_mark.png"))
+
+    # the React Native shell
+    assets = os.path.join(ROOT, "expo-app", "assets")
+    os.makedirs(assets, exist_ok=True)
+    icon(1024).save(os.path.join(assets, "icon.png"))
+    icon(1024).save(os.path.join(assets, "adaptive-icon.png"))
+    mark_only(1024).save(os.path.join(assets, "splash-mark.png"))
+    print("expo assets written: icon, adaptive-icon, splash-mark")
     mark_only(512).save(os.path.join(ROOT, "docs", "logo-preview.png"))
     for name, compact in (("logo-mark.svg", False), ("logo-mark-small.svg", True)):
         with open(os.path.join(ROOT, "app", "static", name), "w", encoding="utf-8") as fh:

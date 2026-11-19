@@ -56,8 +56,11 @@ permissions the shell does not have yet; *drop* if a phone is the wrong place fo
 
 ## Phase 1 — the shell and the exam (the shippable core)
 
-| item | done when |
-| --- | --- |
+Status: built. `expo-app` runs, and the exported web build was driven through the examination,
+the reading, and all three verdict bands.
+
+| item | done when | status |
+| --- | --- | --- |
 | Safe areas | content never sits under the status bar or the gesture bar |
 | Back handling | back closes the verdict sheet before it leaves the screen |
 | Press feedback | Android ripple, iOS opacity, 48 dp minimum targets |
@@ -68,9 +71,16 @@ permissions the shell does not have yet; *drop* if a phone is the wrong place fo
 | Verdict sheet | native sheet, draggable to dismiss, number large, reasons beneath |
 | Identity | adaptive icon from the shield, splash on the product background, dark system bars |
 
-**Verification.** Layout and content against the web original via the exported web build;
-motion and haptics only on a device. Both are listed honestly, because the second one is
-still blocked.
+**Verification.** Layout and content against the web original via the exported web build —
+done, with frames captured for the writing, the reading and the verdict. Motion and haptics
+only on a device: still blocked.
+
+**What the first run corrected.** The caret was positioned absolutely inside a wrapping row,
+so it drifted to the container edge while the text wrapped elsewhere; there were two cursors
+and neither was at the writing edge. It occupies its own two pixels in the text now. The
+address also wrapped piece by piece, so it was rebuilt as one continuous run of characters
+coloured by role. The verdict sheet had no scroll and would have run off a small screen; it is
+bounded to 86 per cent of the height with a scrolling body.
 
 ## Phase 2 — what a phone adds
 
