@@ -14,6 +14,14 @@ with gzip.open("data/threat_snapshot.json.gz", "rb") as handle:
 listed = set(snapshot["hosts"])
 print("threat hosts:", len(listed))
 
+USER_CONTENT = {
+    "blogspot.com", "blogspot.co.ke", "wordpress.com", "tumblr.com", "weebly.com", "wixsite.com",
+    "github.io", "gitlab.io", "pages.dev", "workers.dev", "netlify.app", "vercel.app",
+    "web.app", "firebaseapp.com", "herokuapp.com", "appspot.com", "amazonaws.com",
+    "cloudfront.net", "azurewebsites.net", "sharepoint.com", "googleusercontent.com",
+    "glitch.me", "replit.app", "000webhostapp.com", "webflow.io", "surge.sh",
+}
+
 institutions = {row["domain"].lower() for row in
                 json.load(io.open("data/institutions.json", encoding="utf-8"))["entries"]}
 
@@ -21,7 +29,7 @@ institutions = {row["domain"].lower() for row in
 TOP = 1200
 picked = {}
 for rank, domain in enumerate(allow[:TOP], start=1):
-    if domain in institutions or domain in listed:
+    if domain in institutions or domain in listed or domain in USER_CONTENT:
         continue
     labels = domain.split(".")
     if any(".".join(labels[index:]) in listed for index in range(1, len(labels) - 1)):

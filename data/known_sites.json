@@ -6,13 +6,6 @@
 "Not on any of the phishing lists we ship"
 ]
 },
-"amazonaws.com": {
-"rank": 3,
-"evidence": [
-"Among the 1,200 most visited sites worldwide (rank 3)",
-"Not on any of the phishing lists we ship"
-]
-},
 "ezviz7.com": {
 "rank": 4,
 "evidence": [
@@ -153,13 +146,6 @@
 "Not on any of the phishing lists we ship"
 ]
 },
-"cloudfront.net": {
-"rank": 29,
-"evidence": [
-"Among the 1,200 most visited sites worldwide (rank 29)",
-"Not on any of the phishing lists we ship"
-]
-},
 "office.com": {
 "rank": 30,
 "evidence": [
@@ -185,13 +171,6 @@
 "rank": 34,
 "evidence": [
 "Among the 1,200 most visited sites worldwide (rank 34)",
-"Not on any of the phishing lists we ship"
-]
-},
-"sharepoint.com": {
-"rank": 35,
-"evidence": [
-"Among the 1,200 most visited sites worldwide (rank 35)",
 "Not on any of the phishing lists we ship"
 ]
 },
@@ -262,13 +241,6 @@
 "rank": 46,
 "evidence": [
 "Among the 1,200 most visited sites worldwide (rank 46)",
-"Not on any of the phishing lists we ship"
-]
-},
-"googleusercontent.com": {
-"rank": 47,
-"evidence": [
-"Among the 1,200 most visited sites worldwide (rank 47)",
 "Not on any of the phishing lists we ship"
 ]
 },
@@ -454,13 +426,6 @@
 "Not on any of the phishing lists we ship"
 ]
 },
-"workers.dev": {
-"rank": 80,
-"evidence": [
-"Among the 1,200 most visited sites worldwide (rank 80)",
-"Not on any of the phishing lists we ship"
-]
-},
 "a2z.com": {
 "rank": 81,
 "evidence": [
@@ -514,13 +479,6 @@
 "rank": 88,
 "evidence": [
 "Among the 1,200 most visited sites worldwide (rank 88)",
-"Not on any of the phishing lists we ship"
-]
-},
-"blogspot.com": {
-"rank": 89,
-"evidence": [
-"Among the 1,200 most visited sites worldwide (rank 89)",
 "Not on any of the phishing lists we ship"
 ]
 },
@@ -584,13 +542,6 @@
 "rank": 98,
 "evidence": [
 "Among the 1,200 most visited sites worldwide (rank 98)",
-"Not on any of the phishing lists we ship"
-]
-},
-"wordpress.com": {
-"rank": 99,
-"evidence": [
-"Among the 1,200 most visited sites worldwide (rank 99)",
 "Not on any of the phishing lists we ship"
 ]
 },
@@ -811,13 +762,6 @@
 "Not on any of the phishing lists we ship"
 ]
 },
-"github.io": {
-"rank": 135,
-"evidence": [
-"Among the 1,200 most visited sites worldwide (rank 135)",
-"Not on any of the phishing lists we ship"
-]
-},
 "android.com": {
 "rank": 137,
 "evidence": [
@@ -944,13 +888,6 @@
 "Not on any of the phishing lists we ship"
 ]
 },
-"tumblr.com": {
-"rank": 158,
-"evidence": [
-"Among the 1,200 most visited sites worldwide (rank 158)",
-"Not on any of the phishing lists we ship"
-]
-},
 "godaddy.com": {
 "rank": 159,
 "evidence": [
@@ -962,13 +899,6 @@
 "rank": 160,
 "evidence": [
 "Among the 1,200 most visited sites worldwide (rank 160)",
-"Not on any of the phishing lists we ship"
-]
-},
-"azurewebsites.net": {
-"rank": 161,
-"evidence": [
-"Among the 1,200 most visited sites worldwide (rank 161)",
 "Not on any of the phishing lists we ship"
 ]
 },
@@ -1074,13 +1004,6 @@
 "rank": 179,
 "evidence": [
 "Among the 1,200 most visited sites worldwide (rank 179)",
-"Not on any of the phishing lists we ship"
-]
-},
-"pages.dev": {
-"rank": 180,
-"evidence": [
-"Among the 1,200 most visited sites worldwide (rank 180)",
 "Not on any of the phishing lists we ship"
 ]
 },
@@ -1721,13 +1644,6 @@
 "Not on any of the phishing lists we ship"
 ]
 },
-"wixsite.com": {
-"rank": 274,
-"evidence": [
-"Among the 1,200 most visited sites worldwide (rank 274)",
-"Not on any of the phishing lists we ship"
-]
-},
 "brave.com": {
 "rank": 275,
 "evidence": [
@@ -2250,13 +2166,6 @@
 "rank": 353,
 "evidence": [
 "Among the 1,200 most visited sites worldwide (rank 353)",
-"Not on any of the phishing lists we ship"
-]
-},
-"weebly.com": {
-"rank": 354,
-"evidence": [
-"Among the 1,200 most visited sites worldwide (rank 354)",
 "Not on any of the phishing lists we ship"
 ]
 },
@@ -3751,13 +3660,6 @@
 "Not on any of the phishing lists we ship"
 ]
 },
-"herokuapp.com": {
-"rank": 570,
-"evidence": [
-"Among the 1,200 most visited sites worldwide (rank 570)",
-"Not on any of the phishing lists we ship"
-]
-},
 "nexthink.cloud": {
 "rank": 571,
 "evidence": [
@@ -4035,13 +3937,6 @@
 "rank": 610,
 "evidence": [
 "Among the 1,200 most visited sites worldwide (rank 610)",
-"Not on any of the phishing lists we ship"
-]
-},
-"vercel.app": {
-"rank": 611,
-"evidence": [
-"Among the 1,200 most visited sites worldwide (rank 611)",
 "Not on any of the phishing lists we ship"
 ]
 },
@@ -5515,13 +5410,6 @@
 "Not on any of the phishing lists we ship"
 ]
 },
-"netlify.app": {
-"rank": 826,
-"evidence": [
-"Among the 1,200 most visited sites worldwide (rank 826)",
-"Not on any of the phishing lists we ship"
-]
-},
 "mixpanel.com": {
 "rank": 827,
 "evidence": [
@@ -5701,13 +5589,6 @@
 "rank": 852,
 "evidence": [
 "Among the 1,200 most visited sites worldwide (rank 852)",
-"Not on any of the phishing lists we ship"
-]
-},
-"appspot.com": {
-"rank": 853,
-"evidence": [
-"Among the 1,200 most visited sites worldwide (rank 853)",
 "Not on any of the phishing lists we ship"
 ]
 },

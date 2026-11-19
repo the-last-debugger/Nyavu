@@ -206,6 +206,7 @@ def _scan_and_store(url: str, user_id):
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc))
     result = _apply_credential_policy(result)
+    result = _apply_hosting_policy(result)
     result = _apply_feed(result)
     result["stored"] = _store_scan(user_id, url, result)
     return result
@@ -272,9 +273,28 @@ def _known_sites() -> dict:
     return _KNOWN
 
 
+# Platforms where any stranger can create a subdomain. Their reputation must never be lent down to
+# one of those subdomains: "evil-verify.blogspot.com" was being cleared because blogspot.com is a
+# well known site, which is exactly the shape a hosted phishing page takes.
+_USER_CONTENT = {
+    "blogspot.com", "blogspot.co.ke", "wordpress.com", "tumblr.com", "weebly.com", "wixsite.com",
+    "github.io", "gitlab.io", "pages.dev", "workers.dev", "netlify.app", "vercel.app",
+    "web.app", "firebaseapp.com", "herokuapp.com", "appspot.com", "amazonaws.com",
+    "cloudfront.net", "azurewebsites.net", "sharepoint.com", "googleusercontent.com",
+    "glitch.me", "replit.app", "000webhostapp.com", "webflow.io", "surge.sh",
+}
+
+
+def _registrable(host: str) -> str:
+    labels = (host or "").lower().strip(".").split(".")
+    return ".".join(labels[-2:]) if len(labels) >= 2 else (host or "").lower()
+
+
 def _known_site(host: str):
     host = (host or "").lower().strip(".")
     if not host:
+        return None
+    if _registrable(host) in _USER_CONTENT:
         return None
     known = _known_sites()
     labels = host.split(".")
@@ -358,6 +378,31 @@ def _apply_credential_policy(result: dict) -> dict:
     result["reasons"] = [
         "A brand name sits in a label its owner does not control, on a path that asks for a password "
         "or a code. An address built that way is a phishing address, not a borderline one."
+    ] + list(result.get("reasons") or [])[:3]
+    return result
+
+
+def _apply_hosting_policy(result: dict) -> dict:
+    """A login page on a platform where anyone can publish is at least worth a look.
+
+    It is not automatically phishing, because plenty of legitimate small sites live there, but it
+    should never be cleared: the address cannot say whose page it is, and that is the whole problem.
+    """
+    host = (result.get("host") or "").lower()
+    if _registrable(host) not in _USER_CONTENT:
+        return result
+    if result.get("verdict") != "legitimate":
+        return result
+    if not _CREDENTIAL_PATH.search(result.get("url", "")):
+        return result
+    result["verdict"] = "suspicious"
+    result["risk"] = "medium"
+    result["band"] = "Suspicious"
+    result["label"] = 0
+    result["probability"] = max(float(result.get("probability") or 0), 0.4)
+    result["reasons"] = [
+        "The address sits on a platform where anyone can publish, and its path asks for a password "
+        "or a code. That does not prove who is behind it, which is why it is not cleared."
     ] + list(result.get("reasons") or [])[:3]
     return result
 
@@ -493,6 +538,7 @@ async def scan_bulk(request: Request, file: UploadFile = File(...)):
             # model directly, so neither the credential policy nor the feed snapshot applied, and the
             # same address could be phishing on one page and suspicious in a CSV.
             r = _apply_credential_policy(r)
+            r = _apply_hosting_policy(r)
             r = _apply_feed(r)
             db.add_scan(user["id"] if user else None, u, r["host"], r["verdict"],
                         r["risk"], r["probability"], r["inference_ms"])

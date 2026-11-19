@@ -228,6 +228,13 @@ def main() -> None:
            "both phishing for a credential imitator",
            f"single = {single.get('verdict')}, bulk = {row.get('verdict')}", same)
 
+    # T19: a hosting platform must not lend its reputation to a stranger's subdomain
+    _, hosted = call("/api/predict", {"url": "https://evil-verify.blogspot.com/login"}, method="POST")
+    not_cleared = hosted.get("verdict") in ("phishing", "suspicious")
+    record("T19", "Hosted subdomain is not cleared by its platform's reputation",
+           "phishing or suspicious, not legitimate",
+           f"verdict = {hosted.get('verdict')}", not_cleared)
+
     with open(OUT, "w", encoding="utf-8") as fh:
         json.dump(results, fh, indent=2)
 

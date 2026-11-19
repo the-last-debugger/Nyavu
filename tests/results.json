@@ -124,5 +124,12 @@
     "expected": "both phishing for a credential imitator",
     "actual": "single = phishing, bulk = phishing",
     "status": "Pass"
+  },
+  {
+    "id": "T19",
+    "case": "Hosted subdomain is not cleared by its platform's reputation",
+    "expected": "phishing or suspicious, not legitimate",
+    "actual": "verdict = suspicious",
+    "status": "Pass"
   }
 ]
