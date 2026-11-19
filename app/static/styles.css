@@ -1038,7 +1038,7 @@ details.advanced{
   45%{ transform: rotate(30deg); }/* holding, something tugging */
   62%{ transform: rotate(34deg); }78%{ transform: rotate(6deg); }/* hauling */
   90%{ transform: rotate(-8deg); }100%{ transform: rotate(0deg); }
-}
+
 
 @keyframes netswing {0%, 10%{ transform: translate(0,0) scale(1); opacity: 1; }26%{ transform: translate(6px, 26px) scale(.9); opacity: 1; }45%{ transform: translate(4px, 20px) scale(.92); opacity: .95; }78%{ transform: translate(-2px, 4px) scale(1.02); opacity: 1; }100%{ transform: translate(0,0) scale(1); }
 }
@@ -1094,7 +1094,7 @@ details.advanced{
   84%{ transform: translate(302px, 150px) scale(.6); }/* coming aboard */
   94%{ transform: translate(292px, 136px) scale(.52); }/* in the boat */
   100%{ transform: translate(290px, 134px) scale(.5); }
-}
+
 
 @keyframes bundle {0%, 12%{ opacity: 1; }22%{ opacity: 0; }100%{ opacity: 0; }
 }
@@ -1115,7 +1115,7 @@ details.advanced{
   58%{ transform: rotate(28deg); }66%{ transform: rotate(12deg); }74%{ transform: rotate(24deg); }/* second tug */
   84%{ transform: rotate(-16deg); }/* the haul */
   94%{ transform: rotate(-4deg); }100%{ transform: rotate(0deg); }
-}/* the cast-net scene is also exempt from the global collapse, same reason */
+/* the cast-net scene is also exempt from the global collapse, same reason */
 @media (prefers-reduced-motion: reduce){
       }/* ====================== the drape: ten seconds of casting ==================
    0-12%  winds back with the net gathered in both hands
@@ -1265,8 +1265,8 @@ details.advanced{
 
   to{ transform: scale(9); opacity: 0; }
 
-}60%{ opacity: .5; filter: blur(2px); }100%{ opacity: 0; filter: blur(6px); }
-}.wash circle{ transform-box: fill-box; transform-origin: center; }/* ============ the verdict arrives out of the catch ============ */
+60%{ opacity: .5; filter: blur(2px); }100%{ opacity: 0; filter: blur(6px); }
+.wash circle{ transform-box: fill-box; transform-origin: center; }/* ============ the verdict arrives out of the catch ============ */
 
 .veil{
   position: absolute;
@@ -1301,7 +1301,7 @@ details.advanced{
   45%{ transform: rotate(30deg); }/* holding, something tugging */
   62%{ transform: rotate(34deg); }78%{ transform: rotate(6deg); }/* hauling */
   90%{ transform: rotate(-8deg); }100%{ transform: rotate(0deg); }
-}
+
 
 @keyframes netswing {0%, 10%{ transform: translate(0,0) scale(1); opacity: 1; }26%{ transform: translate(6px, 26px) scale(.9); opacity: 1; }45%{ transform: translate(4px, 20px) scale(.92); opacity: .95; }78%{ transform: translate(-2px, 4px) scale(1.02); opacity: 1; }100%{ transform: translate(0,0) scale(1); }
 }
@@ -1357,7 +1357,7 @@ details.advanced{
   84%{ transform: translate(302px, 150px) scale(.6); }/* coming aboard */
   94%{ transform: translate(292px, 136px) scale(.52); }/* in the boat */
   100%{ transform: translate(290px, 134px) scale(.5); }
-}
+
 
 @keyframes bundle {0%, 12%{ opacity: 1; }22%{ opacity: 0; }100%{ opacity: 0; }
 }
@@ -1378,7 +1378,7 @@ details.advanced{
   58%{ transform: rotate(28deg); }66%{ transform: rotate(12deg); }74%{ transform: rotate(24deg); }/* second tug */
   84%{ transform: rotate(-16deg); }/* the haul */
   94%{ transform: rotate(-4deg); }100%{ transform: rotate(0deg); }
-}/* the cast-net scene is also exempt from the global collapse, same reason */
+/* the cast-net scene is also exempt from the global collapse, same reason */
 @media (prefers-reduced-motion: reduce){
       }/* ====================== the drape: ten seconds of casting ==================
    0-12%  winds back with the net gathered in both hands
@@ -1529,8 +1529,8 @@ details.advanced{
 }/* the wash: three rings cross the frame, and the scene dissolves behind them */
 
   to{ transform: scale(9); opacity: 0; }
-}60%{ opacity: .5; filter: blur(2px); }100%{ opacity: 0; filter: blur(6px); }
-}.wash circle{ transform-box: fill-box; transform-origin: center; }/* ============ the verdict arrives out of the catch ============ */
+60%{ opacity: .5; filter: blur(2px); }100%{ opacity: 0; filter: blur(6px); }
+.wash circle{ transform-box: fill-box; transform-origin: center; }/* ============ the verdict arrives out of the catch ============ */
 
 .veil{
   position: absolute;
@@ -4812,7 +4812,7 @@ details.advanced{
   45%{ transform: rotate(30deg); }/* holding, something tugging */
   62%{ transform: rotate(34deg); }78%{ transform: rotate(6deg); }/* hauling */
   90%{ transform: rotate(-8deg); }100%{ transform: rotate(0deg); }
-}
+
 
 @keyframes netswing {0%, 10%{ transform: translate(0,0) scale(1); opacity: 1; }26%{ transform: translate(6px, 26px) scale(.9); opacity: 1; }45%{ transform: translate(4px, 20px) scale(.92); opacity: .95; }78%{ transform: translate(-2px, 4px) scale(1.02); opacity: 1; }100%{ transform: translate(0,0) scale(1); }
 }
@@ -4868,7 +4868,7 @@ details.advanced{
   84%{ transform: translate(302px, 150px) scale(.6); }/* coming aboard */
   94%{ transform: translate(292px, 136px) scale(.52); }/* in the boat */
   100%{ transform: translate(290px, 134px) scale(.5); }
-}
+
 
 @keyframes bundle {0%, 12%{ opacity: 1; }22%{ opacity: 0; }100%{ opacity: 0; }
 }
@@ -4889,7 +4889,7 @@ details.advanced{
   58%{ transform: rotate(28deg); }66%{ transform: rotate(12deg); }74%{ transform: rotate(24deg); }/* second tug */
   84%{ transform: rotate(-16deg); }/* the haul */
   94%{ transform: rotate(-4deg); }100%{ transform: rotate(0deg); }
-}/* the cast-net scene is also exempt from the global collapse, same reason */
+/* the cast-net scene is also exempt from the global collapse, same reason */
 @media (prefers-reduced-motion: reduce){
       }/* ====================== the drape: ten seconds of casting ==================
    0-12%  winds back with the net gathered in both hands
@@ -5039,8 +5039,8 @@ details.advanced{
 
   to{ transform: scale(9); opacity: 0; }
 
-}60%{ opacity: .5; filter: blur(2px); }100%{ opacity: 0; filter: blur(6px); }
-}.wash circle{ transform-box: fill-box; transform-origin: center; }/* ============ the verdict arrives out of the catch ============ */
+60%{ opacity: .5; filter: blur(2px); }100%{ opacity: 0; filter: blur(6px); }
+.wash circle{ transform-box: fill-box; transform-origin: center; }/* ============ the verdict arrives out of the catch ============ */
 
 .veil{
   position: absolute;
@@ -5075,7 +5075,7 @@ details.advanced{
   45%{ transform: rotate(30deg); }/* holding, something tugging */
   62%{ transform: rotate(34deg); }78%{ transform: rotate(6deg); }/* hauling */
   90%{ transform: rotate(-8deg); }100%{ transform: rotate(0deg); }
-}
+
 
 @keyframes netswing {0%, 10%{ transform: translate(0,0) scale(1); opacity: 1; }26%{ transform: translate(6px, 26px) scale(.9); opacity: 1; }45%{ transform: translate(4px, 20px) scale(.92); opacity: .95; }78%{ transform: translate(-2px, 4px) scale(1.02); opacity: 1; }100%{ transform: translate(0,0) scale(1); }
 }
@@ -5131,7 +5131,7 @@ details.advanced{
   84%{ transform: translate(302px, 150px) scale(.6); }/* coming aboard */
   94%{ transform: translate(292px, 136px) scale(.52); }/* in the boat */
   100%{ transform: translate(290px, 134px) scale(.5); }
-}
+
 
 @keyframes bundle {0%, 12%{ opacity: 1; }22%{ opacity: 0; }100%{ opacity: 0; }
 }
@@ -5152,7 +5152,7 @@ details.advanced{
   58%{ transform: rotate(28deg); }66%{ transform: rotate(12deg); }74%{ transform: rotate(24deg); }/* second tug */
   84%{ transform: rotate(-16deg); }/* the haul */
   94%{ transform: rotate(-4deg); }100%{ transform: rotate(0deg); }
-}/* the cast-net scene is also exempt from the global collapse, same reason */
+/* the cast-net scene is also exempt from the global collapse, same reason */
 @media (prefers-reduced-motion: reduce){
       }/* ====================== the drape: ten seconds of casting ==================
    0-12%  winds back with the net gathered in both hands
@@ -5303,8 +5303,8 @@ details.advanced{
 }/* the wash: three rings cross the frame, and the scene dissolves behind them */
 
   to{ transform: scale(9); opacity: 0; }
-}60%{ opacity: .5; filter: blur(2px); }100%{ opacity: 0; filter: blur(6px); }
-}.wash circle{ transform-box: fill-box; transform-origin: center; }/* ============ the verdict arrives out of the catch ============ */
+60%{ opacity: .5; filter: blur(2px); }100%{ opacity: 0; filter: blur(6px); }
+.wash circle{ transform-box: fill-box; transform-origin: center; }/* ============ the verdict arrives out of the catch ============ */
 
 .veil{
   position: absolute;

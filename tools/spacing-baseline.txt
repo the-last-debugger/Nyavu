@@ -1,0 +1,31 @@
+# Rules that hide without display:none and are reviewed as safe: overlays, animation
+# states and decorative layers. New lines here are a defect, not a formality.
+styles.css:.auth-notice.fade
+styles.css:.autopsy-caption
+styles.css:.autopsy-caret
+styles.css:.autopsy-mode
+styles.css:.autopsy-panel
+styles.css:.gauge .readout
+styles.css:.gauge-fade
+styles.css:.gauge-fade .readout
+styles.css:.hero-note .note-quote.changing
+styles.css:.measure
+styles.css:.measures-strip.settled
+styles.css:.modal-shell .result.card-pending
+styles.css:.result.pending .block-title
+styles.css:.result.pending .score-note
+styles.css:.result.pending .verdict-line
+styles.css:.result.pending .verdict-text .badge
+styles.css:.result.pending .verdict-text h2
+styles.css:.result.pending:not(.dialcoming) .gauge
+styles.css:.result.pending:not(.dialcoming) .gauge:not(.arriving)
+styles.css:.result.swapping > *:not(.verdict-skeleton)
+styles.css:.reveal
+styles.css:.seg
+styles.css:.seg .seg-note
+styles.css:.seg-note
+styles.css:.veil.clear
+styles.css:.verdict-skeleton.gone
+styles.css:.verdict-skeleton.inline.gone
+styles.css:body.has-result .hero
+styles.css:to
