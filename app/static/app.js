@@ -173,7 +173,7 @@
   });
 
   // the dial speaks in the signal palette; the muted tokens stay for furniture
-const TONE = { high: "var(--signal-danger)", medium: "var(--signal-warn)", low: "var(--signal-safe)" };
+const TONE = { high: "var(--signal-danger)", medium: "var(--signal-warn)", low: "var(--signal-clean)" };
 
 
   /* Small things people notice: numbers that count to their value, and a scanning
@@ -880,7 +880,7 @@ const TONE = { high: "var(--signal-danger)", medium: "var(--signal-warn)", low: 
       : `Model estimate ${frequency(pct)} (${pct} out of 100). That is the estimated chance this address is a phish, read from its name alone.`;
     const reasons = r.reasons.length
       ? r.reasons.map(t => `<li>${escapeHtml(t)}</li>`).join("")
-      : `<li class="safe">No strong phishing indicators were found in the URL text.</li>`;
+      : `<li class="clean">No strong phishing indicators were found in the URL text.</li>`;
 
     const evidence = r.evidence && r.evidence.length
       ? (() => {

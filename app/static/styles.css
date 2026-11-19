@@ -21,16 +21,16 @@
 
   --accent:    #8FA98F;
   --accent-2:  #7c6bff;
-  --safe:      #7FA98F;
+  --clean:      #7FA98F;
   --warn:      #ffb020;
   --danger:    #ff4d6d;
 
   /* The signal palette. The tokens above are interface furniture: calm, desaturated, and they
      should stay that way. These three are read as a verdict, so they carry the chroma the
-     furniture cannot. The old pair failed for measurable reasons: the safe green sat at 13%
+     furniture cannot. The old pair failed for measurable reasons: the clean green sat at 13%
      saturation (a grey-green, which reads weak) and the danger sat at hue 349, eleven degrees
      past red towards magenta, which reads pink. */
-  --signal-safe:   #57C08A;
+  --signal-clean:   #57C08A;
   --signal-warn:   #E6B450;
   --signal-danger: #EF4444;
 
@@ -120,7 +120,7 @@ body::before{
   filter: drop-shadow(0 0 12px rgba(143, 169, 143, 0.45));
 }.brand svg .tick{
   fill: none;
-  stroke: var(--safe);
+  stroke: var(--clean);
   stroke-width: 2;
   stroke-linecap: round;
 }.nav{ display: flex; gap: 3px; }.nav a{
@@ -244,7 +244,7 @@ main{ max-width: 1120px; margin: 0 auto; padding: 60px clamp(16px, 4vw, 26px) 10
   stroke-width: 1.4;
   stroke-linejoin: round;
   filter: drop-shadow(0 0 10px rgba(143, 169, 143, 0.7));
-}.core svg .tick{ stroke: var(--safe); stroke-width: 2; stroke-linecap: round; }
+}.core svg .tick{ stroke: var(--clean); stroke-width: 2; stroke-linecap: round; }
 
 @media (max-width: 900px) {.hero{ grid-template-columns: 1fr; }.hero-visual{ display: none; }
 }/* ---------------------------------------------------------------- scanner */
@@ -441,8 +441,8 @@ main{ max-width: 1120px; margin: 0 auto; padding: 60px clamp(16px, 4vw, 26px) 10
   color: var(--warn);
   border-color: rgba(255, 176, 32, 0.45);
   background: rgba(255, 176, 32, 0.1);
-}.badge.low, .badge.safe{
-  color: var(--safe);
+}.badge.low, .badge.clean{
+  color: var(--clean);
   border-color: rgba(127, 169, 143, 0.45);
   background: rgba(127, 169, 143, 0.1);
   box-shadow: 0 0 24px rgba(127, 169, 143, 0.15);
@@ -2584,7 +2584,7 @@ h1, .hero h1{
   background: none !important;
   -webkit-text-fill-color: currentColor !important;
   color: var(--text) !important;
-}.nav a.active{ box-shadow: none !important; }.badge.high, .badge.low, .badge.safe, .badge.medium{ box-shadow: none !important; }.btn.primary::after{ display: none !important; }.topbar::after{ display: none !important; }.eyebrow-dot{ box-shadow: none !important; }/* the verdict surface is a panel, not a light source */
+}.nav a.active{ box-shadow: none !important; }.badge.high, .badge.low, .badge.clean, .badge.medium{ box-shadow: none !important; }.btn.primary::after{ display: none !important; }.topbar::after{ display: none !important; }.eyebrow-dot{ box-shadow: none !important; }/* the verdict surface is a panel, not a light source */
 .verdict-head{
   background: rgba(255, 255, 255, .022) !important;
   box-shadow: 0 1px 0 rgba(255, 255, 255, .05), 0 18px 40px rgba(0, 0, 0, .35) !important;
@@ -3381,7 +3381,7 @@ code, kbd, samp{
   background: currentColor;
   border-radius: 1px;
   transform: translateY(-1px);
-}.badge.high{ color: #F09AA8 !important; }.badge.medium{ color: #E8BE7C !important; }.badge.low, .badge.safe{ color: #A8C0A8 !important; }.badge.rep{
+}.badge.high{ color: #F09AA8 !important; }.badge.medium{ color: #E8BE7C !important; }.badge.low, .badge.clean{ color: #A8C0A8 !important; }.badge.rep{
   color: var(--faint) !important;
   font-size: 0.92rem !important;
 }.badge.rep::before{
@@ -3804,7 +3804,7 @@ html.modal-lock, body.verdict-open { overflow: hidden; }
 
   --accent:    #8FA98F;
   --accent-2:  #7c6bff;
-  --safe:      #7FA98F;
+  --clean:      #7FA98F;
   --warn:      #ffb020;
   --danger:    #ff4d6d;
 
@@ -3894,7 +3894,7 @@ body::before{
   filter: drop-shadow(0 0 12px rgba(143, 169, 143, 0.45));
 }.brand svg .tick{
   fill: none;
-  stroke: var(--safe);
+  stroke: var(--clean);
   stroke-width: 2;
   stroke-linecap: round;
 }.nav{ display: flex; gap: 3px; }.nav a{
@@ -4018,7 +4018,7 @@ main{ max-width: 1120px; margin: 0 auto; padding: 60px clamp(16px, 4vw, 26px) 10
   stroke-width: 1.4;
   stroke-linejoin: round;
   filter: drop-shadow(0 0 10px rgba(143, 169, 143, 0.7));
-}.core svg .tick{ stroke: var(--safe); stroke-width: 2; stroke-linecap: round; }
+}.core svg .tick{ stroke: var(--clean); stroke-width: 2; stroke-linecap: round; }
 
 @media (max-width: 900px) {.hero{ grid-template-columns: 1fr; }.hero-visual{ display: none; }
 }/* ---------------------------------------------------------------- scanner */
@@ -4215,8 +4215,8 @@ main{ max-width: 1120px; margin: 0 auto; padding: 60px clamp(16px, 4vw, 26px) 10
   color: var(--warn);
   border-color: rgba(255, 176, 32, 0.45);
   background: rgba(255, 176, 32, 0.1);
-}.badge.low, .badge.safe{
-  color: var(--safe);
+}.badge.low, .badge.clean{
+  color: var(--clean);
   border-color: rgba(127, 169, 143, 0.45);
   background: rgba(127, 169, 143, 0.1);
   box-shadow: 0 0 24px rgba(127, 169, 143, 0.15);
@@ -6358,7 +6358,7 @@ h1, .hero h1{
   background: none !important;
   -webkit-text-fill-color: currentColor !important;
   color: var(--text) !important;
-}.nav a.active{ box-shadow: none !important; }.badge.high, .badge.low, .badge.safe, .badge.medium{ box-shadow: none !important; }.btn.primary::after{ display: none !important; }.topbar::after{ display: none !important; }.eyebrow-dot{ box-shadow: none !important; }/* the verdict surface is a panel, not a light source */
+}.nav a.active{ box-shadow: none !important; }.badge.high, .badge.low, .badge.clean, .badge.medium{ box-shadow: none !important; }.btn.primary::after{ display: none !important; }.topbar::after{ display: none !important; }.eyebrow-dot{ box-shadow: none !important; }/* the verdict surface is a panel, not a light source */
 .verdict-head{
   background: rgba(255, 255, 255, .022) !important;
   box-shadow: 0 1px 0 rgba(255, 255, 255, .05), 0 18px 40px rgba(0, 0, 0, .35) !important;
@@ -7155,7 +7155,7 @@ code, kbd, samp{
   background: currentColor;
   border-radius: 1px;
   transform: translateY(-1px);
-}.badge.high{ color: #F09AA8 !important; }.badge.medium{ color: #E8BE7C !important; }.badge.low, .badge.safe{ color: #A8C0A8 !important; }.badge.rep{
+}.badge.high{ color: #F09AA8 !important; }.badge.medium{ color: #E8BE7C !important; }.badge.low, .badge.clean{ color: #A8C0A8 !important; }.badge.rep{
   color: var(--faint) !important;
   font-size: 0.92rem !important;
 }.badge.rep::before{
@@ -7752,7 +7752,7 @@ html.modal-lock, body.verdict-open { overflow: hidden; }
 
   /* the source is worth having on the page */
   .result::after {
-    content: "Checked by Nyavu, nyavu.onrender.com. A verdict is an assessment, not a guarantee of safety.";
+    content: "Checked by Nyavu, nyavu.onrender.com. A verdict is an assessment, not a guarantee.";
     display: block;
     margin-top: 14px;
     font-size: 9pt;
@@ -7824,7 +7824,7 @@ html.modal-lock, body.verdict-open { overflow: hidden; }
   .result .verdict-text .badge,
   .result .verdict-text .badge.high { color: #a01028 !important; }
   .result .verdict-text .badge.low,
-  .result .verdict-text .badge.safe { color: #16624a !important; }
+  .result .verdict-text .badge.clean { color: #16624a !important; }
   .result .verdict-text .badge.medium { color: #7a5200 !important; }
   .result .verdict-text .badge.rep { color: #444 !important; }
 
@@ -8513,7 +8513,7 @@ dialog.verdict-dialog[open] {
   stroke-linecap: butt;
   opacity: .22;
 }
-.gauge .band-clear { stroke: var(--signal-safe); }
+.gauge .band-clear { stroke: var(--signal-clean); }
 .gauge .band-caution { stroke: var(--signal-warn); }
 .gauge .band-concern { stroke: var(--signal-danger); }
 
